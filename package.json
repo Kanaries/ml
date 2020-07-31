@@ -1,0 +1,48 @@
+{
+  "name": "@kanaries/ml",
+  "version": "0.0.1",
+  "description": "machine learning lib in javascript",
+  "main": "./build/cjs/index.js",
+  "types": "./build/cjs/index.d.ts",
+  "module": "./build/esm/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc -p ./config/tsconfig.cjs.json && tsc -p ./config/tsconfig.esm.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kanaries/ml.git"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "tabWidth": 4,
+    "printWidth": 120
+  },
+  "keywords": [
+    "machine learning",
+    "ML",
+    "AI",
+    "statistics",
+    "algorithms"
+  ],
+  "author": {
+    "name": "Observed Observer",
+    "email": "270001151@qq.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kanaries/ml/issues"
+  },
+  "homepage": "https://github.com/Kanaries/ml#readme",
+  "dependencies": {
+    "@types/assert": "^1.5.1",
+    "@types/node": "^14.0.27",
+    "assert": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.8",
+    "jest": "^26.2.1",
+    "ts-jest": "^26.1.4",
+    "typescript": "^3.9.7"
+  }
+}

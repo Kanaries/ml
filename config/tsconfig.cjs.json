@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "../build/cjs",
+        "target": "esnext",
+        "moduleResolution": "node",
+        "declaration": true,
+        "downlevelIteration": true,
+        "module": "commonjs"
+    },
+    "include": [
+        "../src/**/*"
+    ]
+}
