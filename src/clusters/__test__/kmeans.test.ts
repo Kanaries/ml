@@ -18,7 +18,7 @@ test('kmeans results', () => {
 
     const kmeans = new KMeans(2, 0.05, initCenters);
     const result = kmeans.fitPredict(X, sampleWeights);
-    console.log(result)
+
     expect(result).toEqual(expected);
 })
 function reAssignLabel (labels: number[]): number[] {
