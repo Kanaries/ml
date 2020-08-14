@@ -24,7 +24,6 @@ export class KMeans extends ClusterBase {
         }
     }
     private assignment (): void {
-        console.log('assignment')
         const { centers, samplesX } = this;
         const samplesY = samplesX.map(() => 0);
         let objective: number = 0;
@@ -45,11 +44,12 @@ export class KMeans extends ClusterBase {
         this.samplesY = samplesY;
         this.iter++;
 
-        if (this.iter <= this.max_iter && objective < this.objective * (1 - this.opt_ratio)) {
-            this.objective = objective;
-            this.updateCentroids();
-            this.assignment();
-        }
+        if (this.iter <= this.max_iter || objective < this.objective * (1 - this.opt_ratio)) {
+        // if (this.iter <= this.max_iter) { for visual test
+                this.objective = objective;
+                this.updateCentroids();
+                this.assignment();
+            }
     }
     private updateCentroids (): void {
         const { n_clusters, samplesX, samplesY, sampleWeights } = this;

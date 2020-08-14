@@ -7,7 +7,9 @@
   "module": "./build/esm/index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc -p ./config/tsconfig.cjs.json && tsc -p ./config/tsconfig.esm.json"
+    "build": "tsc -p ./config/tsconfig.cjs.json && tsc -p ./config/tsconfig.esm.json",
+    "doc": "docsify serve docs",
+    "example": "webpack-dev-server"
   },
   "repository": {
     "type": "git",
@@ -34,15 +36,20 @@
     "url": "https://github.com/Kanaries/ml/issues"
   },
   "homepage": "https://github.com/Kanaries/ml#readme",
-  "dependencies": {
-    "@types/assert": "^1.5.1",
-    "@types/node": "^14.0.27",
-    "assert": "^2.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@types/assert": "^1.5.1",
     "@types/jest": "^26.0.8",
+    "@types/node": "^14.0.27",
     "jest": "^26.2.1",
     "ts-jest": "^26.1.4",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "vega": "^5.13.0",
+    "vega-embed": "^6.10.0",
+    "vega-lite": "^4.14.1",
+    "webpack": "^4.44.1",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-cli": "^3.3.12",
+    "ts-loader": "^8.0.2"
   }
 }

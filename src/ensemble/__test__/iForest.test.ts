@@ -10,7 +10,6 @@ test('example', () => {
     const X = [[-1.1], [0.3], [0.5], [100]];
     iForest.fit(X);
     const result = iForest.predict([[0.1], [0], [90]]);
-    console.log(result);
     expect(result).toEqual([0, 0, 1]);
 });
 
@@ -28,6 +27,5 @@ test('toy data', () => {
     ];
     iForest.fit(X);
     const result = iForest.predict(X)
-    console.log(result);
     expect(result).toEqual([0, 0, 0, 0, 0, 0, 1, 1]);
 })
