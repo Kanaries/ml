@@ -1,4 +1,5 @@
 import { gaussianElimination, Inverse } from '../index';
+import { transpose, augmentMatrix } from '../basic';
 test('basic gussian elimination', () => {
     const A = [
         [0, -1, -1, 1],
@@ -7,13 +8,21 @@ test('basic gussian elimination', () => {
         [3, 1, -2, 2]
     ]
     const Y = [[0], [6], [-1], [3]];
-    const result = gaussianElimination(A, Y) as number[][];
+    const AM = augmentMatrix(A, Y);
+    const result = gaussianElimination(AM) as number[][];
+    expect(result instanceof Array).toBe(true)
     expect(result.length > 0).toBe(true);
+    // const ans = [
+    //     [1, 1, 1, 1, 6],
+    //     [0, 1, 1, -1, 0],
+    //     [0, 0, 1, 2/3, 13/3],
+    //     [0, 0, 0, 1, 2]
+    // ];
     const ans = [
-        [1, 1, 1, 1, 6],
-        [0, 1, 1, -1, 0],
-        [0, 0, 1, 2/3, 13/3],
-        [0, 0, 0, 1, 2]
+        [1, 1, 1, 1],
+        [0, 1, 1, -1],
+        [0, 0, 1, 2 / 3],
+        [0, 0, 0, 1],
     ];
     for (let i = 0 ; i < A.length; i++) {
         for (let j = 0 ; j < A[i].length; j++) {
@@ -37,6 +46,24 @@ test('inverse of matrix', () => {
     for (let i = 0; i < ans.length; i++) {
         for (let j = 0; j < ans[i].length; j++) {
             expect(A_Inverse[i][j]).toBeCloseTo(ans[i][j]);
+        }
+    }
+})
+
+test('transpose', () => {
+    const width = 10;
+    const height = 20;
+    const matrix: number[][] = [];
+    for (let i = 0; i < height; i++) {
+        matrix.push([])
+        for (let j = 0; j < width; j++) {
+            matrix[i].push(Math.round(100 * Math.random()));
+        }
+    }
+    const matrix_t = transpose(matrix);
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            expect(matrix[i][j]).toBe(matrix_t[j][i])
         }
     }
 })

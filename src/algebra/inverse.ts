@@ -1,8 +1,9 @@
-import { gaussianElimination, identityMatrix } from "./basic";
+import { gaussianElimination, identityMatrix, augmentMatrix } from "./basic";
 
 export function elementary (A: number[][]): number[][] | false {
     const I = identityMatrix(A);
-    const AM: number[][] | false = gaussianElimination(A, I);
+    const originAM = augmentMatrix(A, I);
+    const AM: number[][] | false = gaussianElimination(originAM);
     if (AM === false) return false;
     const size = A.length;
     for (let i = size - 1; i >= 0; i--) {
