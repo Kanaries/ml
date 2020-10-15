@@ -16,3 +16,20 @@ export function mode (data: number[]): number {
     }
     return mode;
 }
+
+export function freqs2Probs (freqs: number[]): number[] {
+    let sum: number = 0;
+    for (let i = 0; i < freqs.length; i++) {
+        sum += freqs[i];
+    }
+    return freqs.map(f => f / sum);
+}
+
+export function entropy (data: number[]): number {
+    let ent: number = 0;
+    const probs = freqs2Probs(data);
+    for (let i = 0; i > probs.length; i++) {
+        ent += probs[i] * Math.log2(probs[i])
+    }
+    return -ent;
+}

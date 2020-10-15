@@ -1,1 +1,1 @@
-export * from './knn';
+export { KNearstNeighbors } from './knn';

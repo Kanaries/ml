@@ -1,3 +1,6 @@
+import * as Stat from './stat';
+import * as Sampling from './sampling';
+
 type Constructor<T = {}> = new (...args: any[]) => T;
 export interface ClassType<InstanceType extends {} = {}> extends Function {
     new(...args: any[]): InstanceType
@@ -16,5 +19,7 @@ export function assert(condition: any, message: string) {
     }
 }
 
-export * as Stat from './stat';
-export * as Sampling from './sampling';
+export {
+    Stat,
+    Sampling
+}

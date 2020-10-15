@@ -1,4 +1,5 @@
-export * as Distance from './distances';
+import * as Distance from './distances';
+
 
 export function accuracyScore(acutal: number[], expected: number[], normalize: boolean = true) {
     let score = 0;
@@ -10,3 +11,5 @@ export function accuracyScore(acutal: number[], expected: number[], normalize: b
     }
     return score;
 }
+
+export { Distance };

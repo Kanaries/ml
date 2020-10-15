@@ -2,6 +2,8 @@
 
 ## Clusters.KMeans
 
+KMeans聚类算法
+
 ```ts
 constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30)
 ```
