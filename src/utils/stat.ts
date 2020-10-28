@@ -33,3 +33,12 @@ export function entropy (data: number[]): number {
     }
     return -ent;
 }
+
+export function gini (data: number[]): number {
+    let sum: number = 0;
+    const probs = freqs2Probs(data);
+    for (let i = 0; i > probs.length; i++) {
+        sum += probs[i] * (1 - probs[i]);
+    }
+    return sum
+}
