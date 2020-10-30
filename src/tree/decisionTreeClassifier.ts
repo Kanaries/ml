@@ -11,7 +11,7 @@ export interface ISlice {
     X: number[][];
     Y: number[];
 }
-interface IDTree {
+export interface IDTree {
     splitIndex: number;
     // 离散的情况下是当前节点的所有取值集合，连续则是一个区间
     nodeValue: number;
@@ -19,19 +19,28 @@ interface IDTree {
     leftChild: IDTree | null;
     rightChild: IDTree | null;
 } 
+export interface DecisionTreeProps {
+    max_depth?: number;
+    min_samples_split?: number;
+    criterion?: 'entropy' | 'gini';
+}
+
 export class DecisionTreeClassifier {
     private dtree: IDTree | null;
-    private maxDepth: number;
-    private featureNumber: number;
+    private max_depth: number;
+    private feature_number: number;
+    private min_samples_split: number;
     private criterion: 'entropy' | 'gini' = 'entropy';
     private impurity: (freqs: number[]) => number;
-    public constructor(maxDepth?: number, criterion?: 'entropy' | 'gini') {
+    public constructor(props: DecisionTreeProps = {}) {
+        const { max_depth = Infinity, criterion = 'entropy', min_samples_split = 2 } = props;
         this.dtree = null;
         this.criterion;
-        this.maxDepth = maxDepth || Infinity;
-        this.criterion = criterion || 'entropy';
-        this.featureNumber = 0;
-        if (this.criterion === 'entropy') {
+        this.max_depth = max_depth;
+        this.criterion = criterion;
+        this.feature_number = 0;
+        this.min_samples_split = min_samples_split;
+        if (criterion === 'entropy') {
             this.impurity = entropy;
         } else {
             this.impurity = gini
@@ -44,10 +53,13 @@ export class DecisionTreeClassifier {
      * @param attributes indices of attributes.
      */
     public treeGenerate(tree: IDTree, sampleX: number[][], sampleY: number[], depth: number) {
+        if (sampleX.length < this.min_samples_split)return;
+        if (depth > this.max_depth) return;
         const vsame = valuesAllSame(sampleY);
         if (vsame) return;
-        if (depth > this.maxDepth) return;
+    
         const split = this.attributeSelection(sampleX, sampleY);
+        // if (split.gain <= 0) return;
         tree.splitIndex = split.attIndex;
         tree.nodeValue = split.splitValue;
 
@@ -77,22 +89,21 @@ export class DecisionTreeClassifier {
             attIndex: -1,
             splitValue: 0,
         };
-        const { featureNumber } = this;
-        let maxGain = 0;
+        const { feature_number } = this;
+        let maxGain = -Infinity;
         let maxGainAttIndex = 0;
-        for (let i = 0; i < featureNumber; i++) {
+        for (let i = 0; i < feature_number; i++) {
             let totalImp = 0;
             let attIndex = i;
             const values = sampleX.map((r) => r[attIndex]);
             const min = Math.min(...values);
             const max = Math.max(...values);
-            console.log({ values, min, max, attIndex });
-            // 可拓展，目前只生产一个随机的分割值
+
             const splitValue = Math.random() * (max - min) + min;
             const left = filterWithIndices(values, (v) => v < splitValue);
             const right = filterWithIndices(values, (v) => v >= splitValue);
-            const leftImp = this.nodeImpurity(left.indices.map((i) => sampleY[i]));
-            const rightImp = this.nodeImpurity(right.indices.map((i) => sampleY[i]));
+            const leftImp = this.nodeImpurity(left.indices.map((index) => sampleY[index]));
+            const rightImp = this.nodeImpurity(right.indices.map((index) => sampleY[index]));
             totalImp += (left.subArr.length / sampleX.length) * leftImp;
             totalImp += (right.subArr.length / sampleX.length) * rightImp;
             const gain = imp - totalImp;
@@ -100,12 +111,12 @@ export class DecisionTreeClassifier {
                 maxGain = gain;
                 maxGainAttIndex = attIndex;
                 ans.left = {
-                    X: left.indices.map((i) => sampleX[i]),
-                    Y: left.indices.map((i) => sampleY[i]),
+                    X: left.indices.map((index) => sampleX[index]),
+                    Y: left.indices.map((index) => sampleY[index]),
                 };
                 ans.right = {
-                    X: right.indices.map((i) => sampleX[i]),
-                    Y: right.indices.map((i) => sampleY[i]),
+                    X: right.indices.map((index) => sampleX[index]),
+                    Y: right.indices.map((index) => sampleY[index]),
                 };
                 ans.splitValue = splitValue;
             }
@@ -115,22 +126,6 @@ export class DecisionTreeClassifier {
         return ans;
     }
 
-    // private nodeEntropy(sampleY: number[]): number {
-    //     const freqMap: Map<any, number> = new Map();
-    //     for (let i = 0; i < sampleY.length; i++) {
-    //         if (!freqMap.has(sampleY[i])) {
-    //             freqMap.set(sampleY[i], 0);
-    //         }
-    //         freqMap.set(sampleY[i], freqMap.get(sampleY[i]) + 1);
-    //     }
-    //     let ent = 0;
-    //     for (let freq of freqMap.values()) {
-    //         const p = freq / sampleY.length;
-    //         ent += p * Math.log2(p);
-    //     }
-    //     return -ent;
-    // }
-
     private nodeImpurity (sampleY: number[]): number {
         const freqs = getUniqueFreqs(sampleY);
         return this.impurity(freqs);
@@ -138,7 +133,7 @@ export class DecisionTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.featureNumber = sampleX[0].length;
+        this.feature_number = sampleX[0].length;
         this.dtree = {
             nodeValue: 0,
             splitIndex: -1,
@@ -152,7 +147,7 @@ export class DecisionTreeClassifier {
         return sampleX.map((x) => this.findSample(x, this.dtree, 0));
     }
     private findSample(X: number[], tree: IDTree, depth: number): number {
-        if (depth >= this.maxDepth || tree.splitIndex === -1) {
+        if (depth >= this.max_depth || tree.splitIndex === -1) {
             return tree.y;
         }
         if (X[tree.splitIndex] < tree.nodeValue) {

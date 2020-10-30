@@ -28,7 +28,7 @@ export function freqs2Probs (freqs: number[]): number[] {
 export function entropy (data: number[]): number {
     let ent: number = 0;
     const probs = freqs2Probs(data);
-    for (let i = 0; i > probs.length; i++) {
+    for (let i = 0; i < probs.length; i++) {
         ent += probs[i] * Math.log2(probs[i])
     }
     return -ent;
@@ -37,7 +37,7 @@ export function entropy (data: number[]): number {
 export function gini (data: number[]): number {
     let sum: number = 0;
     const probs = freqs2Probs(data);
-    for (let i = 0; i > probs.length; i++) {
+    for (let i = 0; i < probs.length; i++) {
         sum += probs[i] * (1 - probs[i]);
     }
     return sum

@@ -20,7 +20,7 @@ test('toy sample',  () => {
     const T = [[-1, -1], [2, 2], [3, 2]]
     const true_result = [-1, 1, 1]
 
-    const dtree = new DecisionTreeClassifier();
+    const dtree = new DecisionTreeClassifier({ criterion: 'gini' });
     dtree.fit(X, y);
     const ans = dtree.predict(T);
     expect(ans).toEqual(true_result);
