@@ -1,11 +1,12 @@
 + [介绍](zh-cn/introd.md)
 + [起步](zh-cn/starts.md)
 + APIs
+    + [Algebra(代数)](zh-cn/apis/algebra/index.md)
     + [Clusters](zh-cn/apis/clusters/index.md)
         + [KMeans](zh-cn/apis/clusters/kmeans.md)
     + [Ensemble](zh-cn/apis/ensemble.md)
         + [IsolationForest(孤立森林)](zh-cn/apis/ensemble/iforest.md)
     + [Neighbors](zh-cn/apis/neighbors.md)
-        + [KNN(K近邻)](zh-cn/apis/neighbors/knn.md)
+        + [KNearstNeighbors(K近邻)](zh-cn/apis/neighbors/knn.md)
     + [Tree](zh-cn/apis/tree/index.md)
         + [DecisionTreeClassifier(决策树分类器)](zh-cn/apis/tree/decisionTreeClassifier.md)
