@@ -27,7 +27,7 @@ export class DecisionTreeRegressor {
         for (let i = 0; i < values.length; i++) {
             sum += (values[i] - _mean) ** 2
         }
-        return sum;
+        return sum / values.length;
     }
     private attributeSelection (sampleX: number[][], sampleY: number[]) {
         let minErr = Infinity;
@@ -71,11 +71,11 @@ export class DecisionTreeRegressor {
     private buildTree (tree: IRegTree, sampleX: number[][], sampleY: number[], depth: number) {
         if (sampleX.length < this.min_sample_split) return;
         const nodeErr = this.calErr(sampleY);
-        if (nodeErr < 0.00001) return;
+        // if (nodeErr < 0.00001) return;
         const selection = this.attributeSelection(sampleX, sampleY);
         if (selection.minErrFeaIndex === -1) return;
         console.log(tree, sampleX, sampleY, selection)
-        if (Math.abs(nodeErr - selection.minErr) < 0.00001) return;
+        // if (Math.abs(nodeErr - selection.minErr) < 0.00001) return;
         const values = sampleX.map(x => x[selection.minErrFeaIndex]);
         let leftSamples = filterWithIndices(values, v => v < selection.minErrValue);
         let rightSamples = filterWithIndices(values, v => v >= selection.minErrValue);
