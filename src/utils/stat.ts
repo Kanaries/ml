@@ -17,6 +17,14 @@ export function mode (data: number[]): number {
     return mode;
 }
 
+export function mean (data: number[]): number {
+    let sum = 0;
+    for (let i = 0; i < data.length; i++) {
+        sum += data[i];
+    }
+    return sum / data.length
+}
+
 export function freqs2Probs (freqs: number[]): number[] {
     let sum: number = 0;
     for (let i = 0; i < freqs.length; i++) {
