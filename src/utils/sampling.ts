@@ -4,10 +4,14 @@ export function std<T = any> (arr: T[], size: number): T[] {
     let samples: T[] = [];
     let count = 0;
     while (count < size) {
-        const index = Math.floor(Math.random() * size)
+        let index = Math.floor(Math.random() * size)
+        while (choosen[index]) {
+            index++;
+        }
         if (!choosen[index]) {
             choosen[index] = true;
             samples.push(arr[index]);
+            count++;
         }
     }
     return arr;
