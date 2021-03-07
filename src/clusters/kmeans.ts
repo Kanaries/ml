@@ -10,7 +10,7 @@ export class KMeans extends ClusterBase {
     private objective: number;
     private max_iter: number;
     private iter: number;
-    constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30) {
+    constructor(n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30) {
         super();
         this.n_clusters = n_clusters;
         this.centers = null;
@@ -23,11 +23,11 @@ export class KMeans extends ClusterBase {
             this.centers = initCenters;
         }
     }
-    private assignment (): void {
+    private assignment(): void {
         const { centers, samplesX } = this;
         const samplesY = samplesX.map(() => 0);
         let objective: number = 0;
-        for (let  i = 0; i < samplesX.length; i++) {
+        for (let i = 0; i < samplesX.length; i++) {
             let nearestIndex = 0;
             let nearestDis = Infinity;
             for (let j = 0; j < centers.length; j++) {
@@ -45,17 +45,17 @@ export class KMeans extends ClusterBase {
         this.iter++;
 
         if (this.iter <= this.max_iter || objective < this.objective * (1 - this.opt_ratio)) {
-        // if (this.iter <= this.max_iter) { for visual test
-                this.objective = objective;
-                this.updateCentroids();
-                this.assignment();
-            }
+            // if (this.iter <= this.max_iter) { for visual test
+            this.objective = objective;
+            this.updateCentroids();
+            this.assignment();
+        }
     }
-    private updateCentroids (): void {
+    private updateCentroids(): void {
         const { n_clusters, samplesX, samplesY, sampleWeights } = this;
-        const centers: number[][] = [];// = new Array(n_clusters).fill(0);
+        const centers: number[][] = []; // = new Array(n_clusters).fill(0);
         const featureSize = samplesX[0].length;
-        for (let i = 0 ; i < n_clusters; i++) {
+        for (let i = 0; i < n_clusters; i++) {
             centers.push(new Array(featureSize).fill(0));
         }
         let neighborCounter: number[] = new Array(n_clusters).fill(0);
@@ -74,7 +74,7 @@ export class KMeans extends ClusterBase {
         }
         this.centers = centers;
     }
-    private initCentroids (): void {
+    private initCentroids(): void {
         const randSet: Set<number> = new Set();
         this.centers = [];
         let randIndex: number = 0;
@@ -86,7 +86,7 @@ export class KMeans extends ClusterBase {
             this.centers.push(this.samplesX[randIndex]);
         }
     }
-    public fitPredict (sampleX: number[][], sampleWeights?: number[]) {
+    public fitPredict(sampleX: number[][], sampleWeights?: number[]) {
         if (sampleWeights) {
             this.sampleWeights = sampleWeights;
         } else {
@@ -101,5 +101,8 @@ export class KMeans extends ClusterBase {
         // this.initCentroids();
         this.assignment();
         return this.samplesY;
+    }
+    public getCentroids () {
+        return this.centers;
     }
 }
