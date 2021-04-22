@@ -1,5 +1,5 @@
 import { gaussianElimination, Inverse } from '../index';
-import { transpose, augmentMatrix } from '../basic';
+import { transpose, augmentMatrix, product } from '../basic';
 test('basic gussian elimination', () => {
     const A = [
         [0, -1, -1, 1],
@@ -66,4 +66,23 @@ test('transpose', () => {
             expect(matrix[i][j]).toBe(matrix_t[j][i])
         }
     }
+})
+
+test('product', () => {
+    const A = [
+        [3, -2],
+        [2, 4],
+        [1, -3]
+    ];
+    const B = [
+        [-2, 1, 3],
+        [4, 1, 6]
+    ];
+    const result = product(A, B);
+    const ans = [
+        [-14, 1, -3],
+        [12, 6, 30],
+        [-14, -2, -15]
+    ]
+    expect(result).toEqual(ans);
 })

@@ -73,3 +73,26 @@ export function augmentMatrix(matrix: number[][], expanded: number[][]): number[
     }
     return AM;
 }
+
+export function product (A: number[][], B: number[][]) {
+    assert(A.length > 0 && B.length > 0 && A[0].length > 0 && B[0].length > 0, 'matrix should not be empty');
+    assert(A[0].length === B.length, 'A = m * n, B = n * k');
+    const ans: number[][] = [];
+    // init the matrix;
+    for (let i = 0; i < A.length; i++) {
+        const row = [];
+        for (let j = 0; j < B[0].length; j++) {
+            row.push(0);
+        }
+        ans.push(row);
+    }
+    // calculate
+    for (let i = 0; i < A.length; i++) {
+        for (let j = 0; j < B[0].length; j++) {
+            for (let k = 0; k < B.length; k++) {
+                ans[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return ans;
+}
