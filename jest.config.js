@@ -1,11 +1,12 @@
 module.exports = {
     preset: 'ts-jest',
+    testEnvironment: 'node',
     globals: {
         'ts-jest': {
             diagnostics: false,
-            tsConfig: './config/tsconfig.cjs.json',
+            tsconfig: './config/tsconfig.cjs.json',
         },
     },
-    browser: false,
+    testMatch: ['**/__test__/**/*.test.ts'],
     testPathIgnorePatterns: ['/node_modules/', 'test/', 'build/', 'workers/'],
 };
