@@ -29,3 +29,17 @@ const kmeans = new KMeans(2, 0.05, initCenters);
 const result = kmeans.fitPredict(X, sampleWeights);
 
 ```
+
+## Clusters.DBScan
+
+```ts
+constructor(eps: number = 0.5, minSamples: number = 5, distanceType: Distance.IDistanceType = 'euclidiean')
+```
+
+`fitPredict(samplesX: number[][]): number[]` returns cluster labels for samples. Noise points are marked as `-1`.
+
+```ts
+const X = makeCircles(20, 20, 1, 5);
+const dbscan = new DBScan(0.6, 3);
+const labels = dbscan.fitPredict(X);
+```
