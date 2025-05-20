@@ -2,10 +2,12 @@
     "compilerOptions": {
         "outDir": "../build/esm",
         "target": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "declaration": true,
         "downlevelIteration": true,
-        "module": "ESNext"
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "esModuleInterop": true
     },
     "include": [
         "../src/**/*"

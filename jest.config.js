@@ -1,11 +1,11 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
     preset: 'ts-jest',
-    globals: {
-        'ts-jest': {
+    transform: {
+        '^.+\\.tsx?$': ['ts-jest', {
             diagnostics: false,
-            tsConfig: './config/tsconfig.cjs.json',
-        },
+            tsconfig: './config/tsconfig.cjs.json',
+        }]
     },
-    browser: false,
     testPathIgnorePatterns: ['/node_modules/', 'test/', 'build/', 'workers/'],
 };

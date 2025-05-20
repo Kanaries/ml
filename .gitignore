@@ -103,5 +103,11 @@ dist
 # TernJS port file
 .tern-port
 
+# Vite
+node_modules
+dist
+*.local
+.vite
+
 build
 dist
