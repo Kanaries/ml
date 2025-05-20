@@ -1,13 +1,13 @@
-# 起步
+# Getting Started
 
-## 安装
+## Install
 ![](https://img.shields.io/github/license/kanaries/ml?)
 ![](https://img.shields.io/npm/v/@kanaries/ml?)
 ```bash
 npm i --save @kanaries/ml
 ```
 
-## 使用
+## Usage
 
 ```typescript
 import { Ensemble } from '@kanaries';
