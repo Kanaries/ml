@@ -74,7 +74,7 @@ export class DecisionTreeRegressor {
         // if (nodeErr < 0.00001) return;
         const selection = this.attributeSelection(sampleX, sampleY);
         if (selection.minErrFeaIndex === -1) return;
-        console.log(tree, sampleX, sampleY, selection)
+        // console.log(tree, sampleX, sampleY, selection)
         // if (Math.abs(nodeErr - selection.minErr) < 0.00001) return;
         const values = sampleX.map(x => x[selection.minErrFeaIndex]);
         let leftSamples = filterWithIndices(values, v => v < selection.minErrValue);
