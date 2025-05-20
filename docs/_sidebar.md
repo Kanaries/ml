@@ -18,3 +18,8 @@
     
     + [Linear](./apis/linear/index.md)
         + [Linear Regression](./apis/linear/linearRegression.md)
+
+    + [SVM](./apis/svm/index.md)
+        + [SVC](./apis/svm/SVC.md)
+        + [NuSVC](./apis/svm/NuSVC.md)
+        + [LinearSVC](./apis/svm/LinearSVC.md)
