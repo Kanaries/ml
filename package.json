@@ -6,7 +6,8 @@
   "types": "./build/cjs/index.d.ts",
   "module": "./build/esm/index.js",
   "scripts": {
-    "test": "jest",
+    "gen-data": "python scripts/gen_all.py",
+    "test": "npm run gen-data && jest",
     "build": "tsc -p ./config/tsconfig.cjs.json && tsc -p ./config/tsconfig.esm.json",
     "doc": "docsify serve docs",
     "dev": "vite",
@@ -38,7 +39,6 @@
     "url": "https://github.com/Kanaries/ml/issues"
   },
   "homepage": "https://github.com/Kanaries/ml#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/assert": "^1.5.1",
     "@types/jest": "^29.5.14",
