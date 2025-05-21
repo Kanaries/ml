@@ -14,7 +14,7 @@ function normalize(labels: number[]): number[] {
 test('compare with sklearn', () => {
     const p = path.join(__dirname, '../../../test_data/optics.json');
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
-    const optics = new OPTICS(3);
+    const optics = new OPTICS({ eps: 3, min_samples: 3 });
     const pred = optics.fitPredict(data.X);
     expect(normalize(pred)).toEqual(normalize(data.expected));
 });
