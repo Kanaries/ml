@@ -9,3 +9,7 @@ npm run test
 
 The library is designed to be used in both browser and node.js.
 The library uses yarn as package manager.
+
+We also have sklearn and numpy installed, so you can use python library to generate output for testing the js library.
+
+
