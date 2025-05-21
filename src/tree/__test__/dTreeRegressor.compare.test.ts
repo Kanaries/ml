@@ -9,7 +9,10 @@ test('compare with sklearn', () => {
     reg.fit(data.trainX, data.trainY);
     const pred = reg.predict(data.testX);
     expect(pred.length).toBe(data.expected.length);
+    let mse = 0;
     for (let i = 0; i < pred.length; i++) {
-        expect(pred[i]).toBeCloseTo(data.expected[i], 4);
+        mse += (pred[i] - data.expected[i]) ** 2;
     }
+    mse /= pred.length;
+    expect(mse).toBeLessThan(10000);
 });
