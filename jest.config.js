@@ -8,4 +8,6 @@ module.exports = {
         }]
     },
     testPathIgnorePatterns: ['/node_modules/', 'test/', 'build/', 'workers/'],
+    testEnvironment: 'node',
+    setupFiles: ['<rootDir>/jest.setup.js']
 };
