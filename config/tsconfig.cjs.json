@@ -6,7 +6,12 @@
         "declaration": true,
         "downlevelIteration": true,
         "module": "commonjs",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+        "inlineSourceMap": true,
+        "allowJs": true
     },
     "include": [
         "../src/**/*"
