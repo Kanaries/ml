@@ -11,7 +11,7 @@ svc = SVC(kernel='linear', max_iter=1000)
 svc.fit(X, y)
 pred_svc = svc.predict(X_test)
 
-linsvc = LinearSVC(max_iter=1000)
+linsvc = LinearSVC(max_iter=1000, dual=True)
 linsvc.fit(X, y)
 pred_linsvc = linsvc.predict(X_test)
 
