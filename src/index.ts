@@ -6,6 +6,7 @@ import * as KMath from './math';
 import * as Tree from './tree/index';
 import * as Linear from './linear';
 import * as SVM from './svm';
+import * as Decomposition from './decomposition';
 
 export {
     Tree,
@@ -15,5 +16,6 @@ export {
     Algebra,
     KMath,
     Linear,
-    SVM
+    SVM,
+    Decomposition
 }

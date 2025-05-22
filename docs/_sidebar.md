@@ -19,6 +19,9 @@
     + [Linear](apis/linear/index.md)
         + [Linear Regression](apis/linear/linearRegression.md)
 
+    + [Decomposition](apis/decomposition.md)
+        + [PCA](apis/decomposition/pca.md)
+
     + [SVM](apis/svm/index.md)
         + [SVC](apis/svm/SVC.md)
         + [NuSVC](apis/svm/NuSVC.md)
