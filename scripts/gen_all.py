@@ -15,7 +15,8 @@ scripts = [
     'gen_mean_shift.py',
     'gen_dbscan.py',
     'gen_optics.py',
-    'gen_svc.py'
+    'gen_svc.py',
+    'gen_pca.py'
 ]
 
 for s in scripts:
