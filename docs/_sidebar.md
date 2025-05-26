@@ -18,6 +18,7 @@
     
     + [Linear](apis/linear/index.md)
         + [Linear Regression](apis/linear/linearRegression.md)
+        + [Logistic Regression](apis/linear/logisticRegression.md)
 
     + [Decomposition](apis/decomposition.md)
         + [PCA](apis/decomposition/pca.md)
