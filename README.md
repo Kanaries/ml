@@ -12,6 +12,7 @@
 - Support vector machines
 - Clustering algorithms (KMeans, DBSCAN, OPTICS, Mean Shift, HDBSCAN)
 - Dimensionality reduction (PCA)
+- Manifold learning (t-SNE)
 - Basic linear algebra utilities
 
 ## Installation
