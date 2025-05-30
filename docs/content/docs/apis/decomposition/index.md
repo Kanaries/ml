@@ -2,4 +2,4 @@
 title: Decomposition
 ---
 
-- [PCA](decomposition/pca.md)
+- [PCA](pca.md)
