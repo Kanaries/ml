@@ -1,32 +1,45 @@
-# @kanaries/ml
+# docs
 
-![](https://img.shields.io/github/license/kanaries/ml?color=%23FF7575)
+This is a Next.js application generated with
+[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
 
-machine learning lib in javascript
+Run development server:
 
-## Usage
-
-```sh
-npm i --save @kanaries/ml
+```bash
+npm run dev
+# or
+pnpm dev
+# or
+yarn dev
 ```
 
-examples:
-```js
-import { Neighbors } from '@kanaries/ml';
-const trainX = [
-    [0.12, 0.2, ..., 0.2],
-    [0.21, 0.3, ..., 0.2],
-    ...
-];
-const trainY = [0, 1, ..., 1];
-const knn = new Neighbors.KNearstNeighbors(3, 'distance', '2-norm');
-knn.fit(trainX, trainY);
+Open http://localhost:3000 with your browser to see the result.
 
-const testX = [
-    [0.52, 0.72, ..., 0.24],
-    [0.11, 0.98, ..., 0.32],
-    ...
-];
-knn.predict(testX)
-// [2, 1, ..., 0]
-```
+## Explore
+
+In the project, you can see:
+
+- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
+- `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
+
+| Route                     | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| `app/(home)`              | The route group for your landing page and other pages. |
+| `app/docs`                | The documentation layout and pages.                    |
+| `app/api/search/route.ts` | The Route Handler for search.                          |
+
+### Fumadocs MDX
+
+A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+
+Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
+
+## Learn More
+
+To learn more about Next.js and Fumadocs, take a look at the following
+resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
+  features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Fumadocs](https://fumadocs.vercel.app) - learn about Fumadocs

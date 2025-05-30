@@ -14,6 +14,8 @@
         "examples"
     ],
     "exclude": [
-        "**/__test__/**"
+        "**/__test__/**",
+        "**/node_modules/**",
+        "docs/**"
     ]
 }
