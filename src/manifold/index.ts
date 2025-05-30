@@ -1,0 +1,1 @@
+export { LocallyLinearEmbedding } from './lle';

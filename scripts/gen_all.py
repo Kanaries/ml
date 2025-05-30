@@ -17,7 +17,8 @@ scripts = [
     'gen_optics.py',
     'gen_logistic_regression.py',
     'gen_svc.py',
-    'gen_pca.py'
+    'gen_pca.py',
+    'gen_lle.py'
 ]
 
 for s in scripts:
