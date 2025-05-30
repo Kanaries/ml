@@ -19,6 +19,8 @@ scripts = [
     'gen_svc.py',
     'gen_pca.py',
     'gen_mds.py'
+    'gen_lle.py'
+    'gen_tsne.py'
 ]
 
 for s in scripts:

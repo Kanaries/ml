@@ -25,7 +25,14 @@ test('toy data', () => {
         [6, 3],
         [-4, 7],
     ];
+    const originalRandom = Math.random;
+    let seed = 0;
+    Math.random = () => {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
     iForest.fit(X);
-    const result = iForest.predict(X)
+    const result = iForest.predict(X);
+    Math.random = originalRandom;
     expect(result).toEqual([0, 0, 0, 0, 0, 0, 1, 1]);
 })
