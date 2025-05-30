@@ -1,5 +1,6 @@
 ---
 title: Manifold
+description: API reference for Manifold
 ---
 
 - [SpectralEmbedding](spectralEmbedding.md)

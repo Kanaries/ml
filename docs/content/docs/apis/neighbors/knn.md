@@ -1,5 +1,6 @@
 ---
 title: KNearstNeighbors
+description: API reference for KNearstNeighbors
 ---
 
 # Neighbors.KNearstNeighbors

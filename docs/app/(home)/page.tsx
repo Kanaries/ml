@@ -1,5 +1,11 @@
 import Link from 'next/link';
 
+export const metadata = {
+  title: '@kanaries/ml',
+  description:
+    'A fast and friendly machine learning toolkit for modern web development.',
+};
+
 const FEATURES = [
   {
     title: 'Familiar API',

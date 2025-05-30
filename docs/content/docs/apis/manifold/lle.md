@@ -1,5 +1,6 @@
 ---
 title: LocallyLinearEmbedding
+description: API reference for LocallyLinearEmbedding
 ---
 
 # Manifold.LocallyLinearEmbedding

@@ -1,5 +1,6 @@
 ---
 title: SVM
+description: API reference for SVM
 ---
 
 - [SVC](SVC.md)

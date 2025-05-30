@@ -1,5 +1,6 @@
 ---
 title: MDS
+description: API reference for MDS
 ---
 
 # Manifold.MDS

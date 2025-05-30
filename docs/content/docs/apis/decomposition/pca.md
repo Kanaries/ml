@@ -1,5 +1,6 @@
 ---
 title: PCA
+description: API reference for PCA
 ---
 
 # Decomposition.PCA

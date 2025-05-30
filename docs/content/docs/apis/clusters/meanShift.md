@@ -1,5 +1,6 @@
 ---
 title: MeanShift
+description: API reference for MeanShift
 ---
 
 # Clusters.MeanShift

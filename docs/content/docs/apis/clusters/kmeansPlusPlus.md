@@ -1,5 +1,6 @@
 ---
 title: kmeansPlusPlus
+description: API reference for kmeansPlusPlus
 ---
 
 # Clusters.kmeansPlusPlus

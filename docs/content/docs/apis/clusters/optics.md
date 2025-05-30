@@ -1,5 +1,6 @@
 ---
 title: OPTICS
+description: API reference for OPTICS
 ---
 
 # Clusters.OPTICS

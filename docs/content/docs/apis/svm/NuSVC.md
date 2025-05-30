@@ -1,5 +1,6 @@
 ---
 title: NuSVC
+description: API reference for NuSVC
 ---
 
 # SVM.NuSVC

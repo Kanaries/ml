@@ -1,5 +1,6 @@
 ---
 title: TSNE
+description: API reference for TSNE
 ---
 
 # Manifold.TSNE

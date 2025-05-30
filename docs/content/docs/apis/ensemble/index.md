@@ -1,5 +1,6 @@
 ---
 title: Ensemble
+description: API reference for Ensemble
 ---
 
 ## Ensemble.IsolationForest

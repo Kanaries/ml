@@ -1,5 +1,6 @@
 ---
 title: KMeans
+description: API reference for KMeans
 ---
 
 # Clusters.KMeans

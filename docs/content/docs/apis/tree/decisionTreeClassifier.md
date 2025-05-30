@@ -1,5 +1,6 @@
 ---
 title: DecisionTreeClassifier
+description: API reference for DecisionTreeClassifier
 ---
 
 # Tree.DecisionTreeClassifier

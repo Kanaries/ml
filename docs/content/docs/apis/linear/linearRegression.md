@@ -1,5 +1,6 @@
 ---
 title: LinearRegression
+description: API reference for LinearRegression
 ---
 
 # Linear.LinearRegression
