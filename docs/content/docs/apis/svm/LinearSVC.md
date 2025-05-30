@@ -1,5 +1,6 @@
 ---
 title: LinearSVC
+description: API reference for LinearSVC
 ---
 
 # SVM.LinearSVC

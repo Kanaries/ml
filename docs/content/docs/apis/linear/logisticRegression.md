@@ -1,5 +1,6 @@
 ---
 title: LogisticRegression
+description: API reference for LogisticRegression
 ---
 
 # Linear.LogisticRegression

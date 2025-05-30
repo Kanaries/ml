@@ -1,5 +1,6 @@
 ---
 title: HDBScan
+description: API reference for HDBScan
 ---
 
 # Clusters.HDBScan

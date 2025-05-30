@@ -1,5 +1,6 @@
 ---
 title: SpectralEmbedding
+description: API reference for SpectralEmbedding
 ---
 
 # Manifold.SpectralEmbedding

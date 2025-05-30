@@ -1,5 +1,6 @@
 ---
 title: DecisionTreeRegressor
+description: API reference for DecisionTreeRegressor
 ---
 
 # Tree.DecisionTreeRegressor
