@@ -11,6 +11,7 @@ scripts = [
     'gen_decision_tree_regressor.py',
     'gen_isolation_forest.py',
     'gen_knn.py',
+    'gen_ball_tree.py',
     'gen_kmeans.py',
     'gen_mean_shift.py',
     'gen_dbscan.py',
