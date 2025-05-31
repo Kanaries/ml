@@ -5,3 +5,4 @@ description: API reference for Neighbors
 
 - [KNearstNeighbors](knn.md)
 - [BallTree](ballTree.md)
+- [KDTree](kdTree.md)
