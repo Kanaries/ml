@@ -8,6 +8,7 @@ import * as Linear from './linear';
 import * as SVM from './svm';
 import * as Decomposition from './decomposition';
 import * as Manifold from './manifold';
+import * as Bayes from './bayes';
 
 export {
     Tree,
@@ -19,5 +20,6 @@ export {
     Linear,
     SVM,
     Decomposition,
-    Manifold
+    Manifold,
+    Bayes
 }
