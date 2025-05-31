@@ -10,6 +10,7 @@
 - Classification and regression trees
 - k-nearest neighbors
 - Support vector machines
+- Naive Bayes classifier
 - Clustering algorithms (KMeans, DBSCAN, OPTICS, Mean Shift, HDBSCAN)
 - Dimensionality reduction (PCA)
 - Manifold learning (t-SNE)

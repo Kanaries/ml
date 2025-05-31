@@ -13,3 +13,4 @@ description: Machine learning API documentation
 - [Neighbors](neighbors/index.md)
 - [SVM](svm/index.md)
 - [Tree](tree/index.md)
+- [Bayes](bayes/index.md)

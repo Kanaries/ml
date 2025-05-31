@@ -1,0 +1,1 @@
+export { BernoulliNB } from './bernoulliNB';
