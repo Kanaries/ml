@@ -48,6 +48,36 @@ const result = knn.predict(testX);
 console.log(result);
 ```
 
+## Supported Algorithms
+
+The library exposes several categories of algorithms:
+
+- **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`
+- **Neighbors**: `KNearstNeighbors`, `BallTree`, `KDTree`
+- **Linear Models**: `LinearRegression`, `LogisticRegression`
+- **Support Vector Machines**: `SVC`, `NuSVC`, `LinearSVC`
+- **Naive Bayes**: `BernoulliNB`, `CategoricalNB`
+- **Clustering**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `OPTICS`, `MeanShift`, `HDBScan`
+- **Decomposition**: `PCA`
+- **Manifold Learning**: `SpectralEmbedding`, `MDS`, `LocallyLinearEmbedding`, `TSNE`
+- **Ensemble**: `IsolationForest`
+- **Utilities**: linear algebra helpers and math functions
+
+## Advanced Features
+
+### asyncMode
+
+`asyncMode` runs a synchronous function in a worker (Web Worker or Node.js worker thread) and returns a `Promise`.
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const heavy = (x: number) => x * x;
+const runAsync = utils.asyncMode(heavy);
+
+const result = await runAsync(5);
+```
+
 ## Development
 
 ```sh
