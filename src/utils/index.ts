@@ -1,5 +1,6 @@
 import * as Stat from './stat';
 import * as Sampling from './sampling';
+import { asyncMode } from './asyncMode';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 export interface ClassType<InstanceType extends {} = {}> extends Function {
@@ -21,5 +22,6 @@ export function assert(condition: any, message: string) {
 
 export {
     Stat,
-    Sampling
+    Sampling,
+    asyncMode
 }
