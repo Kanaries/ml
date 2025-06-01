@@ -14,3 +14,4 @@ description: Machine learning API documentation
 - [SVM](svm/index.md)
 - [Tree](tree/index.md)
 - [Bayes](bayes/index.md)
+- [Utils](utils/index.md)
