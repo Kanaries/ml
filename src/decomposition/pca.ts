@@ -40,7 +40,8 @@ export class PCA {
     }
 
     private static powerIteration(A: number[][], iter: number = 100): {value: number, vector: number[]} {
-        let v: number[] = Array(A.length).fill(0).map(() => Math.random());
+        // use deterministic initialization to avoid sign flips between runs
+        let v: number[] = new Array(A.length).fill(1);
         v = PCA.normalize(v);
         for (let i = 0; i < iter; i++) {
             const Av = PCA.matVecMul(A, v);
@@ -90,6 +91,18 @@ export class PCA {
         this.explainedVariance = [];
         for (let c = 0; c < k; c++) {
             const {value, vector} = PCA.powerIteration(A, 200);
+            // ensure deterministic sign by forcing the largest absolute component to be positive
+            let maxIdx = 0;
+            for (let i = 1; i < vector.length; i++) {
+                if (Math.abs(vector[i]) > Math.abs(vector[maxIdx])) {
+                    maxIdx = i;
+                }
+            }
+            if (vector[maxIdx] < 0) {
+                for (let i = 0; i < vector.length; i++) {
+                    vector[i] = -vector[i];
+                }
+            }
             this.components.push(vector.slice());
             this.explainedVariance.push(value);
             // deflate
