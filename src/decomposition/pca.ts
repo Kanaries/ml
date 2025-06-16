@@ -1,8 +1,8 @@
 export class PCA {
-    private nComponents: number | null;
-    private components: number[][];
-    private mean: number[];
-    private explainedVariance: number[];
+    protected nComponents: number | null;
+    protected components: number[][];
+    protected mean: number[];
+    protected explainedVariance: number[];
 
     constructor(nComponents: number | null = null) {
         this.nComponents = nComponents;
@@ -11,7 +11,7 @@ export class PCA {
         this.explainedVariance = [];
     }
 
-    private static dot(a: number[], b: number[]): number {
+    protected static dot(a: number[], b: number[]): number {
         let s = 0;
         for (let i = 0; i < a.length; i++) {
             s += a[i] * b[i];
@@ -19,11 +19,11 @@ export class PCA {
         return s;
     }
 
-    private static matVecMul(A: number[][], v: number[]): number[] {
+    protected static matVecMul(A: number[][], v: number[]): number[] {
         return A.map(row => PCA.dot(row, v));
     }
 
-    private static outer(v1: number[], v2: number[]): number[][] {
+    protected static outer(v1: number[], v2: number[]): number[][] {
         const res: number[][] = [];
         for (let i = 0; i < v1.length; i++) {
             res.push([]);
@@ -34,12 +34,12 @@ export class PCA {
         return res;
     }
 
-    private static normalize(v: number[]): number[] {
+    protected static normalize(v: number[]): number[] {
         const norm = Math.sqrt(PCA.dot(v, v));
         return v.map(x => x / norm);
     }
 
-    private static powerIteration(A: number[][], iter: number = 100): {value: number, vector: number[]} {
+    protected static powerIteration(A: number[][], iter: number = 100): {value: number, vector: number[]} {
         // use deterministic initialization to avoid sign flips between runs
         let v: number[] = new Array(A.length).fill(1);
         v = PCA.normalize(v);
@@ -52,7 +52,7 @@ export class PCA {
         return { value, vector: v };
     }
 
-    private static cloneMatrix(A: number[][]): number[][] {
+    protected static cloneMatrix(A: number[][]): number[][] {
         return A.map(r => r.slice());
     }
 
