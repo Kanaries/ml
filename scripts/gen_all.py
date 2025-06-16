@@ -22,6 +22,7 @@ scripts = [
     'gen_categorical_nb.py',
     'gen_svc.py',
     'gen_pca.py',
+    'gen_sparse_pca.py',
     'gen_spectral_embedding.py',
     'gen_mds.py',
     'gen_lle.py',
