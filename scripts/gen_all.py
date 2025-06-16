@@ -8,6 +8,7 @@ def run(script):
 scripts = [
     'gen_linear_regression.py',
     'gen_decision_tree_classifier.py',
+    'gen_extra_tree_classifier.py',
     'gen_decision_tree_regressor.py',
     'gen_extra_tree_regressor.py',
     'gen_isolation_forest.py',
@@ -23,6 +24,7 @@ scripts = [
     'gen_categorical_nb.py',
     'gen_svc.py',
     'gen_pca.py',
+    'gen_sparse_pca.py',
     'gen_spectral_embedding.py',
     'gen_mds.py',
     'gen_lle.py',

@@ -52,7 +52,7 @@ console.log(result);
 
 The library exposes several categories of algorithms:
 
-- **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeRegressor`
+- **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
 - **Neighbors**: `KNearstNeighbors`, `BallTree`, `KDTree`
 - **Linear Models**: `LinearRegression`, `LogisticRegression`
 - **Support Vector Machines**: `SVC`, `NuSVC`, `LinearSVC`
