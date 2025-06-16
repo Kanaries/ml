@@ -8,3 +8,4 @@ description: API reference for Tree
 - [ExtraTreeClassifier](extraTreeClassifier.md)
 
 - [DecisionTreeRegressor](decisionTreeRegressor.md)
+- [ExtraTreeRegressor](extraTreeRegressor.md)
