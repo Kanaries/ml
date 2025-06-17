@@ -2,7 +2,7 @@ export function mode (data: number[]): number {
     const counter: Map<any, number> = new Map();
     for (let record of data) {
         if (!counter.has(record)) {
-            counter.set(record, 0)
+            counter.set(record, 0);
         }
         counter.set(record, counter.get(record) + 1);
     }
@@ -11,7 +11,7 @@ export function mode (data: number[]): number {
     for (let [m, mc] of counter) {
         if (mc > modeCount) {
             mode = m;
-            mc = modeCount;
+            modeCount = mc;
         }
     }
     return mode;
@@ -22,7 +22,7 @@ export function mean (data: number[]): number {
     for (let i = 0; i < data.length; i++) {
         sum += data[i];
     }
-    return sum / data.length
+    return sum / data.length;
 }
 
 export function freqs2Probs (freqs: number[]): number[] {
@@ -48,5 +48,5 @@ export function gini (data: number[]): number {
     for (let i = 0; i < probs.length; i++) {
         sum += probs[i] * (1 - probs[i]);
     }
-    return sum
+    return sum;
 }
