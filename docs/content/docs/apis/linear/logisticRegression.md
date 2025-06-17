@@ -13,6 +13,21 @@ interface LogisticRegressionProps {
 constructor(props: LogisticRegressionProps = {})
 ```
 
+Performs binary logistic regression optimized with gradient descent. The
+`learningRate` controls the step size during optimization and `maxIter`
+specifies the number of iterations.
+
+### Methods
+* `fit(trainX: number[][], trainY: number[]): void`
+* `predict(testX: number[][]): number[]`
+
+#### fit
+* `trainX` - Training features with shape `[nSamples, nFeatures]`.
+* `trainY` - Binary labels for each training sample.
+
+#### predict
+* `testX` - Feature matrix to classify.
+
 ### Example
 ```ts
 const clf = new LogisticRegression();

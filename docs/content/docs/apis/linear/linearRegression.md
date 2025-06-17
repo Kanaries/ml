@@ -9,9 +9,20 @@ description: API reference for LinearRegression
 constructor()
 ```
 
+This class implements ordinary least squares linear regression. It estimates
+coefficients for a linear model by minimizing the squared error between
+predicted and actual values.
+
 ### Methods
 + `fit(X: number[][], Y: number[]): void`
 + `predict(X: number[][]): number[]`
+
+#### fit
+* `X` - Feature matrix of shape `[nSamples, nFeatures]`.
+* `Y` - Target values of length `nSamples`.
+
+#### predict
+* `X` - Feature matrix for which to compute predictions.
 
 ### Example
 ```ts
