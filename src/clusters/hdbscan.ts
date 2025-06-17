@@ -19,7 +19,7 @@ export class HDBScan extends ClusterBase {
         min_cluster_size: number = 5,
         min_samples: number | null = null,
         cluster_selection_epsilon: number = 0.5,
-        metric: Distance.IDistanceType = 'euclidiean'
+        metric: Distance.IDistanceType = 'euclidean'
     ) {
         super();
         this.minClusterSize = min_cluster_size;

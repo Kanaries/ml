@@ -21,7 +21,7 @@ export class OPTICS extends ClusterBase {
 
     constructor(options: OPTICSOptions = {}) {
         super();
-        const { min_samples = 5, max_eps, metric = 'euclidiean', p = 2, eps = 0.5 } = options;
+        const { min_samples = 5, max_eps, metric = 'euclidean', p = 2, eps = 0.5 } = options;
         this.minSamples = min_samples;
         this.eps = eps;
         this.maxEps = max_eps !== undefined ? max_eps : eps;

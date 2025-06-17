@@ -1,17 +1,24 @@
 {
   "name": "@kanaries/ml",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "machine learning lib in javascript",
-  "main": "./build/cjs/index.js",
-  "types": "./build/cjs/index.d.ts",
-  "module": "./build/esm/index.js",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "module": "./build/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.mjs",
+      "require": "./build/index.js"
+    }
+  },
   "scripts": {
     "gen-data": "python scripts/gen_all.py",
     "test": "npm run gen-data && jest",
-    "build": "tsc -p ./config/tsconfig.cjs.json && tsc -p ./config/tsconfig.esm.json",
+    "build": "vite build && tsc --emitDeclarationOnly --outDir build",
     "doc": "docsify serve docs",
-    "dev": "vite",
-    "build:example": "vite build",
+    "dev": "NODE_ENV=development vite",
+    "build:example": "NODE_ENV=development vite build",
     "preview": "vite preview"
   },
   "repository": {

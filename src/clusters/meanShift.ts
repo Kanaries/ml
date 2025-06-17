@@ -6,7 +6,7 @@ export class MeanShift extends ClusterBase {
     private centers: number[][];
     private max_iter: number;
     private distance: Distance.IDistance;
-    public constructor(bandwidth: number = 1, max_iter: number = 300, distanceType: Distance.IDistanceType = 'euclidiean') {
+    public constructor(bandwidth: number = 1, max_iter: number = 300, distanceType: Distance.IDistanceType = 'euclidean') {
         super();
         this.bandwidth = bandwidth;
         this.centers = [];

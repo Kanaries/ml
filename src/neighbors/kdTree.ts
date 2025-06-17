@@ -18,7 +18,7 @@ export class KDTree {
     constructor(
         X: number[][] = [],
         leafSize: number = 40,
-        metric: Distance.IDistanceType = 'euclidiean',
+        metric: Distance.IDistanceType = 'euclidean',
         p: number = 2
     ) {
         this.X = X;

@@ -1,21 +1,27 @@
 {
     "compilerOptions": {
-        "outDir": "./build/cjs",
         "target": "esnext",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
+        "moduleResolution": "bundler",
         "declaration": true,
+        "emitDeclarationOnly": true,
         "downlevelIteration": true,
-        "module": "commonjs",
-        "skipLibCheck": true
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
+            "allowJs": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false
     },
     "include": [
-        "src",
-        "examples"
+        "src/**/*"
     ],
     "exclude": [
-        "**/__test__/**",
-        "**/node_modules/**",
-        "docs/**"
+        "node_modules",
+        "build",
+        "dist",
+        "examples"
     ]
 }

@@ -5,7 +5,7 @@ export class DBScan extends ClusterBase {
     private eps: number;
     private minSamples: number;
     private distance: Distance.IDistance;
-    constructor(eps: number = 0.5, minSamples: number = 5, distanceType: Distance.IDistanceType = 'euclidiean') {
+    constructor(eps: number = 0.5, minSamples: number = 5, distanceType: Distance.IDistanceType = 'euclidean') {
         super();
         this.eps = eps;
         this.minSamples = minSamples;

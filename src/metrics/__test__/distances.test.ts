@@ -5,7 +5,7 @@ function randPosPair (size: number): [number[], number[]] {
     return [pos1, pos2];
 }
 test('useDistance', () => {
-    expect(useDistance('euclidiean')).toBe(euclidean);
+    expect(useDistance('euclidean')).toBe(euclidean);
     expect(useDistance('2-norm')).toBe(euclidean);
     expect(useDistance('1-norm')).toBe(manhattan);
     expect(useDistance('manhattan')).toBe(manhattan);
@@ -21,7 +21,7 @@ test('manhattan', () => {
     }
 })
 
-test('euclidiean', () => {
+test('euclidean', () => {
     for (let i = 0; i < 10; i++) {
         const [pos1, pos2] = randPosPair(5);
         let dis = pos1.reduce((total, p1, index) => total + Math.pow(p1 - pos2[index], 2), 0);
