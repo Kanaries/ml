@@ -1,3 +1,4 @@
 import { IsolationForest } from './isolationForest';
+import { AdaBoostRegressor } from './adaBoostRegressor';
 
-export { IsolationForest }
+export { IsolationForest, AdaBoostRegressor };

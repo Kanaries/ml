@@ -9,6 +9,7 @@ scripts = [
     'gen_linear_regression.py',
     'gen_decision_tree_classifier.py',
     'gen_decision_tree_regressor.py',
+    'gen_ada_boost_regressor.py',
     'gen_isolation_forest.py',
     'gen_knn.py',
     'gen_ball_tree.py',
