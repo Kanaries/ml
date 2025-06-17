@@ -10,7 +10,7 @@ export class KMeans extends ClusterBase {
     private objective: number;
     private max_iter: number;
     private iter: number;
-    constructor(n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30) {
+    constructor(n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30, random_state?: number) {
         super();
         this.n_clusters = n_clusters;
         this.centers = null;
@@ -43,9 +43,12 @@ export class KMeans extends ClusterBase {
         this.samplesY = samplesY;
         this.iter++;
 
-        if (this.iter <= this.max_iter && objective >= this.objective * (1 - this.opt_ratio)) {
-            // if (this.iter <= this.max_iter) { for visual test
-            this.objective = objective;
+        const shouldContinue = this.iter < this.max_iter && 
+            (this.objective === Infinity || Math.abs(objective - this.objective) / this.objective > this.opt_ratio);
+        
+        this.objective = objective;
+        
+        if (shouldContinue) {
             this.updateCentroids();
             this.assignment();
         }
@@ -74,15 +77,50 @@ export class KMeans extends ClusterBase {
         this.centers = centers;
     }
     private initCentroids(): void {
-        const randSet: Set<number> = new Set();
         this.centers = [];
-        let randIndex: number = 0;
-        for (let i = 0; i < this.n_clusters; i++) {
-            do {
-                randIndex = Math.floor(Math.random() * this.samplesX.length);
-            } while (randSet.has(randIndex));
-            randSet.add(randIndex);
-            this.centers.push(this.samplesX[randIndex]);
+        const usedIndices: Set<number> = new Set();
+        
+        // For better determinism, use first data point as first center
+        this.centers.push([...this.samplesX[0]]);
+        usedIndices.add(0);
+        
+        // Choose remaining centers using k-means++ method
+        for (let k = 1; k < this.n_clusters; k++) {
+            const distances: number[] = [];
+            let totalDistance = 0;
+            
+            // Calculate distance to nearest center for each point
+            for (let i = 0; i < this.samplesX.length; i++) {
+                if (usedIndices.has(i)) {
+                    distances[i] = 0;
+                    continue;
+                }
+                
+                let minDist = Infinity;
+                for (const center of this.centers) {
+                    const dist = center.reduce((sum, val, idx) => 
+                        sum + (val - this.samplesX[i][idx]) ** 2, 0);
+                    minDist = Math.min(minDist, dist);
+                }
+                distances[i] = minDist;
+                totalDistance += minDist;
+            }
+            
+            // For determinism, choose the point with maximum distance to nearest center
+            let maxDist = -1;
+            let maxIndex = -1;
+            for (let i = 0; i < this.samplesX.length; i++) {
+                if (usedIndices.has(i)) continue;
+                if (distances[i] > maxDist) {
+                    maxDist = distances[i];
+                    maxIndex = i;
+                }
+            }
+            
+            if (maxIndex !== -1) {
+                this.centers.push([...this.samplesX[maxIndex]]);
+                usedIndices.add(maxIndex);
+            }
         }
     }
     public fitPredict(sampleX: number[][], sampleWeights?: number[]) {
