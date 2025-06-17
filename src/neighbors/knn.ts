@@ -13,7 +13,7 @@ export class KNearstNeighbors extends ClassifierBase {
     public constructor(
         kNeighbors: number = 5,
         weightType: IWeightType = 'uniform',
-        distanceType: Distance.IDistanceType = 'euclidiean',
+        distanceType: Distance.IDistanceType = 'euclidean',
         pNorm: number = 2
     ) {
         super();

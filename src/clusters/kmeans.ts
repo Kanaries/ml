@@ -32,9 +32,8 @@ export class KMeans extends ClusterBase {
             let nearestDis = Infinity;
             for (let j = 0; j < centers.length; j++) {
                 const dis_square = centers[j].reduce((sum, value, index) => sum + (value - samplesX[i][index]) ** 2, 0);
-                const dis = Math.sqrt(dis_square);
-                if (dis < nearestDis) {
-                    nearestDis = dis;
+                if (dis_square < nearestDis) {
+                    nearestDis = dis_square;
                     nearestIndex = j;
                 }
             }
@@ -44,7 +43,7 @@ export class KMeans extends ClusterBase {
         this.samplesY = samplesY;
         this.iter++;
 
-        if (this.iter <= this.max_iter || objective < this.objective * (1 - this.opt_ratio)) {
+        if (this.iter <= this.max_iter && objective >= this.objective * (1 - this.opt_ratio)) {
             // if (this.iter <= this.max_iter) { for visual test
             this.objective = objective;
             this.updateCentroids();

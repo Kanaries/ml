@@ -35,7 +35,6 @@ export class DecisionTreeClassifier {
     public constructor(props: DecisionTreeProps = {}) {
         const { max_depth = Infinity, criterion = 'entropy', min_samples_split = 2 } = props;
         this.dtree = null;
-        this.criterion;
         this.max_depth = max_depth;
         this.criterion = criterion;
         this.feature_number = 0;
@@ -43,7 +42,7 @@ export class DecisionTreeClassifier {
         if (criterion === 'entropy') {
             this.impurity = entropy;
         } else {
-            this.impurity = gini
+            this.impurity = gini;
         }
     }
     /**
@@ -53,7 +52,7 @@ export class DecisionTreeClassifier {
      * @param attributes indices of attributes.
      */
     public treeGenerate(tree: IDTree, sampleX: number[][], sampleY: number[], depth: number) {
-        if (sampleX.length < this.min_samples_split)return;
+        if (sampleX.length < this.min_samples_split) return;
         if (depth > this.max_depth) return;
         const vsame = valuesAllSame(sampleY);
         if (vsame) return;
@@ -93,32 +92,37 @@ export class DecisionTreeClassifier {
         let maxGain = -Infinity;
         let maxGainAttIndex = 0;
         for (let i = 0; i < feature_number; i++) {
-            let totalImp = 0;
             let attIndex = i;
             const values = sampleX.map((r) => r[attIndex]);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-
-            const splitValue = Math.random() * (max - min) + min;
-            const left = filterWithIndices(values, (v) => v < splitValue);
-            const right = filterWithIndices(values, (v) => v >= splitValue);
-            const leftImp = this.nodeImpurity(left.indices.map((index) => sampleY[index]));
-            const rightImp = this.nodeImpurity(right.indices.map((index) => sampleY[index]));
-            totalImp += (left.subArr.length / sampleX.length) * leftImp;
-            totalImp += (right.subArr.length / sampleX.length) * rightImp;
-            const gain = imp - totalImp;
-            if (gain > maxGain) {
-                maxGain = gain;
-                maxGainAttIndex = attIndex;
-                ans.left = {
-                    X: left.indices.map((index) => sampleX[index]),
-                    Y: left.indices.map((index) => sampleY[index]),
-                };
-                ans.right = {
-                    X: right.indices.map((index) => sampleX[index]),
-                    Y: right.indices.map((index) => sampleY[index]),
-                };
-                ans.splitValue = splitValue;
+            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+            
+            // Try all possible split points between unique values
+            for (let j = 0; j < uniqueValues.length - 1; j++) {
+                const splitValue = (uniqueValues[j] + uniqueValues[j + 1]) / 2;
+                const left = filterWithIndices(values, (v) => v < splitValue);
+                const right = filterWithIndices(values, (v) => v >= splitValue);
+                
+                if (left.indices.length === 0 || right.indices.length === 0) continue;
+                
+                const leftImp = this.nodeImpurity(left.indices.map((index) => sampleY[index]));
+                const rightImp = this.nodeImpurity(right.indices.map((index) => sampleY[index]));
+                const totalImp = (left.subArr.length / sampleX.length) * leftImp + 
+                                (right.subArr.length / sampleX.length) * rightImp;
+                const gain = imp - totalImp;
+                
+                if (gain > maxGain) {
+                    maxGain = gain;
+                    maxGainAttIndex = attIndex;
+                    ans.left = {
+                        X: left.indices.map((index) => sampleX[index]),
+                        Y: left.indices.map((index) => sampleY[index]),
+                    };
+                    ans.right = {
+                        X: right.indices.map((index) => sampleX[index]),
+                        Y: right.indices.map((index) => sampleY[index]),
+                    };
+                    ans.splitValue = splitValue;
+                }
             }
         }
         ans.gain = maxGain;
