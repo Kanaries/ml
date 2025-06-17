@@ -7,6 +7,10 @@ description: API reference for TSNE
 
 T-distributed Stochastic Neighbor Embedding for visualizing high dimensional data.
 
+TSNE models pairwise similarities both in the original space and in the
+embedding. It iteratively updates the embedding using gradient descent to
+minimize the Kullback–Leibler divergence between these two distributions.
+
 ```ts
 constructor(options: TSNEOptions = {})
 ```
