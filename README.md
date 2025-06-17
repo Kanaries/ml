@@ -60,7 +60,7 @@ The library exposes several categories of algorithms:
 - **Clustering**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `OPTICS`, `MeanShift`, `HDBScan`
 - **Decomposition**: `PCA`
 - **Manifold Learning**: `SpectralEmbedding`, `MDS`, `LocallyLinearEmbedding`, `TSNE`
-- **Ensemble**: `IsolationForest`
+ - **Ensemble**: `IsolationForest`, `AdaBoostClassifier`
 - **Utilities**: linear algebra helpers and math functions
 
 ## Advanced Features

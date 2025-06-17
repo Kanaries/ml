@@ -20,6 +20,7 @@ scripts = [
     'gen_dbscan.py',
     'gen_optics.py',
     'gen_logistic_regression.py',
+    'gen_adaboost_classifier.py',
     'gen_bernoulli_nb.py',
     'gen_categorical_nb.py',
     'gen_svc.py',
