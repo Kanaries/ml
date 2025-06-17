@@ -9,6 +9,16 @@ description: API reference for AdaBoostRegressor
 constructor(props?: { estimator?: DecisionTreeRegressor; n_estimators?: number; learning_rate?: number })
 ```
 
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| estimator | DecisionTreeRegressor | depth 3 tree | Base learner used in boosting |
+| n_estimators | number | 50 | Number of boosting rounds |
+| learning_rate | number | 1.0 | Shrinks the contribution of each regressor |
+
+### Algorithm
+AdaBoostRegressor combines weak regressors sequentially. Each new estimator focuses on samples that previous models predicted poorly.
+
 ### Methods
 + `fit(trainX: number[][], trainY: number[]): void`
 + `predict(testX: number[][]): number[]`
