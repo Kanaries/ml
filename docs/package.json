@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prebuild": "cd .. && yarn build",
+    "prebuild": "cd .. && yarn install && yarn build",
     "build": "next build",
     "dev": "next dev --turbo",
     "start": "next start",
