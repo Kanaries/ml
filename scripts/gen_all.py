@@ -25,6 +25,7 @@ scripts = [
     'gen_bernoulli_nb.py',
     'gen_categorical_nb.py',
     'gen_svc.py',
+    'gen_bernoulli_rbm.py',
     'gen_pca.py',
     'gen_truncated_svd.py',
     'gen_sparse_pca.py',
