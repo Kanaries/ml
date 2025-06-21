@@ -16,3 +16,4 @@ description: Machine learning API documentation
 - [Bayes](bayes/index.md)
 - [NeuralNetwork](neural_network/index.md)
 - [Utils](utils/index.md)
+- [SemiSupervised](semi_supervised/index.md)

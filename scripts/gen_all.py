@@ -33,7 +33,8 @@ scripts = [
     'gen_spectral_embedding.py',
     'gen_mds.py',
     'gen_lle.py',
-    'gen_tsne.py'
+    'gen_tsne.py',
+    'gen_label_propagation.py'
 ]
 
 for s in scripts:
