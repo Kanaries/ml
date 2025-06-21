@@ -15,3 +15,4 @@ description: Machine learning API documentation
 - [Tree](tree/index.md)
 - [Bayes](bayes/index.md)
 - [Utils](utils/index.md)
+- [SemiSupervised](semi_supervised/index.md)
