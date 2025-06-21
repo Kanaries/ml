@@ -9,6 +9,7 @@ import * as SVM from './svm';
 import * as Decomposition from './decomposition';
 import * as Manifold from './manifold';
 import * as Bayes from './bayes';
+import * as NeuralNetwork from './neural_network';
 
 export {
     Tree,
@@ -21,5 +22,6 @@ export {
     SVM,
     Decomposition,
     Manifold,
-    Bayes
+    Bayes,
+    NeuralNetwork
 }
