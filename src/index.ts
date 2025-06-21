@@ -10,6 +10,7 @@ import * as Decomposition from './decomposition';
 import * as Manifold from './manifold';
 import * as Bayes from './bayes';
 import * as SemiSupervised from './semi_supervised';
+import * as NeuralNetwork from './neural_network';
 
 export {
     Tree,
@@ -24,4 +25,5 @@ export {
     Manifold,
     Bayes,
     SemiSupervised
+    NeuralNetwork
 }

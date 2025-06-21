@@ -1,0 +1,1 @@
+export { BernoulliRBM } from './bernoulliRBM';
