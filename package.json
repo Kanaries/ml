@@ -15,11 +15,11 @@
   "scripts": {
     "gen-data": "python scripts/gen_all.py",
     "test": "npm run gen-data && jest",
-    "build": "yarn vite build && yarn tsc --emitDeclarationOnly --outDir build",
+    "build": "npx vite build && npx tsc --emitDeclarationOnly --outDir build",
     "doc": "docsify serve docs",
-    "dev": "NODE_ENV=development yarn vite",
-    "build:example": "NODE_ENV=development yarn vite build",
-    "preview": "yarn vite preview"
+    "dev": "NODE_ENV=development npx vite",
+    "build:example": "NODE_ENV=development npx vite build",
+    "preview": "npx vite preview"
   },
   "repository": {
     "type": "git",
