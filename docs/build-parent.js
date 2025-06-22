@@ -19,7 +19,7 @@ try {
   }
   
   console.log('Installing dependencies...');
-  execSync('yarn install --frozen-lockfile', { stdio: 'inherit' });
+  execSync('yarn install --frozen-lockfile --production=false', { stdio: 'inherit' });
   
   console.log('Building parent project...');
   execSync('yarn build', { stdio: 'inherit' });
