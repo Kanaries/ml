@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "prebuild": "cd .. && yarn install --production=false && yarn build",
+    "prebuild": "node build-parent.js",
     "build": "next build",
     "dev": "next dev --turbo",
     "start": "next start",
