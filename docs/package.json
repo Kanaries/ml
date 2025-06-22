@@ -10,7 +10,7 @@
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
-    "@kanaries/ml": "file:../",
+    "@kanaries/ml": "latest",
     "@observablehq/plot": "^0.6.17",
     "fumadocs-core": "15.4.2",
     "fumadocs-mdx": "11.6.6",

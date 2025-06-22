@@ -358,8 +358,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@kanaries/ml@file:..":
-  version "0.0.9"
+"@kanaries/ml@latest":
+  version "0.0.10"
+  resolved "https://registry.npmjs.org/@kanaries/ml/-/ml-0.0.10.tgz#403f9443b1e68f296ef3fe9af93cf2b678f54d3f"
+  integrity sha512-3KYZcxtHYwhuZ/ZA5/JTwjkAGB8+XduJOdo/ZiOiciSN/YU6O+G+okKU5rTNXl6bgekbNs2j8f4ylNI/2jmj9Q==
 
 "@mdx-js/mdx@^3.1.0":
   version "3.1.0"

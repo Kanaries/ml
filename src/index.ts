@@ -24,6 +24,6 @@ export {
     Decomposition,
     Manifold,
     Bayes,
-    SemiSupervised
+    SemiSupervised,
     NeuralNetwork
 }

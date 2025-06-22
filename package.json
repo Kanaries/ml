@@ -1,6 +1,6 @@
 {
   "name": "@kanaries/ml",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "machine learning lib in javascript",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
