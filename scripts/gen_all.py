@@ -34,7 +34,8 @@ scripts = [
     'gen_mds.py',
     'gen_lle.py',
     'gen_tsne.py',
-    'gen_label_propagation.py'
+    'gen_label_propagation.py',
+    'gen_label_spreading.py'
 ]
 
 for s in scripts:
