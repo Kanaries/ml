@@ -1,9 +1,11 @@
 ---
-title: KMeans
-description: API reference for KMeans
+title: K-Means Clustering (KMeans) – @kanaries/ml Algorithm Guide
+description: Learn how to apply the K-Means clustering algorithm with @kanaries/ml, including parameter definitions, TypeScript API usage, and examples for segmenting datasets in modern web apps.
 ---
 
-# Clusters.KMeans
+# K-Means Clustering (Clusters.KMeans)
+
+K-Means clustering partitions datasets into a chosen number of groups by minimizing within-cluster variance. Use the `Clusters.KMeans` implementation in @kanaries/ml to build fast, client-side segmentation pipelines for browser or Node.js applications.
 
 ```ts
 constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30)
