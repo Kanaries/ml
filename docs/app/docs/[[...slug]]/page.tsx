@@ -48,7 +48,7 @@ export async function generateMetadata(props: {
 
   const slug = params.slug ?? [];
   const path = slug.length ? `/docs/${slug.join('/')}` : '/docs';
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kanaries.net';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net';
   const canonicalUrl = new URL(path, siteUrl).toString();
 
   return {
