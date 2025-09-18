@@ -2,17 +2,19 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+
 export const metadata: Metadata = {
   title: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
   description:
     'Train and deploy ML models in JavaScript with a scikit-learn-style API. Works in browser and Node.js. Fast examples, tiny bundles, docs for every algorithm.',
   alternates: {
-    canonical: 'https://kanaries.github.io/ml/',
+    canonical: `${siteUrl}/`,
   },
   openGraph: {
     title: 'Machine Learning in JavaScript — @kanaries/ml',
     description: 'Train and deploy ML models in JavaScript (browser & Node).',
-    url: 'https://kanaries.github.io/ml/',
+    url: `${siteUrl}/`,
   },
 };
 
@@ -171,7 +173,7 @@ const JSON_LD = {
   name: '@kanaries/ml',
   description:
     'A scikit-learn-style JavaScript machine learning library for browser and Node.js. Familiar API, tiny bundles, runnable examples.',
-  url: 'https://kanaries.github.io/ml/',
+  url: `${siteUrl}/`,
   programmingLanguage: 'JavaScript',
   codeRepository: 'https://github.com/Kanaries/ml',
   license: 'https://opensource.org/licenses/MIT',
