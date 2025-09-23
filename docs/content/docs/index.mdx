@@ -1,29 +1,74 @@
 ---
-title: Getting Started
-description: Getting Started with ml
+title: Build JavaScript Machine Learning with @kanaries/ml
+description: Discover how to train and deploy machine learning models in JavaScript and TypeScript using @kanaries/ml, including installation, core features, tutorials, and API references.
 ---
 
-# Getting Started
+# Build machine learning in JavaScript with @kanaries/ml
 
-## Install
-![](https://img.shields.io/github/license/kanaries/ml?)
-![](https://img.shields.io/npm/v/@kanaries/ml?)
-```bash
-npm i --save @kanaries/ml
-```
+@kanaries/ml delivers scikit-learn inspired tooling for JavaScript and TypeScript so you can prototype, train, and deploy machine learning models in the browser or on Node.js services. Use this home page as your launchpad for installation steps, guided tutorials, and deep-dive API references.
 
-## Usage
+## Start here
+
+1. **Install the SDK** – Add the package with your preferred manager. Both builds include TypeScript definitions out of the box.
+
+   ```bash
+   npm install @kanaries/ml
+   ```
+
+   ```bash
+   yarn add @kanaries/ml
+   ```
+
+2. **Explore quickstart recipes** – Follow the [anomaly detection walkthrough](#build-an-anomaly-detector) or jump straight to the [API catalog](apis/index.md) to browse available estimators.
+3. **Integrate with your stack** – Pair @kanaries/ml with modern frameworks, dashboards, and serverless runtimes to deliver on-device intelligence without round-trips to Python services.
+
+## Why teams choose @kanaries/ml
+
+- **Built for browsers and Node.js** – Run classical ML workflows alongside your UI code or in lightweight edge functions.
+- **Type-safe developer experience** – Strong typings and predictable method signatures accelerate onboarding for TypeScript teams.
+- **Comprehensive algorithm coverage** – Access clustering, decomposition, ensembles, linear models, neural networks, and more through a consistent API surface.
+- **Interoperable with Python tooling** – Mirror familiar scikit-learn patterns to translate notebooks into production-ready JavaScript apps.
+
+## Build an anomaly detector
 
 ```typescript
-import { Ensemble } from '@kanaries';
+import { Ensemble } from '@kanaries/ml';
 
-const iForest = new Ensemble.IsolationForest();
+const isolationForest = new Ensemble.IsolationForest({
+  nEstimators: 100,
+  contamination: 0.1,
+});
 
-const X = [[-1.1], [0.3], [0.5], [100]];
-iForest.fit(X);
-const result = iForest.predict([[0.1], [0], [90]]);
-// [0, 0, 1]
+const trainingData = [[-1.1], [0.3], [0.5], [100]];
+isolationForest.fit(trainingData);
+
+const predictions = isolationForest.predict([[0.1], [0], [90]]);
+// predictions: [0, 0, 1] where 1 indicates an outlier
 ```
-## Documentation
 
-- [API References](apis/index.md)
+Isolation Forest isolates anomalies quickly by measuring the path length needed to separate each point. Use it for fraud detection, IoT monitoring, or surfacing suspicious product analytics trends. Continue learning with the [Ensemble module reference](apis/ensemble/index.md) to configure contamination thresholds and scoring utilities.
+
+## Explore the ecosystem
+
+| Topic | What you can build | Resources |
+| --- | --- | --- |
+| Clustering and segmentation | Customer cohorts, anomaly buckets, recommendation seeds | [Clusters API](apis/clusters/index.md) |
+| Dimensionality reduction | Feature compression, visualization prep, noise filtering | [Decomposition API](apis/decomposition/index.md) |
+| Predictive modeling | Regressions and classifiers for tabular or streaming data | [Linear](apis/linear/index.md), [Tree](apis/tree/index.md), [SVM](apis/svm/index.md) |
+| Deep learning basics | Lightweight neural networks for inference on the edge | [Neural Network module](apis/neural_network/index.md) |
+| Data preparation | Normalization, metrics, and helpers for production workflows | [Utils module](apis/utils/index.md) |
+
+For a complete view of available modules and helper utilities, head to the [full API reference](apis/index.md).
+
+## Learn by goal
+
+- **Ship to production faster** – Use the deployment checklist *(coming soon)* to package models for serverless or browser targets.
+- **Prototype interactive analytics** – Explore the [`examples`](../../../examples) directory for visual demos you can fork and customize.
+- **Master the fundamentals** – Read the upcoming Getting Started guide for an end-to-end project walkthrough, from dataset preparation to evaluation.
+
+## Stay connected
+
+- Watch the [project README](../../../README.md) for release notes, roadmap updates, and contribution guidelines.
+- Join the conversation in community channels to share feedback and learn from other @kanaries/ml practitioners.
+
+With these resources, you can build intelligent features that run entirely in JavaScript, experiment rapidly, and scale machine learning experiences across your product surface area.
