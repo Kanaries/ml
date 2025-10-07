@@ -3,14 +3,29 @@ export interface BernoulliRBMOptions {
     learningRate?: number;
     batchSize?: number;
     nIter?: number;
+    randomState?: number;
 }
 
 function logistic(x: number): number {
     return 1 / (1 + Math.exp(-x));
 }
 
-function sampleBernoulli(probs: number[]): number[] {
-    return probs.map(p => (Math.random() < p ? 1 : 0));
+function createRandomGenerator(seed?: number): () => number {
+    if (seed === undefined) {
+        return Math.random;
+    }
+    let state = Math.floor(seed) % 2147483647;
+    if (state <= 0) {
+        state += 2147483646;
+    }
+    return () => {
+        state = (state * 16807) % 2147483647;
+        return (state - 1) / 2147483646;
+    };
+}
+
+function sampleBernoulli(probs: number[], random: () => number): number[] {
+    return probs.map(p => (random() < p ? 1 : 0));
 }
 
 export class BernoulliRBM {
@@ -18,6 +33,7 @@ export class BernoulliRBM {
     private learningRate: number;
     private batchSize: number;
     private nIter: number;
+    private random: () => number;
 
     private components: number[][] = [];
     private interceptHidden: number[] = [];
@@ -28,6 +44,7 @@ export class BernoulliRBM {
         this.learningRate = options.learningRate ?? 0.1;
         this.batchSize = options.batchSize ?? 10;
         this.nIter = options.nIter ?? 10;
+        this.random = createRandomGenerator(options.randomState);
     }
 
     private initParams(nFeatures: number): void {
@@ -35,7 +52,7 @@ export class BernoulliRBM {
         for (let j = 0; j < this.nComponents; j++) {
             const row: number[] = [];
             for (let i = 0; i < nFeatures; i++) {
-                row.push((Math.random() - 0.5) * 0.1);
+                row.push((this.random() - 0.5) * 0.1);
             }
             this.components.push(row);
         }
@@ -80,9 +97,9 @@ export class BernoulliRBM {
         for (let s = 0; s < bSize; s++) {
             const v0 = batch[s];
             const h0Prob = this.hiddenProb(v0);
-            const h0 = sampleBernoulli(h0Prob);
+            const h0 = sampleBernoulli(h0Prob, this.random);
             const v1Prob = this.visibleProb(h0);
-            const v1 = sampleBernoulli(v1Prob);
+            const v1 = sampleBernoulli(v1Prob, this.random);
             const h1Prob = this.hiddenProb(v1);
 
             for (let j = 0; j < this.nComponents; j++) {
@@ -141,8 +158,8 @@ export class BernoulliRBM {
 
     public gibbs(V: number[][]): number[][] {
         return V.map(v => {
-            const h = sampleBernoulli(this.hiddenProb(v));
-            const v1 = sampleBernoulli(this.visibleProb(h));
+            const h = sampleBernoulli(this.hiddenProb(v), this.random);
+            const v1 = sampleBernoulli(this.visibleProb(h), this.random);
             return v1;
         });
     }
