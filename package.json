@@ -55,7 +55,7 @@
     "ts-jest": "^29.4.0",
     "typescript": "^5.8.3",
     "vega": "^5.13.0",
-    "vega-embed": "^6.10.0",
+    "vega-embed": "^7.1.0",
     "vega-lite": "^6.0.0",
     "vite": "^6.3.5"
   },
