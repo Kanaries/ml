@@ -1,18 +1,20 @@
 export function std<T = any> (arr: T[], size: number): T[] {
-    if (arr.length <= size) return arr;
-    let choosen = arr.map(() => false);
-    let samples: T[] = [];
-    let count = 0;
-    while (count < size) {
-        let index = Math.floor(Math.random() * size)
-        while (choosen[index]) {
-            index++;
-        }
-        if (!choosen[index]) {
-            choosen[index] = true;
-            samples.push(arr[index]);
-            count++;
+    const n = arr.length;
+    const k = Math.floor(size);
+    if (n === 0 || k <= 0) {
+        return [];
+    }
+    if (k >= n) {
+        return arr.slice();
+    }
+
+    // Reservoir sampling (sampling without replacement).
+    const sample = arr.slice(0, k);
+    for (let i = k; i < n; i++) {
+        const j = Math.floor(Math.random() * (i + 1));
+        if (j < k) {
+            sample[j] = arr[i];
         }
     }
-    return arr;
+    return sample;
 }
