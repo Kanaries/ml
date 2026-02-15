@@ -11,6 +11,7 @@ import * as Manifold from './manifold';
 import * as Bayes from './bayes';
 import * as SemiSupervised from './semi_supervised';
 import * as NeuralNetwork from './neural_network';
+import * as utils from './utils';
 
 export {
     Tree,
@@ -25,5 +26,6 @@ export {
     Manifold,
     Bayes,
     SemiSupervised,
-    NeuralNetwork
+    NeuralNetwork,
+    utils
 }

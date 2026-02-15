@@ -78,6 +78,22 @@ const runAsync = utils.asyncMode(heavy);
 const result = await runAsync(5);
 ```
 
+### trainTestSplit
+
+`utils.Sampling.trainTestSplit` splits samples into train/test sets and supports reproducible shuffling with `randomState`.
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const X = [[1], [2], [3], [4], [5]];
+const y = [0, 0, 1, 1, 1];
+
+const { XTrain, XTest, yTrain, yTest } = utils.Sampling.trainTestSplit(X, y, {
+    testSize: 0.4,
+    randomState: 42,
+});
+```
+
 ## Development
 
 ```sh
@@ -93,4 +109,3 @@ yarn build
 # Start the example development server
 yarn dev
 ```
-

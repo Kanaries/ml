@@ -1,9 +1,9 @@
-import subprocess, os
+import subprocess, os, sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 
 def run(script):
-    subprocess.run(['python', os.path.join(here, script)], check=True)
+    subprocess.run([sys.executable, os.path.join(here, script)], check=True)
 
 scripts = [
     'gen_linear_regression.py',

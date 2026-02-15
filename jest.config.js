@@ -1,6 +1,7 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
     preset: 'ts-jest',
+    watchman: false,
     transform: {
         '^.+\\.tsx?$': ['ts-jest', {
             diagnostics: false,

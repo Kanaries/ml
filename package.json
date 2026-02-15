@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "gen-data": "python scripts/gen_all.py",
+    "gen-data": "node scripts/run_gen_data.js",
     "test": "npm run gen-data && jest",
     "build": "vite build && tsc --emitDeclarationOnly --outDir build",
     "doc": "docsify serve docs",
