@@ -54,14 +54,15 @@ The library exposes several categories of algorithms:
 
 - **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
 - **Neighbors**: `KNearstNeighbors`, `BallTree`, `KDTree`
-- **Linear Models**: `LinearRegression`, `LogisticRegression`
+- **Linear Models**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`
 - **Support Vector Machines**: `SVC`, `NuSVC`, `LinearSVC`
 - **Naive Bayes**: `BernoulliNB`, `CategoricalNB`
 - **Clustering**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `OPTICS`, `MeanShift`, `HDBScan`
 - **Decomposition**: `PCA`
 - **Manifold Learning**: `SpectralEmbedding`, `MDS`, `LocallyLinearEmbedding`, `TSNE`
  - **Ensemble**: `IsolationForest`, `AdaBoostClassifier`
-- **Utilities**: linear algebra helpers and math functions
+- **Metrics**: `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `meanSquaredError`, `r2Score`
+- **Utilities**: `Sampling.trainTestSplit`, `Preprocessing.StandardScaler`, `Preprocessing.MinMaxScaler`, `ModelSelection.KFold`, `ModelSelection.crossValScore`, linear algebra helpers and math functions
 
 ## Advanced Features
 

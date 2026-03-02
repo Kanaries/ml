@@ -24,5 +24,18 @@ export const baseOptions: BaseLayoutProps = {
     ),
   },
   // see https://fumadocs.dev/docs/ui/navigation/links
-  links: [],
+  links: [
+    {
+      text: 'Docs Home',
+      url: '/docs',
+    },
+    {
+      text: 'API Reference',
+      url: '/docs/apis',
+    },
+    {
+      text: 'GitHub',
+      url: 'https://github.com/Kanaries/ml',
+    },
+  ],
 };

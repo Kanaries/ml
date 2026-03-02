@@ -84,32 +84,39 @@ const FEATURES = [
 ];
 
 const ALGORITHMS: Record<string, { label: string; href: string }[]> = {
-  Classification: [
-    { label: 'Logistic Regression', href: '/docs/algorithms/logistic-regression/' },
-    { label: 'Linear SVM', href: '/docs/algorithms/linear-svm/' },
-    { label: 'Random Forest', href: '/docs/algorithms/random-forest/' },
-    { label: 'Naive Bayes', href: '/docs/algorithms/naive-bayes/' },
-    { label: 'k-NN', href: '/docs/algorithms/knn/' },
+  'Linear & SVM': [
+    { label: 'Linear module', href: '/docs/apis/linear' },
+    { label: 'LinearRegression', href: '/docs/apis/linear/linearRegression' },
+    { label: 'LogisticRegression', href: '/docs/apis/linear/logisticRegression' },
+    { label: 'SVM module', href: '/docs/apis/svm' },
+    { label: 'SVC / NuSVC / LinearSVC', href: '/docs/apis/svm/SVC' },
   ],
-  Regression: [
-    { label: 'Linear Regression', href: '/docs/algorithms/linear-regression/' },
-    { label: 'Ridge & Lasso', href: '/docs/algorithms/ridge-lasso/' },
-    { label: 'Random Forest Regressor', href: '/docs/algorithms/random-forest-regressor/' },
-    { label: 'k-NN Regressor', href: '/docs/algorithms/knn-regressor/' },
+  'Tree & Ensemble': [
+    { label: 'Tree module', href: '/docs/apis/tree' },
+    { label: 'DecisionTreeClassifier', href: '/docs/apis/tree/decisionTreeClassifier' },
+    { label: 'ExtraTreeClassifier', href: '/docs/apis/tree/extraTreeClassifier' },
+    { label: 'Ensemble module', href: '/docs/apis/ensemble' },
+    { label: 'IsolationForest / AdaBoost', href: '/docs/apis/ensemble/iforest' },
   ],
-  Clustering: [
-    { label: 'k-Means', href: '/docs/algorithms/kmeans/' },
-    { label: 'DBSCAN', href: '/docs/algorithms/dbscan/' },
+  'Neighbors & Clustering': [
+    { label: 'Neighbors module', href: '/docs/apis/neighbors' },
+    { label: 'KNearstNeighbors', href: '/docs/apis/neighbors/knn' },
+    { label: 'BallTree / KDTree', href: '/docs/apis/neighbors/ballTree' },
+    { label: 'Clusters module', href: '/docs/apis/clusters' },
+    { label: 'KMeans / DBSCAN / OPTICS / HDBSCAN / MeanShift', href: '/docs/apis/clusters/kmeans' },
   ],
-  'Dimensionality Reduction': [
-    { label: 'PCA', href: '/docs/algorithms/pca/' },
-    { label: 'Truncated SVD', href: '/docs/algorithms/truncated-svd/' },
+  'Decomposition & Manifold': [
+    { label: 'Decomposition module', href: '/docs/apis/decomposition' },
+    { label: 'PCA / SparsePCA / TruncatedSVD', href: '/docs/apis/decomposition/pca' },
+    { label: 'Manifold module', href: '/docs/apis/manifold' },
+    { label: 'MDS / LLE / TSNE / SpectralEmbedding', href: '/docs/apis/manifold/MDS' },
   ],
-  Preprocessing: [
-    { label: 'StandardScaler', href: '/docs/data/preprocessing/standard-scaler/' },
-    { label: 'MinMaxScaler', href: '/docs/data/preprocessing/minmax-scaler/' },
-    { label: 'OneHotEncoder', href: '/docs/data/preprocessing/onehot-encoder/' },
-    { label: 'Train/Test Split', href: '/docs/data/preprocessing/train-test-split/' },
+  'Bayes, Semi-Supervised & Utils': [
+    { label: 'Bayes module', href: '/docs/apis/bayes' },
+    { label: 'BernoulliNB / CategoricalNB', href: '/docs/apis/bayes/bernoulliNB' },
+    { label: 'SemiSupervised module', href: '/docs/apis/semi_supervised' },
+    { label: 'LabelPropagation / LabelSpreading', href: '/docs/apis/semi_supervised/labelPropagation' },
+    { label: 'Utils module (asyncMode, trainTestSplit, preprocessing, model selection)', href: '/docs/apis/utils' },
   ],
 };
 
@@ -237,11 +244,11 @@ export default function HomePage() {
               scikit-learn API, zero-install demos, production-ready builds.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link className="rounded-md bg-fd-foreground px-6 py-3 font-semibold text-white shadow-lg transition hover:opacity-90" href="/playground">
-                Try in Browser
+              <Link className="rounded-md bg-fd-foreground px-6 py-3 font-semibold text-white shadow-lg transition hover:opacity-90" href="/docs/apis">
+                Browse API Docs
               </Link>
-              <Link className="rounded-md border border-fd-border px-6 py-3 font-semibold text-fd-foreground transition hover:bg-fd-foreground/5" href="/docs/get-started">
-                Get Started (npm)
+              <Link className="rounded-md border border-fd-border px-6 py-3 font-semibold text-fd-foreground transition hover:bg-fd-foreground/5" href="/docs">
+                Open Documentation
               </Link>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-fd-muted-foreground">
@@ -306,7 +313,7 @@ export default function HomePage() {
             <div>
               <p className="text-sm font-semibold text-fd-muted-foreground">Node.js</p>
               <pre className="mt-2 overflow-x-auto rounded-lg bg-fd-muted p-4 text-left text-sm text-fd-foreground">
-                <code>{`import { StandardScaler, LogisticRegression } from '@kanaries/ml';
+                <code>{`import { Linear, utils } from '@kanaries/ml';
 
 const X = [
   [5.1, 3.5],
@@ -315,9 +322,10 @@ const X = [
 ];
 const y = [0, 0, 1];
 
-const scaler = new StandardScaler();
+const scaler = new utils.Preprocessing.StandardScaler();
 const Xs = scaler.fitTransform(X);
-const clf = new LogisticRegression({ maxIter: 200 }).fit(Xs, y);
+const clf = new Linear.LogisticRegression({ maxIter: 200 });
+clf.fit(Xs, y);
 
 console.log(clf.predict([[6.1, 3.1]]));
 `}</code>
@@ -353,7 +361,10 @@ console.log(clf.predict([[6.1, 3.1]]));
         </section>
 
         <section className="mx-auto max-w-6xl px-6">
-          <h2 className="text-2xl font-semibold">Supported algorithms</h2>
+          <h2 className="text-2xl font-semibold">Implemented modules and API quick links</h2>
+          <p className="mt-3 text-sm text-fd-muted-foreground">
+            The links below go directly to existing documentation pages so you can quickly inspect available APIs and algorithms.
+          </p>
           <div className="mt-6 grid gap-8 md:grid-cols-2">
             {Object.entries(ALGORITHMS).map(([group, items]) => (
               <div key={group}>
@@ -380,11 +391,10 @@ console.log(clf.predict([[6.1, 3.1]]));
               Use Web Workers for CPU-heavy tasks and opt into the WASM build for additional throughput.
             </p>
             <p>
-              Explore performance charts for training time vs. samples and inference vs. feature counts in the dedicated
-              benchmarks section.
+              We are prioritizing API coverage and practical examples first. For implementation details and usage patterns, jump to the full API reference.
             </p>
-            <Link className="inline-flex items-center gap-2 text-fd-foreground underline-offset-4 hover:underline" href="/benchmarks/">
-              See all benchmarks →
+            <Link className="inline-flex items-center gap-2 text-fd-foreground underline-offset-4 hover:underline" href="/docs/apis">
+              Open full API reference →
             </Link>
           </div>
         </section>
@@ -408,11 +418,10 @@ console.log(clf.predict([[6.1, 3.1]]));
           <div className="rounded-xl border border-fd-border bg-gradient-to-br from-fd-background via-fd-background to-fd-muted p-8">
             <h2 className="text-2xl font-semibold">Compare with scikit-learn</h2>
             <p className="mt-2 text-sm text-fd-muted-foreground">
-              Understand parameter parity, migration tips, and when it makes sense to stay in Python versus delivering ML
-              experiences directly in the browser.
+              @kanaries/ml keeps familiar `fit`/`predict` patterns and estimator-style classes. Use the docs index to find module-level references and examples quickly.
             </p>
-            <Link className="mt-4 inline-flex items-center gap-2 text-fd-foreground underline-offset-4 hover:underline" href="/compare/sklearn/">
-              Migration guide →
+            <Link className="mt-4 inline-flex items-center gap-2 text-fd-foreground underline-offset-4 hover:underline" href="/docs">
+              Open docs index →
             </Link>
           </div>
         </section>
@@ -449,11 +458,11 @@ console.log(clf.predict([[6.1, 3.1]]));
               Deploy machine learning models anywhere JavaScript runs with @kanaries/ml.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-              <Link className="rounded-md bg-fd-foreground px-6 py-3 font-semibold text-white transition hover:opacity-90" href="/playground">
-                Try in Browser
+              <Link className="rounded-md bg-fd-foreground px-6 py-3 font-semibold text-white transition hover:opacity-90" href="/docs/apis">
+                Browse API Docs
               </Link>
-              <Link className="rounded-md border border-fd-border px-6 py-3 font-semibold text-fd-foreground transition hover:bg-fd-foreground/5" href="/docs/get-started">
-                Read the Docs
+              <Link className="rounded-md border border-fd-border px-6 py-3 font-semibold text-fd-foreground transition hover:bg-fd-foreground/5" href="/docs">
+                Read Documentation
               </Link>
               <Link className="rounded-md border border-fd-border px-6 py-3 font-semibold text-fd-foreground transition hover:bg-fd-foreground/5" href="https://www.npmjs.com/package/@kanaries/ml" target="_blank" rel="noreferrer">
                 npm install @kanaries/ml

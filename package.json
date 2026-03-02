@@ -14,7 +14,8 @@
   },
   "scripts": {
     "gen-data": "node scripts/run_gen_data.js",
-    "test": "npm run gen-data && jest",
+    "test": "jest",
+    "test:regen-data": "npm run gen-data",
     "build": "vite build && tsc --emitDeclarationOnly --outDir build",
     "doc": "docsify serve docs",
     "dev": "NODE_ENV=development vite",

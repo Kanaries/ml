@@ -8,6 +8,7 @@ export interface ExtraTreeProps {
     min_samples_split?: number;
     criterion?: 'entropy' | 'gini';
     max_features?: number;
+    randomState?: number;
 }
 
 export class ExtraTreeClassifier {
@@ -19,15 +20,39 @@ export class ExtraTreeClassifier {
     private impurity: (freqs: number[]) => number;
     private max_features_prop?: number;
     private max_features_: number;
+    private randomState?: number;
+    private random: () => number;
 
     public constructor(props: ExtraTreeProps = {}) {
-        const { max_depth = Infinity, min_samples_split = 2, criterion = 'entropy', max_features } = props;
+        const {
+            max_depth = Infinity,
+            min_samples_split = 2,
+            criterion = 'entropy',
+            max_features,
+            randomState = 0,
+        } = props;
         this.max_depth = max_depth;
         this.min_samples_split = min_samples_split;
         this.criterion = criterion;
         this.max_features_prop = max_features;
         this.impurity = criterion === 'entropy' ? entropy : gini;
         this.max_features_ = 0;
+        this.randomState = randomState;
+        this.random = this.createRandomGenerator(this.randomState);
+    }
+
+    private createRandomGenerator(seed?: number): () => number {
+        if (seed === undefined) {
+            return Math.random;
+        }
+        let state = Math.floor(seed) % 2147483647;
+        if (state <= 0) {
+            state += 2147483646;
+        }
+        return () => {
+            state = (state * 16807) % 2147483647;
+            return (state - 1) / 2147483646;
+        };
     }
 
     private nodeImpurity(sampleY: number[]): number {
@@ -38,7 +63,7 @@ export class ExtraTreeClassifier {
     private selectFeatures(): number[] {
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(this.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
         return indices.slice(0, this.max_features_);
@@ -67,15 +92,15 @@ export class ExtraTreeClassifier {
                 lo = v1;
                 hi = v2;
             } else {
-                let a = uniqueVals[Math.floor(Math.random() * uniqueVals.length)];
-                let b = uniqueVals[Math.floor(Math.random() * uniqueVals.length)];
+                let a = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
+                let b = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
                 while (a === b) {
-                    b = uniqueVals[Math.floor(Math.random() * uniqueVals.length)];
+                    b = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
                 }
                 lo = Math.min(a, b);
                 hi = Math.max(a, b);
             }
-            const splitValue = Math.random() * (hi - lo) + lo;
+            const splitValue = this.random() * (hi - lo) + lo;
             const left = filterWithIndices(values, v => v < splitValue);
             const right = filterWithIndices(values, v => v >= splitValue);
             if (left.subArr.length === 0 || right.subArr.length === 0) {
@@ -126,6 +151,7 @@ export class ExtraTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
+        this.random = this.createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         const sqrtFeatures = Math.floor(Math.sqrt(this.feature_number));
         this.max_features_ = this.max_features_prop ? Math.min(this.feature_number, Math.floor(this.max_features_prop)) : sqrtFeatures;

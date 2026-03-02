@@ -1,5 +1,7 @@
 import * as Stat from './stat';
 import * as Sampling from './sampling';
+import * as Preprocessing from './preprocessing';
+import * as ModelSelection from './modelSelection';
 import { asyncMode } from './asyncMode';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
@@ -23,5 +25,7 @@ export function assert(condition: any, message: string) {
 export {
     Stat,
     Sampling,
+    Preprocessing,
+    ModelSelection,
     asyncMode
 }

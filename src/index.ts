@@ -3,6 +3,7 @@ import * as Ensemble from './ensemble/index';
 import * as Clusters from './clusters';
 import * as Algebra from './algebra';
 import * as KMath from './math';
+import * as Metrics from './metrics';
 import * as Tree from './tree/index';
 import * as Linear from './linear';
 import * as SVM from './svm';
@@ -20,6 +21,7 @@ export {
     Clusters,
     Algebra,
     KMath,
+    Metrics,
     Linear,
     SVM,
     Decomposition,

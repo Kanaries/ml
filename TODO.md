@@ -5,11 +5,11 @@
 ### Linear Models
 - [x] Linear Regression (simple & multiple)
 - [x] Logistic Regression
-- [ ] Polynomial Regression
+- [x] Polynomial Regression
 
 ### Basic Classification
 - [x] k-Nearest Neighbors (k-NN)
-- [ ] Naive Bayes
+- [x] Naive Bayes
 - [x] Decision Trees
 
 ### Clustering
@@ -18,10 +18,10 @@
 - [ ] Hierarchical Clustering
 
 ### Utilities & Preprocessing
-- [ ] Data normalization/standardization
-- [ ] Train/test split functionality
-- [ ] Cross-validation
-- [ ] Feature scaling
+- [x] Data normalization/standardization
+- [x] Train/test split functionality
+- [x] Cross-validation
+- [x] Feature scaling
 - [ ] Missing data handling
 
 ### Distance Metrics & Evaluation
@@ -35,7 +35,7 @@
 ### Ensemble Methods
 - [ ] Random Forest
 - [ ] Bagging
-- [ ] Boosting (AdaBoost)
+- [x] Boosting (AdaBoost)
 
 ### Advanced Classification
 - [x] Support Vector Machines (SVM)

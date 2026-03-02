@@ -5,7 +5,7 @@ import path from 'path';
 test('compare with sklearn', () => {
     const p = path.join(__dirname, '../../../test_data/extra_tree_classifier.json');
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));
-    const clf = new ExtraTreeClassifier();
+    const clf = new ExtraTreeClassifier({ randomState: 0 });
     clf.fit(data.trainX, data.trainY);
     const pred = clf.predict(data.testX);
     let correct = 0;
