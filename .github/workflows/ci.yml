@@ -31,7 +31,10 @@ jobs:
     
     - name: Install dependencies
       run: yarn install --frozen-lockfile
-    
+
+    - name: Generate sklearn reference fixtures
+      run: yarn gen-data
+
     - name: Run tests
       run: yarn test
       
