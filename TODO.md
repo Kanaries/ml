@@ -48,8 +48,8 @@
 - [ ] Linear Discriminant Analysis (LDA)
 
 ### Regression Variants
-- [ ] Ridge Regression
-- [ ] Lasso Regression
+- [x] Ridge Regression
+- [x] Lasso Regression
 - [ ] Elastic Net
 
 ### Clustering Extensions
