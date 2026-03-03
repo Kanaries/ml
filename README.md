@@ -54,7 +54,7 @@ The library exposes several categories of algorithms:
 
 - **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
 - **Neighbors**: `KNearstNeighbors`, `BallTree`, `KDTree`
-- **Linear Models**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`
+- **Linear Models**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `RidgeRegression`
 - **Support Vector Machines**: `SVC`, `NuSVC`, `LinearSVC`
 - **Naive Bayes**: `BernoulliNB`, `CategoricalNB`
 - **Clustering**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `OPTICS`, `MeanShift`, `HDBScan`
