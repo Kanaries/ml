@@ -1,6 +1,6 @@
 ---
 title: LogisticRegression
-description: API reference for LogisticRegression
+description: API and practical guide for LogisticRegression in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
 ---
 
 # Linear.LogisticRegression
@@ -37,3 +37,29 @@ const clf = new LogisticRegression();
 clf.fit(trainX, trainY);
 const result = clf.predict(testX);
 ```
+
+## Practical guide: LogisticRegression in JavaScript and TypeScript
+
+LogisticRegression estimates class probabilities for binary classification with stable, interpretable coefficients.
+
+### When to use LogisticRegression
+- You need calibrated probability scores for threshold-based decisions.
+- Binary outcomes are influenced by approximately linear decision boundaries.
+- You want a strong and explainable baseline in TypeScript projects.
+
+### Implementation workflow
+1. Standardize inputs and confirm label quality for binary classes.
+2. Fit with appropriate iteration settings and monitor convergence.
+3. Tune decision threshold based on business costs of false positives/negatives.
+
+### JavaScript deployment notes
+- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
+- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
+- Keep a simple baseline from the same module as a fallback model for comparison.
+
+### Search intents this page targets
+- `LogisticRegression JavaScript`
+- `LogisticRegression TypeScript`
+- `LogisticRegression browser machine learning`
+- `@kanaries/ml LogisticRegression`
+

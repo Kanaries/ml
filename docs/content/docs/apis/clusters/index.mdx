@@ -1,6 +1,6 @@
 ---
 title: Clusters
-description: API reference for Clusters
+description: Learn how to use Clusters algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
 ---
 
 # Clusters
@@ -129,3 +129,30 @@ This utility initializes cluster centers using the k-means++ strategy.
 ```ts
 const { centers } = kmeansPlusPlus(X, 3);
 ```
+
+## How to use the Clusters module in real projects
+
+The Clusters module groups unlabeled data so you can segment users, sessions, or events without requiring ground-truth labels.
+
+### Selection checklist
+1. Use KMeans when you expect compact cluster centers and can predefine cluster count.
+2. Use density-based methods (DBSCAN, OPTICS, HDBScan) when clusters have irregular shapes or noisy outliers.
+3. Validate with silhouette scores or downstream business metrics such as campaign lift by segment.
+
+### Common implementation workflow
+1. Start from a simple baseline in this module and evaluate on a holdout split.
+2. Compare at least one alternative algorithm from this module before locking production defaults.
+3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+
+### Common search intents
+- `javascript clustering library`
+- `kmeans javascript tutorial`
+- `density clustering in typescript`
+
+### Explore algorithms in this module
+- [hdbscan](hdbscan)
+- [kmeans](kmeans)
+- [kmeansPlusPlus](kmeansPlusPlus)
+- [meanShift](meanShift)
+- [optics](optics)
+

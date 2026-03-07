@@ -1,6 +1,6 @@
 ---
 title: CategoricalNB
-description: API reference for CategoricalNB
+description: API and practical guide for CategoricalNB in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
 ---
 
 # Bayes.CategoricalNB
@@ -39,3 +39,29 @@ const clf = new CategoricalNB();
 clf.fit(trainX, trainY);
 const result = clf.predict(testX);
 ```
+
+## Practical guide: CategoricalNB in JavaScript and TypeScript
+
+CategoricalNB is designed for discrete categorical features encoded as integer category IDs.
+
+### When to use CategoricalNB
+- Inputs are naturally categorical and not meaningful on a numeric distance scale.
+- You need fast classification with probabilistic interpretation.
+- You want a robust baseline for tabular categoricals in pure JavaScript.
+
+### Implementation workflow
+1. Encode every categorical column to stable integer category indices.
+2. Fit on labeled rows and validate per-class calibration quality.
+3. Monitor unseen-category behavior and keep category mapping versioned.
+
+### JavaScript deployment notes
+- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
+- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
+- Keep a simple baseline from the same module as a fallback model for comparison.
+
+### Search intents this page targets
+- `CategoricalNB JavaScript`
+- `CategoricalNB TypeScript`
+- `CategoricalNB browser machine learning`
+- `@kanaries/ml CategoricalNB`
+

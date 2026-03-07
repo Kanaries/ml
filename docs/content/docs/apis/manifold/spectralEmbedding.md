@@ -1,6 +1,6 @@
 ---
 title: SpectralEmbedding
-description: API reference for SpectralEmbedding
+description: API and practical guide for SpectralEmbedding in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
 ---
 
 # Manifold.SpectralEmbedding
@@ -34,3 +34,29 @@ constructor(props: SpectralEmbeddingProps = {})
 const se = new SpectralEmbedding({ nComponents: 2, nNeighbors: 5 });
 const T = se.fitTransform(X);
 ```
+
+## Practical guide: SpectralEmbedding in JavaScript and TypeScript
+
+SpectralEmbedding uses graph Laplacian eigenvectors to reveal manifold and community structure in data.
+
+### When to use SpectralEmbedding
+- Graph or affinity relationships are central to your dataset.
+- You need embeddings suitable for downstream clustering.
+- Non-linear structure is not captured by purely linear projections.
+
+### Implementation workflow
+1. Construct an affinity graph with an appropriate similarity metric.
+2. Fit SpectralEmbedding and evaluate resulting cluster separability.
+3. Tune neighborhood/affinity parameters for stable embeddings.
+
+### JavaScript deployment notes
+- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
+- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
+- Keep a simple baseline from the same module as a fallback model for comparison.
+
+### Search intents this page targets
+- `SpectralEmbedding JavaScript`
+- `SpectralEmbedding TypeScript`
+- `SpectralEmbedding browser machine learning`
+- `@kanaries/ml SpectralEmbedding`
+

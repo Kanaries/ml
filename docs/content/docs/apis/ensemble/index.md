@@ -48,3 +48,28 @@ Ensemble methods in @kanaries/ml combine multiple weak learners to produce stron
 - Return to the [API overview](../index.md) to browse additional algorithm families.
 - Follow the [Getting Started tutorial](../../index.mdx) to integrate ensembles into a new project.
 - Experiment with datasets in the [`examples` folder](../../../../../examples) to see ensemble models in action.
+
+## How to use the Ensemble module in real projects
+
+The Ensemble module improves robustness by combining multiple weak learners, helping JavaScript models generalize better on noisy datasets.
+
+### Selection checklist
+1. Use IsolationForest for unsupervised anomaly detection on tabular telemetry or transaction streams.
+2. Use AdaBoostClassifier for difficult classification boundaries with moderate feature counts.
+3. Use AdaBoostRegressor to improve non-linear regression quality over a single weak estimator.
+
+### Common implementation workflow
+1. Start from a simple baseline in this module and evaluate on a holdout split.
+2. Compare at least one alternative algorithm from this module before locking production defaults.
+3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+
+### Common search intents
+- `isolation forest javascript`
+- `adaboost classifier typescript`
+- `ensemble learning nodejs`
+
+### Explore algorithms in this module
+- [adaboost](adaboost)
+- [adaboostClassifier](adaboostClassifier)
+- [iforest](iforest)
+

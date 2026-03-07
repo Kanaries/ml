@@ -21,3 +21,23 @@ This catalog describes every module available in @kanaries/ml so you can quickly
 - **[SemiSupervised](semi_supervised/index.md)** – Combine labeled and unlabeled data to boost performance in low-label environments.
 
 Looking for inspiration? The [Getting Started guide](../index.mdx) and [examples directory](../../../../examples) provide end-to-end workflows you can adapt for your application.
+
+## How to work with this API catalog
+
+Use this page to map business problems to the right @kanaries/ml algorithm family before diving into constructor parameters.
+
+### Selection checklist
+1. Identify your task type first: classification, regression, clustering, dimensionality reduction, anomaly detection, or utility workflow support.
+2. Start with one simple baseline model and one stronger alternative from the same module.
+3. Evaluate model quality together with runtime constraints such as browser latency, Node.js throughput, and bundle size.
+
+### Practical implementation flow
+1. Open the module page that matches your task and read the algorithm-specific "when to use" guidance.
+2. Build a minimal `fit`/`predict` pipeline and validate it on holdout data.
+3. Tune model settings and deployment strategy (browser worker vs Node.js service) before production rollout.
+
+### Search intents this page targets
+- `javascript machine learning api reference`
+- `typescript machine learning algorithms`
+- `scikit-learn style api for javascript`
+- `@kanaries/ml algorithm documentation`

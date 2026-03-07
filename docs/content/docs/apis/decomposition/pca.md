@@ -1,6 +1,6 @@
 ---
 title: PCA
-description: API reference for PCA
+description: API and practical guide for PCA in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
 ---
 
 # Decomposition.PCA
@@ -33,3 +33,29 @@ const pca = new PCA(2);
 pca.fit(X);
 const T = pca.transform(X_test);
 ```
+
+## Practical guide: PCA in JavaScript and TypeScript
+
+PCA compresses correlated numeric features into orthogonal components while preserving maximal variance.
+
+### When to use PCA
+- Feature dimensions are high and training speed needs improvement.
+- You need 2D/3D projections for exploratory visualization.
+- Multicollinearity hurts stability in downstream supervised models.
+
+### Implementation workflow
+1. Standardize continuous features before decomposition.
+2. Fit PCA and select component count by explained variance.
+3. Use transformed features for visualization or downstream training.
+
+### JavaScript deployment notes
+- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
+- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
+- Keep a simple baseline from the same module as a fallback model for comparison.
+
+### Search intents this page targets
+- `PCA JavaScript`
+- `PCA TypeScript`
+- `PCA browser machine learning`
+- `@kanaries/ml PCA`
+

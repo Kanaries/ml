@@ -1,6 +1,6 @@
 ---
 title: KDTree
-description: API reference for KDTree
+description: API and practical guide for KDTree in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
 ---
 
 # Neighbors.KDTree
@@ -38,3 +38,29 @@ neighbors.
 const tree = new KDTree(X, 2);
 const result = tree.query(X.slice(0, 1), 3);
 ```
+
+## Practical guide: KDTree in JavaScript and TypeScript
+
+KDTree speeds up nearest-neighbor searches for low-to-medium dimensional numeric feature spaces.
+
+### When to use KDTree
+- You need many repeated neighbor lookups with Euclidean-like distances.
+- Dataset dimensionality is not too high for kd-tree pruning to remain effective.
+- You want faster KNN-style operations in JS services or browser apps.
+
+### Implementation workflow
+1. Index feature vectors with KDTree construction.
+2. Run neighbor queries and capture distances/indices.
+3. Tune leaf/query parameters to balance speed and accuracy.
+
+### JavaScript deployment notes
+- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
+- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
+- Keep a simple baseline from the same module as a fallback model for comparison.
+
+### Search intents this page targets
+- `KDTree JavaScript`
+- `KDTree TypeScript`
+- `KDTree browser machine learning`
+- `@kanaries/ml KDTree`
+
