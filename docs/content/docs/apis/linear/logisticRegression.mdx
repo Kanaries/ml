@@ -1,12 +1,75 @@
 ---
-title: LogisticRegression
-description: API and practical guide for LogisticRegression in @kanaries/ml, including when to use it in JavaScript and TypeScript ML workflows.
+title: Logistic Regression in JavaScript with @kanaries/ml
+description: Learn what logistic regression does, when to use it, and how to run logistic regression in JavaScript or TypeScript with @kanaries/ml in the browser or Node.js.
 ---
 
-# Linear.LogisticRegression
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import LogisticRegressionDemo from '@/components/logisticRegression';
 
+# Logistic Regression in JavaScript
+
+## Algorithm overview
+
+Logistic regression is a classic supervised learning algorithm for binary classification. It models the probability that a sample belongs to class `1` versus class `0`, which makes it useful when you need both a final prediction and an interpretable confidence score.
+
+This algorithm works especially well when:
+
+- you need a strong and explainable baseline for binary classification
+- you want probability-like outputs for ranking, thresholding, or alerts
+- your decision boundary is approximately linear after feature engineering or scaling
+
+Compared with heavier models, logistic regression is fast to train, easy to inspect, and usually a sensible first model before trying trees, SVMs, or ensembles.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides a JavaScript and TypeScript implementation of logistic regression so you can run classification workflows without leaving the JS ecosystem. That means you can train or serve models in browser applications, Node.js services, and frontend-heavy products that want a scikit-learn-like API without switching to Python at runtime.
+
+This is particularly useful for product decisions, ranking thresholds, and binary prediction tasks where teams want coefficients and prediction logic to stay understandable to both engineers and stakeholders.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LogisticRegression"}
+  pythonCode={String.raw`from sklearn.linear_model import LogisticRegression
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = LogisticRegression(max_iter=500, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.2, 0.1]])`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Linear.LogisticRegression({ learningRate: 0.1, maxIter: 800 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const trainX = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const trainY = [0, 1, 1, 0];
+
+const model = new Linear.LogisticRegression({
+    learningRate: 0.1,
+    maxIter: 800,
+});
+
+model.fit(trainX, trainY);
+
+const predictions = model.predict([[0.9, 0.8], [0.2, 0.1]]);
+console.log(predictions);
+```
+
 <LogisticRegressionDemo />
+
+## Detailed API reference
 
 ```ts
 interface LogisticRegressionProps {
@@ -16,50 +79,29 @@ interface LogisticRegressionProps {
 constructor(props: LogisticRegressionProps = {})
 ```
 
-Performs binary logistic regression optimized with gradient descent. The
-`learningRate` controls the step size during optimization and `maxIter`
-specifies the number of iterations.
+`learningRate` controls the optimizer step size, and `maxIter` controls how many optimization rounds the model runs during fitting.
+
+### Parameters
+
+- `learningRate`: gradient descent step size
+- `maxIter`: maximum number of training iterations
 
 ### Methods
-* `fit(trainX: number[][], trainY: number[]): void`
-* `predict(testX: number[][]): number[]`
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
 
 #### fit
-* `trainX` - Training features with shape `[nSamples, nFeatures]`.
-* `trainY` - Binary labels for each training sample.
+
+- `trainX`: training features with shape `[nSamples, nFeatures]`
+- `trainY`: binary labels for each training sample
 
 #### predict
-* `testX` - Feature matrix to classify.
 
-### Example
-```ts
-const clf = new LogisticRegression();
-clf.fit(trainX, trainY);
-const result = clf.predict(testX);
-```
+- `testX`: feature matrix to classify
 
-## Practical guide: LogisticRegression in JavaScript and TypeScript
+### Usage notes
 
-LogisticRegression estimates class probabilities for binary classification with stable, interpretable coefficients.
-
-### When to use LogisticRegression
-- You need calibrated probability scores for threshold-based decisions.
-- Binary outcomes are influenced by approximately linear decision boundaries.
-- You want a strong and explainable baseline in TypeScript projects.
-
-### Implementation workflow
-1. Standardize inputs and confirm label quality for binary classes.
-2. Fit with appropriate iteration settings and monitor convergence.
-3. Tune decision threshold based on business costs of false positives/negatives.
-
-### JavaScript deployment notes
-- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
-- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
-- Keep a simple baseline from the same module as a fallback model for comparison.
-
-### Search intents this page targets
-- `LogisticRegression JavaScript`
-- `LogisticRegression TypeScript`
-- `LogisticRegression browser machine learning`
-- `@kanaries/ml LogisticRegression`
-
+- Standardize numeric features before training for more stable optimization.
+- Use this model when you want interpretable coefficients and threshold-based decision logic.
+- For browser applications, move large training jobs into a Web Worker to keep the UI responsive.

@@ -1,0 +1,95 @@
+---
+title: KD Tree in JavaScript with @kanaries/ml
+description: Learn what KD Tree does, when to use it, and how to run KDTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# KD Tree in JavaScript
+
+## Algorithm overview
+
+KDTree speeds up nearest-neighbor searches for low-to-medium dimensional numeric feature spaces.
+
+This algorithm is especially useful when:
+
+- You need many repeated neighbor lookups with Euclidean-like distances.
+- Dataset dimensionality is not too high for kd-tree pruning to remain effective.
+- You want faster KNN-style operations in JS services or browser apps.
+
+## JavaScript implementation
+
+@kanaries/ml exposes KD Tree in JavaScript for spatial indexing and repeated nearest-neighbor lookup in products that already operate in TypeScript. This is useful for search, recommendation, and geometry-heavy applications that want query acceleration without moving indexing logic out of the JS stack.
+
+KD Tree is particularly practical when the data is reasonably low-dimensional and query latency matters more than one-time build cost.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"KDTree"}
+  pythonCode={String.raw`from sklearn.neighbors import KDTree
+
+X = [[0, 0], [1, 1], [2, 2], [3, 3]]
+tree = KDTree(X, leaf_size=2)
+
+distances, indices = tree.query([[1.2, 1.1]], k=2)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [2, 2], [3, 3]];
+const tree = new Neighbors.KDTree(X, 2);
+
+const { distances, indices } = tree.query([[1.2, 1.1]], 2);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [2, 2], [3, 3]];
+const tree = new Neighbors.KDTree(X, 2);
+
+const { distances, indices } = tree.query([[1.2, 1.1]], 2);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    X: number[][] = [],
+    leafSize: number = 40,
+    metric: Distance.IDistanceType = 'euclidiean',
+    p: number = 2
+)
+```
+
+### Parameters
+
+- `X` *(number[][])*: data used to build the tree. You can also call `fit` later.
+- `leafSize` *(number)*: maximum samples per leaf. Default is `40`.
+- `metric` *(Distance.IDistanceType)*: distance metric used for queries. Default
+  `'euclidiean'`.
+- `p` *(number)*: order of the norm when using Minkowski distance. Default `2`.
+
+### Algorithm
+
+KD-tree recursively splits points by dimension. Each internal node stores a
+split dimension and value and points to left and right subtrees. During search
+the tree is pruned using bounding boxes to efficiently locate nearest
+neighbors.
+
+`query(X: number[][], k: number = 1)` returns distances and indices of nearest neighbors.
+
+`queryRadius(X: number[][], r: number, returnDistance = false)` finds neighbors within given radius.
+
+### Implementation workflow
+
+1. Index feature vectors with KDTree construction.
+2. Run neighbor queries and capture distances/indices.
+3. Tune leaf/query parameters to balance speed and accuracy.
+
+### JavaScript deployment notes
+
+- KD Tree works best for repeated queries over relatively stable, lower-dimensional datasets.
+- Compare it with Ball Tree when the metric or geometry of your data changes the pruning behavior.
+- Keep the index close to the application that consumes it so lookup and follow-up logic stay in one runtime.

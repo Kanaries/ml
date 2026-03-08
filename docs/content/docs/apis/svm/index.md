@@ -1,35 +1,43 @@
 ---
-title: SVM
-description: Learn how to use SVM algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
+title: Support Vector Machines in JavaScript with @kanaries/ml
+description: Explore SVC, NuSVC, LinearSVC, and LinearSVR in JavaScript and TypeScript with @kanaries/ml for margin-based classification and regression.
 ---
 
-- [SVC](SVC)
-- [NuSVC](NuSVC)
-- [LinearSVC](LinearSVC)
-- [LinearSVR](LinearSVR)
+# Support Vector Machines in JavaScript
 
-## How to use the SVM module in real projects
+## Module overview
 
-The SVM module offers margin-based models for classification and regression with strong performance on medium-sized structured datasets.
+The SVM module provides margin-based models for classification and regression. These algorithms are useful when you want strong decision boundaries, controlled regularization, and model families that range from simple linear separators to kernelized non-linear classifiers.
 
-### Selection checklist
-1. Use SVC or NuSVC for non-linear or margin-sensitive classification settings.
-2. Use LinearSVC for large sparse feature spaces where linear boundaries are sufficient.
-3. Use LinearSVR for regression with margin-based robustness to moderate noise.
+This module is a strong fit when:
 
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+- linear models are too weak or margin-based behavior is preferred
+- you need both linear and kernel-based options in one family
+- you want to compare classification and regression variants with similar modeling ideas
 
-### Common search intents
-- `svm javascript`
-- `linearsvc typescript`
-- `support vector machine nodejs`
+## JavaScript implementation
 
-### Explore algorithms in this module
-- [LinearSVC](LinearSVC)
-- [LinearSVR](LinearSVR)
-- [NuSVC](NuSVC)
-- [SVC](SVC)
+`@kanaries/ml` provides support vector machine models in JavaScript and TypeScript so teams can run margin-based learning in the same runtime that already owns feature extraction, request handling, and product logic. This is useful in both browser tools and Node.js services when Python is not the serving environment.
 
+If someone searches for "SVM in JavaScript", "LinearSVC in TypeScript", or "SVC in JavaScript", this module is the right entry point.
+
+## Quick navigation
+
+- [SVC](SVC): kernel classification for non-linear decision boundaries
+- [NuSVC](NuSVC): support vector classification with `nu`-based control
+- [LinearSVC](LinearSVC): linear classification for suitable feature spaces
+- [LinearSVR](LinearSVR): linear support vector regression
+
+## Detailed module guide
+
+### How to choose an algorithm
+
+1. Use [SVC](SVC) or [NuSVC](NuSVC) when non-linear classification behavior matters.
+2. Use [LinearSVC](LinearSVC) when a linear boundary is sufficient and feature spaces are larger or simpler.
+3. Use [LinearSVR](LinearSVR) when you want a support-vector-style regression objective instead of plain least squares.
+
+### JavaScript deployment notes
+
+- Scale features before training because SVM behavior is highly sensitive to feature magnitude.
+- Treat kernel choice and regularization settings as part of the same tuning problem.
+- Keep these models in JS when their output needs to connect directly to application-side business logic.

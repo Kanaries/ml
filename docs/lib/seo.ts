@@ -88,6 +88,10 @@ function buildFaq(topic: string, moduleName: string): FaqItem[] {
       answer: `${topic} helps teams implement production-ready ML workflows in browser and Node.js environments with a familiar scikit-learn-style API.`,
     },
     {
+      question: `How does ${topic} in JavaScript compare with scikit-learn in Python?`,
+      answer: `The @kanaries/ml version keeps the overall estimator workflow familiar for Python users while exposing JavaScript and TypeScript-friendly arrays, imports, and runtime behavior.`,
+    },
+    {
       question: `When should I choose ${topic} instead of other ${moduleName} algorithms?`,
       answer: `Use ${topic} when it best matches your data shape, labeling strategy, and runtime constraints. Benchmark against at least one alternative in the same module before finalizing defaults.`,
     },
@@ -105,15 +109,18 @@ export function buildSeoProfile({ title, description, slug }: SeoInput): SeoProf
   const moduleName = moduleLabels[moduleKey] ?? 'Documentation';
   const pool = moduleKeywordPools[moduleKey] ?? moduleKeywordPools.docs;
 
-  const primaryKeyword = `${topic} JavaScript`;
+  const primaryKeyword = `${topic} in JavaScript`;
   const secondaryKeywords = [
-    `${topic} TypeScript`,
+    `${topic} in TypeScript`,
+    `${topic} scikit-learn equivalent`,
     `${topic} tutorial`,
     `${moduleName} algorithms in JavaScript`,
   ];
   const longTailKeywords = [
     ...pool,
     `@kanaries/ml ${topic}`,
+    `${topic} Python vs JavaScript`,
+    `${topic} for browser machine learning`,
     description ? `${topic} in browser and Node.js` : '',
   ];
   const keywords = unique([
@@ -124,6 +131,7 @@ export function buildSeoProfile({ title, description, slug }: SeoInput): SeoProf
     'browser machine learning',
     'Node.js machine learning',
     'scikit-learn style API',
+    'scikit-learn for JavaScript',
   ]);
 
   return {

@@ -1,43 +1,53 @@
 ---
-title: JavaScript Machine Learning API Reference
-description: Explore the @kanaries/ml API for clustering, classification, anomaly detection, and more in JavaScript and TypeScript.
+title: JavaScript Machine Learning APIs with @kanaries/ml
+description: Explore machine learning APIs in JavaScript and TypeScript with @kanaries/ml, including clustering, classification, anomaly detection, dimensionality reduction, and workflow utilities.
 ---
 
-# @kanaries/ml API Reference
+# JavaScript Machine Learning APIs
 
-This catalog describes every module available in @kanaries/ml so you can quickly locate the algorithm or utility that fits your JavaScript or TypeScript project. Each section below links to a detailed page covering parameters, usage patterns, and practical tips.
+## Module overview
 
-- **[Clusters](clusters/index.md)** – Implement k-means, DBSCAN, spectral clustering, and other unsupervised techniques for segmentation and feature discovery.
-- **[Decomposition](decomposition/index.md)** – Run dimensionality reduction methods such as PCA and SVD directly in the browser or Node.js.
-- **[Ensemble](ensemble/index.md)** – Combine multiple estimators including Isolation Forest and AdaBoost for robust anomaly detection and boosting workflows.
-- **[Linear](linear/index.md)** – Access regression and classification algorithms like Linear Regression, Lasso, and Logistic Regression with sklearn-like APIs.
-- **[Manifold](manifold/index.md)** – Visualize high-dimensional data using t-SNE, Isomap, and related manifold learning approaches.
-- **[Neighbors](neighbors/index.md)** – Use k-nearest neighbors for search, recommendation, and classification tasks.
-- **[SVM](svm/index.md)** – Train support vector machines for high-margin classification and regression scenarios.
-- **[Tree](tree/index.md)** – Build decision trees and random forests for interpretable models and tabular data analysis.
-- **[Bayes](bayes/index.md)** – Apply naive Bayes and probabilistic models to text classification, spam detection, and more.
-- **[NeuralNetwork](neural_network/index.md)** – Prototype lightweight neural networks tailored for in-browser inference.
-- **[Utils](utils/index.md)** – Leverage preprocessing helpers, metrics, and shared utilities to streamline your ML pipelines.
-- **[SemiSupervised](semi_supervised/index.md)** – Combine labeled and unlabeled data to boost performance in low-label environments.
+This page is the entry point to the full `@kanaries/ml` API catalog. It helps JavaScript and TypeScript teams choose the right algorithm family before diving into individual estimators such as K-Means, Logistic Regression, Isolation Forest, PCA, or k-Nearest Neighbors.
 
-Looking for inspiration? The [Getting Started guide](../index.mdx) and [examples directory](../../../../examples) provide end-to-end workflows you can adapt for your application.
+Use this catalog when you already know the kind of problem you need to solve, such as:
 
-## How to work with this API catalog
+- classification or regression on tabular data
+- clustering or segmentation without labels
+- anomaly detection on product, telemetry, or transaction data
+- dimensionality reduction for embeddings, charts, or preprocessing
+- utility workflows such as non-blocking execution in browser or Node.js apps
 
-Use this page to map business problems to the right @kanaries/ml algorithm family before diving into constructor parameters.
+## JavaScript implementation
 
-### Selection checklist
-1. Identify your task type first: classification, regression, clustering, dimensionality reduction, anomaly detection, or utility workflow support.
-2. Start with one simple baseline model and one stronger alternative from the same module.
-3. Evaluate model quality together with runtime constraints such as browser latency, Node.js throughput, and bundle size.
+`@kanaries/ml` provides a scikit-learn-like machine learning API for JavaScript and TypeScript so teams can build ML workflows directly in browser applications and Node.js services. Instead of treating ML as a separate Python-only layer, you can keep feature engineering, inference logic, interactive visualizations, and product code inside the same JS stack.
 
-### Practical implementation flow
-1. Open the module page that matches your task and read the algorithm-specific "when to use" guidance.
-2. Build a minimal `fit`/`predict` pipeline and validate it on holdout data.
-3. Tune model settings and deployment strategy (browser worker vs Node.js service) before production rollout.
+This is especially useful when someone searches for "machine learning in JavaScript", "TypeScript machine learning APIs", or "scikit-learn for JavaScript" and needs a practical module map rather than a single algorithm page.
 
-### Search intents this page targets
-- `javascript machine learning api reference`
-- `typescript machine learning algorithms`
-- `scikit-learn style api for javascript`
-- `@kanaries/ml algorithm documentation`
+## Quick navigation
+
+- **[Clusters](clusters/index.md)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
+- **[Decomposition](decomposition/index.md)**: reduce dimensions with PCA, Sparse PCA, and Truncated SVD.
+- **[Ensemble](ensemble/index.md)**: use Isolation Forest and AdaBoost models for anomaly detection, classification, and regression.
+- **[Linear](linear/index.md)**: start with linear regression and logistic regression baselines.
+- **[Manifold](manifold/index.md)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
+- **[Neighbors](neighbors/index.md)**: run k-nearest neighbors and fast nearest-neighbor search structures.
+- **[SVM](svm/index.md)**: train support vector models for classification and regression.
+- **[Tree](tree/index.md)**: use interpretable decision tree and extra tree models.
+- **[Bayes](bayes/index.md)**: apply naive Bayes models to binary or categorical features.
+- **[Neural Network](neural_network/index.md)**: learn compact representations with Bernoulli RBM.
+- **[Semi-Supervised](semi_supervised/index.md)**: spread labels through partially labeled datasets.
+- **[Utils](utils/index.md)**: use workflow helpers such as `asyncMode`.
+
+## Detailed module guide
+
+### How to choose a module
+
+1. Start from the task type: classification, regression, clustering, anomaly detection, embedding, or workflow support.
+2. Open the matching module page and compare one simple baseline against one stronger alternative.
+3. Read the algorithm-specific guidance to balance model quality with browser latency, Node.js throughput, and implementation complexity.
+
+### Recommended learning path
+
+1. If you are new to the library, start with [Linear](linear/index.md), [Tree](tree/index.md), or [Clusters](clusters/index.md).
+2. Move to [Ensemble](ensemble/index.md) and [SVM](svm/index.md) when simple baselines are not expressive enough.
+3. Use [Decomposition](decomposition/index.md), [Manifold](manifold/index.md), and [Utils](utils/index.md) to improve preprocessing, visualization, and application integration.

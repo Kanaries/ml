@@ -1,0 +1,89 @@
+---
+title: Truncated SVD in JavaScript with @kanaries/ml
+description: Learn what Truncated SVD does, when to use it, and how to run TruncatedSVD in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Truncated SVD in JavaScript
+
+## Algorithm overview
+
+Dimensionality reduction using truncated Singular Value Decomposition of the data. Unlike PCA, the input data is not centered before decomposition.
+
+TruncatedSVD reduces dimensionality of large sparse matrices without centering, making it practical for text/vectorized data.
+
+This algorithm is especially useful when:
+
+- Your feature matrix is sparse (for example TF-IDF or one-hot encodings).
+- You need latent semantic compression before classification or retrieval.
+- PCA centering is too expensive or undesirable for sparse data.
+
+## JavaScript implementation
+
+@kanaries/ml brings Truncated SVD to JavaScript for workflows that work with large sparse matrices, vectorized text, or one-hot encoded features. This is especially useful in Node.js search, recommendation, and document pipelines where you want latent factors without centering the matrix first.
+
+For product teams working with sparse representations in TypeScript, this keeps feature compression and downstream modeling inside the same JS stack.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"TruncatedSVD"}
+  pythonCode={String.raw`from sklearn.decomposition import TruncatedSVD
+
+X = [[1, 0, 1], [0, 1, 1], [1, 1, 0], [0, 0, 1]]
+
+svd = TruncatedSVD(n_components=2, random_state=0)
+embedding = svd.fit_transform(X)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 0, 1], [0, 1, 1], [1, 1, 0], [0, 0, 1]];
+
+const svd = new Decomposition.TruncatedSVD(2);
+const embedding = svd.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 0, 1], [0, 1, 1], [1, 1, 0], [0, 0, 1]];
+
+const svd = new Decomposition.TruncatedSVD(2);
+const embedding = svd.fitTransform(X);
+```
+
+## Detailed API reference
+
+### Algorithm
+The algorithm performs power iteration on the uncentered covariance matrix and keeps the top components corresponding to the largest singular values.
+
+```ts
+constructor(nComponents: number = 2)
+```
+
+### Parameters
+- `nComponents` (number, default `2`): number of singular vectors to retain.
+
+### Methods
+- `fit(X: number[][]): void`
+- `transform(X: number[][]): number[][]`
+- `fitTransform(X: number[][]): number[][]`
+- `inverseTransform(X: number[][]): number[][]`
+- `getComponents(): number[][]`
+- `getSingularValues(): number[]`
+- `getExplainedVariance(): number[]`
+- `getExplainedVarianceRatio(): number[]`
+
+### Implementation workflow
+
+1. Build sparse-compatible numeric input matrix.
+2. Fit TruncatedSVD with candidate component counts.
+3. Evaluate retrieval/classification quality on reduced features.
+
+### JavaScript deployment notes
+
+- Prefer Truncated SVD over PCA when working with sparse or high-cardinality vectorized inputs.
+- Use it before retrieval, classification, or visualization when you need lower-dimensional latent features.
+- It is particularly practical in Node.js pipelines that already generate sparse text or categorical vectors.

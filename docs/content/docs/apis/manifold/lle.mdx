@@ -1,0 +1,91 @@
+---
+title: Locally Linear Embedding in JavaScript with @kanaries/ml
+description: Learn what Locally Linear Embedding does, when to use it, and how to run LocallyLinearEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Locally Linear Embedding in JavaScript
+
+## Algorithm overview
+
+Locally Linear Embedding (LLE) reconstructs each sample from its nearest
+neighbors and finds a low‑dimensional representation that preserves these
+local relationships.
+
+LocallyLinearEmbedding captures manifold structure by preserving local linear neighborhoods in a low-dimensional embedding.
+
+This algorithm is especially useful when:
+
+- Data lies on a non-linear manifold with meaningful local geometry.
+- You want neighborhood-preserving visualization or preprocessing.
+- Linear projection methods (like PCA) lose important local structure.
+
+## JavaScript implementation
+
+@kanaries/ml provides Locally Linear Embedding in JavaScript for teams working on non-linear visualization or manifold-aware preprocessing inside browser and Node.js applications. This is useful when you want local neighborhood structure to survive dimensionality reduction better than it would with a linear method like PCA.
+
+Running LLE in the JS stack is particularly helpful for interactive data tools where embeddings feed directly into frontend plots or exploratory workflows.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LocallyLinearEmbedding"}
+  pythonCode={String.raw`from sklearn.manifold import LocallyLinearEmbedding
+
+X = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]]
+
+lle = LocallyLinearEmbedding(n_neighbors=3, n_components=2)
+embedding = lle.fit_transform(X)`}
+  tsCode={String.raw`import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]];
+
+const lle = new Manifold.LocallyLinearEmbedding(3, 2);
+const embedding = lle.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]];
+
+const lle = new Manifold.LocallyLinearEmbedding(3, 2);
+const embedding = lle.fitTransform(X);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    nNeighbors: number = 5,
+    nComponents: number = 2,
+    reg: number = 0.001
+)
+```
+
+### Parameters
+- `nNeighbors` (number, default `5`): how many neighbors to use for the local
+  reconstructions.
+- `nComponents` (number, default `2`): dimension of the returned embedding.
+- `reg` (number, default `0.001`): regularization value added to the covariance
+  matrix to ensure numerical stability.
+
+### Methods
+- `fit(X: number[][]): void`
+- `transform(X: number[][]): number[][]`
+- `fitTransform(X: number[][]): number[][]`
+
+### Implementation workflow
+
+1. Select neighborhood size based on expected local manifold smoothness.
+2. Fit and inspect embedding quality visually and with neighborhood metrics.
+3. Tune neighbors/components to balance stability and detail.
+
+### JavaScript deployment notes
+
+- Use LLE when preserving local neighborhood geometry matters more than preserving global distances.
+- Tune neighbor count carefully because it strongly affects the stability of the embedding.
+- In product code, treat it primarily as an exploratory or preprocessing tool rather than a low-latency online transform.

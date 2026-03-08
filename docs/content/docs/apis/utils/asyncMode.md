@@ -1,46 +1,54 @@
 ---
-title: asyncMode
-description: Run a synchronous function in a worker
+title: asyncMode in JavaScript with @kanaries/ml
+description: Learn what asyncMode does, when to use it, and how to run synchronous machine learning work in JavaScript without blocking browser or Node.js execution.
 ---
 
-# Utils.asyncMode
+# asyncMode in JavaScript
+
+## Helper overview
+
+`asyncMode` is a utility that wraps a synchronous function so it runs in a worker-like execution path. In the browser that means a Web Worker, and in Node.js it means a worker thread.
+
+This helper is especially useful when:
+
+- model training or inference is CPU-intensive
+- you need to keep browser interfaces responsive during ML work
+- event-loop-sensitive Node.js services should avoid blocking synchronous computation
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `asyncMode` as a JavaScript and TypeScript helper for moving heavy synchronous work off the main execution path. This is particularly useful when ML logic already lives in a JS application but should not freeze the UI, delay input handling, or block other latency-sensitive work.
+
+If someone searches for "run machine learning in a Web Worker" or "async ML execution in JavaScript", this page should make it clear that `asyncMode` is the relevant integration helper.
+
+## Quick start
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const heavy = (x: number) => x * x;
+const runAsync = utils.asyncMode(heavy);
+
+const result = await runAsync(5);
+console.log(result);
+```
+
+## Detailed API reference
 
 ```ts
 asyncMode<P extends any[], R>(fn: (...args: P) => R): (...args: P) => Promise<R>
 ```
 
-This helper wraps a synchronous function so it runs in a Web Worker in the browser or a worker thread in Node.js.
+`asyncMode` takes a synchronous function and returns an async wrapper that executes the work off the main thread when supported by the runtime.
 
-```ts
-const heavy = (x: number) => x * x;
-const runAsync = asyncMode(heavy);
-const result = await runAsync(5);
-```
+### Usage notes
 
-This function is useful for CPU intensive operations.
-
-## Practical guide: asyncMode in JavaScript and TypeScript
-
-asyncMode helps run heavy ML computation without blocking the browser UI or event-loop-sensitive Node.js services.
-
-### When to use asyncMode
-- You need responsive user interfaces during model training or inference.
-- CPU-heavy operations should run in worker-like or deferred execution paths.
-- You want predictable runtime behavior in interactive apps.
-
-### Implementation workflow
-1. Wrap model operations with asyncMode-compatible execution flow.
-2. Move expensive workloads off the main thread when possible.
-3. Profile latency and adjust batching/chunking for smooth UX.
+- Wrap CPU-heavy functions rather than tiny helper functions.
+- Use this helper for responsiveness, not as a substitute for model-level optimization.
+- Profile long-running workloads and consider batching when jobs are still too large for smooth UX.
 
 ### JavaScript deployment notes
-- Prefer feature scaling for distance-based and gradient-based algorithms to improve stability.
-- In browser apps, run heavy training in Web Workers to keep UI interactions smooth.
-- Keep a simple baseline from the same module as a fallback model for comparison.
 
-### Search intents this page targets
-- `asyncMode JavaScript`
-- `asyncMode TypeScript`
-- `asyncMode browser machine learning`
-- `@kanaries/ml asyncMode`
-
+- In browser products, this is one of the simplest ways to keep training or inference from freezing the UI.
+- In Node.js services, it helps isolate expensive CPU work from the main event loop.
+- Pair it with model pages in this documentation when you need a production-friendly execution path.

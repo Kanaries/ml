@@ -1,0 +1,90 @@
+---
+title: Multidimensional Scaling (MDS) in JavaScript with @kanaries/ml
+description: Learn what Multidimensional Scaling (MDS) does, when to use it, and how to run MDS in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Multidimensional Scaling (MDS) in JavaScript
+
+## Algorithm overview
+
+Multidimensional scaling using classical MDS algorithm.
+
+Classical MDS converts a distance matrix into a centered similarity matrix and
+computes its dominant eigenvectors to recover coordinates that preserve the
+original pairwise dissimilarities.
+
+MDS embeds points into lower dimensions while preserving pairwise distances as much as possible.
+
+This algorithm is especially useful when:
+
+- Distance geometry is more important than original feature axes.
+- You need interpretable 2D/3D maps for exploratory analysis.
+- You are comparing similarity relationships across entities.
+
+## JavaScript implementation
+
+@kanaries/ml makes classical multidimensional scaling available in JavaScript for cases where you care more about preserving pairwise distances than about modeling the original feature axes directly. That is useful in browser-based visualization tools, similarity explorers, and Node.js analytics pipelines that already work from distance matrices.
+
+Because MDS often feeds directly into charts and exploratory interfaces, keeping it inside the JS layer is especially practical for frontend-heavy products.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"MDS"}
+  pythonCode={String.raw`from sklearn.manifold import MDS
+
+X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]]
+
+mds = MDS(n_components=2, random_state=0)
+embedding = mds.fit_transform(X)`}
+  tsCode={String.raw`import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
+
+const mds = new Manifold.MDS({ nComponents: 2 });
+const embedding = mds.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
+
+const mds = new Manifold.MDS({ nComponents: 2 });
+const embedding = mds.fitTransform(X);
+```
+
+## Detailed API reference
+
+```ts
+interface MDSOptions {
+    nComponents?: number;
+    dissimilarity?: 'euclidean' | 'precomputed';
+}
+constructor(options: MDSOptions = {})
+```
+
+### Options
+- `nComponents` (number, default `2`): dimension of the embedded space.
+- `dissimilarity` (`'euclidean'` | `'precomputed'`, default `'euclidean'`): if
+  `'precomputed'`, the input to `fitTransform` should be a distance matrix.
+
+`fitTransform(data: number[][]): number[][]` computes the embedding and returns it.
+
+`getEmbedding(): number[][]` returns the computed embedding.
+
+### Implementation workflow
+
+1. Choose or compute a distance matrix aligned with your domain.
+2. Fit MDS with target component count for visualization.
+3. Validate stress/error and inspect neighborhood preservation quality.
+
+### JavaScript deployment notes
+
+- Use MDS when your core input is a distance or dissimilarity structure rather than a traditional feature matrix.
+- It is especially valuable for interactive visualization and exploratory analysis rather than high-throughput production inference.
+- Watch dataset size because pairwise distance handling can become expensive quickly.

@@ -1,0 +1,84 @@
+---
+title: Extra Tree Regressor in JavaScript with @kanaries/ml
+description: Learn what Extra Tree Regressor does, when to use it, and how to run ExtraTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Extra Tree Regressor in JavaScript
+
+## Algorithm overview
+
+ExtraTreeRegressor uses randomized splits for regression to reduce variance and capture non-linear structure efficiently.
+
+This algorithm is especially useful when:
+
+- DecisionTreeRegressor is too sensitive to small data perturbations.
+- You need robust tree-style regression with limited tuning overhead.
+- Non-linear relationships dominate your numeric prediction task.
+
+## JavaScript implementation
+
+@kanaries/ml provides Extra Tree regression in JavaScript for non-linear tabular prediction with randomized splitting behavior. This can be useful when you want a lightweight tree regressor that differs from a standard decision tree in how it explores split candidates.
+
+For TypeScript-based experimentation, it is a convenient way to compare deterministic and randomized tree regression strategies without switching runtimes.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"ExtraTreeRegressor"}
+  pythonCode={String.raw`from sklearn.tree import ExtraTreeRegressor
+
+X = [[0], [1], [2], [3]]
+y = [1.0, 2.0, 3.1, 4.1]
+
+reg = ExtraTreeRegressor(max_depth=3, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [2.5]])`}
+  tsCode={String.raw`import { Tree } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.0, 3.1, 4.1];
+
+const reg = new Tree.ExtraTreeRegressor({ max_depth: 3 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Tree } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.0, 3.1, 4.1];
+
+const reg = new Tree.ExtraTreeRegressor({ max_depth: 3 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);
+```
+
+## Detailed API reference
+
+```ts
+interface ExtraTreeRegressorProps {
+    max_depth?: number;
+    min_samples_split?: number;
+    splitter?: 'random';
+    max_features?: number | 'sqrt' | 'log2';
+}
+
+constructor(props: ExtraTreeRegressorProps = {})
+```
+
+### Implementation workflow
+
+1. Fit with baseline constraints and inspect holdout error metrics.
+2. Benchmark against linear and decision tree baselines.
+3. Tune depth/min-sample controls for stable generalization.
+
+### JavaScript deployment notes
+
+- Use Extra Tree regression when you want a randomized tree baseline for structured regression tasks.
+- Compare it against the standard decision tree regressor to understand the stability-versus-variance tradeoff.
+- It is particularly useful as a stepping stone toward ensemble-style tree modeling.

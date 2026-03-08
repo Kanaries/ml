@@ -110,9 +110,14 @@ export async function generateMetadata(props: {
   const title = page.data.title;
   const description = page.data.description;
   const seoProfile = buildSeoProfile({ title, description, slug });
+  const isAlgorithmPage = slug[0] === 'apis' && slug.length >= 3;
+  const metadataTitle =
+    isAlgorithmPage && !/javascript|typescript/i.test(title)
+      ? `${title} in JavaScript and TypeScript`
+      : title;
 
   return {
-    title,
+    title: metadataTitle,
     description,
     keywords: seoProfile.keywords,
     alternates: {
@@ -120,7 +125,7 @@ export async function generateMetadata(props: {
     },
     openGraph: {
       type: 'article',
-      title,
+      title: metadataTitle,
       description,
       url: canonicalUrl,
       siteName: '@kanaries/ml',
@@ -128,7 +133,7 @@ export async function generateMetadata(props: {
     },
     twitter: {
       card: 'summary',
-      title,
+      title: metadataTitle,
       description,
     },
     other: {

@@ -1,0 +1,91 @@
+---
+title: Spectral Embedding in JavaScript with @kanaries/ml
+description: Learn what Spectral Embedding does, when to use it, and how to run SpectralEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Spectral Embedding in JavaScript
+
+## Algorithm overview
+
+Spectral embedding for non-linear dimensionality reduction using the Laplacian Eigenmaps algorithm.
+
+The algorithm builds a nearest‑neighbor graph from the data, computes the
+normalized graph Laplacian and uses its leading eigenvectors (except for the
+trivial one) as the embedding coordinates.
+
+SpectralEmbedding uses graph Laplacian eigenvectors to reveal manifold and community structure in data.
+
+This algorithm is especially useful when:
+
+- Graph or affinity relationships are central to your dataset.
+- You need embeddings suitable for downstream clustering.
+- Non-linear structure is not captured by purely linear projections.
+
+## JavaScript implementation
+
+@kanaries/ml brings Spectral Embedding to JavaScript for graph-like or neighborhood-based dimensionality reduction tasks. This is useful when your data relationships are better captured by local connectivity than by global linear variance, and when embeddings need to feed directly into web visualizations or JS-native downstream logic.
+
+Because many spectral workflows are exploratory, having the implementation in the same browser or Node.js runtime simplifies iteration and integration with charts.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"SpectralEmbedding"}
+  pythonCode={String.raw`from sklearn.manifold import SpectralEmbedding
+
+X = [[0, 0], [0.2, 0.1], [1, 1], [1.1, 1.0], [3, 3]]
+
+embedding = SpectralEmbedding(n_components=2, n_neighbors=2, random_state=0)
+embedding = embedding.fit_transform(X)`}
+  tsCode={String.raw`import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [1, 1], [1.1, 1.0], [3, 3]];
+
+const model = new Manifold.SpectralEmbedding({ nComponents: 2, nNeighbors: 2 });
+const embedding = model.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [1, 1], [1.1, 1.0], [3, 3]];
+
+const model = new Manifold.SpectralEmbedding({ nComponents: 2, nNeighbors: 2 });
+const embedding = model.fitTransform(X);
+```
+
+## Detailed API reference
+
+```ts
+interface SpectralEmbeddingProps {
+    nComponents?: number;
+    nNeighbors?: number;
+}
+constructor(props: SpectralEmbeddingProps = {})
+```
+
+### Parameters
+- `nComponents` (number, default `2`): number of embedding dimensions.
+- `nNeighbors` (number, default `10`): how many neighbors are connected in the
+  affinity graph.
+
+### Methods
+- `fit(X: number[][]): void`
+- `fitTransform(X: number[][]): number[][]`
+- `getEmbedding(): number[][]`
+
+### Implementation workflow
+
+1. Construct an affinity graph with an appropriate similarity metric.
+2. Fit SpectralEmbedding and evaluate resulting cluster separability.
+3. Tune neighborhood/affinity parameters for stable embeddings.
+
+### JavaScript deployment notes
+
+- Spectral Embedding is a good fit when local graph structure matters more than linear explainability.
+- Normalize and validate neighborhood settings because they strongly influence the resulting embedding.
+- Use it mainly for visualization or preprocessing, then benchmark downstream utility with a supervised model.

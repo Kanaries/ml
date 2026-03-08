@@ -1,0 +1,88 @@
+---
+title: t-SNE in JavaScript with @kanaries/ml
+description: Learn what t-SNE does, when to use it, and how to run TSNE in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# t-SNE in JavaScript
+
+## Algorithm overview
+
+T-distributed Stochastic Neighbor Embedding for visualizing high dimensional data.
+
+TSNE models pairwise similarities both in the original space and in the
+embedding. It iteratively updates the embedding using gradient descent to
+minimize the Kullback–Leibler divergence between these two distributions.
+
+TSNE creates low-dimensional visualizations that preserve local neighborhoods in high-dimensional data.
+
+This algorithm is especially useful when:
+
+- You need exploratory plots to inspect cluster tendencies or anomalies.
+- Local similarity is more important than global distance preservation.
+- You can afford iterative optimization for offline analysis workflows.
+
+## JavaScript implementation
+
+@kanaries/ml makes t-SNE available in JavaScript for high-dimensional visualization tasks that need to stay close to interactive frontend tools or Node.js analytics apps. This is valuable when embeddings are primarily used for charting, cluster inspection, or anomaly exploration inside a web product.
+
+Because t-SNE is usually an exploratory visualization method rather than a serving-time model, keeping it inside the JS experience can make experimentation much faster for product teams.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"TSNE"}
+  pythonCode={String.raw`from sklearn.manifold import TSNE
+
+X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]]
+
+tsne = TSNE(n_components=2, perplexity=2, learning_rate=50, random_state=0)
+embedding = tsne.fit_transform(X)`}
+  tsCode={String.raw`import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
+
+const tsne = new Manifold.TSNE({ nComponents: 2, perplexity: 2, learningRate: 50, nIter: 300 });
+const embedding = tsne.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
+
+const tsne = new Manifold.TSNE({ nComponents: 2, perplexity: 2, learningRate: 50, nIter: 300 });
+const embedding = tsne.fitTransform(X);
+```
+
+## Detailed API reference
+
+```ts
+constructor(options: TSNEOptions = {})
+```
+
+### Options
+- `nComponents` (number, default `2`): embedding dimensions
+- `perplexity` (number, default `30`)
+- `learningRate` (number, default `200`)
+- `nIter` (number, default `250`)
+
+### Methods
+- `fit(X: number[][]): void`
+- `fitTransform(X: number[][]): number[][]`
+- `getEmbedding(): number[][]`
+
+### Implementation workflow
+
+1. Normalize inputs and optionally reduce dimensions with PCA first.
+2. Fit TSNE with tuned perplexity and iteration settings.
+3. Interpret clusters carefully and validate findings with quantitative checks.
+
+### JavaScript deployment notes
+
+- Use t-SNE for visualization and exploration, not as a primary production feature transform by default.
+- Reduce dimensions first when helpful, especially on larger feature spaces.
+- In browser apps, run t-SNE outside the main thread because iterative optimization is compute-heavy.

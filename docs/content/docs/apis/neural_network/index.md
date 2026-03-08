@@ -1,29 +1,40 @@
 ---
-title: NeuralNetwork
-description: Learn how to use NeuralNetwork algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
+title: Lightweight Neural Models in JavaScript with @kanaries/ml
+description: Explore Bernoulli RBM in JavaScript and TypeScript with @kanaries/ml for feature learning and latent representation workflows.
 ---
 
-- [BernoulliRBM](bernoulliRBM)
+# Lightweight Neural Models in JavaScript
 
-## How to use the NeuralNetwork module in real projects
+## Module overview
 
-The NeuralNetwork module provides lightweight neural components for feature learning in JavaScript-centric pipelines.
+The Neural Network module currently focuses on lightweight representation learning rather than full deep learning stacks. It is useful when you want to learn latent features inside a JavaScript pipeline and then feed those features into downstream models or visual workflows.
 
-### Selection checklist
-1. Use BernoulliRBM for binary-feature representation learning or pretraining-style workflows.
-2. Stack learned features with linear or tree models for fast downstream tasks.
-3. Validate convergence and reconstruction quality before deploying feature transformations.
+This module is a strong fit when:
 
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+- your data can benefit from compact learned representations
+- you want a JS-native feature-learning step before a classifier or regressor
+- you are building experimentation or educational workflows around latent features
 
-### Common search intents
-- `rbm javascript`
-- `bernoulli rbm typescript`
-- `feature learning in browser`
+## JavaScript implementation
 
-### Explore algorithms in this module
-- [bernoulliRBM](bernoulliRBM)
+`@kanaries/ml` provides lightweight neural feature-learning utilities in JavaScript and TypeScript so teams can keep representation learning close to the rest of the application stack. This is especially useful when transformed features need to flow directly into additional JS models, UI-driven exploration, or Node.js preprocessing stages.
 
+If someone searches for "Bernoulli RBM in JavaScript" or "feature learning in TypeScript", this module is the right entry point.
+
+## Quick navigation
+
+- [Bernoulli RBM](bernoulliRBM): learn latent binary features from binary or binarized inputs
+
+## Detailed module guide
+
+### How to choose an algorithm
+
+1. Start with [Bernoulli RBM](bernoulliRBM) when your inputs are binary or can be meaningfully binarized.
+2. Use the learned features as an experimental preprocessing step before downstream classifiers or regressors.
+3. Compare downstream lift against raw features before adopting the representation in production.
+
+### JavaScript deployment notes
+
+- Keep datasets moderate in size when running iterative representation learning in the browser.
+- Use this module mainly for preprocessing, feature learning, and experimentation rather than as a complete neural stack.
+- Pair learned features with simpler downstream estimators when you want the rest of the pipeline to remain easy to operate.

@@ -1,0 +1,98 @@
+---
+title: Ball Tree in JavaScript with @kanaries/ml
+description: Learn what Ball Tree does, when to use it, and how to run BallTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Ball Tree in JavaScript
+
+## Algorithm overview
+
+BallTree accelerates nearest-neighbor queries using hierarchical metric-space partitioning.
+
+This algorithm is especially useful when:
+
+- You run repeated k-nearest-neighbor lookups on static or slowly changing datasets.
+- Brute-force distance scans are too slow at your scale.
+- Your metric choice is compatible with tree-based neighbor search.
+
+## JavaScript implementation
+
+@kanaries/ml provides Ball Tree in JavaScript for repeated nearest-neighbor queries in retrieval, recommendation, and local-model workflows. This is useful when a JS application needs faster spatial lookup than brute force, especially if the same dataset will be queried many times.
+
+Because the tree lives in the same runtime as your scoring or UI logic, you can build neighbor-based features and interactive search experiences without shipping requests to a Python service.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"BallTree"}
+  pythonCode={String.raw`from sklearn.neighbors import BallTree
+
+X = [[0, 0], [1, 1], [2, 2], [3, 3]]
+tree = BallTree(X, leaf_size=2)
+
+distances, indices = tree.query([[1.2, 1.1]], k=2)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [2, 2], [3, 3]];
+const tree = new Neighbors.BallTree(X, 2);
+
+const { distances, indices } = tree.query([[1.2, 1.1]], 2);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [2, 2], [3, 3]];
+const tree = new Neighbors.BallTree(X, 2);
+
+const { distances, indices } = tree.query([[1.2, 1.1]], 2);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    X: number[][] = [],
+    leafSize: number = 40,
+    metric: Distance.IDistanceType = 'euclidiean',
+    p: number = 2
+)
+```
+
+### Parameters
+
+- `X` *(number[][])*: training data used to build the tree. Can be provided at
+  construction time or via `fit`.
+- `leafSize` *(number)*: maximum number of points stored in a leaf. Default is
+  `40`.
+- `metric` *(Distance.IDistanceType)*: distance function for search. Defaults to
+  `'euclidiean'`.
+- `p` *(number)*: norm order for Minkowski distance when applicable. Default is
+  `2`.
+
+### Algorithm
+
+Ball tree organizes points in hyperspheres. Each node stores a centroid and
+radius covering its children. During queries the tree is traversed to prune
+branches that are farther than the currently found neighbors, leading to faster
+neighbor search than a brute-force approach.
+
+`query(X: number[][], k: number = 1)` returns distances and indices of nearest neighbors.
+
+`queryRadius(X: number[][], r: number, returnDistance = false)` finds neighbors within given radius.
+
+### Implementation workflow
+
+1. Build the tree from normalized feature vectors.
+2. Query nearest points for recommendation, retrieval, or local modeling.
+3. Benchmark query latency and rebuild policy as data evolves.
+
+### JavaScript deployment notes
+
+- Build the tree once and reuse it when the reference dataset changes slowly.
+- Prefer Ball Tree for repeated query workloads rather than one-off nearest-neighbor calls.
+- Benchmark query speed against brute force and KD Tree because the best structure depends on the data and metric.

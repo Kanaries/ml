@@ -1,0 +1,99 @@
+---
+title: k-Nearest Neighbors in JavaScript with @kanaries/ml
+description: Learn what k-Nearest Neighbors does, when to use it, and how to run KNearstNeighbors in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# k-Nearest Neighbors in JavaScript
+
+## Algorithm overview
+
+KNearstNeighbors predicts from nearby examples and works as a strong non-parametric baseline for classification and regression.
+
+This algorithm is especially useful when:
+
+- Decision boundaries are irregular and hard to model parametrically.
+- You need straightforward behavior that is easy to reason about.
+- Training time should be minimal and inference latency is acceptable.
+
+## JavaScript implementation
+
+@kanaries/ml makes k-nearest neighbors available in JavaScript for recommendation logic, local classification, and quick non-parametric baselines. This is a strong fit when the model should stay close to application code and when teams want behavior that is easy to inspect because predictions come directly from nearby examples.
+
+In web products, KNN is often useful for prototypes and medium-sized datasets where it is more important to stay flexible than to train a compact parametric model.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"KNearstNeighbors"}
+  pythonCode={String.raw`from sklearn.neighbors import KNeighborsClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = KNeighborsClassifier(n_neighbors=3, weights='distance')
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.2, 0.1]])`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Neighbors.KNearstNeighbors(3, 'distance');
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Neighbors.KNearstNeighbors(3, 'distance');
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    kNeighbors: number = 5,
+    weightType: IWeightType = 'uniform',
+    distanceType: Distance.IDistanceType = 'euclidiean',
+    pNorm: number = 2
+)
+```
+
+### Parameters
+
+- `kNeighbors` *(number)*: number of neighbors used for prediction. Default is `5`.
+- `weightType` *(`'uniform' | 'distance'`)*: weighting strategy for voting. `'uniform'`
+  counts every neighbor equally while `'distance'` weighs closer samples more.
+- `distanceType` *(Distance.IDistanceType)*: distance metric. Defaults to
+  `'euclidiean'` but other metrics from `Distance` can be used.
+- `pNorm` *(number)*: order of the norm when using Minkowski distance. Default is
+  `2`.
+
+### Algorithm
+
+KNN is a lazy classifier. During prediction it computes the distance between the
+query sample and all training points. The closest `kNeighbors` points vote for
+the label. Voting can be uniform or weighted by inverse distance depending on
+`weightType`.
+
+### Implementation workflow
+
+1. Scale numeric features and choose a distance metric.
+2. Fit on labeled examples and test multiple `k` values.
+3. Validate accuracy/latency tradeoffs before deployment.
+
+### JavaScript deployment notes
+
+- Scale numeric features before distance-based prediction so no single dimension dominates.
+- Use KNN when you want a simple, inspectable baseline and can afford query-time distance calculations.
+- Consider pairing it with Ball Tree or KD Tree if nearest-neighbor lookup becomes a bottleneck.

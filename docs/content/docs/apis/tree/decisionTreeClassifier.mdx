@@ -1,0 +1,83 @@
+---
+title: Decision Tree Classifier in JavaScript with @kanaries/ml
+description: Learn what Decision Tree Classifier does, when to use it, and how to run DecisionTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Decision Tree Classifier in JavaScript
+
+## Algorithm overview
+
+DecisionTreeClassifier learns human-readable if/else rules for classification tasks on tabular data.
+
+This algorithm is especially useful when:
+
+- Interpretability and decision-path transparency are important.
+- Feature interactions are non-linear and heterogeneous.
+- You need a baseline that is easy to inspect and debug.
+
+## JavaScript implementation
+
+@kanaries/ml gives JavaScript teams an interpretable decision tree classifier that fits naturally into product logic, browser demos, and Node.js APIs. This is useful when teams care about inspecting split paths, explaining predictions, or debugging model decisions in the same codebase that serves the application.
+
+Because tree behavior is easy to reason about, this implementation is especially practical in products where transparency matters more than squeezing out the last bit of benchmark accuracy.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"DecisionTreeClassifier"}
+  pythonCode={String.raw`from sklearn.tree import DecisionTreeClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = DecisionTreeClassifier(max_depth=3, criterion='gini', random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { Tree } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Tree.DecisionTreeClassifier({ max_depth: 3, criterion: 'gini' });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Tree } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Tree.DecisionTreeClassifier({ max_depth: 3, criterion: 'gini' });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface DecisionTreeProps {
+    max_depth?: number;
+    min_samples_split?: number;
+    criterion?: 'entropy' | 'gini';
+}
+
+constructor(props: DecisionTreeProps = {})
+```
+
+### Implementation workflow
+
+1. Prepare cleaned tabular features and split train/validation data.
+2. Fit the classifier and inspect depth, splits, and leaf purity.
+3. Tune depth/min-sample settings to reduce overfitting.
+
+### JavaScript deployment notes
+
+- Use a decision tree classifier when interpretability and rule-like behavior matter.
+- Control depth and split thresholds to avoid overfitting on smaller tabular datasets.
+- Trees are a strong product baseline because their behavior is easy to inspect and explain.

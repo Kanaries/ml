@@ -1,0 +1,106 @@
+---
+title: Bernoulli Naive Bayes in JavaScript with @kanaries/ml
+description: Learn what Bernoulli Naive Bayes does, when to use it, and how to run BernoulliNB in JavaScript or TypeScript with @kanaries/ml for browser and Node.js apps.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Bernoulli Naive Bayes in JavaScript
+
+## Algorithm overview
+
+Bernoulli Naive Bayes is a probabilistic classifier designed for binary-valued features. Instead of modeling continuous numeric values directly, it focuses on whether a feature is present or absent, active or inactive, true or false.
+
+That makes it a strong option when:
+
+- your input features are boolean indicators, flags, or token-presence signals
+- you need a lightweight baseline for text, events, or sparse binary data
+- you want class probabilities from a simple model that is easy to run in production
+
+It is often used for fast classification tasks such as keyword detection, binary event modeling, and simple document labeling.
+
+## JavaScript implementation
+
+@kanaries/ml exposes Bernoulli Naive Bayes as a pure JavaScript and TypeScript estimator, which is useful when your feature extraction already happens in the browser or in a Node.js request pipeline. You can keep boolean features, keyword flags, or binary event signals inside the same JS application without handing them off to a separate Python service.
+
+That makes this implementation a good fit for lightweight text classification, rule-assisted scoring, and product features where simple probabilistic models need to run close to the UI or application logic.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"BernoulliNB"}
+  pythonCode={String.raw`from sklearn.naive_bayes import BernoulliNB
+
+X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]]
+y = [1, 1, 0, 0]
+
+clf = BernoulliNB(alpha=1.0)
+clf.fit(X, y)
+pred = clf.predict([[1, 0, 0], [0, 1, 1]])`}
+  tsCode={String.raw`import { Bayes } from '@kanaries/ml';
+
+const X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]];
+const y = [1, 1, 0, 0];
+
+const clf = new Bayes.BernoulliNB({ alpha: 1.0 });
+clf.fit(X, y);
+const pred = clf.predict([[1, 0, 0], [0, 1, 1]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Bayes } from '@kanaries/ml';
+
+const trainX = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]];
+const trainY = [1, 1, 0, 0];
+
+const model = new Bayes.BernoulliNB({
+    alpha: 1.0,
+    binarize: null,
+});
+
+model.fit(trainX, trainY);
+
+const predictions = model.predict([[1, 0, 0], [0, 1, 1]]);
+console.log(predictions);
+```
+
+## Detailed API reference
+
+Bernoulli Naive Bayes is designed for binary or boolean features. Continuous features can be converted into binary values using the `binarize` threshold, and class probabilities are estimated with additive smoothing.
+
+```ts
+interface BernoulliNBProps {
+    alpha?: number;
+    binarize?: number | null;
+    fitPrior?: boolean;
+    classPrior?: number[] | null;
+}
+constructor(props: BernoulliNBProps = {})
+```
+
+### Parameters
+
+- `alpha` &mdash; Additive smoothing parameter applied when estimating
+  probabilities. Defaults to `1.0`.
+- `binarize` &mdash; Threshold for binarizing input features. If `null`, the
+  input is assumed to already be binary.
+- `fitPrior` &mdash; Whether to learn class prior probabilities from the
+  training data. When `false`, a uniform prior is used.
+- `classPrior` &mdash; Optional array of prior probabilities for each class.
+  If provided, these values override the learned priors.
+
+### Methods
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+- `predictProba(testX: number[][]): number[][]`
+
+### Usage notes
+
+- Your features represent yes/no states such as token presence, clicks, or product flags.
+- You need probabilistic outputs for ranking, threshold tuning, or alert prioritization.
+- You want a lightweight baseline before trying heavier linear or tree models.
+- If your inputs are not already binary, decide whether to binarize upstream or use the built-in `binarize` threshold.
+- Keep category meaning stable between training and prediction so the model sees the same feature semantics.

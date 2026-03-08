@@ -1,0 +1,86 @@
+---
+title: K-Means in JavaScript with @kanaries/ml
+description: Learn what K-Means clustering does, when to use it, and how to run K-Means in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# K-Means in JavaScript
+
+## Algorithm overview
+
+K-Means is an unsupervised clustering algorithm that groups samples into `k` clusters by assigning each point to the nearest centroid and then repeatedly updating those centroids. It is widely used for segmentation, coarse pattern discovery, and exploratory analysis when labels are not available.
+
+K-Means is a good fit when:
+
+- you can estimate a reasonable cluster count ahead of time
+- your clusters are roughly compact and distance-based
+- you want a fast baseline for customer, product, or behavior segmentation
+
+It is usually one of the first clustering algorithms to try because it is simple, fast, and easy to explain.
+
+## JavaScript implementation
+
+@kanaries/ml lets you run K-Means directly in JavaScript, which is useful for dashboards, segmentation tools, and in-product analytics where clustering needs to happen close to the user interaction. You can cluster points in the browser for exploratory work or in Node.js for server-side batch processing without leaving the JS stack.
+
+This is especially valuable when frontend engineers want scikit-learn-like clustering behavior but need the implementation to live alongside React, Next.js, or other TypeScript-based application code.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"K-Means Clustering (KMeans)"}
+  pythonCode={String.raw`from sklearn.cluster import KMeans
+
+X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]]
+
+model = KMeans(n_clusters=2, random_state=0, n_init='auto')
+labels = model.fit_predict(X)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]];
+
+const model = new Clusters.KMeans(2);
+const labels = model.fitPredict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [
+    [0, 0],
+    [0.5, 0],
+    [0.5, 1],
+    [1, 1],
+];
+
+const sampleWeights = [3, 1, 1, 3];
+const initCenters = [[0, 0], [1, 1]];
+
+const kmeans = new Clusters.KMeans(2, 0.05, initCenters);
+const labels = kmeans.fitPredict(X, sampleWeights);
+```
+
+## Detailed API reference
+
+```ts
+constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30)
+```
+
+| props name | type | default value |
+|-|-|-|
+| n_clusters | number | 2 |
+| opt_ratio | number | 0.05 |
+| initCenters | number[][] | undefined |
+| max_iter | number | 30 |
+
+### Methods
+
+- `fitPredict(trainX: number[][], sampleWeights?: number[]): number[]`
+
+### Usage notes
+
+- Normalize numeric features before clustering so distance behaves more predictably.
+- Try several values of `k` and compare cluster quality with both domain knowledge and quantitative metrics.
+- For interactive browser apps, run larger clustering jobs off the main thread.

@@ -1,0 +1,99 @@
+---
+title: AdaBoost Classifier in JavaScript with @kanaries/ml
+description: Learn what AdaBoost Classifier does, when to use it, and how to run AdaBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# AdaBoost Classifier in JavaScript
+
+## Algorithm overview
+
+AdaBoostClassifier focuses on hard examples across rounds to improve classification performance over weak learners.
+
+This algorithm is especially useful when:
+
+- Baseline classifiers miss difficult boundary regions.
+- You need improved recall/precision without switching to heavy models.
+- You can invest in hyperparameter tuning for learning rate and rounds.
+
+## JavaScript implementation
+
+@kanaries/ml exposes AdaBoost classification in JavaScript so you can build stronger tabular classifiers without leaving the browser or Node.js ecosystem. It is a good option when a single weak learner is too simple, but you still want a relatively compact model with straightforward prediction logic.
+
+That makes it attractive for product-side decision systems and TypeScript services that need boosting behavior without operating a separate Python inference path.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"AdaBoostClassifier"}
+  pythonCode={String.raw`from sklearn.ensemble import AdaBoostClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = AdaBoostClassifier(n_estimators=25, learning_rate=0.5, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.AdaBoostClassifier({ nEstimators: 25, learningRate: 0.5 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.AdaBoostClassifier({ nEstimators: 25, learningRate: 0.5 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface AdaBoostClassifierProps {
+    nEstimators?: number;
+    learningRate?: number;
+    randomState?: number;
+}
+constructor(props: AdaBoostClassifierProps = {})
+```
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| nEstimators | number | 50 | Number of boosting iterations |
+| learningRate | number | 1.0 | Weight applied to each stump |
+| randomState | number | undefined | Seed for reproducibility |
+
+### Algorithm
+AdaBoostClassifier trains decision stumps sequentially and reweights samples so that misclassified points receive more focus in subsequent rounds.
+
+### Methods
+
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
++ `predictProba(testX: number[][]): number[][]`
++ `getFeatureImportances(): number[]`
+
+### Implementation workflow
+
+1. Start with balanced preprocessing and clear label quality checks.
+2. Fit with several estimator counts and compare classification metrics.
+3. Tune threshold and class-weight strategy for product-specific tradeoffs.
+
+### JavaScript deployment notes
+
+- Use AdaBoost when a simple linear or shallow-tree baseline is close to useful but misses harder examples.
+- Monitor overfitting as you increase the number of estimators, especially on smaller datasets.
+- It works best on structured tabular features rather than large-scale unstructured inputs.

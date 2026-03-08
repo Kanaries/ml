@@ -1,0 +1,92 @@
+---
+title: NuSVC in JavaScript with @kanaries/ml
+description: Learn what NuSVC does, when to use it, and how to run NuSVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# NuSVC in JavaScript
+
+## Algorithm overview
+
+Variant of `SVC` that uses the `nu` parameter to control the fraction of support vectors and the margin errors.
+
+NuSVC provides SVM classification with nu-based control over support vector fraction and margin errors.
+
+This algorithm is especially useful when:
+
+- You prefer `nu` constraints over classic `C` tuning behavior.
+- Dataset boundaries require flexible kernel-based classification.
+- You need explicit control over support-vector complexity.
+
+## JavaScript implementation
+
+@kanaries/ml makes NuSVC available in JavaScript for teams that want SVM-style classification with `nu` controlling model behavior instead of tuning only through `C`. This is useful in experimentation-heavy JS workflows where hyperparameter semantics need to match an existing Python or scikit-learn mental model.
+
+Keeping NuSVC in the same TypeScript runtime also makes it easier to compare linear and kernel SVM variants inside one application stack.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"NuSVC"}
+  pythonCode={String.raw`from sklearn.svm import NuSVC
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = NuSVC(nu=0.4, kernel='linear', random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'linear', maxIter: 400, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'linear', maxIter: 400, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface NuSVCProps {
+    nu?: number;
+}
+constructor(props: NuSVCProps = {})
+```
+
+### Parameters
+- `nu` (number, default `0.5`): trade-off between the number of support vectors and training errors
+- `C` (number, default `1/nu`): regularization strength
+- `maxIter` (number, default `100`): maximum iterations for training
+- `learningRate` (number, default `0.01`): step size for gradient descent
+- `kernel` ('linear' | 'rbf', default `'rbf'`): kernel type
+- `gamma` (number, default `1`): RBF kernel coefficient
+
+NuSVC shares the same usage as `SVC` but uses the `nu` parameter instead of `C`.
+
+### Implementation workflow
+
+1. Choose kernel and initialize a conservative `nu` value.
+2. Fit NuSVC and inspect validation accuracy and support vector count.
+3. Tune kernel and nu jointly for generalization and runtime limits.
+
+### JavaScript deployment notes
+
+- Use NuSVC when you prefer `nu`-based control over support vectors and margin behavior.
+- Scale features before training, especially for kernel-based setups.
+- Compare it directly with SVC in validation because the best control scheme depends on the dataset.

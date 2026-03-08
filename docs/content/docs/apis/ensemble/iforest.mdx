@@ -1,0 +1,88 @@
+---
+title: Isolation Forest in JavaScript with @kanaries/ml
+description: Learn what Isolation Forest does, when to use it, and how to run IsolationForest in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Isolation Forest in JavaScript
+
+## Algorithm overview
+
+IsolationForest detects anomalies by isolating rare points with shorter path lengths in random partition trees.
+
+This algorithm is especially useful when:
+
+- You have mostly normal behavior with relatively few outliers.
+- Labeling anomalies is expensive or unavailable.
+- You need near-real-time anomaly scoring in browser or Node.js.
+
+## JavaScript implementation
+
+@kanaries/ml provides Isolation Forest in JavaScript for anomaly detection features that need to run inside a product, a browser-based monitoring view, or a Node.js scoring service. That is useful when you want outlier detection near the application layer, for example in fraud heuristics, telemetry triage, or unusual-behavior alerts.
+
+Keeping anomaly scoring in JS makes it easier to connect feature extraction, threshold logic, and downstream product actions without introducing a Python serving dependency.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"IsolationForest"}
+  pythonCode={String.raw`from sklearn.ensemble import IsolationForest
+
+X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]]
+
+clf = IsolationForest(n_estimators=50, contamination=0.25, random_state=0)
+clf.fit(X)
+pred = clf.predict(X)`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
+
+const clf = new Ensemble.IsolationForest(256, 50, 0.25);
+clf.fit(X);
+const pred = clf.predict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
+
+const clf = new Ensemble.IsolationForest(256, 50, 0.25);
+clf.fit(X);
+const pred = clf.predict(X);
+```
+
+## Detailed API reference
+
+```ts
+constructor(subsampling_size: number = 256, tree_num: number = 100, contamination: 'auto' | number = 'auto')
+```
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| subsampling_size | number | 256 | Number of samples used to build each tree |
+| tree_num | number | 100 | Number of isolation trees in the forest |
+| contamination | 'auto' \| number | 'auto' | Expected proportion of outliers |
+
+### Algorithm
+IsolationForest randomly splits features to isolate samples. Points that can be isolated with fewer splits are considered anomalies.
+
+### Methods
++ `fit(samplesX: number[][]): void`
++ `predict(samplesX: number[][]): (0|1)[]`
+
+### Implementation workflow
+
+1. Train on representative mostly-normal historical samples.
+2. Predict anomaly labels or scores on incoming events.
+3. Tune contamination and decision thresholds using alert precision targets.
+
+### JavaScript deployment notes
+
+- Train on representative mostly-normal data so anomaly scores reflect real deviations.
+- Treat contamination and alert thresholds as product decisions, not just model defaults.
+- For real-time scoring, keep feature generation and model prediction in the same Node.js pipeline when possible.

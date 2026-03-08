@@ -1,0 +1,82 @@
+---
+title: Decision Tree Regressor in JavaScript with @kanaries/ml
+description: Learn what Decision Tree Regressor does, when to use it, and how to run DecisionTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Decision Tree Regressor in JavaScript
+
+## Algorithm overview
+
+DecisionTreeRegressor models non-linear numeric targets with interpretable split rules.
+
+This algorithm is especially useful when:
+
+- Linear regression misses stepwise or interaction-driven behavior.
+- You need explainable regression predictions for stakeholders.
+- Fast inference with simple control over model complexity is required.
+
+## JavaScript implementation
+
+@kanaries/ml provides a decision tree regressor for JavaScript applications that need non-linear tabular regression with understandable split rules. This is useful for product-side prediction tasks where engineers want to inspect how the model partitions the feature space rather than relying on a purely opaque regressor.
+
+In Node.js services, this keeps feature generation, prediction, and debugging in the same runtime and makes it easier to reason about errors.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"DecisionTreeRegressor"}
+  pythonCode={String.raw`from sklearn.tree import DecisionTreeRegressor
+
+X = [[0], [1], [2], [3]]
+y = [1.0, 2.2, 2.8, 4.0]
+
+reg = DecisionTreeRegressor(max_depth=3, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [2.5]])`}
+  tsCode={String.raw`import { Tree } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.2, 2.8, 4.0];
+
+const reg = new Tree.DecisionTreeRegressor({ max_depth: 3 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Tree } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.2, 2.8, 4.0];
+
+const reg = new Tree.DecisionTreeRegressor({ max_depth: 3 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);
+```
+
+## Detailed API reference
+
+```ts
+interface RegressionTreeProps {
+    max_depth?: number;
+    min_samples_split?: number;
+}
+
+constructor(props: RegressionTreeProps = {})
+```
+
+### Implementation workflow
+
+1. Train with baseline depth constraints and evaluate residuals.
+2. Inspect important splits for domain plausibility.
+3. Tune split constraints to balance bias and variance.
+
+### JavaScript deployment notes
+
+- Use a decision tree regressor when linear regression misses non-linear thresholds or interactions.
+- Keep an eye on depth and minimum split settings because trees can overfit quickly.
+- This model is a good fit for interpretable tabular regression baselines in product code.

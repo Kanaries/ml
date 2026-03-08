@@ -1,0 +1,89 @@
+---
+title: Linear SVC in JavaScript with @kanaries/ml
+description: Learn what Linear SVC does, when to use it, and how to run LinearSVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Linear SVC in JavaScript
+
+## Algorithm overview
+
+Linear support vector classifier optimized with gradient descent on hinge loss. It trains one-versus-rest linear models to separate classes.
+
+LinearSVC trains linear support vector classifiers optimized for high-dimensional and sparse feature spaces.
+
+This algorithm is especially useful when:
+
+- You have many features (for example text vectors) and need fast linear classification.
+- Margin-based classification outperforms logistic baselines in your tests.
+- You need robust performance with controlled model complexity.
+
+## JavaScript implementation
+
+@kanaries/ml includes Linear SVC in JavaScript for classification tasks that need margin-based decision boundaries but still want the simplicity of a linear model. This is useful for TypeScript services and browser tools working with high-dimensional but still relatively lightweight feature vectors.
+
+Because it stays in the JS runtime, teams can integrate feature extraction, decision logic, and linear classification into the same application layer without additional serving infrastructure.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LinearSVC"}
+  pythonCode={String.raw`from sklearn.svm import LinearSVC
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = LinearSVC(C=1.0, max_iter=2000, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.LinearSVC({ C: 1, maxIter: 500, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.LinearSVC({ C: 1, maxIter: 500, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface LinearSVCProps {
+    C?: number;
+    maxIter?: number;
+    learningRate?: number;
+}
+constructor(props: LinearSVCProps = {})
+```
+
+### Parameters
+- `C` (number, default `1`): regularization strength
+- `maxIter` (number, default `100`): maximum training iterations
+- `learningRate` (number, default `0.01`): step size for gradient descent
+
+### Implementation workflow
+
+1. Scale/normalize features and choose regularization strength.
+2. Fit the classifier and evaluate margin-driven classification metrics.
+3. Tune `C` and class weighting to match recall/precision priorities.
+
+### JavaScript deployment notes
+
+- Linear SVC is a good fit for high-dimensional feature spaces where a linear boundary is sufficient.
+- Scale features before training so the margin optimization behaves more predictably.
+- Compare against logistic regression when you need to trade off margin behavior versus probability-oriented interpretation.

@@ -1,33 +1,42 @@
 ---
-title: Neighbors
-description: Learn how to use Neighbors algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
+title: Nearest-Neighbor Algorithms in JavaScript with @kanaries/ml
+description: Explore k-nearest neighbors, Ball Tree, and KD Tree in JavaScript and TypeScript with @kanaries/ml for similarity search, retrieval, and local prediction.
 ---
 
-- [KNearstNeighbors](knn)
-- [BallTree](ballTree)
-- [KDTree](kdTree)
+# Nearest-Neighbor Algorithms in JavaScript
 
-## How to use the Neighbors module in real projects
+## Module overview
 
-The Neighbors module supports instance-based learning and efficient nearest-neighbor search for recommendations, retrieval, and similarity tasks.
+The Neighbors module supports instance-based learning and efficient nearest-neighbor search. It is useful for similarity tasks, recommendation flows, retrieval systems, and classifiers that reason directly from nearby examples instead of learning a compact parametric model.
 
-### Selection checklist
-1. Use KNearstNeighbors when you need a direct non-parametric classifier/regressor baseline.
-2. Use KDTree or BallTree to speed up nearest-neighbor queries for repeated lookup workloads.
-3. Tune distance metrics and neighborhood size based on recall/precision targets for your product.
+This module is a strong fit when:
 
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+- prediction or ranking depends on nearby examples
+- you need repeated nearest-neighbor queries over a relatively stable dataset
+- you want to compare a simple KNN baseline with explicit search structures
 
-### Common search intents
-- `knn javascript`
-- `kdtree typescript`
-- `nearest neighbor search browser`
+## JavaScript implementation
 
-### Explore algorithms in this module
-- [ballTree](ballTree)
-- [kdTree](kdTree)
-- [knn](knn)
+`@kanaries/ml` provides nearest-neighbor algorithms in JavaScript and TypeScript so teams can keep indexing, lookup, and local prediction inside the same browser or Node.js runtime as the rest of the product logic. This is especially useful for recommendation tools, search experiences, and interactive similarity workflows that need low-friction integration with application code.
 
+If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScript", or "Ball Tree in TypeScript", this module is the right entry point.
+
+## Quick navigation
+
+- [k-Nearest Neighbors](knn): direct prediction from nearby labeled examples
+- [Ball Tree](ballTree): faster repeated nearest-neighbor search in metric spaces
+- [KD Tree](kdTree): efficient spatial indexing for repeated lookup on suitable data
+
+## Detailed module guide
+
+### How to choose an algorithm
+
+1. Use [k-Nearest Neighbors](knn) when you want a direct non-parametric baseline.
+2. Use [Ball Tree](ballTree) or [KD Tree](kdTree) when repeated query speed matters.
+3. Benchmark both the quality impact of distance choices and the latency impact of your search structure.
+
+### JavaScript deployment notes
+
+- Scale numeric features before distance-based prediction or lookup.
+- Build tree-based indexes once and reuse them when the reference dataset changes slowly.
+- Keep nearest-neighbor search close to the application layer when retrieval results immediately drive UI or product logic.

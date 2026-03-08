@@ -1,0 +1,85 @@
+---
+title: Mean Shift in JavaScript with @kanaries/ml
+description: Learn what Mean Shift does, when to use it, and how to run MeanShift in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Mean Shift in JavaScript
+
+## Algorithm overview
+
+MeanShift detects high-density regions and infers cluster count automatically from data density.
+
+This algorithm is especially useful when:
+
+- You want clustering without specifying the number of clusters.
+- Density peaks are more meaningful than centroid partitions.
+- Your product needs adaptive grouping behavior over time.
+
+## JavaScript implementation
+
+@kanaries/ml gives JavaScript applications access to Mean Shift for cases where clusters form around dense modes rather than around a fixed, user-specified cluster count. That can be useful in browser-based exploratory tools where users want clustering without deciding `k` up front.
+
+Because the implementation is available in JS, you can experiment with bandwidth-driven clustering directly inside Node.js services or interactive frontend tools.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"MeanShift"}
+  pythonCode={String.raw`from sklearn.cluster import MeanShift
+
+X = [[0, 0], [0.1, 0.2], [3, 3], [3.2, 3.1]]
+
+model = MeanShift(bandwidth=1.0)
+labels = model.fit_predict(X)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [3, 3], [3.2, 3.1]];
+
+const model = new Clusters.MeanShift(1.0);
+const labels = model.fitPredict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [3, 3], [3.2, 3.1]];
+
+const model = new Clusters.MeanShift(1.0);
+const labels = model.fitPredict(X);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    bandwidth: number = 1,
+    max_iter: number = 300,
+    distanceType: Distance.IDistanceType = 'euclidiean'
+)
+```
+
+Methods:
+- `fitPredict(samplesX: number[][]): number[]`
+- `getCentroids(): number[][]`
+
+```ts
+const ms = new MeanShift(2);
+const labels = ms.fitPredict(X);
+const centers = ms.getCentroids();
+```
+
+### Implementation workflow
+
+1. Scale numeric features and choose bandwidth heuristics.
+2. Fit and inspect discovered modes and assigned labels.
+3. Tune bandwidth to balance over-fragmentation and over-merging.
+
+### JavaScript deployment notes
+
+- Spend time tuning bandwidth because it strongly controls cluster granularity.
+- Mean Shift is better suited to exploratory analysis than very large real-time workloads.
+- For browser apps, prefer smaller datasets or background workers because iterative shifting can be expensive.

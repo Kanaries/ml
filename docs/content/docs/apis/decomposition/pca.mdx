@@ -1,0 +1,89 @@
+---
+title: PCA in JavaScript with @kanaries/ml
+description: Learn what PCA does, when to use it, and how to run PCA in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# PCA in JavaScript
+
+## Algorithm overview
+
+Linear dimensionality reduction using Singular Value Decomposition of the data to project it to a lower dimensional space. The input data is centered but not scaled for each feature before applying the SVD.
+
+PCA compresses correlated numeric features into orthogonal components while preserving maximal variance.
+
+This algorithm is especially useful when:
+
+- Feature dimensions are high and training speed needs improvement.
+- You need 2D/3D projections for exploratory visualization.
+- Multicollinearity hurts stability in downstream supervised models.
+
+## JavaScript implementation
+
+@kanaries/ml gives frontend and full-stack teams a JavaScript PCA implementation for feature compression, denoising, and 2D or 3D visualization. That is useful when your embeddings or tabular features are already flowing through a JS application and you want dimensionality reduction without switching runtimes.
+
+In practice, PCA is often one of the most useful browser-friendly ML utilities because it helps simplify data before charting, clustering, or downstream modeling.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"PCA"}
+  pythonCode={String.raw`from sklearn.decomposition import PCA
+
+X = [[1, 2, 3], [2, 3, 4], [3, 5, 7], [4, 6, 8]]
+
+pca = PCA(n_components=2)
+embedding = pca.fit_transform(X)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 3], [2, 3, 4], [3, 5, 7], [4, 6, 8]];
+
+const pca = new Decomposition.PCA(2);
+const embedding = pca.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 3], [2, 3, 4], [3, 5, 7], [4, 6, 8]];
+
+const pca = new Decomposition.PCA(2);
+const embedding = pca.fitTransform(X);
+```
+
+## Detailed API reference
+
+### Algorithm
+The covariance matrix of the centered samples is decomposed by power iteration.
+The resulting eigenvectors form the principal components sorted by explained variance.
+
+```ts
+constructor(nComponents: number | null = null)
+```
+
+### Parameters
+- `nComponents` (number | null, default `null`): number of principal components to retain. If `null`, all components are used.
+
+### Methods
+- `fit(X: number[][]): void`
+- `transform(X: number[][]): number[][]`
+- `fitTransform(X: number[][]): number[][]`
+- `inverseTransform(X: number[][]): number[][]`
+- `getComponents(): number[][]`
+- `getMean(): number[]`
+- `getExplainedVariance(): number[]`
+
+### Implementation workflow
+
+1. Standardize continuous features before decomposition.
+2. Fit PCA and select component count by explained variance.
+3. Use transformed features for visualization or downstream training.
+
+### JavaScript deployment notes
+
+- Standardize continuous features before PCA so dominant dimensions do not reflect raw scale alone.
+- Use PCA as a preprocessing step before visualization, clustering, or other downstream models.
+- In browser tools, PCA is a practical way to reduce feature count before rendering or interactive analysis.

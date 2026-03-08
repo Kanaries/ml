@@ -1,75 +1,42 @@
 ---
-title: Ensemble Algorithms in @kanaries/ml
-description: Detailed API reference for Isolation Forest and AdaBoost ensemble learning algorithms in JavaScript and TypeScript.
+title: Ensemble Learning in JavaScript with @kanaries/ml
+description: Explore ensemble learning algorithms in JavaScript and TypeScript with @kanaries/ml, including Isolation Forest and AdaBoost models for anomaly detection, classification, and regression.
 ---
 
-# Ensemble algorithms
+# Ensemble Learning in JavaScript
 
-Ensemble methods in @kanaries/ml combine multiple weak learners to produce stronger, more resilient models for both regression and classification tasks. Use the links below to explore parameter definitions, method signatures, and implementation details for each estimator.
+## Module overview
 
-## Isolation Forest for anomaly detection
+The Ensemble module combines multiple weak learners to create stronger models for anomaly detection, classification, and regression. These algorithms are useful when single-model baselines are close to useful but need more robustness or more expressive decision behavior.
 
-`Ensemble.IsolationForest` isolates anomalies by randomly partitioning the feature space. Shorter average path lengths indicate outliers, making this algorithm well-suited for fraud detection, observability metrics, and IoT monitoring in JavaScript environments.
+This module is a strong fit when:
 
-**Highlights**
+- you need anomaly detection on tabular product or telemetry data
+- a simple classifier or regressor underfits important patterns
+- you want stronger performance without moving all the way to heavier model families
 
-- Works with high-dimensional tabular data without heavy preprocessing.
-- Offers configurable contamination rates to tune sensitivity.
-- Runs in browsers or Node.js with minimal dependencies.
+## JavaScript implementation
 
-[Read the full Isolation Forest API reference](iforest.md) for constructor arguments, fit/predict usage, and scoring helpers.
+`@kanaries/ml` provides ensemble models in JavaScript and TypeScript so teams can run boosted learners and anomaly detection inside browser products and Node.js services. This is particularly helpful when feature generation, threshold logic, and downstream product actions already live in JS and should stay close to the model runtime.
 
-## AdaBoostRegressor for gradient boosting
+If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScript", this module is the right entry point.
 
-`Ensemble.AdaBoostRegressor` sequentially trains weak regressors and boosts their contributions to reduce error. It is ideal for modeling continuous targets where interpretability and responsiveness matter.
+## Quick navigation
 
-**Use cases**
+- [Isolation Forest](iforest): anomaly detection for mostly-normal datasets with rare outliers
+- [AdaBoost Regressor](adaboost): boosted regression for non-linear tabular prediction
+- [AdaBoost Classifier](adaboostClassifier): boosted classification for harder decision boundaries
 
-- Forecasting metrics for product analytics dashboards.
-- Enhancing baseline linear models with non-linear corrections.
-- Building lightweight regressors that deploy quickly in serverless functions.
+## Detailed module guide
 
-[Review the AdaBoost regressor documentation](adaboost.md) for hyperparameters and example workflows.
+### How to choose an algorithm
 
-## AdaBoostClassifier for robust classification
+1. Use [Isolation Forest](iforest) when labels are unavailable and the main goal is outlier detection.
+2. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
+3. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
 
-`Ensemble.AdaBoostClassifier` focuses on misclassified samples in each iteration to improve predictive accuracy. Apply it to click-through rate prediction, churn modeling, or any binary/multi-class problem where you need fast inference in JavaScript.
+### JavaScript deployment notes
 
-**Key capabilities**
-
-- Adjustable learning rates to balance speed and generalization.
-- Support for sample weighting and class imbalance handling.
-- Compatible with the preprocessing tools found in the [utils module](../utils/index.md).
-
-[Explore the AdaBoost classifier guide](adaboostClassifier.md) for parameter tables, training instructions, and evaluation tips.
-
-## Related resources
-
-- Return to the [API overview](../index.md) to browse additional algorithm families.
-- Follow the [Getting Started tutorial](../../index.mdx) to integrate ensembles into a new project.
-- Experiment with datasets in the [`examples` folder](../../../../../examples) to see ensemble models in action.
-
-## How to use the Ensemble module in real projects
-
-The Ensemble module improves robustness by combining multiple weak learners, helping JavaScript models generalize better on noisy datasets.
-
-### Selection checklist
-1. Use IsolationForest for unsupervised anomaly detection on tabular telemetry or transaction streams.
-2. Use AdaBoostClassifier for difficult classification boundaries with moderate feature counts.
-3. Use AdaBoostRegressor to improve non-linear regression quality over a single weak estimator.
-
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
-
-### Common search intents
-- `isolation forest javascript`
-- `adaboost classifier typescript`
-- `ensemble learning nodejs`
-
-### Explore algorithms in this module
-- [adaboost](adaboost)
-- [adaboostClassifier](adaboostClassifier)
-- [iforest](iforest)
-
+- Treat thresholds, estimator counts, and learning rates as product-level tuning decisions.
+- Ensemble models often provide a good middle ground between simple baselines and more operationally complex systems.
+- In JS applications, keep feature extraction and prediction close together so model output can flow directly into business logic.

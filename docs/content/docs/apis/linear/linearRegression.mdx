@@ -1,0 +1,92 @@
+---
+title: Linear Regression in JavaScript with @kanaries/ml
+description: Learn what Linear Regression does, when to use it, and how to run LinearRegression in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Linear Regression in JavaScript
+
+## Algorithm overview
+
+LinearRegression models continuous targets with an interpretable linear relationship between features and outputs.
+
+This algorithm is especially useful when:
+
+- You need a transparent baseline for numeric prediction tasks.
+- Feature-target relationships are approximately linear after transformation.
+- You want fast training and low-latency inference in JavaScript.
+
+## JavaScript implementation
+
+@kanaries/ml gives JavaScript teams a straightforward linear regression implementation for numeric prediction tasks that need to stay in the application layer. This is useful for browser-side demos, pricing calculators, forecasting helpers, and Node.js APIs that want transparent coefficients instead of opaque black-box behavior.
+
+Because the model is simple and explainable, it fits especially well in product contexts where engineers and stakeholders need to reason about why a prediction changed.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LinearRegression"}
+  pythonCode={String.raw`from sklearn.linear_model import LinearRegression
+
+X = [[0], [1], [2], [3]]
+y = [1, 3, 5, 7]
+
+reg = LinearRegression()
+reg.fit(X, y)
+pred = reg.predict([[4], [5]])`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 3, 5, 7];
+
+const reg = new Linear.LinearRegression();
+reg.fit(X, y);
+const pred = reg.predict([[4], [5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 3, 5, 7];
+
+const reg = new Linear.LinearRegression();
+reg.fit(X, y);
+const pred = reg.predict([[4], [5]]);
+```
+
+## Detailed API reference
+
+```ts
+constructor()
+```
+
+This class implements ordinary least squares linear regression. It estimates
+coefficients for a linear model by minimizing the squared error between
+predicted and actual values.
+
+### Methods
++ `fit(X: number[][], Y: number[]): void`
++ `predict(X: number[][]): number[]`
+
+#### fit
+* `X` - Feature matrix of shape `[nSamples, nFeatures]`.
+* `Y` - Target values of length `nSamples`.
+
+#### predict
+* `X` - Feature matrix for which to compute predictions.
+
+### Implementation workflow
+
+1. Prepare numeric features and split into train/validation sets.
+2. Fit the model and inspect residual patterns for systematic errors.
+3. Iterate on feature engineering when residuals show non-linear structure.
+
+### JavaScript deployment notes
+
+- Use linear regression as a baseline before moving to more complex non-linear models.
+- Inspect residuals to decide whether feature engineering or a different model family is needed.
+- This estimator is a strong fit for small to medium tabular problems where interpretability matters.

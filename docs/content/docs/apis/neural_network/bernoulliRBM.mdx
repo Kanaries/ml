@@ -1,0 +1,85 @@
+---
+title: Bernoulli RBM in JavaScript with @kanaries/ml
+description: Learn what Bernoulli RBM does, when to use it, and how to run BernoulliRBM in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Bernoulli RBM in JavaScript
+
+## Algorithm overview
+
+BernoulliRBM learns latent binary representations that can improve downstream supervised model quality.
+
+This algorithm is especially useful when:
+
+- You work with binary-valued or binarized feature inputs.
+- Feature learning can improve separability for a later classifier.
+- You need compact latent features in a JavaScript pipeline.
+
+## JavaScript implementation
+
+@kanaries/ml provides Bernoulli RBM in JavaScript for feature learning workflows where latent binary representations are useful before a downstream classifier or recommender. This is relevant for experimentation-heavy products and Node.js pipelines that want learned hidden features without leaving TypeScript.
+
+Because RBMs are usually part of a broader preprocessing or exploration pipeline, keeping them in JS makes it easier to chain transformation, visualization, and downstream modeling in one place.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"BernoulliRBM"}
+  pythonCode={String.raw`from sklearn.neural_network import BernoulliRBM
+
+X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]]
+
+rbm = BernoulliRBM(n_components=2, learning_rate=0.1, batch_size=2, n_iter=20, random_state=0)
+hidden = rbm.fit_transform(X)`}
+  tsCode={String.raw`import { NeuralNetwork } from '@kanaries/ml';
+
+const X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]];
+
+const rbm = new NeuralNetwork.BernoulliRBM({ nComponents: 2, learningRate: 0.1, batchSize: 2, nIter: 20 });
+const hidden = rbm.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { NeuralNetwork } from '@kanaries/ml';
+
+const X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]];
+
+const rbm = new NeuralNetwork.BernoulliRBM({ nComponents: 2, learningRate: 0.1, batchSize: 2, nIter: 20 });
+const hidden = rbm.fitTransform(X);
+```
+
+## Detailed API reference
+
+```ts
+constructor(
+    nComponents: number = 256,
+    learningRate: number = 0.1,
+    batchSize: number = 10,
+    nIter: number = 10
+)
+```
+
+A Restricted Boltzmann Machine with binary visible units and hidden units. The model is trained with contrastive divergence.
+
+### Methods
+- `fit(X: number[][]): void`
+- `partialFit(X: number[][]): void`
+- `transform(X: number[][]): number[][]`
+- `fitTransform(X: number[][]): number[][]`
+- `gibbs(V: number[][]): number[][]`
+
+### Implementation workflow
+
+1. Prepare binary feature matrix and configure hidden-unit size.
+2. Fit RBM and generate transformed latent representations.
+3. Train downstream models on latent features and compare lift.
+
+### JavaScript deployment notes
+
+- Use Bernoulli RBM when your inputs are binary or can be meaningfully binarized.
+- Treat it as a representation-learning step and compare downstream lift against raw features.
+- For frontend demos or educational tools, keep datasets modest because iterative training can still be expensive.

@@ -1,0 +1,93 @@
+---
+title: Support Vector Classifier (SVC) in JavaScript with @kanaries/ml
+description: Learn what Support Vector Classifier (SVC) does, when to use it, and how to run SVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Support Vector Classifier (SVC) in JavaScript
+
+## Algorithm overview
+
+Support Vector Classification. When the kernel is set to `rbf` it applies the kernel trick to transform input features before training a linear classifier.
+
+SVC trains kernelized support vector classifiers for non-linear decision boundaries.
+
+This algorithm is especially useful when:
+
+- Linear models underfit complex class separation patterns.
+- You can afford kernel-based training for improved boundary flexibility.
+- You need strong classification performance on medium-sized datasets.
+
+## JavaScript implementation
+
+@kanaries/ml exposes SVC in JavaScript for teams that need non-linear decision boundaries inside browser apps or Node.js services. This is useful when a linear classifier is not expressive enough but you still want a familiar estimator API and controllable kernel settings in TypeScript.
+
+For product teams, this means kernel-based classification can live in the same JS codebase that already handles feature construction, request handling, and user-facing logic.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"SVC"}
+  pythonCode={String.raw`from sklearn.svm import SVC
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = SVC(C=1.0, kernel='rbf', gamma=1.0, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 1, maxIter: 400, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SVM } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 1, maxIter: 400, learningRate: 0.1 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface SVCProps {
+    C?: number;
+    maxIter?: number;
+    learningRate?: number;
+    kernel?: 'linear' | 'rbf';
+    gamma?: number;
+}
+constructor(props: SVCProps = {})
+```
+
+### Parameters
+- `C` (number, default `1`): regularization strength
+- `maxIter` (number, default `100`): maximum iterations for training
+- `learningRate` (number, default `0.01`): step size for the optimizer
+- `kernel` ('linear' | 'rbf', default `'rbf'`): kernel type
+- `gamma` (number, default `1`): RBF kernel coefficient
+
+### Implementation workflow
+
+1. Scale features and pick a kernel (RBF is a common starting point).
+2. Fit with baseline hyperparameters and assess validation metrics.
+3. Tune `C`, kernel settings, and class weights for task-specific goals.
+
+### JavaScript deployment notes
+
+- Use SVC when linear models underfit but the dataset is still small or medium enough for kernel methods.
+- Scale features before fitting, especially with RBF kernels.
+- Treat kernel choice, `C`, and `gamma` as a joint tuning problem rather than optimizing them one at a time.

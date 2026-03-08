@@ -1,0 +1,101 @@
+---
+title: Categorical Naive Bayes in JavaScript with @kanaries/ml
+description: Learn what Categorical Naive Bayes does, when to use it, and how to run CategoricalNB in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Categorical Naive Bayes in JavaScript
+
+## Algorithm overview
+
+Naive Bayes classifier for features with a finite number of discrete
+categories. It counts how often each feature value appears in each class and
+uses additive smoothing to estimate the conditional probabilities.
+
+CategoricalNB is designed for discrete categorical features encoded as integer category IDs.
+
+This algorithm is especially useful when:
+
+- Inputs are naturally categorical and not meaningful on a numeric distance scale.
+- You need fast classification with probabilistic interpretation.
+- You want a robust baseline for tabular categoricals in pure JavaScript.
+
+## JavaScript implementation
+
+@kanaries/ml provides Categorical Naive Bayes for JavaScript applications that work with encoded categories, product states, or structured form inputs. This is useful when the entire preprocessing pipeline, including category mapping and inference, already lives in TypeScript.
+
+Instead of routing categorical classification through a Python microservice, teams can keep integer-encoded features and prediction logic in the same browser or Node.js runtime that serves the product.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"CategoricalNB"}
+  pythonCode={String.raw`from sklearn.naive_bayes import CategoricalNB
+
+X = [[0, 1], [1, 0], [1, 1], [0, 0]]
+y = [0, 1, 1, 0]
+
+clf = CategoricalNB(alpha=1.0)
+clf.fit(X, y)
+pred = clf.predict([[1, 1], [0, 0]])`}
+  tsCode={String.raw`import { Bayes } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 0], [1, 1], [0, 0]];
+const y = [0, 1, 1, 0];
+
+const clf = new Bayes.CategoricalNB({ alpha: 1.0 });
+clf.fit(X, y);
+const pred = clf.predict([[1, 1], [0, 0]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Bayes } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 0], [1, 1], [0, 0]];
+const y = [0, 1, 1, 0];
+
+const clf = new Bayes.CategoricalNB({ alpha: 1.0 });
+clf.fit(X, y);
+const pred = clf.predict([[1, 1], [0, 0]]);
+```
+
+## Detailed API reference
+
+```ts
+interface CategoricalNBProps {
+    alpha?: number;
+    forceAlpha?: boolean;
+    fitPrior?: boolean;
+    classPrior?: number[] | null;
+    minCategories?: number | number[] | null;
+}
+constructor(props: CategoricalNBProps = {})
+```
+
+### Parameters
+- `alpha` &mdash; Smoothing parameter used when computing category
+  probabilities. Larger values make the model less sensitive to missing
+  observations.
+- `forceAlpha` &mdash; If `true`, ensures that `alpha` is strictly positive even
+  when a small value is provided.
+- `fitPrior` &mdash; Whether to learn class prior probabilities from data. When
+  `false`, class priors are assumed to be uniform.
+- `classPrior` &mdash; Optional array of prior probabilities for each class.
+  Overrides the data-derived priors when provided.
+- `minCategories` &mdash; Minimum number of categories assumed for each feature.
+  Can be a single number or an array specifying the value per feature.
+
+### Implementation workflow
+
+1. Encode every categorical column to stable integer category indices.
+2. Fit on labeled rows and validate per-class calibration quality.
+3. Monitor unseen-category behavior and keep category mapping versioned.
+
+### JavaScript deployment notes
+
+- Version your category encoders so training and inference use the same integer mappings.
+- Prefer this model for truly categorical columns rather than continuous numeric measurements.
+- It is a strong baseline for tabular product logic because training and inference are both lightweight.

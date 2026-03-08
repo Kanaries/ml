@@ -1,0 +1,91 @@
+---
+title: Linear SVR in JavaScript with @kanaries/ml
+description: Learn what Linear SVR does, when to use it, and how to run LinearSVR in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Linear SVR in JavaScript
+
+## Algorithm overview
+
+Linear support vector regression trained with gradient descent on the epsilon-insensitive loss.
+
+LinearSVR performs margin-based linear regression with robustness to moderate outliers in target values.
+
+This algorithm is especially useful when:
+
+- You need regression in high-dimensional spaces with linear assumptions.
+- Outlier sensitivity from ordinary least squares is causing instability.
+- You want a fast margin-based baseline in Node.js services.
+
+## JavaScript implementation
+
+@kanaries/ml provides Linear SVR in JavaScript for regression tasks where a linear support-vector objective is preferable to plain least squares. This can be useful in Node.js services and TypeScript applications that need linear-style regression with a margin-based loss and straightforward inference.
+
+It is especially attractive when the rest of the product pipeline is already in JS and you want to keep feature generation and prediction together.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LinearSVR"}
+  pythonCode={String.raw`from sklearn.svm import LinearSVR
+
+X = [[0], [1], [2], [3]]
+y = [1.0, 2.1, 2.9, 4.2]
+
+reg = LinearSVR(C=1.0, epsilon=0.0, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [2.5]])`}
+  tsCode={String.raw`import { SVM } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.1, 2.9, 4.2];
+
+const reg = new SVM.LinearSVR({ C: 1, epsilon: 0, maxIter: 500, learningRate: 0.01 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SVM } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1.0, 2.1, 2.9, 4.2];
+
+const reg = new SVM.LinearSVR({ C: 1, epsilon: 0, maxIter: 500, learningRate: 0.01 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [2.5]]);
+```
+
+## Detailed API reference
+
+```ts
+interface LinearSVRProps {
+    epsilon?: number;
+    C?: number;
+    maxIter?: number;
+    learningRate?: number;
+}
+constructor(props: LinearSVRProps = {})
+```
+
+### Parameters
+- `epsilon` (number, default `0`): width of the insensitive tube around the regression line
+- `C` (number, default `1`): regularization strength
+- `maxIter` (number, default `100`): maximum training iterations
+- `learningRate` (number, default `0.01`): optimizer step size
+
+### Implementation workflow
+
+1. Prepare standardized numeric features and choose epsilon margin.
+2. Fit LinearSVR and measure MAE/RMSE on holdout data.
+3. Tune `C` and epsilon for error tolerance versus fit quality.
+
+### JavaScript deployment notes
+
+- Use Linear SVR when you want a linear regressor with support-vector-style robustness around small errors.
+- Standardize features before training because optimization is sensitive to scale.
+- Benchmark it against ordinary linear regression to confirm the margin-based objective improves real error metrics.

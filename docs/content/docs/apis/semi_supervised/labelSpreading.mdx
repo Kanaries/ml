@@ -1,0 +1,93 @@
+---
+title: Label Spreading in JavaScript with @kanaries/ml
+description: Learn what Label Spreading does, when to use it, and how to run LabelSpreading in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Label Spreading in JavaScript
+
+## Algorithm overview
+
+LabelSpreading performs smoother semi-supervised label diffusion with regularization to reduce over-confident propagation.
+
+This algorithm is especially useful when:
+
+- You want semi-supervised learning with stronger stability than pure propagation.
+- Graph neighborhoods are useful but somewhat noisy.
+- You need better robustness for low-label datasets.
+
+## JavaScript implementation
+
+@kanaries/ml provides Label Spreading in JavaScript for semi-supervised problems where you want a smoother, regularized alternative to raw label propagation. That is useful for annotation tools and partially labeled datasets where graph-based learning should be robust to noisy neighborhoods.
+
+Because the implementation runs in JS, teams can connect interactive labeling workflows, similarity features, and propagation-based learning without a separate Python service layer.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LabelSpreading"}
+  pythonCode={String.raw`from sklearn.semi_supervised import LabelSpreading
+
+X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]]
+y = [0, -1, 1, -1]
+
+model = LabelSpreading(alpha=0.2)
+model.fit(X, y)
+pred = model.predict(X)`}
+  tsCode={String.raw`import { SemiSupervised } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]];
+const y = [0, -1, 1, -1];
+
+const model = new SemiSupervised.LabelSpreading({ alpha: 0.2 });
+model.fit(X, y);
+const pred = model.predict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SemiSupervised } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]];
+const y = [0, -1, 1, -1];
+
+const model = new SemiSupervised.LabelSpreading({ alpha: 0.2 });
+model.fit(X, y);
+const pred = model.predict(X);
+```
+
+## Detailed API reference
+
+```ts
+interface LabelSpreadingOptions {
+    kernel?: 'rbf' | 'knn' | ((X: number[][], Y: number[][]) => number[][]);
+    gamma?: number;
+    nNeighbors?: number;
+    alpha?: number;
+    maxIter?: number;
+    tol?: number;
+}
+constructor(options: LabelSpreadingOptions = {})
+```
+
+Label spreading assigns labels to unlabeled data using a normalized graph
+and soft clamping controlled by `alpha`.
+
+### Methods
+* `fit(trainX: number[][], trainY: number[]): void`
+* `predict(testX: number[][]): number[]`
+* `predictProba(testX: number[][]): number[][]`
+
+### Implementation workflow
+
+1. Create labeled/unlabeled split and construct feature graph inputs.
+2. Fit LabelSpreading and monitor convergence behavior.
+3. Tune kernel and regularization parameters with validation labels.
+
+### JavaScript deployment notes
+
+- Prefer Label Spreading when graph noise or over-confident propagation is a concern.
+- Tune kernel and regularization settings against a validation subset of known labels.
+- Use it to improve label coverage before training a final supervised model rather than as the only production model.

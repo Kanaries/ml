@@ -1,0 +1,92 @@
+---
+title: Label Propagation in JavaScript with @kanaries/ml
+description: Learn what Label Propagation does, when to use it, and how to run LabelPropagation in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Label Propagation in JavaScript
+
+## Algorithm overview
+
+LabelPropagation spreads labels through similarity graphs to leverage unlabeled data in transductive settings.
+
+This algorithm is especially useful when:
+
+- Only a small subset of samples is labeled.
+- Similarity graph structure reflects class continuity.
+- You need to bootstrap labels before training a final supervised model.
+
+## JavaScript implementation
+
+@kanaries/ml exposes Label Propagation in JavaScript for semi-supervised workflows where only a small portion of the dataset is labeled. This is useful for browser-based data tools, internal review apps, or Node.js services that want to spread labels through a similarity graph before downstream supervised training.
+
+Keeping the algorithm in JS makes it easier to combine labeling interfaces, graph construction, and model-assisted annotation inside one product experience.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"LabelPropagation"}
+  pythonCode={String.raw`from sklearn.semi_supervised import LabelPropagation
+
+X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]]
+y = [0, -1, 1, -1]
+
+model = LabelPropagation()
+model.fit(X, y)
+pred = model.predict(X)`}
+  tsCode={String.raw`import { SemiSupervised } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]];
+const y = [0, -1, 1, -1];
+
+const model = new SemiSupervised.LabelPropagation();
+model.fit(X, y);
+const pred = model.predict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { SemiSupervised } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [1, 1], [1.1, 0.9]];
+const y = [0, -1, 1, -1];
+
+const model = new SemiSupervised.LabelPropagation();
+model.fit(X, y);
+const pred = model.predict(X);
+```
+
+## Detailed API reference
+
+```ts
+interface LabelPropagationOptions {
+    kernel?: 'rbf' | 'knn' | ((X: number[][], Y: number[][]) => number[][]);
+    gamma?: number;
+    nNeighbors?: number;
+    maxIter?: number;
+    tol?: number;
+}
+constructor(options: LabelPropagationOptions = {})
+```
+
+Label propagation assigns labels to unlabeled data by propagating
+information from labeled points across a graph defined by a kernel.
+
+### Methods
+* `fit(trainX: number[][], trainY: number[]): void`
+* `predict(testX: number[][]): number[]`
+* `predictProba(testX: number[][]): number[][]`
+
+### Implementation workflow
+
+1. Build feature representations and seed reliable initial labels.
+2. Fit LabelPropagation and inspect propagated label confidence.
+3. Validate on known labels and tune graph-related hyperparameters.
+
+### JavaScript deployment notes
+
+- Use Label Propagation when the similarity graph is meaningful and labels can reasonably spread through neighborhoods.
+- Validate propagated labels on a trusted subset before using them downstream.
+- It works best as a label-bootstrapping step, not as a replacement for careful annotation strategy.

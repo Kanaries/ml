@@ -1,35 +1,43 @@
 ---
-title: Manifold
-description: Learn how to use Manifold algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
+title: Manifold Learning in JavaScript with @kanaries/ml
+description: Explore t-SNE, MDS, Spectral Embedding, and Locally Linear Embedding in JavaScript and TypeScript with @kanaries/ml for visualization and neighborhood analysis.
 ---
 
-- [SpectralEmbedding](spectralEmbedding)
-- [MDS](MDS)
-- [LocallyLinearEmbedding](lle)
-- [TSNE](tsne)
+# Manifold Learning in JavaScript
 
-## How to use the Manifold module in real projects
+## Module overview
 
-The Manifold module helps project high-dimensional data into lower-dimensional embeddings for visualization, exploration, and neighborhood analysis.
+The Manifold module projects high-dimensional data into lower-dimensional embeddings while trying to preserve important geometric or neighborhood structure. These methods are primarily useful for visualization, exploratory analysis, and pre-processing workflows rather than for low-latency production inference.
 
-### Selection checklist
-1. Use t-SNE for local neighborhood visualization and cluster exploration in 2D/3D.
-2. Use MDS when preserving pairwise distance structure is the main requirement.
-3. Use LocallyLinearEmbedding or SpectralEmbedding when manifold assumptions are meaningful for your data geometry.
+This module is a strong fit when:
 
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+- you need 2D or 3D visualizations of high-dimensional data
+- local neighborhood structure matters more than raw feature axes
+- your embeddings will feed directly into browser charts or interactive analysis tools
 
-### Common search intents
-- `tsne javascript`
-- `manifold learning typescript`
-- `spectral embedding browser`
+## JavaScript implementation
 
-### Explore algorithms in this module
-- [MDS](MDS)
-- [lle](lle)
-- [spectralEmbedding](spectralEmbedding)
-- [tsne](tsne)
+`@kanaries/ml` provides manifold learning algorithms in JavaScript and TypeScript so teams can generate embeddings in the same runtime that renders charts, powers exploratory analysis, or prepares features in Node.js. This is especially practical for frontend-heavy tools where embedding output is consumed immediately by the UI.
 
+If someone searches for "t-SNE in JavaScript" or "Spectral Embedding in TypeScript", this module is the right entry point.
+
+## Quick navigation
+
+- [t-SNE](tsne): local-neighborhood visualization for high-dimensional data
+- [MDS](MDS): embeddings that preserve pairwise distance structure
+- [Locally Linear Embedding](lle): non-linear manifold learning based on local reconstructions
+- [Spectral Embedding](spectralEmbedding): graph-based low-dimensional embeddings
+
+## Detailed module guide
+
+### How to choose an algorithm
+
+1. Use [t-SNE](tsne) for exploratory cluster visualization.
+2. Use [MDS](MDS) when the main input or objective is a distance matrix.
+3. Use [Locally Linear Embedding](lle) or [Spectral Embedding](spectralEmbedding) when local geometry or graph structure is central to the task.
+
+### JavaScript deployment notes
+
+- Treat these methods as exploration and preprocessing tools first, not as default request-time transforms.
+- Run heavier embeddings outside the main browser thread when user interaction matters.
+- Choose based on the structure you want to preserve: local neighborhoods, graph connectivity, or pairwise distances.

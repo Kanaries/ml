@@ -1,37 +1,43 @@
 ---
-title: Tree
-description: Learn how to use Tree algorithms in @kanaries/ml for JavaScript and TypeScript machine learning projects.
+title: Tree Models in JavaScript with @kanaries/ml
+description: Explore decision trees and extra trees in JavaScript and TypeScript with @kanaries/ml for interpretable tabular classification and regression.
 ---
 
-- [DecisionTreeClassifier](decisionTreeClassifier.md)
+# Tree Models in JavaScript
 
-- [ExtraTreeClassifier](extraTreeClassifier.md)
+## Module overview
 
-- [DecisionTreeRegressor](decisionTreeRegressor.md)
-- [ExtraTreeRegressor](extraTreeRegressor.md)
+The Tree module provides interpretable tree-based models for tabular classification and regression. These algorithms are useful when you want rule-like behavior, easy debugging, and models whose decisions can be traced through human-readable splits.
 
-## How to use the Tree module in real projects
+This module is a strong fit when:
 
-The Tree module provides interpretable decision rules for classification and regression on heterogeneous tabular features.
+- explainability matters alongside predictive quality
+- tabular data contains non-linear feature interactions
+- you want to compare standard tree behavior with more randomized extra tree variants
 
-### Selection checklist
-1. Use DecisionTree variants when model explainability and rule extraction matter.
-2. Use ExtraTree variants when you want stronger randomization and variance reduction.
-3. Control depth, split criteria, and validation performance to avoid overfitting.
+## JavaScript implementation
 
-### Common implementation workflow
-1. Start from a simple baseline in this module and evaluate on a holdout split.
-2. Compare at least one alternative algorithm from this module before locking production defaults.
-3. Pair model quality metrics with runtime constraints (latency, memory, bundle size).
+`@kanaries/ml` provides tree models in JavaScript and TypeScript so teams can keep interpretable prediction logic close to product code, browser demos, and Node.js APIs. This is especially useful when engineers or stakeholders need to inspect why a model made a decision, not just what it predicted.
 
-### Common search intents
-- `decision tree javascript`
-- `extra tree classifier typescript`
-- `interpretable ml nodejs`
+If someone searches for "decision tree in JavaScript" or "extra tree classifier in TypeScript", this module is the right entry point.
 
-### Explore algorithms in this module
-- [decisionTreeClassifier](decisionTreeClassifier)
-- [decisionTreeRegressor](decisionTreeRegressor)
-- [extraTreeClassifier](extraTreeClassifier)
-- [extraTreeRegressor](extraTreeRegressor)
+## Quick navigation
 
+- [Decision Tree Classifier](decisionTreeClassifier)
+- [Decision Tree Regressor](decisionTreeRegressor)
+- [Extra Tree Classifier](extraTreeClassifier)
+- [Extra Tree Regressor](extraTreeRegressor)
+
+## Detailed module guide
+
+### How to choose an algorithm
+
+1. Use decision tree variants when interpretability and clear decision paths matter most.
+2. Use extra tree variants when you want a more randomized tree baseline.
+3. Control depth and split settings carefully because tree models can overfit quickly on smaller datasets.
+
+### JavaScript deployment notes
+
+- Tree models are especially practical in product code because their behavior is straightforward to inspect.
+- Use them as strong tabular baselines before moving to boosted ensembles or kernel methods.
+- Keep model constraints simple and explicit so debugging remains easy.

@@ -1,0 +1,79 @@
+---
+title: k-means++ Initialization in JavaScript with @kanaries/ml
+description: Learn what k-means++ Initialization does, when to use it, and how to run kmeansPlusPlus in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# k-means++ Initialization in JavaScript
+
+## Algorithm overview
+
+kmeansPlusPlus provides improved centroid initialization to make KMeans more stable and accurate.
+
+This algorithm is especially useful when:
+
+- Random initialization creates unstable cluster assignments.
+- You need faster convergence and better centroid quality.
+- You run repeated clustering jobs in production pipelines.
+
+## JavaScript implementation
+
+@kanaries/ml exposes k-means++ initialization in JavaScript so you can build your own clustering pipelines while still getting better centroid seeding than uniform random starts. This is useful in advanced JS workflows where you want explicit control over initialization before handing centers into K-Means.
+
+Because it runs in the same runtime as the rest of your app, you can generate centers during browser-side experimentation or Node.js preprocessing without crossing language boundaries.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"kmeansPlusPlus"}
+  pythonCode={String.raw`from sklearn.cluster import kmeans_plusplus
+
+X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2], [8, 8]]
+
+centers, indices = kmeans_plusplus(X, n_clusters=3, random_state=0)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2], [8, 8]];
+
+const { centers, indices } = Clusters.kmeansPlusPlus(X, 3);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2], [8, 8]];
+
+const { centers, indices } = Clusters.kmeansPlusPlus(X, 3);
+```
+
+## Detailed API reference
+
+```ts
+kmeansPlusPlus(
+    X: number[][],
+    n_clusters: number,
+    sampleWeight?: number[],
+    randomState: () => number = Math.random
+): { centers: number[][]; indices: number[] }
+```
+
+This utility initializes cluster centers using the k-means++ strategy.
+
+```ts
+const { centers } = kmeansPlusPlus(X, 3);
+```
+
+### Implementation workflow
+
+1. Initialize centroids with k-means++ strategy before training.
+2. Run KMeans fitting with the initialized seeds and compare inertia.
+3. Retain the best run by objective score and validation diagnostics.
+
+### JavaScript deployment notes
+
+- Use this helper when K-Means results are too sensitive to random initialization.
+- Pair it with repeated clustering runs when you need more stable segment assignments.
+- It is especially useful in custom pipelines that manage centroid initialization explicitly.

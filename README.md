@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/github/license/kanaries/ml?color=%23FF7575)
 ![CI](https://github.com/kanaries/ml/actions/workflows/ci.yml/badge.svg)
 
-**@kanaries/ml** is a JavaScript/TypeScript library that provides a set of machine learning algorithms with an API similar to scikit-learn. It works in both browsers and Node.js environments.
+**@kanaries/ml** is a JavaScript/TypeScript machine learning library with a scikit-learn-like API. It works in both browsers and Node.js environments, so Python users can move familiar estimator workflows into frontend and full-stack JavaScript projects.
 
 ## Features
 
@@ -37,7 +37,7 @@ const trainX = [
 ];
 const trainY = [0, 1];
 
-const knn = new Neighbors.KNearstNeighbors(3, 'distance', '2-norm');
+const knn = new Neighbors.KNearstNeighbors(3, 'distance', 'euclidean');
 knn.fit(trainX, trainY);
 
 const testX = [
@@ -47,6 +47,162 @@ const testX = [
 const result = knn.predict(testX);
 console.log(result);
 ```
+
+## Python vs JavaScript / TypeScript Examples
+
+If you already know scikit-learn, the fastest way to understand `@kanaries/ml` is to compare the same workflow side by side.
+
+### LogisticRegression
+
+<table>
+<tr>
+<th width="50%">Python (scikit-learn)</th>
+<th width="50%">JavaScript / TypeScript (@kanaries/ml)</th>
+</tr>
+<tr>
+<td>
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = LogisticRegression(max_iter=500, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.2, 0.1]])
+```
+
+</td>
+<td>
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Linear.LogisticRegression({ learningRate: 0.1, maxIter: 800 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);
+```
+
+</td>
+</tr>
+</table>
+
+### KMeans
+
+<table>
+<tr>
+<th width="50%">Python (scikit-learn)</th>
+<th width="50%">JavaScript / TypeScript (@kanaries/ml)</th>
+</tr>
+<tr>
+<td>
+
+```python
+from sklearn.cluster import KMeans
+
+X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]]
+
+model = KMeans(n_clusters=2, random_state=0, n_init='auto')
+labels = model.fit_predict(X)
+```
+
+</td>
+<td>
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]];
+
+const model = new Clusters.KMeans(2);
+const labels = model.fitPredict(X);
+```
+
+</td>
+</tr>
+</table>
+
+### DecisionTreeClassifier
+
+<table>
+<tr>
+<th width="50%">Python (scikit-learn)</th>
+<th width="50%">JavaScript / TypeScript (@kanaries/ml)</th>
+</tr>
+<tr>
+<td>
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = DecisionTreeClassifier(max_depth=3, criterion='gini', random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])
+```
+
+</td>
+<td>
+
+```ts
+import { Tree } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Tree.DecisionTreeClassifier({ max_depth: 3, criterion: 'gini' });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+</td>
+</tr>
+</table>
+
+### IsolationForest
+
+<table>
+<tr>
+<th width="50%">Python (scikit-learn)</th>
+<th width="50%">JavaScript / TypeScript (@kanaries/ml)</th>
+</tr>
+<tr>
+<td>
+
+```python
+from sklearn.ensemble import IsolationForest
+
+X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]]
+
+clf = IsolationForest(n_estimators=50, contamination=0.25, random_state=0)
+clf.fit(X)
+pred = clf.predict(X)
+```
+
+</td>
+<td>
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
+
+const clf = new Ensemble.IsolationForest(256, 50, 0.25);
+clf.fit(X);
+const pred = clf.predict(X);
+```
+
+</td>
+</tr>
+</table>
+
+For side-by-side Python and JavaScript examples across the algorithm docs, see [the documentation site](https://ml.kanaries.net/docs/apis).
 
 ## Supported Algorithms
 

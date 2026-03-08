@@ -1,0 +1,84 @@
+---
+title: Extra Tree Classifier in JavaScript with @kanaries/ml
+description: Learn what Extra Tree Classifier does, when to use it, and how to run ExtraTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Extra Tree Classifier in JavaScript
+
+## Algorithm overview
+
+ExtraTreeClassifier injects additional split randomness to reduce variance and improve generalization in noisy settings.
+
+This algorithm is especially useful when:
+
+- Standard decision trees overfit your training set.
+- You need fast tree-based classification with stronger randomization.
+- You plan to combine trees in ensemble-style workflows.
+
+## JavaScript implementation
+
+@kanaries/ml exposes Extra Tree classification in JavaScript for workflows that want tree-based decisions with more randomized splitting behavior. This is useful for experimentation and for teams that want a fast tree baseline with slightly different bias-variance behavior than a standard decision tree.
+
+Because it runs in JS, you can compare deterministic and randomized tree variants directly inside the same product or service codebase.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"ExtraTreeClassifier"}
+  pythonCode={String.raw`from sklearn.tree import ExtraTreeClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = ExtraTreeClassifier(max_depth=3, criterion='gini', random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
+  tsCode={String.raw`import { Tree } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Tree.ExtraTreeClassifier({ max_depth: 3, criterion: 'gini' });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Tree } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Tree.ExtraTreeClassifier({ max_depth: 3, criterion: 'gini' });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+```
+
+## Detailed API reference
+
+```ts
+interface ExtraTreeProps {
+    max_depth?: number;
+    min_samples_split?: number;
+    criterion?: 'entropy' | 'gini';
+    max_features?: number;
+}
+
+constructor(props: ExtraTreeProps = {})
+```
+
+### Implementation workflow
+
+1. Train with randomized split behavior on cleaned tabular inputs.
+2. Compare validation stability against DecisionTreeClassifier.
+3. Tune depth and split constraints based on overfit indicators.
+
+### JavaScript deployment notes
+
+- Use Extra Tree classification when you want a randomized tree baseline for tabular data.
+- Compare it against the standard decision tree because the better choice depends on variance and data noise.
+- It is especially useful in experiments that later feed into larger tree ensembles.

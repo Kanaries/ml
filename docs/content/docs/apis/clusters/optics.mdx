@@ -1,0 +1,85 @@
+---
+title: OPTICS in JavaScript with @kanaries/ml
+description: Learn what OPTICS does, when to use it, and how to run OPTICS in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# OPTICS in JavaScript
+
+## Algorithm overview
+
+OPTICS captures density-based cluster structure across multiple scales and handles varying-density datasets.
+
+This algorithm is especially useful when:
+
+- DBSCAN-style sensitivity to a single epsilon is too limiting.
+- You need ordering information to inspect hierarchical density structure.
+- Noise handling is required for reliable segmentation.
+
+## JavaScript implementation
+
+@kanaries/ml makes OPTICS available in JavaScript for density-based clustering workflows where cluster shapes are irregular and noise handling matters. This is useful for web-based data exploration products that need to surface structure without assuming spherical clusters.
+
+Running OPTICS in the JS stack means engineering teams can keep clustering logic close to interactive visualizations, upload flows, or Node.js processing jobs instead of depending on a separate Python layer.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"OPTICS"}
+  pythonCode={String.raw`from sklearn.cluster import OPTICS
+
+X = [[0, 0], [0.1, 0.1], [5, 5], [5.2, 5.1], [10, 1]]
+
+model = OPTICS(min_samples=2, max_eps=0.6)
+labels = model.fit_predict(X)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.1], [5, 5], [5.2, 5.1], [10, 1]];
+
+const model = new Clusters.OPTICS({ min_samples: 2, eps: 0.6 });
+const labels = model.fitPredict(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.1], [5, 5], [5.2, 5.1], [10, 1]];
+
+const model = new Clusters.OPTICS({ min_samples: 2, eps: 0.6 });
+const labels = model.fitPredict(X);
+```
+
+## Detailed API reference
+
+```ts
+interface OPTICSOptions {
+    min_samples?: number;
+    max_eps?: number;
+    metric?: Distance.IDistanceType;
+    p?: number;
+    eps?: number;
+}
+constructor(options: OPTICSOptions = {})
+```
+
+`fitPredict(samplesX: number[][]): number[]` returns cluster labels. Noise points are marked as `-1`.
+
+```ts
+const optics = new OPTICS({ eps: 0.5, min_samples: 5 });
+const labels = optics.fitPredict(X);
+```
+
+### Implementation workflow
+
+1. Prepare distance-scaled features and configure neighborhood constraints.
+2. Fit and analyze reachability or extracted cluster labels.
+3. Tune min-samples and extraction thresholds for your target behavior.
+
+### JavaScript deployment notes
+
+- OPTICS is a better fit than K-Means when your clusters have uneven density or non-convex structure.
+- Use it for exploratory clustering and noise detection rather than low-latency request-time scoring.
+- Benchmark runtime carefully on larger datasets, especially in browser environments.

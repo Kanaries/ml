@@ -1,0 +1,91 @@
+---
+title: AdaBoost Regressor in JavaScript with @kanaries/ml
+description: Learn what AdaBoost Regressor does, when to use it, and how to run AdaBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# AdaBoost Regressor in JavaScript
+
+## Algorithm overview
+
+AdaBoostRegressor combines weak regressors sequentially to improve predictive accuracy on non-linear regression patterns.
+
+This algorithm is especially useful when:
+
+- Single linear models underfit important non-linear behavior.
+- You need stronger regression quality with manageable model complexity.
+- Your deployment environment requires fast JS inference.
+
+## JavaScript implementation
+
+@kanaries/ml provides AdaBoost regression in JavaScript for teams that want a stronger non-linear regressor than a single tree or plain linear model, while still keeping inference straightforward. This is useful in product analytics, pricing, or forecasting-style features implemented in Node.js or TypeScript services.
+
+Because the estimator is available in JS, boosted regression can live in the same application layer that owns data fetching, feature building, and API responses.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"AdaBoostRegressor"}
+  pythonCode={String.raw`from sklearn.ensemble import AdaBoostRegressor
+
+X = [[0], [1], [2], [3], [4]]
+y = [1.0, 1.8, 3.1, 3.9, 5.2]
+
+reg = AdaBoostRegressor(n_estimators=50, learning_rate=0.5, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [3.5]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.AdaBoostRegressor({ n_estimators: 50, learning_rate: 0.5 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.AdaBoostRegressor({ n_estimators: 50, learning_rate: 0.5 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);
+```
+
+## Detailed API reference
+
+```ts
+constructor(props?: { estimator?: DecisionTreeRegressor; n_estimators?: number; learning_rate?: number })
+```
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| estimator | DecisionTreeRegressor | depth 3 tree | Base learner used in boosting |
+| n_estimators | number | 50 | Number of boosting rounds |
+| learning_rate | number | 1.0 | Shrinks the contribution of each regressor |
+
+### Algorithm
+AdaBoostRegressor combines weak regressors sequentially. Each new estimator focuses on samples that previous models predicted poorly.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
+
+### Implementation workflow
+
+1. Train with a conservative learning rate and enough estimators.
+2. Validate MAE/RMSE on holdout data and monitor overfitting.
+3. Tune estimator count and learning rate for stability vs accuracy.
+
+### JavaScript deployment notes
+
+- Compare AdaBoost regression against a simple tree or linear baseline to confirm the extra complexity is paying off.
+- Tune estimator count and learning rate together rather than adjusting them in isolation.
+- This model is best suited to tabular regression problems where moderate boosting depth improves fit quality.

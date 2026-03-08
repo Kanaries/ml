@@ -1,0 +1,89 @@
+---
+title: Sparse PCA in JavaScript with @kanaries/ml
+description: Learn what Sparse PCA does, when to use it, and how to run SparsePCA in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Sparse PCA in JavaScript
+
+## Algorithm overview
+
+Sparse Principal Components Analysis using truncated power iteration with soft thresholding. The algorithm stops when the updates change by less than `tol` or when `maxIter` is reached.
+
+SparsePCA learns sparse components so each latent dimension uses only a subset of original features.
+
+This algorithm is especially useful when:
+
+- Interpretability of component-feature relationships is important.
+- You need dimensionality reduction with built-in sparsity constraints.
+- Dense PCA components are too hard to explain to stakeholders.
+
+## JavaScript implementation
+
+@kanaries/ml includes Sparse PCA for JavaScript teams that want more interpretable components than standard PCA. This is useful when you need compressed features but also want each component to depend on a smaller subset of the original dimensions.
+
+That makes it relevant for browser-based analytics and Node.js pipelines where component interpretability matters alongside dimensionality reduction.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"SparsePCA"}
+  pythonCode={String.raw`from sklearn.decomposition import SparsePCA
+
+X = [[1, 2, 0], [2, 1, 0], [3, 4, 1], [4, 3, 1]]
+
+model = SparsePCA(n_components=2, alpha=0.1, random_state=0)
+embedding = model.fit_transform(X)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 0], [2, 1, 0], [3, 4, 1], [4, 3, 1]];
+
+const model = new Decomposition.SparsePCA({ nComponents: 2, alpha: 0.1 });
+const embedding = model.fitTransform(X);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 0], [2, 1, 0], [3, 4, 1], [4, 3, 1]];
+
+const model = new Decomposition.SparsePCA({ nComponents: 2, alpha: 0.1 });
+const embedding = model.fitTransform(X);
+```
+
+## Detailed API reference
+
+### Algorithm
+Each component is extracted by iterative thresholding of the covariance matrix.
+The process encourages sparsity by shrinking small coefficients towards zero.
+
+```ts
+interface SparsePCAProps {
+    nComponents?: number | null;
+    alpha?: number;
+    maxIter?: number;
+    tol?: number;
+}
+constructor(props: SparsePCAProps = {})
+```
+
+### Parameters
+- `nComponents` (number | null, default `null`): number of sparse components to compute. `null` keeps all components.
+- `alpha` (number, default `1`): sparsity controlling parameter. Higher values lead to more zero coefficients.
+- `maxIter` (number, default `100`): maximum number of iterations for each component.
+- `tol` (number, default `1e-8`): stopping criterion for convergence of the iterative updates.
+
+### Implementation workflow
+
+1. Scale input features and choose sparsity-related hyperparameters.
+2. Fit SparsePCA and inspect component loadings for feature selection signals.
+3. Use sparse transformed outputs in linear or tree-based downstream models.
+
+### JavaScript deployment notes
+
+- Use Sparse PCA when interpretability of components matters more than pure reconstruction quality.
+- Expect to tune `alpha` because sparsity strength directly affects component structure.
+- It is a good middle ground between raw high-dimensional features and dense latent embeddings.
