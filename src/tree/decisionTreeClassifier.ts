@@ -23,6 +23,8 @@ export interface DecisionTreeProps {
     max_depth?: number;
     min_samples_split?: number;
     criterion?: 'entropy' | 'gini';
+    max_features?: number | 'sqrt' | 'log2';
+    randomState?: number;
 }
 
 export class DecisionTreeClassifier {
@@ -32,18 +34,59 @@ export class DecisionTreeClassifier {
     private min_samples_split: number;
     private criterion: 'entropy' | 'gini' = 'entropy';
     private impurity: (freqs: number[]) => number;
+    private max_features?: number | 'sqrt' | 'log2';
+    private randomState?: number;
+    private random: () => number;
     public constructor(props: DecisionTreeProps = {}) {
-        const { max_depth = Infinity, criterion = 'entropy', min_samples_split = 2 } = props;
+        const { max_depth = Infinity, criterion = 'entropy', min_samples_split = 2, max_features, randomState } = props;
         this.dtree = null;
         this.max_depth = max_depth;
         this.criterion = criterion;
         this.feature_number = 0;
         this.min_samples_split = min_samples_split;
+        this.max_features = max_features;
+        this.randomState = randomState;
+        this.random = this.createRandomGenerator(this.randomState);
         if (criterion === 'entropy') {
             this.impurity = entropy;
         } else {
             this.impurity = gini;
         }
+    }
+
+    private createRandomGenerator(seed?: number): () => number {
+        if (seed === undefined) {
+            return Math.random;
+        }
+        let state = Math.floor(seed) % 2147483647;
+        if (state <= 0) {
+            state += 2147483646;
+        }
+        return () => {
+            state = (state * 16807) % 2147483647;
+            return (state - 1) / 2147483646;
+        };
+    }
+
+    private selectedFeatureIndices(): number[] {
+        let size = this.feature_number;
+        if (this.max_features !== undefined) {
+            if (this.max_features === 'sqrt') {
+                size = Math.max(1, Math.ceil(Math.sqrt(this.feature_number)));
+            } else if (this.max_features === 'log2') {
+                size = Math.max(1, Math.ceil(Math.log2(this.feature_number)));
+            } else if (this.max_features > 0 && this.max_features <= 1) {
+                size = Math.max(1, Math.ceil(this.feature_number * this.max_features));
+            } else {
+                size = Math.max(1, Math.min(this.feature_number, Math.floor(this.max_features)));
+            }
+        }
+        const indices = Array.from({ length: this.feature_number }, (_, i) => i);
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(this.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        return indices.slice(0, size);
     }
     /**
      *
@@ -88,10 +131,10 @@ export class DecisionTreeClassifier {
             attIndex: -1,
             splitValue: 0,
         };
-        const { feature_number } = this;
+        const featureIndices = this.selectedFeatureIndices();
         let maxGain = -Infinity;
         let maxGainAttIndex = 0;
-        for (let i = 0; i < feature_number; i++) {
+        for (const i of featureIndices) {
             let attIndex = i;
             const values = sampleX.map((r) => r[attIndex]);
             const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
@@ -137,6 +180,7 @@ export class DecisionTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
+        this.random = this.createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         this.dtree = {
             nodeValue: 0,
