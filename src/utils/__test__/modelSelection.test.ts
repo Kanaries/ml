@@ -1,6 +1,6 @@
 import { KNearstNeighbors } from '../../neighbors/knn';
 import { meanSquaredError } from '../../metrics';
-import { KFold, crossValScore } from '../modelSelection';
+import { KFold, StratifiedKFold, GridSearchCV, RandomizedSearchCV, crossValScore } from '../modelSelection';
 
 test('KFold split without shuffle is deterministic and exhaustive', () => {
     const X = Array.from({ length: 10 }, (_, i) => [i]);
@@ -79,4 +79,75 @@ test('KFold and crossValScore validate inputs', () => {
     expect(() =>
         crossValScore(() => new KNearstNeighbors(1), [[1], [2]], [0], { cv: 2 }),
     ).toThrow('X and y must have the same length');
+});
+
+test('StratifiedKFold preserves class balance across folds', () => {
+    const X = Array.from({ length: 12 }, (_, i) => [i]);
+    const y = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1];
+    const skf = new StratifiedKFold({ nSplits: 3, shuffle: true, randomState: 7 });
+    const folds = skf.split(X, y);
+
+    expect(folds).toHaveLength(3);
+    for (const fold of folds) {
+        const testLabels = fold.testIndices.map(index => y[index]).sort((a, b) => a - b);
+        expect(testLabels).toEqual([0, 0, 1, 1]);
+    }
+});
+
+test('StratifiedKFold validates label distribution', () => {
+    const X = [[0], [1], [2], [3]];
+    const y = [0, 0, 0, 1];
+    expect(() => new StratifiedKFold({ nSplits: 3 }).split(X, y)).toThrow(
+        'Each class must have at least nSplits samples',
+    );
+});
+
+test('GridSearchCV selects the best parameter combination and refits', () => {
+    const X = [[0], [1], [2], [10], [11], [12]];
+    const y = [0, 0, 0, 1, 1, 1];
+
+    const search = new GridSearchCV({
+        estimatorFactory: params => new KNearstNeighbors(params.nNeighbors),
+        paramGrid: {
+            nNeighbors: [1, 3, 5],
+        },
+        cv: new KFold({ nSplits: 3, shuffle: true, randomState: 42 }),
+    });
+
+    search.fit(X, y);
+
+    expect(search.bestParams).toEqual({ nNeighbors: 1 });
+    expect(search.bestScore).toBeGreaterThanOrEqual(0);
+    expect(search.predict([[0.2], [11.8]])).toEqual([0, 1]);
+});
+
+test('RandomizedSearchCV is reproducible with randomState', () => {
+    const X = [[0], [1], [2], [10], [11], [12]];
+    const y = [0, 0, 0, 1, 1, 1];
+    const config = {
+        estimatorFactory: (params: { nNeighbors: number }) => new KNearstNeighbors(params.nNeighbors),
+        paramDistributions: {
+            nNeighbors: [1, 3, 5],
+        },
+        nIter: 2,
+        cv: new KFold({ nSplits: 3, shuffle: true, randomState: 42 }),
+        randomState: 9,
+    };
+
+    const run1 = new RandomizedSearchCV(config);
+    const run2 = new RandomizedSearchCV(config);
+    run1.fit(X, y);
+    run2.fit(X, y);
+
+    expect(run1.bestParams).toEqual(run2.bestParams);
+    expect(run1.bestScore).toBeCloseTo(run2.bestScore, 12);
+});
+
+test('search estimators validate fit lifecycle', () => {
+    const search = new GridSearchCV({
+        estimatorFactory: params => new KNearstNeighbors(params.nNeighbors),
+        paramGrid: { nNeighbors: [1] },
+    });
+
+    expect(() => search.predict([[0]])).toThrow('search must be fitted before calling predict');
 });
