@@ -22,6 +22,8 @@ scripts = [
     'gen_optics.py',
     'gen_logistic_regression.py',
     'gen_linear_svr.py',
+    'gen_elastic_net.py',
+    'gen_ridge_classifier.py',
     'gen_adaboost_classifier.py',
     'gen_bernoulli_nb.py',
     'gen_categorical_nb.py',

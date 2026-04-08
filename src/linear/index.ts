@@ -3,3 +3,7 @@ export { LogisticRegression } from './logisticRegression';
 export { PolynomialRegression } from './polynomialRegression';
 export { RidgeRegression } from './ridgeRegression';
 export { LassoRegression } from './lassoRegression';
+export { Ridge } from './ridge';
+export { Lasso } from './lasso';
+export { ElasticNet } from './elasticNet';
+export { RidgeClassifier } from './ridgeClassifier';

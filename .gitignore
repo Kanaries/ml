@@ -114,9 +114,11 @@ dist
 test_data/*
 !test_data/
 !test_data/complement_nb.json
+!test_data/elastic_net.json
 !test_data/gaussian_nb.json
 !test_data/kneighbors_regressor.json
 !test_data/multinomial_nb.json
 !test_data/nearest_centroid.json
 !test_data/radius_neighbors_classifier.json
 !test_data/radius_neighbors_regressor.json
+!test_data/ridge_classifier.json
