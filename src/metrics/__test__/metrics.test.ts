@@ -1,9 +1,15 @@
 import {
     accuracyScore,
+    adjustedRandScore,
+    confusionMatrix,
     precisionScore,
+    precisionRecallCurve,
+    precisionRecallFscoreSupport,
     recallScore,
     f1Score,
     meanSquaredError,
+    rocAucScore,
+    rocCurve,
     r2Score,
 } from '../index';
 
@@ -43,4 +49,46 @@ test('meanSquaredError and r2Score for regression', () => {
 test('metrics validate input lengths', () => {
     expect(() => accuracyScore([1], [1, 0])).toThrow('actual and expected must have the same length');
     expect(() => meanSquaredError([], [])).toThrow('actual and expected must be non-empty');
+});
+
+test('precisionRecallFscoreSupport returns macro metrics and supports', () => {
+    const actual = [0, 1, 2, 2, 1, 0];
+    const expected = [0, 2, 2, 1, 1, 0];
+
+    const result = precisionRecallFscoreSupport(actual, expected, { average: 'macro' });
+    expect(result.precision).toBeCloseTo(2 / 3);
+    expect(result.recall).toBeCloseTo(2 / 3);
+    expect(result.fScore).toBeCloseTo(2 / 3);
+    expect(result.support).toEqual([2, 2, 2]);
+});
+
+test('confusionMatrix counts predictions by class order', () => {
+    const actual = [0, 1, 0, 1];
+    const expected = [0, 0, 1, 1];
+
+    expect(confusionMatrix(actual, expected)).toEqual([
+        [1, 1],
+        [1, 1],
+    ]);
+});
+
+test('rocCurve, precisionRecallCurve, and rocAucScore compute binary ranking metrics', () => {
+    const scores = [0.1, 0.4, 0.35, 0.8];
+    const expected = [0, 0, 1, 1];
+
+    const roc = rocCurve(expected, scores);
+    expect(roc.fpr[0]).toBe(0);
+    expect(roc.tpr[0]).toBe(0);
+    expect(roc.thresholds[0]).toBe(Infinity);
+    expect(rocAucScore(expected, scores)).toBeCloseTo(0.75);
+
+    const pr = precisionRecallCurve(expected, scores);
+    expect(pr.precision[0]).toBeCloseTo(2 / 4);
+    expect(pr.recall[0]).toBe(1);
+    expect(pr.thresholds).toEqual([0.1, 0.35, 0.4, 0.8]);
+});
+
+test('adjustedRandScore handles perfect and imperfect clustering matches', () => {
+    expect(adjustedRandScore([0, 0, 1, 1], [1, 1, 0, 0])).toBeCloseTo(1);
+    expect(adjustedRandScore([0, 0, 1, 1], [0, 1, 0, 1])).toBeCloseTo(-0.5);
 });

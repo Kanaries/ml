@@ -7,6 +7,31 @@ export interface MinMaxScalerProps {
     featureRange?: [number, number];
 }
 
+export interface NormalizerProps {
+    norm?: 'l1' | 'l2' | 'max';
+}
+
+export interface BinarizerProps {
+    threshold?: number;
+}
+
+export interface SimpleImputerProps {
+    strategy?: 'mean' | 'median' | 'mostFrequent' | 'constant';
+    fillValue?: number;
+    missingValues?: number | null;
+}
+
+export interface VarianceThresholdProps {
+    threshold?: number;
+}
+
+export type FeatureScoreFunc = (X: number[][], y: number[]) => number[];
+
+export interface SelectKBestProps {
+    k?: number;
+    scoreFunc?: FeatureScoreFunc;
+}
+
 function validateMatrix(X: number[][]): void {
     if (X.length === 0) {
         throw new Error('X must be non-empty');
@@ -19,6 +44,13 @@ function validateMatrix(X: number[][]): void {
         if (X[i].length !== nFeatures) {
             throw new Error('X must be a rectangular matrix');
         }
+    }
+}
+
+function assertSameFeatureCount(X: number[][], featureCount: number, message: string): void {
+    validateMatrix(X);
+    if (X[0].length !== featureCount) {
+        throw new Error(message);
     }
 }
 
@@ -197,5 +229,387 @@ export class MinMaxScaler {
                 return (value - this.offsets[j]) / scale;
             })
         );
+    }
+}
+
+export class MaxAbsScaler {
+    private maxAbs: number[];
+    private fitted: boolean;
+
+    constructor() {
+        this.maxAbs = [];
+        this.fitted = false;
+    }
+
+    public fit(X: number[][]): void {
+        validateMatrix(X);
+        const nFeatures = X[0].length;
+        this.maxAbs = new Array(nFeatures).fill(0);
+        for (let j = 0; j < nFeatures; j++) {
+            let maxValue = 0;
+            for (let i = 0; i < X.length; i++) {
+                maxValue = Math.max(maxValue, Math.abs(X[i][j]));
+            }
+            this.maxAbs[j] = maxValue === 0 ? 1 : maxValue;
+        }
+        this.fitted = true;
+    }
+
+    public transform(X: number[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('MaxAbsScaler must be fitted before calling transform');
+        }
+        assertSameFeatureCount(X, this.maxAbs.length, 'X has different number of features than fitted data');
+        return X.map(row => row.map((value, j) => value / this.maxAbs[j]));
+    }
+
+    public fitTransform(X: number[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+
+    public inverseTransform(X: number[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('MaxAbsScaler must be fitted before calling inverseTransform');
+        }
+        assertSameFeatureCount(X, this.maxAbs.length, 'X has different number of features than fitted data');
+        return X.map(row => row.map((value, j) => value * this.maxAbs[j]));
+    }
+}
+
+export class Normalizer {
+    private norm: 'l1' | 'l2' | 'max';
+
+    constructor(props: NormalizerProps = {}) {
+        this.norm = props.norm || 'l2';
+    }
+
+    public fit(_X: number[][]): void {}
+
+    public transform(X: number[][]): number[][] {
+        validateMatrix(X);
+        return X.map(row => {
+            let scale = 1;
+            if (this.norm === 'l1') {
+                scale = row.reduce((sum, value) => sum + Math.abs(value), 0);
+            } else if (this.norm === 'l2') {
+                scale = Math.sqrt(row.reduce((sum, value) => sum + value * value, 0));
+            } else {
+                scale = row.reduce((maxValue, value) => Math.max(maxValue, Math.abs(value)), 0);
+            }
+            if (scale === 0) {
+                return row.map(() => 0);
+            }
+            return row.map(value => value / scale);
+        });
+    }
+
+    public fitTransform(X: number[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+}
+
+export class LabelEncoder {
+    private classes: number[] = [];
+    private fitted = false;
+
+    public fit(y: number[]): void {
+        if (y.length === 0) {
+            throw new Error('y must be non-empty');
+        }
+        this.classes = Array.from(new Set(y)).sort((a, b) => a - b);
+        this.fitted = true;
+    }
+
+    public transform(y: number[]): number[] {
+        if (!this.fitted) {
+            throw new Error('LabelEncoder must be fitted before calling transform');
+        }
+        const indices = new Map<number, number>();
+        this.classes.forEach((value, index) => indices.set(value, index));
+        return y.map(value => {
+            const encoded = indices.get(value);
+            if (encoded === undefined) {
+                throw new Error(`Unknown label ${value}`);
+            }
+            return encoded;
+        });
+    }
+
+    public fitTransform(y: number[]): number[] {
+        this.fit(y);
+        return this.transform(y);
+    }
+
+    public inverseTransform(y: number[]): number[] {
+        if (!this.fitted) {
+            throw new Error('LabelEncoder must be fitted before calling inverseTransform');
+        }
+        return y.map(value => {
+            if (!Number.isInteger(value) || value < 0 || value >= this.classes.length) {
+                throw new Error(`Encoded label ${value} is out of range`);
+            }
+            return this.classes[value];
+        });
+    }
+}
+
+export class Binarizer {
+    private threshold: number;
+
+    constructor(props: BinarizerProps = {}) {
+        this.threshold = props.threshold ?? 0;
+    }
+
+    public fit(_X: number[][]): void {}
+
+    public transform(X: number[][]): number[][] {
+        validateMatrix(X);
+        return X.map(row => row.map(value => (value > this.threshold ? 1 : 0)));
+    }
+
+    public fitTransform(X: number[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+}
+
+function isMissingValue(value: number, missingValues: number | null): boolean {
+    if (missingValues === null) {
+        return value === null;
+    }
+    return Number.isNaN(missingValues) ? Number.isNaN(value) : value === missingValues;
+}
+
+function median(values: number[]): number {
+    const sorted = values.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+        return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+    return sorted[mid];
+}
+
+function mostFrequent(values: number[]): number {
+    const counts = new Map<number, number>();
+    let bestValue = values[0];
+    let bestCount = 0;
+    for (const value of values) {
+        const count = (counts.get(value) || 0) + 1;
+        counts.set(value, count);
+        if (count > bestCount || (count === bestCount && value < bestValue)) {
+            bestValue = value;
+            bestCount = count;
+        }
+    }
+    return bestValue;
+}
+
+export class SimpleImputer {
+    private strategy: 'mean' | 'median' | 'mostFrequent' | 'constant';
+    private fillValue: number;
+    private missingValues: number | null;
+    private statistics: number[];
+    private fitted: boolean;
+
+    constructor(props: SimpleImputerProps = {}) {
+        const { strategy = 'mean', fillValue = 0, missingValues = Number.NaN } = props;
+        this.strategy = strategy;
+        this.fillValue = fillValue;
+        this.missingValues = missingValues;
+        this.statistics = [];
+        this.fitted = false;
+    }
+
+    public fit(X: number[][]): void {
+        validateMatrix(X);
+        const nFeatures = X[0].length;
+        this.statistics = new Array(nFeatures).fill(0);
+
+        for (let j = 0; j < nFeatures; j++) {
+            const observed: number[] = [];
+            for (let i = 0; i < X.length; i++) {
+                const value = X[i][j];
+                if (!isMissingValue(value, this.missingValues)) {
+                    observed.push(value);
+                }
+            }
+
+            if (this.strategy === 'constant') {
+                this.statistics[j] = this.fillValue;
+                continue;
+            }
+            if (observed.length === 0) {
+                throw new Error(`Feature ${j} has no observed values`);
+            }
+            if (this.strategy === 'mean') {
+                this.statistics[j] = observed.reduce((sum, value) => sum + value, 0) / observed.length;
+            } else if (this.strategy === 'median') {
+                this.statistics[j] = median(observed);
+            } else {
+                this.statistics[j] = mostFrequent(observed);
+            }
+        }
+        this.fitted = true;
+    }
+
+    public transform(X: number[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('SimpleImputer must be fitted before calling transform');
+        }
+        assertSameFeatureCount(X, this.statistics.length, 'X has different number of features than fitted data');
+        return X.map(row =>
+            row.map((value, j) => (isMissingValue(value, this.missingValues) ? this.statistics[j] : value))
+        );
+    }
+
+    public fitTransform(X: number[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+}
+
+export class VarianceThreshold {
+    private threshold: number;
+    private selectedIndices: number[];
+    private fitted: boolean;
+
+    constructor(props: VarianceThresholdProps = {}) {
+        this.threshold = props.threshold ?? 0;
+        this.selectedIndices = [];
+        this.fitted = false;
+    }
+
+    public fit(X: number[][]): void {
+        validateMatrix(X);
+        const nFeatures = X[0].length;
+        this.selectedIndices = [];
+        for (let j = 0; j < nFeatures; j++) {
+            let mean = 0;
+            for (let i = 0; i < X.length; i++) {
+                mean += X[i][j];
+            }
+            mean /= X.length;
+
+            let variance = 0;
+            for (let i = 0; i < X.length; i++) {
+                const diff = X[i][j] - mean;
+                variance += diff * diff;
+            }
+            variance /= X.length;
+            if (variance > this.threshold) {
+                this.selectedIndices.push(j);
+            }
+        }
+        if (this.selectedIndices.length === 0) {
+            throw new Error('No feature meets the variance threshold');
+        }
+        this.fitted = true;
+    }
+
+    public transform(X: number[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('VarianceThreshold must be fitted before calling transform');
+        }
+        validateMatrix(X);
+        return X.map(row => this.selectedIndices.map(index => row[index]));
+    }
+
+    public fitTransform(X: number[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+}
+
+export function fRegression(X: number[][], y: number[]): number[] {
+    validateMatrix(X);
+    if (X.length !== y.length) {
+        throw new Error('X and y must have the same length');
+    }
+    const nSamples = X.length;
+    const nFeatures = X[0].length;
+    const yMean = y.reduce((sum, value) => sum + value, 0) / nSamples;
+    const yVariance = y.reduce((sum, value) => sum + (value - yMean) ** 2, 0);
+
+    return Array.from({ length: nFeatures }, (_, j) => {
+        let xMean = 0;
+        for (let i = 0; i < nSamples; i++) {
+            xMean += X[i][j];
+        }
+        xMean /= nSamples;
+
+        let covariance = 0;
+        let xVariance = 0;
+        for (let i = 0; i < nSamples; i++) {
+            const xDiff = X[i][j] - xMean;
+            const yDiff = y[i] - yMean;
+            covariance += xDiff * yDiff;
+            xVariance += xDiff * xDiff;
+        }
+
+        if (xVariance === 0 || yVariance === 0) {
+            return 0;
+        }
+        const correlation = covariance / Math.sqrt(xVariance * yVariance);
+        const rSquared = Math.max(0, Math.min(1, correlation * correlation));
+        if (rSquared >= 1) {
+            return Number.POSITIVE_INFINITY;
+        }
+        return (rSquared / (1 - rSquared)) * (nSamples - 2);
+    });
+}
+
+export class SelectKBest {
+    private k: number;
+    private scoreFunc: FeatureScoreFunc;
+    private selectedIndices: number[];
+    private fitted: boolean;
+
+    constructor(props: SelectKBestProps = {}) {
+        this.k = props.k ?? 10;
+        this.scoreFunc = props.scoreFunc || fRegression;
+        this.selectedIndices = [];
+        this.fitted = false;
+    }
+
+    public fit(X: number[][], y: number[]): void {
+        validateMatrix(X);
+        if (X.length !== y.length) {
+            throw new Error('X and y must have the same length');
+        }
+        const nFeatures = X[0].length;
+        if (!Number.isInteger(this.k) || this.k <= 0 || this.k > nFeatures) {
+            throw new Error('k must be an integer between 1 and the number of features');
+        }
+        const scores = this.scoreFunc(X, y);
+        if (scores.length !== nFeatures) {
+            throw new Error('scoreFunc must return one score per feature');
+        }
+        this.selectedIndices = scores
+            .map((score, index) => ({ score, index }))
+            .sort((a, b) => {
+                if (b.score === a.score) {
+                    return a.index - b.index;
+                }
+                return b.score - a.score;
+            })
+            .slice(0, this.k)
+            .map(item => item.index)
+            .sort((a, b) => a - b);
+        this.fitted = true;
+    }
+
+    public transform(X: number[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('SelectKBest must be fitted before calling transform');
+        }
+        validateMatrix(X);
+        return X.map(row => this.selectedIndices.map(index => row[index]));
+    }
+
+    public fitTransform(X: number[][], y: number[]): number[][] {
+        this.fit(X, y);
+        return this.transform(X);
     }
 }
