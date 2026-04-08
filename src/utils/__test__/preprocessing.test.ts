@@ -4,6 +4,8 @@ import {
     MaxAbsScaler,
     MinMaxScaler,
     Normalizer,
+    OneHotEncoder,
+    OrdinalEncoder,
     SelectKBest,
     SimpleImputer,
     StandardScaler,
@@ -131,6 +133,59 @@ test('LabelEncoder encodes and decodes labels in sorted order', () => {
 
     expect(encoded).toEqual([2, 0, 2, 1]);
     expect(encoder.inverseTransform([0, 1, 2])).toEqual([2, 3, 5]);
+});
+
+test('OrdinalEncoder encodes categorical columns and supports inverseTransform', () => {
+    const encoder = new OrdinalEncoder();
+    const X = [
+        ['red', 'S'],
+        ['blue', 'M'],
+        ['red', 'L'],
+    ];
+    const encoded = encoder.fitTransform(X);
+
+    expect(encoded).toEqual([
+        [1, 2],
+        [0, 1],
+        [1, 0],
+    ]);
+    expect(encoder.inverseTransform(encoded)).toEqual(X);
+});
+
+test('OrdinalEncoder validates unknown categories at transform time', () => {
+    const encoder = new OrdinalEncoder();
+    encoder.fit([
+        ['red'],
+        ['blue'],
+    ]);
+    expect(() => encoder.transform([['green']])).toThrow('Unknown category green in column 0');
+});
+
+test('OneHotEncoder expands categorical columns and can drop binary first level', () => {
+    const encoder = new OneHotEncoder({ drop: 'ifBinary' });
+    const X = [
+        ['red', 'yes'],
+        ['blue', 'no'],
+        ['green', 'no'],
+    ];
+    const encoded = encoder.fitTransform(X);
+
+    expect(encoded).toEqual([
+        [0, 0, 1, 1],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+    ]);
+});
+
+test('OneHotEncoder inverseTransform recovers original categories', () => {
+    const encoder = new OneHotEncoder();
+    const X = [
+        ['circle', 'solid'],
+        ['square', 'dashed'],
+    ];
+    const encoded = encoder.fitTransform(X);
+
+    expect(encoder.inverseTransform(encoded)).toEqual(X);
 });
 
 test('Binarizer thresholds feature values', () => {

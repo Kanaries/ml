@@ -32,7 +32,28 @@ export interface SelectKBestProps {
     scoreFunc?: FeatureScoreFunc;
 }
 
+export type CategoricalValue = string | number | boolean | null;
+
+export interface OneHotEncoderProps {
+    drop?: 'none' | 'first' | 'ifBinary';
+}
+
 function validateMatrix(X: number[][]): void {
+    if (X.length === 0) {
+        throw new Error('X must be non-empty');
+    }
+    const nFeatures = X[0].length;
+    if (nFeatures === 0) {
+        throw new Error('X must contain at least one feature');
+    }
+    for (let i = 1; i < X.length; i++) {
+        if (X[i].length !== nFeatures) {
+            throw new Error('X must be a rectangular matrix');
+        }
+    }
+}
+
+function validateCategoricalMatrix(X: CategoricalValue[][]): void {
     if (X.length === 0) {
         throw new Error('X must be non-empty');
     }
@@ -372,6 +393,170 @@ export class Binarizer {
     public fitTransform(X: number[][]): number[][] {
         this.fit(X);
         return this.transform(X);
+    }
+}
+
+export class OrdinalEncoder {
+    private categories: CategoricalValue[][];
+    private fitted: boolean;
+
+    constructor() {
+        this.categories = [];
+        this.fitted = false;
+    }
+
+    public fit(X: CategoricalValue[][]): void {
+        validateCategoricalMatrix(X);
+        const nFeatures = X[0].length;
+        this.categories = new Array(nFeatures).fill(null).map(() => []);
+        for (let j = 0; j < nFeatures; j++) {
+            const values = Array.from(new Set(X.map(row => row[j])));
+            values.sort((a, b) => String(a).localeCompare(String(b)));
+            this.categories[j] = values;
+        }
+        this.fitted = true;
+    }
+
+    public transform(X: CategoricalValue[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('OrdinalEncoder must be fitted before calling transform');
+        }
+        validateCategoricalMatrix(X);
+        if (X[0].length !== this.categories.length) {
+            throw new Error('X has different number of features than fitted data');
+        }
+        return X.map(row =>
+            row.map((value, j) => {
+                const index = this.categories[j].indexOf(value);
+                if (index === -1) {
+                    throw new Error(`Unknown category ${String(value)} in column ${j}`);
+                }
+                return index;
+            })
+        );
+    }
+
+    public fitTransform(X: CategoricalValue[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+
+    public inverseTransform(X: number[][]): CategoricalValue[][] {
+        if (!this.fitted) {
+            throw new Error('OrdinalEncoder must be fitted before calling inverseTransform');
+        }
+        assertSameFeatureCount(X, this.categories.length, 'X has different number of features than fitted data');
+        return X.map(row =>
+            row.map((value, j) => {
+                if (!Number.isInteger(value) || value < 0 || value >= this.categories[j].length) {
+                    throw new Error(`Encoded category ${value} is out of range for column ${j}`);
+                }
+                return this.categories[j][value];
+            })
+        );
+    }
+}
+
+export class OneHotEncoder {
+    private drop: 'none' | 'first' | 'ifBinary';
+    private categories: CategoricalValue[][];
+    private retainedCategories: CategoricalValue[][];
+    private fitted: boolean;
+
+    constructor(props: OneHotEncoderProps = {}) {
+        this.drop = props.drop ?? 'none';
+        this.categories = [];
+        this.retainedCategories = [];
+        this.fitted = false;
+    }
+
+    private categoriesToEncode(values: CategoricalValue[]): CategoricalValue[] {
+        if (this.drop === 'none') {
+            return values.slice();
+        }
+        if (this.drop === 'first') {
+            return values.slice(1);
+        }
+        return values.length === 2 ? values.slice(1) : values.slice();
+    }
+
+    public fit(X: CategoricalValue[][]): void {
+        validateCategoricalMatrix(X);
+        const nFeatures = X[0].length;
+        this.categories = new Array(nFeatures).fill(null).map(() => []);
+        this.retainedCategories = new Array(nFeatures).fill(null).map(() => []);
+        for (let j = 0; j < nFeatures; j++) {
+            const values = Array.from(new Set(X.map(row => row[j])));
+            values.sort((a, b) => String(a).localeCompare(String(b)));
+            this.categories[j] = values;
+            this.retainedCategories[j] = this.categoriesToEncode(values);
+        }
+        this.fitted = true;
+    }
+
+    public transform(X: CategoricalValue[][]): number[][] {
+        if (!this.fitted) {
+            throw new Error('OneHotEncoder must be fitted before calling transform');
+        }
+        validateCategoricalMatrix(X);
+        if (X[0].length !== this.categories.length) {
+            throw new Error('X has different number of features than fitted data');
+        }
+        return X.map(row => {
+            const encoded: number[] = [];
+            for (let j = 0; j < row.length; j++) {
+                const categoryIndex = this.categories[j].indexOf(row[j]);
+                if (categoryIndex === -1) {
+                    throw new Error(`Unknown category ${String(row[j])} in column ${j}`);
+                }
+                for (const retained of this.retainedCategories[j]) {
+                    encoded.push(row[j] === retained ? 1 : 0);
+                }
+            }
+            return encoded;
+        });
+    }
+
+    public fitTransform(X: CategoricalValue[][]): number[][] {
+        this.fit(X);
+        return this.transform(X);
+    }
+
+    public inverseTransform(X: number[][]): CategoricalValue[][] {
+        if (!this.fitted) {
+            throw new Error('OneHotEncoder must be fitted before calling inverseTransform');
+        }
+        validateMatrix(X);
+        const expectedWidth = this.retainedCategories.reduce((sum, values) => sum + values.length, 0);
+        if (X[0].length !== expectedWidth) {
+            throw new Error('X has different number of encoded features than fitted data');
+        }
+
+        return X.map(row => {
+            const decoded: CategoricalValue[] = [];
+            let offset = 0;
+            for (let j = 0; j < this.categories.length; j++) {
+                const retained = this.retainedCategories[j];
+                const width = retained.length;
+                const slice = row.slice(offset, offset + width);
+                offset += width;
+
+                if (width === 0) {
+                    decoded.push(this.categories[j][0]);
+                    continue;
+                }
+
+                const activeIndex = slice.findIndex(value => value === 1);
+                if (activeIndex !== -1) {
+                    decoded.push(retained[activeIndex]);
+                    continue;
+                }
+
+                const dropped = this.categories[j].find(category => !retained.includes(category));
+                decoded.push(dropped === undefined ? this.categories[j][0] : dropped);
+            }
+            return decoded;
+        });
     }
 }
 
