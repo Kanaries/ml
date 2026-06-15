@@ -1,3 +1,60 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+/* ------------------------------------------------------------------ *
+ *  Academic / scientific-journal theme
+ *  Warm "paper & ink" palette with a single Prussian-blue accent.
+ *  Overrides the fumadocs neutral preset site-wide for a cohesive,
+ *  scholarly identity across nav, docs and the home page.
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-fd-background: #faf8f1;
+  --color-fd-foreground: #1c1a16;
+  --color-fd-muted: #f1ebdd;
+  --color-fd-muted-foreground: #6c6456;
+  --color-fd-popover: #fffdf8;
+  --color-fd-popover-foreground: #1c1a16;
+  --color-fd-card: #fffdf7;
+  --color-fd-card-foreground: #1c1a16;
+  --color-fd-border: rgba(58, 48, 28, 0.16);
+  --color-fd-primary: #1d3f72;
+  --color-fd-primary-foreground: #faf8f1;
+  --color-fd-secondary: #f1ebdd;
+  --color-fd-secondary-foreground: #1c1a16;
+  --color-fd-accent: #ece4d2;
+  --color-fd-accent-foreground: #1c1a16;
+  --color-fd-ring: #1d3f72;
+}
+
+.dark {
+  --color-fd-background: #14120e;
+  --color-fd-foreground: #ece4d4;
+  --color-fd-muted: #1f1c16;
+  --color-fd-muted-foreground: #a89c87;
+  --color-fd-popover: #1a1712;
+  --color-fd-popover-foreground: #ece4d4;
+  --color-fd-card: #1a1711;
+  --color-fd-card-foreground: #f4eee0;
+  --color-fd-border: rgba(226, 206, 162, 0.14);
+  --color-fd-primary: #a3c2ef;
+  --color-fd-primary-foreground: #14120e;
+  --color-fd-secondary: #221e17;
+  --color-fd-secondary-foreground: #ece4d4;
+  --color-fd-accent: #26211a;
+  --color-fd-accent-foreground: #f0e9da;
+  --color-fd-ring: #a3c2ef;
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: #1f1c16;
+  --color-fd-secondary: #24201a;
+  --color-fd-muted-foreground: #b6ab97;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+      'Segoe UI', sans-serif;
+  }
+}
