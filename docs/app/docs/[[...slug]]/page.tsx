@@ -7,9 +7,11 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { buildSeoProfile } from '@/lib/seo';
+import { getDisplayTitle, getDisplayTitleNode } from '@/lib/title';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
@@ -24,6 +26,17 @@ export default async function Page(props: {
   const slug = params.slug ?? [];
   const path = slug.length ? `/docs/${slug.join('/')}` : '/docs';
   const canonicalUrl = new URL(path, siteUrl).toString();
+  const displayTitle = getDisplayTitle(page.data.title);
+  const displayToc = page.data.toc
+    .map((item) => {
+      const title = getDisplayTitleNode(item.title);
+
+      return {
+        ...item,
+        title,
+      };
+    })
+    .filter((item) => item.title !== displayTitle);
   const seoProfile = buildSeoProfile({
     title: page.data.title,
     description: page.data.description,
@@ -66,14 +79,24 @@ export default async function Page(props: {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
-      <DocsPage toc={page.data.toc} full={page.data.full}>
-        <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsPage toc={displayToc} full={page.data.full}>
+        <DocsTitle>{displayTitle}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
           <MDXContent
             components={getMDXComponents({
               // this allows you to link to other pages with relative file paths
               a: createRelativeLink(source, page),
+              h1: (props) => {
+                const children = getDisplayTitleNode(props.children);
+
+                if (children === displayTitle) return null;
+
+                return defaultMdxComponents.h1({
+                  ...props,
+                  children,
+                });
+              },
             })}
           />
           <section className="mt-12 rounded-lg border border-fd-border bg-fd-muted/40 p-6">

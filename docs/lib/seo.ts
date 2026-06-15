@@ -1,3 +1,5 @@
+import { getDisplayTitle } from '@/lib/title';
+
 type SeoInput = {
   title: string;
   description?: string;
@@ -60,7 +62,7 @@ function unique(values: string[]): string[] {
 }
 
 function titleToTopic(title: string): string {
-  return title.replace(/\s+[-–]\s+@kanaries\/ml.*$/i, '').replace(/\s{2,}/g, ' ').trim();
+  return getDisplayTitle(title.replace(/\s+[-–]\s+@kanaries\/ml.*$/i, '')).replace(/\s{2,}/g, ' ').trim();
 }
 
 function slugToWords(value: string): string {
