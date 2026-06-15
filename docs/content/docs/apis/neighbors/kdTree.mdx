@@ -58,7 +58,7 @@ const { distances, indices } = tree.query([[1.2, 1.1]], 2);
 constructor(
     X: number[][] = [],
     leafSize: number = 40,
-    metric: Distance.IDistanceType = 'euclidiean',
+    metric: Distance.IDistanceType = 'euclidean',
     p: number = 2
 )
 ```
@@ -68,7 +68,7 @@ constructor(
 - `X` *(number[][])*: data used to build the tree. You can also call `fit` later.
 - `leafSize` *(number)*: maximum samples per leaf. Default is `40`.
 - `metric` *(Distance.IDistanceType)*: distance metric used for queries. Default
-  `'euclidiean'`.
+  `'euclidean'`.
 - `p` *(number)*: order of the norm when using Minkowski distance. Default `2`.
 
 ### Algorithm

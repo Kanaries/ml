@@ -64,7 +64,7 @@ const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);
 constructor(
     kNeighbors: number = 5,
     weightType: IWeightType = 'uniform',
-    distanceType: Distance.IDistanceType = 'euclidiean',
+    distanceType: Distance.IDistanceType = 'euclidean',
     pNorm: number = 2
 )
 ```
@@ -75,7 +75,7 @@ constructor(
 - `weightType` *(`'uniform' | 'distance'`)*: weighting strategy for voting. `'uniform'`
   counts every neighbor equally while `'distance'` weighs closer samples more.
 - `distanceType` *(Distance.IDistanceType)*: distance metric. Defaults to
-  `'euclidiean'` but other metrics from `Distance` can be used.
+  `'euclidean'` but other metrics from `Distance` can be used.
 - `pNorm` *(number)*: order of the norm when using Minkowski distance. Default is
   `2`.
 

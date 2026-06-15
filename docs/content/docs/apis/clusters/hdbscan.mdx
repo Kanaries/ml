@@ -59,7 +59,7 @@ constructor(
     min_cluster_size: number = 5,
     min_samples: number | null = null,
     cluster_selection_epsilon: number = 0.5,
-    metric: Distance.IDistanceType = 'euclidiean'
+    metric: Distance.IDistanceType = 'euclidean'
 )
 ```
 
@@ -68,7 +68,7 @@ constructor(
 This is a simplified implementation that internally calls DBSCAN using `cluster_selection_epsilon` as the `eps` parameter.
 
 ```ts
-const hdb = new HDBScan(5, null, 0.6);
+const hdb = new Clusters.HDBScan(2, null, 0.4);
 const labels = hdb.fitPredict(X);
 ```
 

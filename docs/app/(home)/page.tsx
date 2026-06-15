@@ -32,8 +32,8 @@ const WHY_JS = [
     description: 'Create exploratory dashboards that react instantly without server round-trips.',
   },
   {
-    title: 'Tiny bundles & WASM-ready',
-    description: 'Tree-shakable ESM builds, typed arrays and Web Worker friendly execution.',
+    title: 'Tiny, tree-shakable bundles',
+    description: 'Tree-shakable ESM builds, typed arrays, and Web Worker friendly execution via asyncMode.',
   },
 ];
 
@@ -67,11 +67,11 @@ const FEATURES = [
   },
   {
     title: 'Fast numerics',
-    description: 'Typed arrays and WASM-friendly architecture keep memory low and performance high.',
+    description: 'Typed arrays and tight inner loops keep memory low and performance high.',
   },
   {
-    title: 'Model persistence',
-    description: 'Serialize trained pipelines to JSON and reload them in any runtime.',
+    title: 'Built-in metrics',
+    description: 'Accuracy, precision/recall, F1, ROC-AUC, R², and confusion matrices ship in the metrics module.',
   },
   {
     title: 'Docs for every algorithm',
@@ -131,7 +131,7 @@ const HOW_IT_WORKS = [
   },
   {
     title: 'Deploy anywhere',
-    description: 'Persist to JSON, load in browsers or Node.js, and call predict in milliseconds.',
+    description: 'Run the same fit/predict code in browsers, Node.js, and edge functions.',
   },
 ];
 
@@ -139,7 +139,7 @@ const FAQ_ITEMS = [
   {
     question: 'Is JavaScript fast enough for ML?',
     answer:
-      'Yes—for small to medium datasets and interactive experiences, @kanaries/ml delivers responsive inference. Use Web Workers to keep UIs snappy and review our benchmarks for throughput guidance.',
+      'Yes—for small to medium datasets and interactive experiences, @kanaries/ml delivers responsive inference. Wrap heavy training or inference in utils.asyncMode to run it off the main thread and keep UIs snappy.',
   },
   {
     question: 'Does it run fully in the browser?',
@@ -149,22 +149,22 @@ const FAQ_ITEMS = [
   {
     question: 'Can I save and load models?',
     answer:
-      'Every estimator can serialize parameters to JSON. Reload them in any JS runtime and resume predictions instantly.',
+      'There is no built-in serialization yet. For now you can re-fit from stored training data, or read a fitted estimator’s parameters and reconstruct it manually.',
   },
   {
     question: 'How close is the API to scikit-learn?',
     answer:
-      'We follow scikit-learn naming and options wherever practical. The migration guide highlights the rare differences.',
+      'We follow scikit-learn naming and options wherever practical. Note that some estimators take positional constructor arguments rather than keyword options, so check each algorithm page for the exact signature.',
   },
   {
     question: 'How big is the bundle?',
     answer:
-      'The core stays well below typical UI bundle budgets and each algorithm tree-shakes to just the code you import. See the benchmarks section for the latest size numbers.',
+      'The full library is about 32 kB gzipped, and each algorithm tree-shakes to just the code you import.',
   },
   {
-    question: 'Does it support Web Workers or WASM?',
+    question: 'Does it support Web Workers?',
     answer:
-      'Yes. The runtime is designed for off-main-thread execution and plays nicely with WASM-backed kernels.',
+      'Yes. utils.asyncMode runs a synchronous function in a Web Worker (browser) or worker thread (Node.js) and returns a Promise, so training and inference can stay off the main thread.',
   },
 ];
 
@@ -336,15 +336,16 @@ console.log(clf.predict([[6.1, 3.1]]));
                 <summary className="cursor-pointer font-semibold">Use from a CDN (browser)</summary>
                 <pre className="mt-4 overflow-x-auto rounded-lg bg-fd-muted p-4 text-left text-sm text-fd-foreground">
                   <code>{`<script type="module">
-  import { KMeans } from 'https://cdn.skypack.dev/@kanaries/ml';
+  import { Clusters } from 'https://cdn.skypack.dev/@kanaries/ml';
 
-  const km = new KMeans({ k: 3 }).fit([
+  const km = new Clusters.KMeans(2);
+  const labels = km.fitPredict([
     [1, 1],
     [1.2, 1.1],
     [5, 5],
   ]);
 
-  console.log(km.predict([[1.1, 1]]));
+  console.log(labels); // [0, 0, 1]
 </script>`}</code>
                 </pre>
               </details>
@@ -387,8 +388,8 @@ console.log(clf.predict([[6.1, 3.1]]));
           <h2 className="text-2xl font-semibold">Benchmarks & footprint</h2>
           <div className="mt-4 space-y-4 text-sm text-fd-muted-foreground">
             <p>
-              Core bundle <strong>&lt; 50 kB gzipped</strong>; individual algorithms typically stay below <strong>15 kB</strong>.
-              Use Web Workers for CPU-heavy tasks and opt into the WASM build for additional throughput.
+              The full library is <strong>~32 kB gzipped</strong>, and individual algorithms tree-shake down to a fraction of that.
+              Use Web Workers (via <code>utils.asyncMode</code>) for CPU-heavy tasks to keep the UI responsive.
             </p>
             <p>
               We are prioritizing API coverage and practical examples first. For implementation details and usage patterns, jump to the full API reference.

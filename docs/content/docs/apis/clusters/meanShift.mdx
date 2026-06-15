@@ -58,7 +58,7 @@ const labels = model.fitPredict(X);
 constructor(
     bandwidth: number = 1,
     max_iter: number = 300,
-    distanceType: Distance.IDistanceType = 'euclidiean'
+    distanceType: Distance.IDistanceType = 'euclidean'
 )
 ```
 
@@ -67,7 +67,7 @@ Methods:
 - `getCentroids(): number[][]`
 
 ```ts
-const ms = new MeanShift(2);
+const ms = new Clusters.MeanShift(2);
 const labels = ms.fitPredict(X);
 const centers = ms.getCentroids();
 ```

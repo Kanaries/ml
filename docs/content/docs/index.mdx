@@ -34,16 +34,15 @@ description: Discover how to train and deploy machine learning models in JavaScr
 ```typescript
 import { Ensemble } from '@kanaries/ml';
 
-const isolationForest = new Ensemble.IsolationForest({
-  nEstimators: 100,
-  contamination: 0.1,
-});
+// constructor(subsamplingSize = 256, treeNum = 100, contamination = 'auto' | number)
+const isolationForest = new Ensemble.IsolationForest(256, 100, 'auto');
 
-const trainingData = [[-1.1], [0.3], [0.5], [100]];
+// "normal" points form a tight cluster
+const trainingData = [[0.1], [0.2], [0.15], [0.3], [0.25], [0.18], [0.22], [0.27]];
 isolationForest.fit(trainingData);
 
-const predictions = isolationForest.predict([[0.1], [0], [90]]);
-// predictions: [0, 0, 1] where 1 indicates an outlier
+const predictions = isolationForest.predict([[0.21], [0.19], [10]]);
+// predictions: [0, 0, 1] where 1 indicates an outlier (the point at 10)
 ```
 
 Isolation Forest isolates anomalies quickly by measuring the path length needed to separate each point. Use it for fraud detection, IoT monitoring, or surfacing suspicious product analytics trends. Continue learning with the [Ensemble module reference](apis/ensemble/index.md) to configure contamination thresholds and scoring utilities.

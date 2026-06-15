@@ -58,7 +58,7 @@ const { distances, indices } = tree.query([[1.2, 1.1]], 2);
 constructor(
     X: number[][] = [],
     leafSize: number = 40,
-    metric: Distance.IDistanceType = 'euclidiean',
+    metric: Distance.IDistanceType = 'euclidean',
     p: number = 2
 )
 ```
@@ -70,7 +70,7 @@ constructor(
 - `leafSize` *(number)*: maximum number of points stored in a leaf. Default is
   `40`.
 - `metric` *(Distance.IDistanceType)*: distance function for search. Defaults to
-  `'euclidiean'`.
+  `'euclidean'`.
 - `p` *(number)*: norm order for Minkowski distance when applicable. Default is
   `2`.
 
