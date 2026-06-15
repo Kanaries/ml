@@ -1,0 +1,12 @@
+{
+  "title": "Ensemble",
+  "pages": [
+    "index",
+    "iforest",
+    "randomForestClassifier",
+    "randomForestRegressor",
+    "baggingClassifier",
+    "adaboostClassifier",
+    "adaboost"
+  ]
+}

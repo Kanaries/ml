@@ -1,4 +1,4 @@
-import { KNearstNeighbors } from '../../neighbors/knn';
+import { KNearestNeighbors } from '../../neighbors/knn';
 import { meanSquaredError } from '../../metrics';
 import { KFold, StratifiedKFold, GridSearchCV, RandomizedSearchCV, crossValScore } from '../modelSelection';
 
@@ -29,7 +29,7 @@ test('crossValScore computes per-fold scores with estimator score method', () =>
     const y = [0, 0, 0, 0, 1, 1, 1, 1];
 
     const scores = crossValScore(
-        () => new KNearstNeighbors(1),
+        () => new KNearestNeighbors(1),
         X,
         y,
         { cv: new KFold({ nSplits: 4, shuffle: true, randomState: 42 }) },
@@ -77,7 +77,7 @@ test('KFold and crossValScore validate inputs', () => {
     expect(() => new KFold({ nSplits: 1 })).toThrow('nSplits must be an integer >= 2');
     expect(() => new KFold({ nSplits: 5 }).split([[1], [2]])).toThrow('nSplits cannot be greater than number of samples');
     expect(() =>
-        crossValScore(() => new KNearstNeighbors(1), [[1], [2]], [0], { cv: 2 }),
+        crossValScore(() => new KNearestNeighbors(1), [[1], [2]], [0], { cv: 2 }),
     ).toThrow('X and y must have the same length');
 });
 
@@ -107,7 +107,7 @@ test('GridSearchCV selects the best parameter combination and refits', () => {
     const y = [0, 0, 0, 1, 1, 1];
 
     const search = new GridSearchCV({
-        estimatorFactory: params => new KNearstNeighbors(params.nNeighbors),
+        estimatorFactory: params => new KNearestNeighbors(params.nNeighbors),
         paramGrid: {
             nNeighbors: [1, 3, 5],
         },
@@ -125,7 +125,7 @@ test('RandomizedSearchCV is reproducible with randomState', () => {
     const X = [[0], [1], [2], [10], [11], [12]];
     const y = [0, 0, 0, 1, 1, 1];
     const config = {
-        estimatorFactory: (params: { nNeighbors: number }) => new KNearstNeighbors(params.nNeighbors),
+        estimatorFactory: (params: { nNeighbors: number }) => new KNearestNeighbors(params.nNeighbors),
         paramDistributions: {
             nNeighbors: [1, 3, 5],
         },
@@ -145,7 +145,7 @@ test('RandomizedSearchCV is reproducible with randomState', () => {
 
 test('search estimators validate fit lifecycle', () => {
     const search = new GridSearchCV({
-        estimatorFactory: params => new KNearstNeighbors(params.nNeighbors),
+        estimatorFactory: params => new KNearestNeighbors(params.nNeighbors),
         paramGrid: { nNeighbors: [1] },
     });
 

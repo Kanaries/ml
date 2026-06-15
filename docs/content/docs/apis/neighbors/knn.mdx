@@ -1,6 +1,6 @@
 ---
 title: k-Nearest Neighbors in JavaScript with @kanaries/ml
-description: Learn what k-Nearest Neighbors does, when to use it, and how to run KNearstNeighbors in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+description: Learn what k-Nearest Neighbors does, when to use it, and how to run KNearestNeighbors in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
@@ -9,7 +9,7 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-KNearstNeighbors predicts from nearby examples and works as a strong non-parametric baseline for classification and regression.
+KNearestNeighbors predicts from nearby examples and works as a strong non-parametric baseline for classification and regression.
 
 This algorithm is especially useful when:
 
@@ -26,7 +26,7 @@ In web products, KNN is often useful for prototypes and medium-sized datasets wh
 ## Quick start
 
 <AlgorithmComparison
-  title={"KNearstNeighbors"}
+  title={"KNearestNeighbors"}
   pythonCode={String.raw`from sklearn.neighbors import KNeighborsClassifier
 
 X = [[0, 0], [1, 1], [1, 0], [0, 1]]
@@ -40,7 +40,7 @@ pred = clf.predict([[0.9, 0.8], [0.2, 0.1]])`}
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new Neighbors.KNearstNeighbors(3, 'distance');
+const clf = new Neighbors.KNearestNeighbors(3, 'distance');
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);`}
 />
@@ -53,10 +53,12 @@ import { Neighbors } from '@kanaries/ml';
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new Neighbors.KNearstNeighbors(3, 'distance');
+const clf = new Neighbors.KNearestNeighbors(3, 'distance');
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);
 ```
+
+`KNearstNeighbors` remains exported as a deprecated compatibility alias for existing code. New code should use `KNearestNeighbors`.
 
 ## Detailed API reference
 

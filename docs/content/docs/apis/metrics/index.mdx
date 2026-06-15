@@ -1,0 +1,129 @@
+---
+title: Metrics in JavaScript and TypeScript with @kanaries/ml
+description: Evaluate classification, regression, clustering, ranking curves, and distance calculations with the @kanaries/ml Metrics JavaScript implementation for browser and Node.js workflows.
+---
+
+# Metrics in JavaScript
+
+## Algorithm overview
+
+Metrics turn model outputs into numbers you can compare, monitor, and use for product decisions. The Metrics module covers common classification scores, regression errors, clustering agreement, binary ranking curves, and distance functions.
+
+Use these helpers when you need to:
+
+- compare JavaScript models with consistent scoring code
+- report classification quality with accuracy, precision, recall, F1, and confusion matrices
+- evaluate regression predictions with MSE and R2
+- inspect binary score thresholds with ROC and precision-recall curves
+- measure clustering agreement with adjusted Rand index
+- reuse distance functions across algorithms and application code
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes metrics as plain JavaScript functions under `Metrics`, so browser tools and Node.js services can evaluate model quality without a Python runtime. The API is intentionally small and works with arrays of numbers, which makes it easy to use next to model predictions, UI charts, and test fixtures.
+
+The function convention is `actual` first and `expected` second for predicted labels or values versus ground truth labels or values.
+
+## Quick start example
+
+```ts
+import { Metrics } from '@kanaries/ml';
+
+const predicted = [0, 1, 1, 0, 1];
+const truth = [0, 1, 0, 0, 1];
+
+const accuracy = Metrics.accuracyScore(predicted, truth);
+const f1 = Metrics.f1Score(predicted, truth, { positiveLabel: 1 });
+const matrix = Metrics.confusionMatrix(predicted, truth, [0, 1]);
+```
+
+```ts
+import { Metrics } from '@kanaries/ml';
+
+const yPred = [2.5, 0.0, 2.1, 7.8];
+const yTrue = [3.0, -0.5, 2.0, 7.0];
+
+const mse = Metrics.meanSquaredError(yPred, yTrue);
+const r2 = Metrics.r2Score(yPred, yTrue);
+```
+
+## Detailed API reference
+
+### Classification metrics
+
+```ts
+accuracyScore(actual: number[], expected: number[], normalize = true): number
+precisionScore(actual: number[], expected: number[], options?: ClassificationMetricOptions): number
+recallScore(actual: number[], expected: number[], options?: ClassificationMetricOptions): number
+f1Score(actual: number[], expected: number[], options?: ClassificationMetricOptions): number
+precisionRecallFscoreSupport(actual: number[], expected: number[], options?: ClassificationMetricOptions): PrecisionRecallFscoreSupportResult
+confusionMatrix(actual: number[], expected: number[], labels?: number[]): number[][]
+```
+
+`ClassificationMetricOptions` supports:
+
+- `average?: 'binary' | 'macro'`, default `'binary'`
+- `positiveLabel?: number`, default `1`
+
+`precisionRecallFscoreSupport` returns `{ precision, recall, fScore, support }`. For binary scoring, `support` contains the positive label support. For macro scoring, support follows the sorted label order.
+
+`confusionMatrix` returns rows by expected label and columns by actual label. Pass `labels` to control row and column order.
+
+### Regression metrics
+
+```ts
+meanSquaredError(actual: number[], expected: number[]): number
+r2Score(actual: number[], expected: number[]): number
+```
+
+Both functions require non-empty arrays with matching lengths.
+
+### Curves and ranking metrics
+
+```ts
+rocCurve(expected: number[], scores: number[], positiveLabel = 1): {
+  fpr: number[];
+  tpr: number[];
+  thresholds: number[];
+}
+
+rocAucScore(expected: number[], scores: number[], positiveLabel = 1): number
+
+precisionRecallCurve(expected: number[], scores: number[], positiveLabel = 1): {
+  precision: number[];
+  recall: number[];
+  thresholds: number[];
+}
+```
+
+Curve functions expect true binary labels in `expected` and model scores in `scores`. The configured `positiveLabel` must be present.
+
+### Clustering agreement
+
+```ts
+adjustedRandScore(labelsTrue: number[], labelsPred: number[]): number
+```
+
+Adjusted Rand score compares two cluster label assignments while accounting for chance agreement.
+
+### Distance utilities
+
+```ts
+Metrics.Distance.manhattan(pos1: number[], pos2: number[]): number
+Metrics.Distance.euclidean(pos1: number[], pos2: number[]): number
+Metrics.Distance.minkowski(pos1: number[], pos2: number[], p = 2): number
+Metrics.Distance.useDistance(distanceType: Distance.IDistanceType): Distance.IDistance
+```
+
+Supported distance types are `'manhattan'`, `'euclidean'`, `'minkowski'`, `'1-norm'`, `'2-norm'`, and `'p-norm'`.
+
+```ts
+const distance = Metrics.Distance.useDistance('minkowski');
+const value = distance([0, 0], [3, 4], 2);
+```
+
+## JavaScript deployment notes
+
+- Keep a single metric convention across validation, tests, and UI reporting.
+- For binary classifiers, store the positive label next to the model configuration.
+- Use curve outputs directly with chart libraries when tuning thresholds in browser-based analysis tools.

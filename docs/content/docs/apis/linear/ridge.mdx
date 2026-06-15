@@ -1,0 +1,40 @@
+---
+title: Ridge in JavaScript with @kanaries/ml
+description: Use the Ridge JavaScript and TypeScript implementation in @kanaries/ml as the sklearn-style alias for RidgeRegression in browser and Node.js applications.
+---
+
+# Ridge in JavaScript
+
+## Algorithm overview
+
+`Ridge` is the sklearn-style name for L2-regularized linear regression. It is used for continuous target prediction when ordinary linear regression needs coefficient shrinkage.
+
+## JavaScript implementation
+
+In `@kanaries/ml`, `Linear.Ridge` extends `Linear.RidgeRegression`. Use it when you prefer the shorter sklearn-style class name while keeping the same JavaScript behavior and options.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.Ridge({ alpha: 1, fitIntercept: true });
+model.fit([[0], [1], [2]], [1, 2, 3]);
+const pred = model.predict([[3]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.Ridge(props?: {
+  alpha?: number;
+  fitIntercept?: boolean;
+})
+```
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+`Ridge` has the same options and behavior as `RidgeRegression`.

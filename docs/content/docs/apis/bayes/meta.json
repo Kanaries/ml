@@ -1,0 +1,11 @@
+{
+  "title": "Naive Bayes",
+  "pages": [
+    "index",
+    "gaussianNB",
+    "multinomialNB",
+    "complementNB",
+    "bernoulliNB",
+    "categoricalNB"
+  ]
+}

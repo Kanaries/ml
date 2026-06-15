@@ -1,0 +1,41 @@
+---
+title: DBScan in JavaScript with @kanaries/ml
+description: Discover density-based clusters and noise with the DBScan JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+---
+
+# DBScan in JavaScript
+
+## Algorithm overview
+
+DBSCAN groups points that are densely connected and marks sparse points as noise. It is useful when cluster count is unknown and clusters may have irregular shapes.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Clusters.DBScan` for JavaScript and TypeScript workflows. It accepts an epsilon radius, a minimum sample count, and a distance metric name.
+
+## Quick start example
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0], [5, 5], [5.1, 5], [20, 20]];
+
+const dbscan = new Clusters.DBScan(0.3, 2, 'euclidean');
+const labels = dbscan.fitPredict(X);
+```
+
+## Detailed API reference
+
+```ts
+new Clusters.DBScan(
+  eps?: number,
+  minSamples?: number,
+  distanceType?: Distance.IDistanceType,
+)
+```
+
+Methods:
+
+- `fitPredict(samplesX: number[][]): number[]`
+
+Labels are numeric cluster ids starting at `0`. Noise points are labeled `-1`.

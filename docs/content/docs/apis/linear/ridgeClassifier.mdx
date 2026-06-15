@@ -1,0 +1,43 @@
+---
+title: RidgeClassifier in JavaScript with @kanaries/ml
+description: Train L2-regularized linear classifiers with the RidgeClassifier JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+---
+
+# RidgeClassifier in JavaScript
+
+## Algorithm overview
+
+RidgeClassifier adapts ridge regression for classification by fitting one-vs-rest linear models and selecting the class with the highest score. It is useful for fast, interpretable classification on numeric tabular data.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Linear.RidgeClassifier` with a JavaScript estimator API. It supports binary and multiclass numeric labels through one-vs-rest fitting.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0, 0], [0, 1], [2, 2], [3, 2]];
+const y = [0, 0, 1, 1];
+
+const clf = new Linear.RidgeClassifier({ alpha: 1 });
+clf.fit(X, y);
+const pred = clf.predict([[1, 1], [3, 3]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.RidgeClassifier(props?: {
+  alpha?: number;
+  fitIntercept?: boolean;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+The classifier sorts numeric classes ascending and fits one `RidgeRegression` model per class.

@@ -1,0 +1,21 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "clusters",
+    "linear",
+    "tree",
+    "ensemble",
+    "neighbors",
+    "svm",
+    "bayes",
+    "decomposition",
+    "manifold",
+    "neural_network",
+    "semi_supervised",
+    "metrics",
+    "utils",
+    "algebra",
+    "KMath"
+  ]
+}

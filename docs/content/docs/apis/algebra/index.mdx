@@ -1,0 +1,39 @@
+---
+title: Algebra Utilities in JavaScript with @kanaries/ml
+description: Use lightweight linear algebra helpers from the @kanaries/ml Algebra JavaScript and TypeScript implementation in browser and Node.js applications.
+---
+
+# Algebra Utilities in JavaScript
+
+## Algorithm overview
+
+The Algebra module contains small matrix helpers used by the library and useful in application-level numeric code: transposition, Gaussian elimination, identity matrices, matrix augmentation, determinants, cofactors, and elementary matrix inverse.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports these helpers under `Algebra`, so simple linear algebra operations can run in browser or Node.js without another dependency.
+
+## Quick start example
+
+```ts
+import { Algebra } from '@kanaries/ml';
+
+const X = [[1, 2], [3, 4]];
+const XT = Algebra.transpose(X);
+const determinant = Algebra.det(X);
+const inverse = Algebra.Inverse.elementary(X);
+```
+
+## Detailed API reference
+
+```ts
+Algebra.transpose(matrix: number[][]): number[][]
+Algebra.identityMatrix(A: number[][]): number[][]
+Algebra.augmentMatrix(matrix: number[][], expanded: number[][]): number[][]
+Algebra.gaussianElimination(A: number[][]): number[][] | false
+Algebra.cofactorMatrix(matrix: number[][], minorRowIndex: number, minorColIndex: number): number[][]
+Algebra.det(matrix: number[][]): number
+Algebra.Inverse.elementary(A: number[][]): number[][] | false
+```
+
+`det` requires a non-empty square matrix. Inverse and elimination helpers return `false` when the matrix cannot be reduced with the available pivot logic.

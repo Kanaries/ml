@@ -1,0 +1,57 @@
+---
+title: Sampling Utilities in JavaScript with @kanaries/ml
+description: Split and sample JavaScript arrays for machine learning workflows with the @kanaries/ml Sampling utilities in browser and Node.js applications.
+---
+
+# Sampling Utilities in JavaScript
+
+## Algorithm overview
+
+Sampling utilities help create subsets and train/test splits from JavaScript arrays. They are useful for small ML experiments, examples, validation flows, and browser-side demos.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports sampling helpers under `utils.Sampling`. The functions work with generic arrays, so feature rows and labels can remain in normal JavaScript data structures.
+
+## Quick start example
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [0, 0, 1, 1, 1];
+
+const split = utils.Sampling.trainTestSplit(X, y, {
+  testSize: 0.4,
+  randomState: 42,
+});
+
+const sample = utils.Sampling.std([1, 2, 3, 4, 5], 3);
+```
+
+## Detailed API reference
+
+```ts
+utils.Sampling.std<T>(arr: T[], size: number): T[]
+```
+
+Returns a sample without replacement. If `size` is greater than or equal to the array length, it returns a shallow copy.
+
+```ts
+utils.Sampling.trainTestSplit<X, Y>(
+  X: X[],
+  y?: Y[],
+  options?: {
+    testSize?: number;
+    shuffle?: boolean;
+    randomState?: number;
+  },
+): {
+  XTrain: X[];
+  XTest: X[];
+  yTrain?: Y[];
+  yTest?: Y[];
+}
+```
+
+`testSize` can be a fraction less than `1` or an absolute count. `shuffle` defaults to `true`; set `randomState` for repeatable splits.

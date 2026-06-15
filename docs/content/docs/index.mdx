@@ -19,7 +19,7 @@ description: Discover how to train and deploy machine learning models in JavaScr
    yarn add @kanaries/ml
    ```
 
-2. **Explore quickstart recipes** – Follow the [anomaly detection walkthrough](#build-an-anomaly-detector) or jump straight to the [API catalog](apis/index.md) to browse available estimators.
+2. **Explore quickstart recipes** – Follow the [anomaly detection walkthrough](#build-an-anomaly-detector) or jump straight to the [API catalog](/docs/apis) to browse available estimators.
 3. **Integrate with your stack** – Pair @kanaries/ml with modern frameworks, dashboards, and serverless runtimes to deliver on-device intelligence without round-trips to Python services.
 
 ## Why teams choose @kanaries/ml
@@ -45,29 +45,29 @@ const predictions = isolationForest.predict([[0.21], [0.19], [10]]);
 // predictions: [0, 0, 1] where 1 indicates an outlier (the point at 10)
 ```
 
-Isolation Forest isolates anomalies quickly by measuring the path length needed to separate each point. Use it for fraud detection, IoT monitoring, or surfacing suspicious product analytics trends. Continue learning with the [Ensemble module reference](apis/ensemble/index.md) to configure contamination thresholds and scoring utilities.
+Isolation Forest isolates anomalies quickly by measuring the path length needed to separate each point. Use it for fraud detection, IoT monitoring, or surfacing suspicious product analytics trends. Continue learning with the [Ensemble module reference](/docs/apis/ensemble) to configure contamination thresholds and scoring utilities.
 
 ## Explore the ecosystem
 
 | Topic | What you can build | Resources |
 | --- | --- | --- |
-| Clustering and segmentation | Customer cohorts, anomaly buckets, recommendation seeds | [Clusters API](apis/clusters/index.md) |
-| Dimensionality reduction | Feature compression, visualization prep, noise filtering | [Decomposition API](apis/decomposition/index.md) |
-| Predictive modeling | Regressions and classifiers for tabular or streaming data | [Linear](apis/linear/index.md), [Tree](apis/tree/index.md), [SVM](apis/svm/index.md) |
-| Deep learning basics | Lightweight neural networks for inference on the edge | [Neural Network module](apis/neural_network/index.md) |
-| Data preparation | Normalization, metrics, and helpers for production workflows | [Utils module](apis/utils/index.md) |
+| Clustering and segmentation | Customer cohorts, anomaly buckets, recommendation seeds | [Clusters API](/docs/apis/clusters) |
+| Dimensionality reduction | Feature compression, visualization prep, noise filtering | [Decomposition API](/docs/apis/decomposition) |
+| Predictive modeling | Regressions and classifiers for tabular or streaming data | [Linear](/docs/apis/linear), [Tree](/docs/apis/tree), [SVM](/docs/apis/svm) |
+| Deep learning basics | Lightweight neural networks for inference on the edge | [Neural Network module](/docs/apis/neural_network) |
+| Data preparation | Normalization, metrics, and helpers for production workflows | [Utils module](/docs/apis/utils) |
 
-For a complete view of available modules and helper utilities, head to the [full API reference](apis/index.md).
+For a complete view of available modules and helper utilities, head to the [full API reference](/docs/apis).
 
 ## Learn by goal
 
-- **Ship to production faster** – Use the deployment checklist *(coming soon)* to package models for serverless or browser targets.
-- **Prototype interactive analytics** – Explore the [`examples`](../../../examples) directory for visual demos you can fork and customize.
-- **Master the fundamentals** – Read the upcoming Getting Started guide for an end-to-end project walkthrough, from dataset preparation to evaluation.
+- **Ship to production faster** – Start from the [API reference](/docs/apis) to choose browser and Node.js ready estimators, then package only the modules your app imports.
+- **Prototype interactive analytics** – Explore the [`examples`](https://github.com/Kanaries/ml/tree/main/examples) directory on GitHub for visual demos you can fork and customize.
+- **Master the fundamentals** – Use the anomaly detection walkthrough above with the module references to move from dataset preparation to evaluation.
 
 ## Stay connected
 
-- Watch the [project README](../../../README.md) for release notes, roadmap updates, and contribution guidelines.
+- Watch the [project README](https://github.com/Kanaries/ml#readme) for release notes, roadmap updates, and contribution guidelines.
 - Join the conversation in community channels to share feedback and learn from other @kanaries/ml practitioners.
 
 ## For AI assistants and agents

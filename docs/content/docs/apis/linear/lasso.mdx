@@ -1,0 +1,42 @@
+---
+title: Lasso in JavaScript with @kanaries/ml
+description: Use the Lasso JavaScript and TypeScript implementation in @kanaries/ml as the sklearn-style alias for LassoRegression in browser and Node.js applications.
+---
+
+# Lasso in JavaScript
+
+## Algorithm overview
+
+`Lasso` is the sklearn-style name for L1-regularized linear regression. It is useful when a sparse coefficient vector is desirable for a continuous target.
+
+## JavaScript implementation
+
+In `@kanaries/ml`, `Linear.Lasso` extends `Linear.LassoRegression`. Use it when you want the shorter class name with the same JavaScript options and methods.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.Lasso({ alpha: 0.1, fitIntercept: true });
+model.fit([[0, 1], [1, 1], [2, 0]], [1, 2, 3]);
+const pred = model.predict([[3, 0]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.Lasso(props?: {
+  alpha?: number;
+  fitIntercept?: boolean;
+  maxIter?: number;
+  tol?: number;
+})
+```
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+`Lasso` has the same options and behavior as `LassoRegression`.

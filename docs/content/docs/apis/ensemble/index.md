@@ -1,6 +1,6 @@
 ---
 title: Ensemble Learning in JavaScript with @kanaries/ml
-description: Explore ensemble learning algorithms in JavaScript and TypeScript with @kanaries/ml, including Isolation Forest and AdaBoost models for anomaly detection, classification, and regression.
+description: Explore ensemble learning algorithms in JavaScript and TypeScript with @kanaries/ml, including Isolation Forest, AdaBoost, random forests, and bagging models.
 ---
 
 # Ensemble Learning in JavaScript
@@ -24,6 +24,9 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 ## Quick navigation
 
 - [Isolation Forest](iforest): anomaly detection for mostly-normal datasets with rare outliers
+- [RandomForestClassifier](randomForestClassifier): majority-vote tree ensembles for classification
+- [RandomForestRegressor](randomForestRegressor): averaged tree ensembles for regression
+- [BaggingClassifier](baggingClassifier): bootstrap classifier ensembles with default or custom estimators
 - [AdaBoost Regressor](adaboost): boosted regression for non-linear tabular prediction
 - [AdaBoost Classifier](adaboostClassifier): boosted classification for harder decision boundaries
 
@@ -32,8 +35,10 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 ### How to choose an algorithm
 
 1. Use [Isolation Forest](iforest) when labels are unavailable and the main goal is outlier detection.
-2. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
-3. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
+2. Use [RandomForestClassifier](randomForestClassifier) or [RandomForestRegressor](randomForestRegressor) when tree variance is high and nonlinear patterns matter.
+3. Use [BaggingClassifier](baggingClassifier) when you want bootstrap aggregation around decision trees or a custom classifier.
+4. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
+5. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
 
 ### JavaScript deployment notes
 

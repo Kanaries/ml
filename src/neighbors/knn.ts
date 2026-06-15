@@ -3,7 +3,7 @@ import { Distance } from "../metrics";
 import { mode } from "../utils/stat";
 import { getWeights, IWeightType, votes } from "./utils";
 
-export class KNearstNeighbors extends ClassifierBase {
+export class KNearestNeighbors extends ClassifierBase {
     private samplesX: number[][];
     private samplesY: number[];
     private distance: Distance.IDistance;
@@ -51,3 +51,8 @@ export class KNearstNeighbors extends ClassifierBase {
         return Y;
     }
 }
+
+/** @deprecated Use KNearestNeighbors instead. */
+export const KNearstNeighbors = KNearestNeighbors;
+/** @deprecated Use KNearestNeighbors instead. */
+export type KNearstNeighbors = KNearestNeighbors;

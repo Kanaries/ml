@@ -1,0 +1,42 @@
+---
+title: RadiusNeighborsRegressor in JavaScript with @kanaries/ml
+description: Predict numeric targets from all neighbors inside a radius using the RadiusNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# RadiusNeighborsRegressor in JavaScript
+
+## Algorithm overview
+
+RadiusNeighborsRegressor predicts continuous values from all training samples within a fixed radius. It can be more stable than K-neighbor regression when sample density varies across the feature space.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Neighbors.RadiusNeighborsRegressor` for JavaScript applications with uniform or distance-weighted averaging.
+
+## Quick start example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const reg = new Neighbors.RadiusNeighborsRegressor({ radius: 1.25, weights: 'distance' });
+reg.fit([[0], [1], [4]], [0, 1, 4]);
+const pred = reg.predict([[0.5], [10]]);
+```
+
+## Detailed API reference
+
+```ts
+new Neighbors.RadiusNeighborsRegressor(props?: {
+  radius?: number;
+  weights?: 'uniform' | 'distance';
+  metric?: Distance.IDistanceType;
+  p?: number;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+If no neighbors are found for a query sample, the prediction is `Number.NaN`.

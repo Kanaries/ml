@@ -1,0 +1,40 @@
+---
+title: NearestCentroid in JavaScript with @kanaries/ml
+description: Classify samples by the closest class centroid using the NearestCentroid JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# NearestCentroid in JavaScript
+
+## Algorithm overview
+
+NearestCentroid represents each class by the mean feature vector of its training samples, then predicts the class with the closest centroid. It is a fast, interpretable baseline for numeric classification.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Neighbors.NearestCentroid` for browser and Node.js applications. It supports the same distance type names used by `Metrics.Distance`.
+
+## Quick start example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const clf = new Neighbors.NearestCentroid({ metric: 'euclidean' });
+clf.fit([[0, 0], [0, 1], [4, 4], [5, 4]], [0, 0, 1, 1]);
+const pred = clf.predict([[1, 1], [4, 5]]);
+```
+
+## Detailed API reference
+
+```ts
+new Neighbors.NearestCentroid(props?: {
+  metric?: Distance.IDistanceType;
+  p?: number;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+Class labels are numeric. Ties are resolved by the smaller class label.

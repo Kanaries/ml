@@ -1,0 +1,49 @@
+---
+title: RandomForestRegressor in JavaScript with @kanaries/ml
+description: Predict continuous targets with tree ensembles using the RandomForestRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# RandomForestRegressor in JavaScript
+
+## Algorithm overview
+
+RandomForestRegressor averages predictions from many decision trees. It is useful for nonlinear numeric prediction when a single regression tree is too noisy.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Ensemble.RandomForestRegressor` for JavaScript and TypeScript projects. It supports bootstrap sampling, feature subsampling, and seeded randomness.
+
+## Quick start example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const reg = new Ensemble.RandomForestRegressor({
+  nEstimators: 25,
+  maxDepth: 4,
+  randomState: 7,
+});
+
+reg.fit([[0], [1], [2], [3]], [0, 1, 4, 9]);
+const pred = reg.predict([[4]]);
+```
+
+## Detailed API reference
+
+```ts
+new Ensemble.RandomForestRegressor(props?: {
+  nEstimators?: number;
+  bootstrap?: boolean;
+  maxDepth?: number;
+  minSamplesSplit?: number;
+  maxFeatures?: number | 'sqrt' | 'log2';
+  randomState?: number;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+Defaults are `nEstimators: 100`, `bootstrap: true`, and `maxFeatures: 1.0`.

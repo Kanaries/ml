@@ -1,0 +1,12 @@
+{
+  "title": "Clustering",
+  "pages": [
+    "index",
+    "kmeans",
+    "dbscan",
+    "hdbscan",
+    "meanShift",
+    "optics",
+    "kmeansPlusPlus"
+  ]
+}

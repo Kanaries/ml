@@ -1,0 +1,40 @@
+---
+title: KMath Utilities in JavaScript with @kanaries/ml
+description: Use lightweight math and descriptive statistics helpers from the @kanaries/ml KMath JavaScript and TypeScript implementation.
+---
+
+# KMath Utilities in JavaScript
+
+## Algorithm overview
+
+KMath provides small numeric helpers for sums, expectations, variance, covariance, and standard deviation. These are useful for examples, feature calculations, and lightweight statistical summaries.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports this module as `KMath`, keeping simple numeric utilities available in browser and Node.js code without switching runtimes.
+
+## Quick start example
+
+```ts
+import { KMath } from '@kanaries/ml';
+
+const values = [1, 2, 3, 4];
+const mean = KMath.expected(values);
+const sampleVariance = KMath.varSample(values);
+const populationSd = KMath.SDPopulation(values);
+```
+
+## Detailed API reference
+
+```ts
+KMath.sum(nums: number[]): number
+KMath.expected(nums: number[]): number
+KMath.variance(nums: number[], df: number): number
+KMath.covariance(X: number[], Y: number[]): number
+KMath.varSample(nums: number[]): number
+KMath.SDSample(nums: number[]): number
+KMath.varPopulation(nums: number[]): number
+KMath.SDPopulation(nums: number[]): number
+```
+
+`covariance` requires arrays with the same length.

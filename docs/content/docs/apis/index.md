@@ -25,18 +25,21 @@ This is especially useful when someone searches for "machine learning in JavaScr
 
 ## Quick navigation
 
-- **[Clusters](clusters/index.md)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
-- **[Decomposition](decomposition/index.md)**: reduce dimensions with PCA, Sparse PCA, and Truncated SVD.
-- **[Ensemble](ensemble/index.md)**: use Isolation Forest and AdaBoost models for anomaly detection, classification, and regression.
-- **[Linear](linear/index.md)**: start with linear regression and logistic regression baselines.
-- **[Manifold](manifold/index.md)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
-- **[Neighbors](neighbors/index.md)**: run k-nearest neighbors and fast nearest-neighbor search structures.
-- **[SVM](svm/index.md)**: train support vector models for classification and regression.
-- **[Tree](tree/index.md)**: use interpretable decision tree and extra tree models.
-- **[Bayes](bayes/index.md)**: apply naive Bayes models to binary or categorical features.
-- **[Neural Network](neural_network/index.md)**: learn compact representations with Bernoulli RBM.
-- **[Semi-Supervised](semi_supervised/index.md)**: spread labels through partially labeled datasets.
-- **[Utils](utils/index.md)**: use workflow helpers such as `asyncMode`.
+- **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
+- **[Decomposition](/docs/apis/decomposition)**: reduce dimensions with PCA, Sparse PCA, and Truncated SVD.
+- **[Ensemble](/docs/apis/ensemble)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
+- **[Linear](/docs/apis/linear)**: start with linear regression, logistic regression, regularized regression, and linear classification baselines.
+- **[Metrics](/docs/apis/metrics)**: evaluate classification, regression, clustering, curves, and distance functions.
+- **[Manifold](/docs/apis/manifold)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
+- **[Neighbors](/docs/apis/neighbors)**: run k-nearest neighbors and fast nearest-neighbor search structures.
+- **[SVM](/docs/apis/svm)**: train support vector models for classification and regression.
+- **[Tree](/docs/apis/tree)**: use interpretable decision tree and extra tree models.
+- **[Bayes](/docs/apis/bayes)**: apply naive Bayes models to binary or categorical features.
+- **[Neural Network](/docs/apis/neural_network)**: learn compact representations with Bernoulli RBM.
+- **[Semi-Supervised](/docs/apis/semi_supervised)**: spread labels through partially labeled datasets.
+- **[Utils](/docs/apis/utils)**: use preprocessing, sampling, model selection, statistics, and async workflow helpers.
+- **[Algebra](/docs/apis/algebra)**: use lightweight matrix helpers such as transpose, determinants, and inverse.
+- **[KMath](/docs/apis/KMath)**: compute lightweight descriptive statistics.
 
 ## Detailed module guide
 
@@ -48,6 +51,6 @@ This is especially useful when someone searches for "machine learning in JavaScr
 
 ### Recommended learning path
 
-1. If you are new to the library, start with [Linear](linear/index.md), [Tree](tree/index.md), or [Clusters](clusters/index.md).
-2. Move to [Ensemble](ensemble/index.md) and [SVM](svm/index.md) when simple baselines are not expressive enough.
-3. Use [Decomposition](decomposition/index.md), [Manifold](manifold/index.md), and [Utils](utils/index.md) to improve preprocessing, visualization, and application integration.
+1. If you are new to the library, start with [Linear](/docs/apis/linear), [Tree](/docs/apis/tree), or [Clusters](/docs/apis/clusters).
+2. Move to [Ensemble](/docs/apis/ensemble) and [SVM](/docs/apis/svm) when simple baselines are not expressive enough.
+3. Use [Metrics](/docs/apis/metrics), [Decomposition](/docs/apis/decomposition), [Manifold](/docs/apis/manifold), and [Utils](/docs/apis/utils) to improve evaluation, preprocessing, visualization, and application integration.

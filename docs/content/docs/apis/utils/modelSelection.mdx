@@ -1,0 +1,101 @@
+---
+title: Model Selection Utilities in JavaScript with @kanaries/ml
+description: Run cross-validation, K-fold splits, grid search, and randomized search with the @kanaries/ml ModelSelection JavaScript implementation.
+---
+
+# Model Selection Utilities in JavaScript
+
+## Algorithm overview
+
+Model selection utilities estimate model quality across data splits and search over hyperparameters. They are useful when a single train/test score is too fragile or when you need a repeatable way to choose parameters.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports these helpers under `utils.ModelSelection`, enabling cross-validation workflows inside browser analysis tools and Node.js services.
+
+## Quick start example
+
+```ts
+import { Linear, Metrics, utils } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4], [5]];
+const y = [0, 0, 0, 1, 1, 1];
+
+const scores = utils.ModelSelection.crossValScore(
+  () => new Linear.RidgeClassifier({ alpha: 1 }),
+  X,
+  y,
+  { cv: 3, scoring: Metrics.accuracyScore },
+);
+```
+
+## Detailed API reference
+
+### Splitters
+
+```ts
+new utils.ModelSelection.KFold({
+  nSplits?: number;
+  shuffle?: boolean;
+  randomState?: number;
+})
+
+new utils.ModelSelection.StratifiedKFold({
+  nSplits?: number;
+  shuffle?: boolean;
+  randomState?: number;
+})
+```
+
+Both splitters expose:
+
+- `split(X: any[], y?: any[]): { trainIndices: number[]; testIndices: number[] }[]`
+
+`StratifiedKFold` requires labels and preserves class balance across folds.
+
+### Cross-validation
+
+```ts
+utils.ModelSelection.crossValScore(
+  estimatorFactory: () => EstimatorLike,
+  X: number[][],
+  y: number[],
+  options?: {
+    cv?: number | SplitterLike;
+    scoring?: (actual: number[], expected: number[]) => number;
+  },
+): number[]
+```
+
+The estimator returned by `estimatorFactory` must implement `fit` and `predict`. If no `scoring` is provided, the helper uses the estimator `score` method when available, otherwise accuracy.
+
+### Search estimators
+
+```ts
+new utils.ModelSelection.GridSearchCV({
+  estimatorFactory,
+  paramGrid,
+  cv,
+  scoring,
+  refit,
+})
+
+new utils.ModelSelection.RandomizedSearchCV({
+  estimatorFactory,
+  paramDistributions,
+  nIter,
+  cv,
+  scoring,
+  randomState,
+  refit,
+})
+```
+
+Both search classes expose:
+
+- `fit(X: number[][], y: number[]): void`
+- `predict(X: number[][]): number[]`
+- `score(X: number[][], y: number[]): number`
+- public `bestParams`, `bestScore`, and `bestEstimator`
+
+`estimatorFactory` receives a parameter object and must return an estimator with `fit` and `predict`.

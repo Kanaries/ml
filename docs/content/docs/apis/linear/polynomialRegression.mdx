@@ -1,0 +1,46 @@
+---
+title: Polynomial Regression in JavaScript with @kanaries/ml
+description: Fit nonlinear numeric trends with the PolynomialRegression JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js regression workflows.
+---
+
+# Polynomial Regression in JavaScript
+
+## Algorithm overview
+
+Polynomial regression expands each numeric feature into powers of that feature, then fits a linear model on the expanded matrix. It is useful when a linear baseline is too simple but the target still follows a smooth curve.
+
+Use it for small numeric regression problems where the degree of curvature is known or easy to tune.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Linear.PolynomialRegression` as a JavaScript estimator with `fit` and `predict`. It runs in browser or Node.js and keeps polynomial feature expansion inside the model.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 2, 5, 10];
+
+const model = new Linear.PolynomialRegression({ degree: 2 });
+model.fit(X, y);
+const pred = model.predict([[4]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.PolynomialRegression(props?: { degree?: number })
+```
+
+Options:
+
+- `degree?: number`, default `2`. Must be an integer greater than or equal to 1.
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+The implementation expands every input feature to powers from `1` through `degree`, fits ordinary least squares, and stores an intercept plus coefficients internally.

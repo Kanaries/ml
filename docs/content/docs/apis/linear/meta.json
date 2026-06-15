@@ -1,0 +1,15 @@
+{
+  "title": "Linear Models",
+  "pages": [
+    "index",
+    "linearRegression",
+    "logisticRegression",
+    "polynomialRegression",
+    "ridgeRegression",
+    "lassoRegression",
+    "ridge",
+    "lasso",
+    "elasticNet",
+    "ridgeClassifier"
+  ]
+}

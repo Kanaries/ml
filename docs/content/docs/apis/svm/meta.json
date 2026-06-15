@@ -1,0 +1,10 @@
+{
+  "title": "SVM",
+  "pages": [
+    "index",
+    "SVC",
+    "NuSVC",
+    "LinearSVC",
+    "LinearSVR"
+  ]
+}

@@ -37,7 +37,7 @@ const trainX = [
 ];
 const trainY = [0, 1];
 
-const knn = new Neighbors.KNearstNeighbors(3, 'distance', 'euclidean');
+const knn = new Neighbors.KNearestNeighbors(3, 'distance', 'euclidean');
 knn.fit(trainX, trainY);
 
 const testX = [
@@ -209,7 +209,7 @@ For side-by-side Python and JavaScript examples across the algorithm docs, see [
 The library exposes several categories of algorithms:
 
 - **Tree**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
-- **Neighbors**: `KNearstNeighbors`, `BallTree`, `KDTree`
+- **Neighbors**: `KNearestNeighbors`, `BallTree`, `KDTree` (`KNearstNeighbors` remains available as a deprecated compatibility alias)
 - **Linear Models**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `RidgeRegression`, `LassoRegression`
 - **Support Vector Machines**: `SVC`, `NuSVC`, `LinearSVC`
 - **Naive Bayes**: `BernoulliNB`, `CategoricalNB`

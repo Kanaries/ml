@@ -1,0 +1,10 @@
+{
+  "title": "Tree",
+  "pages": [
+    "index",
+    "decisionTreeClassifier",
+    "decisionTreeRegressor",
+    "extraTreeClassifier",
+    "extraTreeRegressor"
+  ]
+}

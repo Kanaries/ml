@@ -1,0 +1,50 @@
+---
+title: Lasso Regression in JavaScript with @kanaries/ml
+description: Use the LassoRegression JavaScript and TypeScript implementation in @kanaries/ml for sparse regularized linear regression in browser and Node.js workflows.
+---
+
+# Lasso Regression in JavaScript
+
+## Algorithm overview
+
+Lasso regression uses L1 regularization, which can shrink some coefficients to zero. It is useful when you want a linear model that can perform simple feature selection while controlling overfitting.
+
+## JavaScript implementation
+
+`@kanaries/ml` implements `Linear.LassoRegression` with coordinate-descent style optimization and a JavaScript API for browser or Node.js applications.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 1], [2, 0], [3, 0]];
+const y = [1, 2, 3, 4];
+
+const model = new Linear.LassoRegression({ alpha: 0.1, maxIter: 1000, tol: 1e-6 });
+model.fit(X, y);
+const pred = model.predict([[4, 0]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.LassoRegression(props?: {
+  alpha?: number;
+  fitIntercept?: boolean;
+  maxIter?: number;
+  tol?: number;
+})
+```
+
+Options:
+
+- `alpha?: number`, default `1`. L1 penalty strength.
+- `fitIntercept?: boolean`, default `true`.
+- `maxIter?: number`, default `1000`.
+- `tol?: number`, default `1e-6`.
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`

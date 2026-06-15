@@ -7,4 +7,6 @@ test('top-level export provides utils namespace', () => {
     expect(typeof ML.utils.Preprocessing.StandardScaler).toBe('function');
     expect(typeof ML.utils.ModelSelection.crossValScore).toBe('function');
     expect(typeof ML.Metrics.accuracyScore).toBe('function');
+    expect(typeof ML.Neighbors.KNearestNeighbors).toBe('function');
+    expect(ML.Neighbors.KNearstNeighbors).toBe(ML.Neighbors.KNearestNeighbors);
 });

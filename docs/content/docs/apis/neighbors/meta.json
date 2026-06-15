@@ -1,0 +1,13 @@
+{
+  "title": "Neighbors",
+  "pages": [
+    "index",
+    "knn",
+    "kneighborsRegressor",
+    "radiusNeighborsClassifier",
+    "radiusNeighborsRegressor",
+    "nearestCentroid",
+    "ballTree",
+    "kdTree"
+  ]
+}

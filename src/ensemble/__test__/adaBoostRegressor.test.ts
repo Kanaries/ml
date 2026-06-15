@@ -17,3 +17,16 @@ test('fit simple linear', () => {
     const pred = reg.predict([[30], [40]]);
     expect(pred.length).toBe(2);
 });
+
+test('supports camelCase constructor aliases', () => {
+    const X: number[][] = [];
+    const Y: number[] = [];
+    for (let i = 0; i < 20; i++) {
+        X.push([i]);
+        Y.push(2 * i + 3);
+    }
+    const reg = new AdaBoostRegressor({ nEstimators: 10, learningRate: 0.5 });
+    reg.fit(X, Y);
+    const pred = reg.predict([[30], [40]]);
+    expect(pred.length).toBe(2);
+});

@@ -1,6 +1,6 @@
 ---
 title: Clustering in JavaScript with @kanaries/ml
-description: Explore clustering algorithms in JavaScript and TypeScript with @kanaries/ml, including K-Means, HDBSCAN, Mean Shift, OPTICS, and clustering utilities.
+description: Explore clustering algorithms in JavaScript and TypeScript with @kanaries/ml, including K-Means, DBSCAN, HDBSCAN, Mean Shift, OPTICS, and clustering utilities.
 ---
 
 import ClusteringComparison from '@/components/clusters';
@@ -28,6 +28,7 @@ If someone searches for "clustering in JavaScript", "K-Means in JavaScript", or 
 <ClusteringComparison />
 
 - [K-Means](kmeans): centroid-based clustering when cluster count is known or estimated
+- [DBScan](dbscan): density-based clustering with explicit radius and noise labels
 - [HDBSCAN](hdbscan): density-based clustering when cluster count is unknown and noise matters
 - [Mean Shift](meanShift): mode-seeking clustering without predefining cluster count
 - [OPTICS](optics): density-based clustering for irregular cluster shapes
@@ -38,8 +39,9 @@ If someone searches for "clustering in JavaScript", "K-Means in JavaScript", or 
 ### How to choose an algorithm
 
 1. Start with [K-Means](kmeans) when clusters are roughly compact and you can choose `k`.
-2. Use [HDBSCAN](hdbscan) or [OPTICS](optics) when clusters are irregular or noisy.
-3. Use [Mean Shift](meanShift) when you want clustering around dense modes without committing to a cluster count up front.
+2. Use [DBScan](dbscan) when you can choose a meaningful neighborhood radius.
+3. Use [HDBSCAN](hdbscan) or [OPTICS](optics) when clusters are irregular or noisy.
+4. Use [Mean Shift](meanShift) when you want clustering around dense modes without committing to a cluster count up front.
 
 ### JavaScript deployment notes
 

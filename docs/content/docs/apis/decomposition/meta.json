@@ -1,0 +1,9 @@
+{
+  "title": "Decomposition",
+  "pages": [
+    "index",
+    "pca",
+    "sparsePCA",
+    "truncatedSVD"
+  ]
+}

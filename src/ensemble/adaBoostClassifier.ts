@@ -2,8 +2,11 @@ import { ClassifierBase } from '../base';
 
 export interface AdaBoostClassifierProps {
     nEstimators?: number;
+    n_estimators?: number;
     learningRate?: number;
+    learning_rate?: number;
     randomState?: number;
+    random_state?: number;
 }
 
 interface Stump {
@@ -21,7 +24,8 @@ export class AdaBoostClassifier extends ClassifierBase {
 
     constructor(props: AdaBoostClassifierProps = {}) {
         super();
-        const { nEstimators = 50, learningRate = 1.0 } = props;
+        const nEstimators = props.nEstimators ?? props.n_estimators ?? 50;
+        const learningRate = props.learningRate ?? props.learning_rate ?? 1.0;
         this.nEstimators = nEstimators;
         this.learningRate = learningRate;
         this.estimators = [];
@@ -199,4 +203,3 @@ export class AdaBoostClassifier extends ClassifierBase {
         return importances;
     }
 }
-

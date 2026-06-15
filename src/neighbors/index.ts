@@ -1,4 +1,4 @@
-export { KNearstNeighbors } from './knn';
+export { KNearestNeighbors, KNearstNeighbors } from './knn';
 export { BallTree } from './ballTree';
 export { KDTree } from './kdTree';
 export { KNeighborsRegressor } from './kneighborsRegressor';

@@ -22,7 +22,9 @@ function weightedSampleIndices(weights: number[], size: number): number[] {
 export interface AdaBoostRegressorProps {
     estimator?: DecisionTreeRegressor;
     n_estimators?: number;
+    nEstimators?: number;
     learning_rate?: number;
+    learningRate?: number;
 }
 
 export class AdaBoostRegressor {
@@ -33,7 +35,9 @@ export class AdaBoostRegressor {
     private estimator_weights: number[] = [];
 
     constructor(props: AdaBoostRegressorProps = {}) {
-        const { estimator = new DecisionTreeRegressor({ max_depth: 3 }), n_estimators = 50, learning_rate = 1.0 } = props;
+        const estimator = props.estimator ?? new DecisionTreeRegressor({ max_depth: 3 });
+        const n_estimators = props.n_estimators ?? props.nEstimators ?? 50;
+        const learning_rate = props.learning_rate ?? props.learningRate ?? 1.0;
         this.estimator = estimator;
         this.n_estimators = n_estimators;
         this.learning_rate = learning_rate;
@@ -104,4 +108,3 @@ export class AdaBoostRegressor {
         return result.map(r => r / weightSum);
     }
 }
-

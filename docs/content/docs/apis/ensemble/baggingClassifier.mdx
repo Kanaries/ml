@@ -1,0 +1,52 @@
+---
+title: BaggingClassifier in JavaScript with @kanaries/ml
+description: Train bootstrap classifier ensembles with the BaggingClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# BaggingClassifier in JavaScript
+
+## Algorithm overview
+
+BaggingClassifier trains multiple classifiers on resampled datasets and predicts by vote. It is useful for reducing variance in unstable base estimators such as decision trees.
+
+## JavaScript implementation
+
+`@kanaries/ml` implements `Ensemble.BaggingClassifier` with a default decision-tree base estimator. You can also pass an `estimatorFactory` for custom estimators that implement `fit` and `predict`.
+
+## Quick start example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const clf = new Ensemble.BaggingClassifier({
+  nEstimators: 20,
+  maxSamples: 3,
+  randomState: 12,
+});
+
+clf.fit([[0, 0], [0, 1], [3, 3], [4, 3]], [0, 0, 1, 1]);
+const pred = clf.predict([[1, 1], [4, 4]]);
+```
+
+## Detailed API reference
+
+```ts
+new Ensemble.BaggingClassifier(props?: {
+  nEstimators?: number;
+  maxSamples?: number;
+  bootstrap?: boolean;
+  randomState?: number;
+  estimatorFactory?: (seed?: number) => {
+    fit(X: number[][], y: number[]): void;
+    predict(X: number[][]): number[];
+  };
+  // plus DecisionTreeClassifier options when using the default estimator
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+Defaults are `nEstimators: 10` and `bootstrap: true`.

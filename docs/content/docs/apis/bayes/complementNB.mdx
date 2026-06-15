@@ -1,0 +1,46 @@
+---
+title: ComplementNB in JavaScript with @kanaries/ml
+description: Classify imbalanced non-negative count features with the ComplementNB JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# ComplementNB in JavaScript
+
+## Algorithm overview
+
+ComplementNB is a naive Bayes variant designed for non-negative count features and often useful on imbalanced text-like classification problems. It estimates feature weights from the complement of each class.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Bayes.ComplementNB` so JavaScript and TypeScript applications can run this lightweight classifier in browser or Node.js environments.
+
+## Quick start example
+
+```ts
+import { Bayes } from '@kanaries/ml';
+
+const X = [[3, 0, 1], [2, 0, 1], [0, 2, 2], [0, 3, 1]];
+const y = [0, 0, 1, 1];
+
+const clf = new Bayes.ComplementNB({ alpha: 1.0, norm: false });
+clf.fit(X, y);
+const pred = clf.predict([[2, 0, 1], [0, 2, 1]]);
+```
+
+## Detailed API reference
+
+```ts
+new Bayes.ComplementNB(props?: {
+  alpha?: number;
+  forceAlpha?: boolean;
+  fitPrior?: boolean;
+  classPrior?: number[] | null;
+  norm?: boolean;
+})
+```
+
+Methods:
+
+- `fit(X: number[][], y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+Feature values must be non-negative.

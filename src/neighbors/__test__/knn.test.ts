@@ -1,8 +1,14 @@
-import { KNearstNeighbors } from '../knn';
+import { KNearestNeighbors, KNearstNeighbors } from '../knn';
 
 test('init', () => {
+    const knn = new KNearestNeighbors();
+    expect(knn).toBeDefined();
+})
+
+test('deprecated alias init', () => {
     const knn = new KNearstNeighbors();
     expect(knn).toBeDefined();
+    expect(knn).toBeInstanceOf(KNearestNeighbors);
 })
 
 test('basic', () => {
@@ -15,7 +21,7 @@ test('basic', () => {
         }
         trainY.push(i % 8);
     }
-    const knn = new KNearstNeighbors(3, 'distance', '2-norm');
+    const knn = new KNearestNeighbors(3, 'distance', '2-norm');
     knn.fit(trainX, trainY);
     expect(knn.predict(trainX)).toEqual(trainY);
 })

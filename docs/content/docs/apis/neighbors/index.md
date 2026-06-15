@@ -1,6 +1,6 @@
 ---
 title: Nearest-Neighbor Algorithms in JavaScript with @kanaries/ml
-description: Explore k-nearest neighbors, Ball Tree, and KD Tree in JavaScript and TypeScript with @kanaries/ml for similarity search, retrieval, and local prediction.
+description: Explore k-nearest neighbors, radius neighbors, centroid classifiers, Ball Tree, and KD Tree in JavaScript and TypeScript with @kanaries/ml.
 ---
 
 # Nearest-Neighbor Algorithms in JavaScript
@@ -23,7 +23,11 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 
 ## Quick navigation
 
-- [k-Nearest Neighbors](knn): direct prediction from nearby labeled examples
+- [k-Nearest Neighbors](knn): direct classification from nearby labeled examples
+- [KNeighborsRegressor](kneighborsRegressor): numeric prediction from the nearest labeled examples
+- [RadiusNeighborsClassifier](radiusNeighborsClassifier): classification from all examples inside a distance radius
+- [RadiusNeighborsRegressor](radiusNeighborsRegressor): numeric prediction from all examples inside a distance radius
+- [NearestCentroid](nearestCentroid): fast classification by closest class centroid
 - [Ball Tree](ballTree): faster repeated nearest-neighbor search in metric spaces
 - [KD Tree](kdTree): efficient spatial indexing for repeated lookup on suitable data
 
@@ -32,8 +36,10 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 ### How to choose an algorithm
 
 1. Use [k-Nearest Neighbors](knn) when you want a direct non-parametric baseline.
-2. Use [Ball Tree](ballTree) or [KD Tree](kdTree) when repeated query speed matters.
-3. Benchmark both the quality impact of distance choices and the latency impact of your search structure.
+2. Use [KNeighborsRegressor](kneighborsRegressor) or [RadiusNeighborsRegressor](radiusNeighborsRegressor) for continuous targets.
+3. Use [RadiusNeighborsClassifier](radiusNeighborsClassifier) when a fixed physical or semantic radius matters more than fixed `k`.
+4. Use [NearestCentroid](nearestCentroid) for a very fast linear-time classifier baseline.
+5. Use [Ball Tree](ballTree) or [KD Tree](kdTree) when repeated query speed matters.
 
 ### JavaScript deployment notes
 

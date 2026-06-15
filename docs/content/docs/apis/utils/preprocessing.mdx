@@ -1,0 +1,82 @@
+---
+title: Preprocessing Utilities in JavaScript with @kanaries/ml
+description: Prepare numeric and categorical features with the @kanaries/ml Preprocessing JavaScript and TypeScript utilities for browser and Node.js machine learning pipelines.
+---
+
+# Preprocessing Utilities in JavaScript
+
+## Algorithm overview
+
+Preprocessing utilities convert raw arrays into model-ready features. They cover scaling, normalization, label and categorical encoding, binarization, missing-value imputation, variance filtering, and univariate feature selection.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports these helpers under `utils.Preprocessing`, so feature preparation can run in the same JavaScript or TypeScript runtime as model training and prediction.
+
+## Quick start example
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const scaler = new utils.Preprocessing.StandardScaler();
+const scaled = scaler.fitTransform([[1, 10], [2, 20], [3, 30]]);
+
+const encoder = new utils.Preprocessing.OneHotEncoder({ drop: 'ifBinary' });
+const encoded = encoder.fitTransform([
+  ['red', 'S'],
+  ['blue', 'M'],
+]);
+```
+
+## Detailed API reference
+
+### Scalers and normalizers
+
+```ts
+new utils.Preprocessing.StandardScaler({ withMean?: boolean; withStd?: boolean })
+new utils.Preprocessing.MinMaxScaler({ featureRange?: [number, number] })
+new utils.Preprocessing.MaxAbsScaler()
+new utils.Preprocessing.Normalizer({ norm?: 'l1' | 'l2' | 'max' })
+```
+
+Scaler methods:
+
+- `fit(X: number[][]): void`
+- `transform(X: number[][]): number[][]`
+- `fitTransform(X: number[][]): number[][]`
+- `inverseTransform(X: number[][]): number[][]` for `StandardScaler`, `MinMaxScaler`, and `MaxAbsScaler`
+
+`Normalizer` supports `fit`, `transform`, and `fitTransform`; `fit` is a no-op.
+
+### Encoders and binarizer
+
+```ts
+new utils.Preprocessing.LabelEncoder()
+new utils.Preprocessing.OrdinalEncoder()
+new utils.Preprocessing.OneHotEncoder({ drop?: 'none' | 'first' | 'ifBinary' })
+new utils.Preprocessing.Binarizer({ threshold?: number })
+```
+
+`LabelEncoder` works on numeric label arrays. `OrdinalEncoder` and `OneHotEncoder` accept categorical matrices containing `string`, `number`, `boolean`, or `null` values.
+
+### Imputation and feature selection
+
+```ts
+new utils.Preprocessing.SimpleImputer({
+  strategy?: 'mean' | 'median' | 'mostFrequent' | 'constant';
+  fillValue?: number;
+  missingValues?: number | null;
+})
+
+new utils.Preprocessing.VarianceThreshold({ threshold?: number })
+utils.Preprocessing.fRegression(X: number[][], y: number[]): number[]
+new utils.Preprocessing.SelectKBest({ k?: number; scoreFunc?: FeatureScoreFunc })
+```
+
+`SimpleImputer` supports `fit`, `transform`, and `fitTransform`. `VarianceThreshold` and `SelectKBest` remove features during `transform`.
+
+## JavaScript deployment notes
+
+- Fit preprocessing on training data only, then reuse the fitted transformer for inference.
+- Keep encoder category assumptions stable between browser sessions or Node.js jobs.
+- Use `fitTransform` for quick experiments, but keep explicit `fit` and `transform` calls in production pipelines.

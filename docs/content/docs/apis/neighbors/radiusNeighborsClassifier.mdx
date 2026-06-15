@@ -1,0 +1,48 @@
+---
+title: RadiusNeighborsClassifier in JavaScript with @kanaries/ml
+description: Classify samples from all neighbors inside a radius using the RadiusNeighborsClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# RadiusNeighborsClassifier in JavaScript
+
+## Algorithm overview
+
+RadiusNeighborsClassifier assigns a class from all training samples within a fixed distance radius. It is useful when a fixed neighborhood size is more meaningful than a fixed number of neighbors.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Neighbors.RadiusNeighborsClassifier` with uniform or distance-weighted voting in browser and Node.js applications.
+
+## Quick start example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const clf = new Neighbors.RadiusNeighborsClassifier({
+  radius: 1.5,
+  weights: 'uniform',
+  outlierLabel: -1,
+});
+
+clf.fit([[0], [1], [4]], [0, 0, 1]);
+const pred = clf.predict([[0.5], [10]]);
+```
+
+## Detailed API reference
+
+```ts
+new Neighbors.RadiusNeighborsClassifier(props?: {
+  radius?: number;
+  weights?: 'uniform' | 'distance';
+  metric?: Distance.IDistanceType;
+  p?: number;
+  outlierLabel?: number | null;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+If no neighbors are found, `predict` returns `outlierLabel` when it is not `null`; otherwise it throws.

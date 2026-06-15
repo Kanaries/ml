@@ -100,10 +100,14 @@ const ALGORITHMS: Record<string, { label: string; href: string }[]> = {
   ],
   'Neighbors & Clustering': [
     { label: 'Neighbors module', href: '/docs/apis/neighbors' },
-    { label: 'KNearstNeighbors', href: '/docs/apis/neighbors/knn' },
+    { label: 'KNearestNeighbors', href: '/docs/apis/neighbors/knn' },
     { label: 'BallTree / KDTree', href: '/docs/apis/neighbors/ballTree' },
     { label: 'Clusters module', href: '/docs/apis/clusters' },
-    { label: 'KMeans / DBSCAN / OPTICS / HDBSCAN / MeanShift', href: '/docs/apis/clusters/kmeans' },
+    { label: 'KMeans', href: '/docs/apis/clusters/kmeans' },
+    { label: 'DBSCAN', href: '/docs/apis/clusters/dbscan' },
+    { label: 'OPTICS', href: '/docs/apis/clusters/optics' },
+    { label: 'HDBSCAN', href: '/docs/apis/clusters/hdbscan' },
+    { label: 'MeanShift', href: '/docs/apis/clusters/meanShift' },
   ],
   'Decomposition & Manifold': [
     { label: 'Decomposition module', href: '/docs/apis/decomposition' },
@@ -351,11 +355,11 @@ console.log(clf.predict([[6.1, 3.1]]));
               </details>
             </div>
             <div className="flex flex-wrap gap-4">
-              <Link className="rounded-md border border-fd-border px-4 py-2 text-sm font-semibold transition hover:bg-fd-foreground/5" href="https://stackblitz.com/github/Kanaries/ml" target="_blank" rel="noreferrer">
-                Open in StackBlitz
+              <Link className="rounded-md border border-fd-border px-4 py-2 text-sm font-semibold transition hover:bg-fd-foreground/5" href="https://github.com/Kanaries/ml/tree/main/examples" target="_blank" rel="noreferrer">
+                View examples on GitHub
               </Link>
-              <Link className="rounded-md border border-fd-border px-4 py-2 text-sm font-semibold transition hover:bg-fd-foreground/5" href="https://codesandbox.io/p/github/Kanaries/ml" target="_blank" rel="noreferrer">
-                Open in CodeSandbox
+              <Link className="rounded-md border border-fd-border px-4 py-2 text-sm font-semibold transition hover:bg-fd-foreground/5" href="/docs/apis">
+                Browse API examples
               </Link>
             </div>
           </div>

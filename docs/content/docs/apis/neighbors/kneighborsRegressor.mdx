@@ -1,0 +1,44 @@
+---
+title: KNeighborsRegressor in JavaScript with @kanaries/ml
+description: Predict numeric targets from nearby examples with the KNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# KNeighborsRegressor in JavaScript
+
+## Algorithm overview
+
+KNeighborsRegressor predicts a continuous value by finding nearby training samples and averaging their targets. It is useful as a non-parametric baseline when similar examples should have similar outcomes.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Neighbors.KNeighborsRegressor` for browser and Node.js workflows. It supports uniform or distance weighting and the distance metrics exposed by `Metrics.Distance`.
+
+## Quick start example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const reg = new Neighbors.KNeighborsRegressor({ nNeighbors: 2, weights: 'distance' });
+reg.fit([[0], [1], [3]], [0, 1, 3]);
+const pred = reg.predict([[2]]);
+```
+
+## Detailed API reference
+
+```ts
+new Neighbors.KNeighborsRegressor()
+new Neighbors.KNeighborsRegressor(nNeighbors: number, weights?: 'uniform' | 'distance', metric?: Distance.IDistanceType, p?: number)
+new Neighbors.KNeighborsRegressor(props?: {
+  nNeighbors?: number;
+  weights?: 'uniform' | 'distance';
+  metric?: Distance.IDistanceType;
+  p?: number;
+})
+```
+
+Methods:
+
+- `fit(trainX: number[][], trainY: number[]): void`
+- `predict(testX: number[][]): number[]`
+
+`metric` defaults to `'euclidean'`, `nNeighbors` defaults to `5`, and `p` is used by Minkowski distance.

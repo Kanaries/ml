@@ -10,6 +10,9 @@
     <loc>https://ml.kanaries.net/docs/apis</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/algebra</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/bayes</loc>
   </url>
   <url>
@@ -19,7 +22,19 @@
     <loc>https://ml.kanaries.net/docs/apis/bayes/categoricalNB</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/bayes/complementNB</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/bayes/gaussianNB</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/bayes/multinomialNB</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/clusters</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/clusters/dbscan</loc>
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/clusters/hdbscan</loc>
@@ -58,16 +73,49 @@
     <loc>https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/ensemble/baggingClassifier</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/ensemble/iforest</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/ensemble/randomForestClassifier</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/ensemble/randomForestRegressor</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/KMath</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/linear</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/elasticNet</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/lasso</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/lassoRegression</loc>
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/linear/linearRegression</loc>
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/linear/logisticRegression</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/polynomialRegression</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/ridge</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/ridgeClassifier</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/linear/ridgeRegression</loc>
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/manifold</loc>
@@ -85,6 +133,9 @@
     <loc>https://ml.kanaries.net/docs/apis/manifold/tsne</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/metrics</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/neighbors</loc>
   </url>
   <url>
@@ -94,7 +145,19 @@
     <loc>https://ml.kanaries.net/docs/apis/neighbors/kdTree</loc>
   </url>
   <url>
+    <loc>https://ml.kanaries.net/docs/apis/neighbors/kneighborsRegressor</loc>
+  </url>
+  <url>
     <loc>https://ml.kanaries.net/docs/apis/neighbors/knn</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/neighbors/nearestCentroid</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsClassifier</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsRegressor</loc>
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/neural_network</loc>
@@ -146,5 +209,17 @@
   </url>
   <url>
     <loc>https://ml.kanaries.net/docs/apis/utils/asyncMode</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/utils/modelSelection</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/utils/preprocessing</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/utils/sampling</loc>
+  </url>
+  <url>
+    <loc>https://ml.kanaries.net/docs/apis/utils/stat</loc>
   </url>
 </urlset>

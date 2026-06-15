@@ -1,0 +1,48 @@
+---
+title: Ridge Regression in JavaScript with @kanaries/ml
+description: Use the RidgeRegression JavaScript and TypeScript implementation in @kanaries/ml for regularized linear regression in browser and Node.js applications.
+---
+
+# Ridge Regression in JavaScript
+
+## Algorithm overview
+
+Ridge regression is linear regression with L2 regularization. It is useful when features are correlated, coefficients are unstable, or an ordinary least squares model overfits.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Linear.RidgeRegression` for JavaScript and TypeScript projects. It follows the familiar `fit` and `predict` estimator shape and works with numeric arrays in browser or Node.js.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 3, 5, 7];
+
+const model = new Linear.RidgeRegression({ alpha: 0.5, fitIntercept: true });
+model.fit(X, y);
+const pred = model.predict([[4]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.RidgeRegression(props?: {
+  alpha?: number;
+  fitIntercept?: boolean;
+})
+```
+
+Options:
+
+- `alpha?: number`, default `1`. L2 penalty strength. Must be finite and greater than or equal to 0.
+- `fitIntercept?: boolean`, default `true`.
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+`predict` throws if the model has not been fitted or if the feature count differs from the fitted data.

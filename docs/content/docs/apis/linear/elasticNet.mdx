@@ -1,0 +1,54 @@
+---
+title: ElasticNet in JavaScript with @kanaries/ml
+description: Fit linear regression with combined L1 and L2 regularization using the ElasticNet JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# ElasticNet in JavaScript
+
+## Algorithm overview
+
+ElasticNet combines L1 and L2 penalties. It is useful when you want sparse-ish linear models but pure Lasso is too unstable, especially with correlated features.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Linear.ElasticNet` for browser and Node.js regression workflows. `l1Ratio` controls the balance between Ridge-like and Lasso-like behavior.
+
+## Quick start example
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 1], [2, 0], [3, 0]];
+const y = [1, 2, 3, 4];
+
+const model = new Linear.ElasticNet({ alpha: 0.1, l1Ratio: 0.5 });
+model.fit(X, y);
+const pred = model.predict([[4, 0]]);
+```
+
+## Detailed API reference
+
+```ts
+new Linear.ElasticNet(props?: {
+  alpha?: number;
+  l1Ratio?: number;
+  fitIntercept?: boolean;
+  maxIter?: number;
+  tol?: number;
+})
+```
+
+Options:
+
+- `alpha?: number`, default `1`.
+- `l1Ratio?: number`, default `0.5`. Must be between `0` and `1`.
+- `fitIntercept?: boolean`, default `true`.
+- `maxIter?: number`, default `1000`.
+- `tol?: number`, default `1e-6`.
+
+Methods:
+
+- `fit(X: number[][], Y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+When `l1Ratio` is `0`, the implementation delegates to Ridge regression. When `l1Ratio` is `1`, it delegates to Lasso regression.

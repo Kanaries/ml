@@ -1,0 +1,40 @@
+---
+title: GaussianNB in JavaScript with @kanaries/ml
+description: Classify continuous numeric features with the GaussianNB JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+---
+
+# GaussianNB in JavaScript
+
+## Algorithm overview
+
+GaussianNB is a naive Bayes classifier for continuous numeric features. It models each feature per class with a Gaussian distribution and predicts the class with the highest posterior score.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes `Bayes.GaussianNB` for lightweight probabilistic classification in browser or Node.js applications.
+
+## Quick start example
+
+```ts
+import { Bayes } from '@kanaries/ml';
+
+const clf = new Bayes.GaussianNB({ varSmoothing: 1e-9 });
+clf.fit([[1.0, 2.0], [1.2, 1.9], [4.0, 4.2], [4.2, 4.0]], [0, 0, 1, 1]);
+const pred = clf.predict([[1.1, 2.1], [4.1, 4.1]]);
+```
+
+## Detailed API reference
+
+```ts
+new Bayes.GaussianNB(props?: {
+  priors?: number[] | null;
+  varSmoothing?: number;
+})
+```
+
+Methods:
+
+- `fit(X: number[][], y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+`priors`, when provided, must match the number of fitted classes.

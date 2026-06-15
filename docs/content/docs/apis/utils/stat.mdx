@@ -1,0 +1,36 @@
+---
+title: Statistical Utilities in JavaScript with @kanaries/ml
+description: Compute simple statistics with the @kanaries/ml Stat JavaScript and TypeScript utilities for browser and Node.js machine learning helpers.
+---
+
+# Statistical Utilities in JavaScript
+
+## Algorithm overview
+
+The Stat utilities provide small helpers used by models and examples: mode, mean, probability conversion, entropy, and Gini impurity.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes these functions under `utils.Stat`, so lightweight statistics can stay in the same JavaScript runtime as preprocessing, training, and inference.
+
+## Quick start example
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const majority = utils.Stat.mode([1, 1, 2, 3]);
+const avg = utils.Stat.mean([1, 2, 3]);
+const entropy = utils.Stat.entropy([2, 2, 4]);
+```
+
+## Detailed API reference
+
+```ts
+utils.Stat.mode(data: number[]): number
+utils.Stat.mean(data: number[]): number
+utils.Stat.freqs2Probs(freqs: number[]): number[]
+utils.Stat.entropy(data: number[]): number
+utils.Stat.gini(data: number[]): number
+```
+
+`entropy` and `gini` treat the input array as frequencies and convert it to probabilities internally.

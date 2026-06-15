@@ -1,0 +1,45 @@
+---
+title: MultinomialNB in JavaScript with @kanaries/ml
+description: Classify non-negative count features with the MultinomialNB JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# MultinomialNB in JavaScript
+
+## Algorithm overview
+
+MultinomialNB is a naive Bayes classifier for non-negative feature counts, such as token counts or frequency-style encoded data.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Bayes.MultinomialNB` for JavaScript and TypeScript applications that need fast probabilistic classification without leaving the browser or Node.js runtime.
+
+## Quick start example
+
+```ts
+import { Bayes } from '@kanaries/ml';
+
+const X = [[2, 0, 1], [1, 0, 2], [0, 2, 1], [0, 3, 1]];
+const y = [0, 0, 1, 1];
+
+const clf = new Bayes.MultinomialNB({ alpha: 1.0 });
+clf.fit(X, y);
+const pred = clf.predict([[1, 0, 1], [0, 2, 2]]);
+```
+
+## Detailed API reference
+
+```ts
+new Bayes.MultinomialNB(props?: {
+  alpha?: number;
+  forceAlpha?: boolean;
+  fitPrior?: boolean;
+  classPrior?: number[] | null;
+})
+```
+
+Methods:
+
+- `fit(X: number[][], y: number[]): void`
+- `predict(X: number[][]): number[]`
+
+Feature values must be non-negative.

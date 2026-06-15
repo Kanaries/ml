@@ -1,0 +1,10 @@
+{
+  "title": "Manifold",
+  "pages": [
+    "index",
+    "MDS",
+    "lle",
+    "tsne",
+    "spectralEmbedding"
+  ]
+}
