@@ -38,6 +38,7 @@ scripts = [
     'gen_nearest_centroid.py',
     'gen_random_forest_classifier.py',
     'gen_random_forest_regressor.py',
+    'gen_gradient_boosting_regressor.py',
     'gen_bernoulli_rbm.py',
     'gen_pca.py',
     'gen_truncated_svd.py',
