@@ -1,7 +1,11 @@
 {
   "name": "@kanaries/ml",
   "version": "0.0.11",
-  "description": "machine learning lib in javascript",
+  "description": "Machine learning library for JavaScript and TypeScript with a scikit-learn-style API: classification, regression, clustering, dimensionality reduction, and anomaly detection in the browser and Node.js.",
+  "files": [
+    "build",
+    "!build/**/__test__"
+  ],
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "module": "./build/index.mjs",
@@ -17,6 +21,7 @@
     "test": "jest",
     "test:regen-data": "npm run gen-data",
     "build": "vite build && tsc --emitDeclarationOnly --outDir build",
+    "prepublishOnly": "npm run build",
     "doc": "docsify serve docs",
     "dev": "NODE_ENV=development vite",
     "build:example": "NODE_ENV=development vite build",
@@ -33,8 +38,29 @@
   },
   "keywords": [
     "machine learning",
+    "machine-learning",
     "ML",
     "AI",
+    "scikit-learn",
+    "sklearn",
+    "typescript",
+    "data science",
+    "classification",
+    "regression",
+    "clustering",
+    "kmeans",
+    "random forest",
+    "xgboost",
+    "gradient boosting",
+    "decision tree",
+    "knn",
+    "svm",
+    "pca",
+    "anomaly detection",
+    "isolation forest",
+    "naive bayes",
+    "browser",
+    "nodejs",
     "statistics",
     "algorithms"
   ],
@@ -46,7 +72,7 @@
   "bugs": {
     "url": "https://github.com/Kanaries/ml/issues"
   },
-  "homepage": "https://github.com/Kanaries/ml#readme",
+  "homepage": "https://ml.kanaries.net/docs",
   "devDependencies": {
     "@types/assert": "^1.5.1",
     "@types/jest": "^29.5.14",
