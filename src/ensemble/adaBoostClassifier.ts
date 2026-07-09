@@ -98,10 +98,13 @@ export class AdaBoostClassifier extends ClassifierBase {
     public fit(trainX: number[][], trainY: number[]): void {
         this.validateInput(trainX, trainY);
 
-        this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
-        if (this.classes.length !== 2) {
+        // validate before mutating state so a failed refit leaves a
+        // previously fitted model intact
+        const classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
+        if (classes.length !== 2) {
             throw new Error('AdaBoost currently supports only binary classification');
         }
+        this.classes = classes;
         // internal labels: classes[0] -> -1, classes[1] -> +1
         const yPm = trainY.map(v => (v === this.classes[1] ? 1 : -1));
 

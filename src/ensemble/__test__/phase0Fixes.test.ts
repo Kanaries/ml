@@ -20,6 +20,14 @@ describe('AdaBoostClassifier label handling', () => {
         expect(clf.predict(X)).toEqual(y);
     });
 
+    test('a failed refit does not corrupt a fitted model', () => {
+        const y = [5, 5, 5, 5, 9, 9, 9, 9];
+        const clf = new AdaBoostClassifier({ nEstimators: 10 });
+        clf.fit(X, y);
+        expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
+        expect(clf.predict([[1], [9]])).toEqual([5, 9]);
+    });
+
     test('predictProba is ordered by sorted class labels', () => {
         const y = [5, 5, 5, 5, 9, 9, 9, 9];
         const clf = new AdaBoostClassifier({ nEstimators: 10 });

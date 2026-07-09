@@ -79,10 +79,13 @@ export class GradientBoostingClassifier extends ClassifierBase {
         if (trainX.length !== trainY.length) {
             throw new Error('X and y must have the same length');
         }
-        this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
-        if (this.classes.length !== 2) {
+        // validate before mutating state so a failed refit leaves a
+        // previously fitted model intact
+        const classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
+        if (classes.length !== 2) {
             throw new Error('GradientBoostingClassifier currently supports only binary classification');
         }
+        this.classes = classes;
         const n = trainX.length;
         const yBin = trainY.map(v => (v === this.classes[1] ? 1 : 0));
         const random = createRandomGenerator(this.randomState);

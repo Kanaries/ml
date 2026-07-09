@@ -51,6 +51,15 @@ test('randomState makes subsampled fit reproducible', () => {
     expect(a.predict(X)).toEqual(b.predict(X));
 });
 
+test('a failed refit does not corrupt a fitted model', () => {
+    const X = [[1], [2], [3], [4], [6], [7], [8], [9]];
+    const y = [5, 5, 5, 5, 9, 9, 9, 9];
+    const clf = new GradientBoostingClassifier({ nEstimators: 10, randomState: 0 });
+    clf.fit(X, y);
+    expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
+    expect(clf.predict([[1], [9]])).toEqual([5, 9]);
+});
+
 test('throws on invalid inputs', () => {
     expect(() => new GradientBoostingClassifier({ nEstimators: 0 })).toThrow();
     expect(() => new GradientBoostingClassifier({ learningRate: -1 })).toThrow();
