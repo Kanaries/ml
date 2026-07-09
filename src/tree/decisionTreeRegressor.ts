@@ -1,7 +1,7 @@
-import { assert } from "../utils";
+import { assert, createRandomGenerator } from "../utils";
 import { mean } from "../utils/stat";
 import { IDTree } from "./decisionTreeClassifier";
-import { filterWithIndices } from "./utils";
+import { valuesAllSame } from "./utils";
 interface IRegTree extends IDTree {
 }
 interface RegressionTreeProps {
@@ -29,20 +29,7 @@ export class DecisionTreeRegressor {
         this.min_sample_split = min_samples_split;
         this.max_features = max_features;
         this.randomState = randomState;
-        this.random = this.createRandomGenerator(this.randomState);
-    }
-    private createRandomGenerator(seed?: number): () => number {
-        if (seed === undefined) {
-            return Math.random;
-        }
-        let state = Math.floor(seed) % 2147483647;
-        if (state <= 0) {
-            state += 2147483646;
-        }
-        return () => {
-            state = (state * 16807) % 2147483647;
-            return (state - 1) / 2147483646;
-        };
+        this.random = createRandomGenerator(this.randomState);
     }
     private selectedFeatureIndices(): number[] {
         let size = this.feature_number;
@@ -64,37 +51,50 @@ export class DecisionTreeRegressor {
         }
         return indices.slice(0, size);
     }
-    private calErr(values: number[]): number {
-        const _mean = mean(values);
-        let sum = 0;
-        for (let i = 0; i < values.length; i++) {
-            sum += (values[i] - _mean) ** 2
-        }
-        return sum / values.length;
-    }
+    /**
+     * Minimizes total SSE = n_left * var_left + n_right * var_right over
+     * midpoint thresholds, scanning each feature once in sorted order.
+     */
     private attributeSelection (sampleX: number[][], sampleY: number[]) {
+        const n = sampleY.length;
         let minErr = Infinity;
         let minErrFeaIndex = -1; // bad case none
         let minErrValue = 0;
         const featureIndices = this.selectedFeatureIndices();
-        for (let feaIndex of featureIndices ) {
-            const values: number[] = sampleX.map(x => x[feaIndex]);
-            const valueSet: Set<number> = new Set(values);
-            let localMinErr = Infinity;
-            let localMinErrValue = 0;
-            for (let feaValue of valueSet) {
-                const leftChild = filterWithIndices(values, x => x < feaValue);
-                const rightChild = filterWithIndices(values, x => x >= feaValue);
-                const err = this.calErr(leftChild.indices.map(i => sampleY[i])) + this.calErr(rightChild.indices.map(i => sampleY[i]));
-                if (err < localMinErr) {
-                    localMinErr = err;
-                    localMinErrValue = feaValue;
-                }
+        for (let feaIndex of featureIndices) {
+            const order = Array.from({ length: n }, (_, i) => i).sort(
+                (a, b) => sampleX[a][feaIndex] - sampleX[b][feaIndex]
+            );
+            let sumLeft = 0;
+            let sumSqLeft = 0;
+            let sumRight = 0;
+            let sumSqRight = 0;
+            for (let i = 0; i < n; i++) {
+                sumRight += sampleY[i];
+                sumSqRight += sampleY[i] * sampleY[i];
             }
-            if (localMinErr < minErr) {
-                minErr = localMinErr;
-                minErrFeaIndex = feaIndex;
-                minErrValue = localMinErrValue;
+            for (let pos = 0; pos < n - 1; pos++) {
+                const y = sampleY[order[pos]];
+                sumLeft += y;
+                sumSqLeft += y * y;
+                sumRight -= y;
+                sumSqRight -= y * y;
+                const vCur = sampleX[order[pos]][feaIndex];
+                const vNext = sampleX[order[pos + 1]][feaIndex];
+                if (vCur === vNext) continue;
+                const nLeft = pos + 1;
+                const nRight = n - nLeft;
+                const err =
+                    (sumSqLeft - (sumLeft * sumLeft) / nLeft) +
+                    (sumSqRight - (sumRight * sumRight) / nRight);
+                if (err < minErr) {
+                    minErr = err;
+                    minErrFeaIndex = feaIndex;
+                    // a/2 + b/2 avoids overflow; the guard handles rounding up
+                    // to b, which would empty the right child
+                    const mid = vCur / 2 + vNext / 2;
+                    minErrValue = mid === vNext ? vCur : mid;
+                }
             }
         }
         return {
@@ -113,50 +113,48 @@ export class DecisionTreeRegressor {
         };
     }
     private buildTree (tree: IRegTree, sampleX: number[][], sampleY: number[], depth: number) {
+        if (depth >= this.max_depth) return;
         if (sampleX.length < this.min_sample_split) return;
-        const nodeErr = this.calErr(sampleY);
-        // if (nodeErr < 0.00001) return;
+        if (valuesAllSame(sampleY)) return;
         const selection = this.attributeSelection(sampleX, sampleY);
         if (selection.minErrFeaIndex === -1) return;
-        // console.log(tree, sampleX, sampleY, selection)
-        // if (Math.abs(nodeErr - selection.minErr) < 0.00001) return;
-        const values = sampleX.map(x => x[selection.minErrFeaIndex]);
-        let leftSamples = filterWithIndices(values, v => v < selection.minErrValue);
-        let rightSamples = filterWithIndices(values, v => v >= selection.minErrValue);
+        const leftX: number[][] = [];
+        const leftY: number[] = [];
+        const rightX: number[][] = [];
+        const rightY: number[] = [];
+        for (let i = 0; i < sampleX.length; i++) {
+            if (sampleX[i][selection.minErrFeaIndex] <= selection.minErrValue) {
+                leftX.push(sampleX[i]);
+                leftY.push(sampleY[i]);
+            } else {
+                rightX.push(sampleX[i]);
+                rightY.push(sampleY[i]);
+            }
+        }
         tree.splitIndex = selection.minErrFeaIndex;
         tree.nodeValue = selection.minErrValue;
 
-        tree.leftChild = this.initTreeNode(leftSamples.indices.map(i => sampleY[i]));
-        tree.rightChild = this.initTreeNode(rightSamples.indices.map(i => sampleY[i]))
-        this.buildTree(
-            tree.leftChild,
-            leftSamples.indices.map((i) => sampleX[i]),
-            leftSamples.indices.map((i) => sampleY[i]),
-            depth + 1
-        );
-        this.buildTree(
-            tree.rightChild,
-            rightSamples.indices.map((i) => sampleX[i]),
-            rightSamples.indices.map((i) => sampleY[i]),
-            depth + 1
-        );
+        tree.leftChild = this.initTreeNode(leftY);
+        tree.rightChild = this.initTreeNode(rightY);
+        this.buildTree(tree.leftChild, leftX, leftY, depth + 1);
+        this.buildTree(tree.rightChild, rightX, rightY, depth + 1);
     }
     public fit (sampleX: number[][], sampleY: number[]): void {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = this.createRandomGenerator(this.randomState);
+        this.random = createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         this.regTree = this.initTreeNode(sampleY);
         this.buildTree(this.regTree, sampleX, sampleY, 0);
     }
-    private findSample(X: number[], tree: IRegTree, depth: number) {
-        if (tree.splitIndex === -1 || depth > this.max_depth) return tree.y;
-        if (X[tree.splitIndex] < tree.nodeValue) {
-            return this.findSample(X, tree.leftChild, depth + 1);
+    private findSample(X: number[], tree: IRegTree): number {
+        if (tree.splitIndex === -1) return tree.y;
+        if (X[tree.splitIndex] <= tree.nodeValue) {
+            return this.findSample(X, tree.leftChild);
         } else {
-            return this.findSample(X, tree.rightChild, depth + 1);
+            return this.findSample(X, tree.rightChild);
         }
     }
     public predict (sampleX: number[][]): number[] {
-        return sampleX.map(x => this.findSample(x, this.regTree, 0));
+        return sampleX.map(x => this.findSample(x, this.regTree));
     }
 }

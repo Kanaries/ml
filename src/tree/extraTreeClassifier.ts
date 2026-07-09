@@ -1,4 +1,4 @@
-import { assert } from '../utils';
+import { assert, createRandomGenerator } from '../utils';
 import { entropy, gini, mode } from '../utils/stat';
 import { filterWithIndices, valuesAllSame, getUniqueFreqs } from './utils';
 import type { IDTree } from './decisionTreeClassifier';
@@ -38,21 +38,7 @@ export class ExtraTreeClassifier {
         this.impurity = criterion === 'entropy' ? entropy : gini;
         this.max_features_ = 0;
         this.randomState = randomState;
-        this.random = this.createRandomGenerator(this.randomState);
-    }
-
-    private createRandomGenerator(seed?: number): () => number {
-        if (seed === undefined) {
-            return Math.random;
-        }
-        let state = Math.floor(seed) % 2147483647;
-        if (state <= 0) {
-            state += 2147483646;
-        }
-        return () => {
-            state = (state * 16807) % 2147483647;
-            return (state - 1) / 2147483646;
-        };
+        this.random = createRandomGenerator(this.randomState);
     }
 
     private nodeImpurity(sampleY: number[]): number {
@@ -151,7 +137,7 @@ export class ExtraTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = this.createRandomGenerator(this.randomState);
+        this.random = createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         const sqrtFeatures = Math.floor(Math.sqrt(this.feature_number));
         this.max_features_ = this.max_features_prop ? Math.min(this.feature_number, Math.floor(this.max_features_prop)) : sqrtFeatures;

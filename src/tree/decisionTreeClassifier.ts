@@ -3,9 +3,9 @@
  * 某一个维度可能个别成员作为单独的分割，其他则作为一个整体，这是直接写离散型分割比较难实现的。
  * 2. 多分割本质上可以被二分替代，所以没必要去做更复杂的多分割，目前也没有依据二者表现会有显著的差别。这样我们就可以直接使用二叉树来做。
  */
-import { assert } from "../utils";
+import { assert, createRandomGenerator } from "../utils";
 import { entropy, gini, mode } from "../utils/stat";
-import { filterWithIndices, getUniqueFreqs, valuesAllSame } from "./utils";
+import { getUniqueFreqs, valuesAllSame } from "./utils";
 export type IFeatureSplitType = 'continuous' | 'discrete';
 export interface ISlice {
     X: number[][];
@@ -46,26 +46,12 @@ export class DecisionTreeClassifier {
         this.min_samples_split = min_samples_split;
         this.max_features = max_features;
         this.randomState = randomState;
-        this.random = this.createRandomGenerator(this.randomState);
+        this.random = createRandomGenerator(this.randomState);
         if (criterion === 'entropy') {
             this.impurity = entropy;
         } else {
             this.impurity = gini;
         }
-    }
-
-    private createRandomGenerator(seed?: number): () => number {
-        if (seed === undefined) {
-            return Math.random;
-        }
-        let state = Math.floor(seed) % 2147483647;
-        if (state <= 0) {
-            state += 2147483646;
-        }
-        return () => {
-            state = (state * 16807) % 2147483647;
-            return (state - 1) / 2147483646;
-        };
     }
 
     private selectedFeatureIndices(): number[] {
@@ -95,13 +81,27 @@ export class DecisionTreeClassifier {
      * @param attributes indices of attributes.
      */
     public treeGenerate(tree: IDTree, sampleX: number[][], sampleY: number[], depth: number) {
+        if (depth >= this.max_depth) return;
         if (sampleX.length < this.min_samples_split) return;
-        if (depth > this.max_depth) return;
         const vsame = valuesAllSame(sampleY);
         if (vsame) return;
-    
+
         const split = this.attributeSelection(sampleX, sampleY);
-        // if (split.gain <= 0) return;
+        // no feature separates the samples (e.g. duplicate rows with different labels)
+        if (split.attIndex === -1) return;
+        const leftX: number[][] = [];
+        const leftY: number[] = [];
+        const rightX: number[][] = [];
+        const rightY: number[] = [];
+        for (let i = 0; i < sampleX.length; i++) {
+            if (sampleX[i][split.attIndex] <= split.splitValue) {
+                leftX.push(sampleX[i]);
+                leftY.push(sampleY[i]);
+            } else {
+                rightX.push(sampleX[i]);
+                rightY.push(sampleY[i]);
+            }
+        }
         tree.splitIndex = split.attIndex;
         tree.nodeValue = split.splitValue;
 
@@ -110,67 +110,71 @@ export class DecisionTreeClassifier {
             nodeValue: 0,
             leftChild: null,
             rightChild: null,
-            y: mode(split.left.Y),
+            y: mode(leftY),
         };
         tree.rightChild = {
             splitIndex: -1,
             nodeValue: 0,
             leftChild: null,
             rightChild: null,
-            y: mode(split.right.Y),
+            y: mode(rightY),
         };
-        this.treeGenerate(tree.leftChild, split.left.X, split.left.Y, depth + 1);
-        this.treeGenerate(tree.rightChild, split.right.X, split.right.Y, depth + 1);
+        this.treeGenerate(tree.leftChild, leftX, leftY, depth + 1);
+        this.treeGenerate(tree.rightChild, rightX, rightY, depth + 1);
     }
+    /**
+     * Maximizes impurity gain over midpoint thresholds, scanning each feature
+     * once in sorted order with incremental class counts.
+     */
     private attributeSelection(sampleX: number[][], sampleY: number[]) {
+        const n = sampleY.length;
         const imp = this.nodeImpurity(sampleY);
-        const ans: { gain: number; left: ISlice; right: ISlice; attIndex: number; splitValue: number } = {
-            gain: 0,
-            left: { X: [], Y: [] },
-            right: { X: [], Y: [] },
-            attIndex: -1,
-            splitValue: 0,
-        };
-        const featureIndices = this.selectedFeatureIndices();
         let maxGain = -Infinity;
-        let maxGainAttIndex = 0;
-        for (const i of featureIndices) {
-            let attIndex = i;
-            const values = sampleX.map((r) => r[attIndex]);
-            const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
-            
-            // Try all possible split points between unique values
-            for (let j = 0; j < uniqueValues.length - 1; j++) {
-                const splitValue = (uniqueValues[j] + uniqueValues[j + 1]) / 2;
-                const left = filterWithIndices(values, (v) => v < splitValue);
-                const right = filterWithIndices(values, (v) => v >= splitValue);
-                
-                if (left.indices.length === 0 || right.indices.length === 0) continue;
-                
-                const leftImp = this.nodeImpurity(left.indices.map((index) => sampleY[index]));
-                const rightImp = this.nodeImpurity(right.indices.map((index) => sampleY[index]));
-                const totalImp = (left.subArr.length / sampleX.length) * leftImp + 
-                                (right.subArr.length / sampleX.length) * rightImp;
+        let bestAttIndex = -1;
+        let bestSplitValue = 0;
+        const featureIndices = this.selectedFeatureIndices();
+        for (const attIndex of featureIndices) {
+            const order = Array.from({ length: n }, (_, i) => i).sort(
+                (a, b) => sampleX[a][attIndex] - sampleX[b][attIndex]
+            );
+            const leftCounts: Map<number, number> = new Map();
+            const rightCounts: Map<number, number> = new Map();
+            for (let i = 0; i < n; i++) {
+                rightCounts.set(sampleY[i], (rightCounts.get(sampleY[i]) || 0) + 1);
+            }
+            for (let pos = 0; pos < n - 1; pos++) {
+                const y = sampleY[order[pos]];
+                leftCounts.set(y, (leftCounts.get(y) || 0) + 1);
+                const rc = rightCounts.get(y) - 1;
+                if (rc === 0) {
+                    rightCounts.delete(y);
+                } else {
+                    rightCounts.set(y, rc);
+                }
+                const vCur = sampleX[order[pos]][attIndex];
+                const vNext = sampleX[order[pos + 1]][attIndex];
+                if (vCur === vNext) continue;
+                const nLeft = pos + 1;
+                const nRight = n - nLeft;
+                const totalImp =
+                    (nLeft / n) * this.impurity([...leftCounts.values()]) +
+                    (nRight / n) * this.impurity([...rightCounts.values()]);
                 const gain = imp - totalImp;
-                
                 if (gain > maxGain) {
                     maxGain = gain;
-                    maxGainAttIndex = attIndex;
-                    ans.left = {
-                        X: left.indices.map((index) => sampleX[index]),
-                        Y: left.indices.map((index) => sampleY[index]),
-                    };
-                    ans.right = {
-                        X: right.indices.map((index) => sampleX[index]),
-                        Y: right.indices.map((index) => sampleY[index]),
-                    };
-                    ans.splitValue = splitValue;
+                    bestAttIndex = attIndex;
+                    // a/2 + b/2 avoids overflow; the guard handles rounding up
+                    // to b, which would empty the right child
+                    const mid = vCur / 2 + vNext / 2;
+                    bestSplitValue = mid === vNext ? vCur : mid;
                 }
             }
         }
-        ans.gain = maxGain;
-        ans.attIndex = maxGainAttIndex;
-        return ans;
+        return {
+            gain: maxGain,
+            attIndex: bestAttIndex,
+            splitValue: bestSplitValue,
+        };
     }
 
     private nodeImpurity (sampleY: number[]): number {
@@ -180,7 +184,7 @@ export class DecisionTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = this.createRandomGenerator(this.randomState);
+        this.random = createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         this.dtree = {
             nodeValue: 0,
@@ -192,16 +196,16 @@ export class DecisionTreeClassifier {
         this.treeGenerate(this.dtree, sampleX, sampleY, 0);
     }
     public predict(sampleX: number[][]): number[] {
-        return sampleX.map((x) => this.findSample(x, this.dtree, 0));
+        return sampleX.map((x) => this.findSample(x, this.dtree));
     }
-    private findSample(X: number[], tree: IDTree, depth: number): number {
-        if (depth >= this.max_depth || tree.splitIndex === -1) {
+    private findSample(X: number[], tree: IDTree): number {
+        if (tree.splitIndex === -1) {
             return tree.y;
         }
-        if (X[tree.splitIndex] < tree.nodeValue) {
-            return this.findSample(X, tree.leftChild, depth + 1);
+        if (X[tree.splitIndex] <= tree.nodeValue) {
+            return this.findSample(X, tree.leftChild);
         } else {
-            return this.findSample(X, tree.rightChild, depth + 1);
+            return this.findSample(X, tree.rightChild);
         }
     }
 }

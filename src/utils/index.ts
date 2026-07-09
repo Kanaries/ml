@@ -22,6 +22,8 @@ export function assert(condition: any, message: string) {
     }
 }
 
+export { createRandomGenerator } from './random';
+
 export {
     Stat,
     Sampling,

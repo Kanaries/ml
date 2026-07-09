@@ -45,6 +45,9 @@ export class AdaBoostClassifier extends ClassifierBase {
         }
     }
 
+    /**
+     * trainY here is already mapped to {-1, +1}.
+     */
     private trainStump(trainX: number[][], trainY: number[], weights: number[]): { stump: Stump; error: number } {
         const nSamples = trainX.length;
         const nFeatures = trainX[0].length;
@@ -70,8 +73,7 @@ export class AdaBoostClassifier extends ClassifierBase {
                     let err = 0;
                     for (let i = 0; i < nSamples; i++) {
                         const pred = polarity * (trainX[i][f] >= thresh ? 1 : -1);
-                        const label = trainY[i] === 1 ? 1 : -1;
-                        if (pred !== label) {
+                        if (pred !== trainY[i]) {
                             err += weights[i];
                         }
                     }
@@ -85,21 +87,23 @@ export class AdaBoostClassifier extends ClassifierBase {
         return { stump: bestStump, error: bestError };
     }
 
-    private stumpPredict(stump: Stump, X: number[][]): number[] {
+    /**
+     * Raw stump output in {-1, +1}.
+     */
+    private stumpScore(stump: Stump, X: number[][]): number[] {
         const { feature, threshold, polarity } = stump;
-        return X.map(row => {
-            const pred = polarity * (row[feature] >= threshold ? 1 : -1);
-            return pred === 1 ? 1 : 0;
-        });
+        return X.map(row => polarity * (row[feature] >= threshold ? 1 : -1));
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
         this.validateInput(trainX, trainY);
 
-        this.classes = Array.from(new Set(trainY)).sort();
+        this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
         if (this.classes.length !== 2) {
             throw new Error('AdaBoost currently supports only binary classification');
         }
+        // internal labels: classes[0] -> -1, classes[1] -> +1
+        const yPm = trainY.map(v => (v === this.classes[1] ? 1 : -1));
 
         const n = trainX.length;
         let sampleWeights = new Array(n).fill(1 / n);
@@ -107,7 +111,7 @@ export class AdaBoostClassifier extends ClassifierBase {
         this.estimatorWeights = [];
 
         for (let i = 0; i < this.nEstimators; i++) {
-            const { stump, error } = this.trainStump(trainX, trainY, sampleWeights);
+            const { stump, error } = this.trainStump(trainX, yPm, sampleWeights);
 
             if (error >= 0.5) {
                 if (this.estimators.length === 0) {
@@ -124,13 +128,14 @@ export class AdaBoostClassifier extends ClassifierBase {
             }
 
             const alpha = this.learningRate * Math.log((1 - error) / Math.max(error, 1e-10));
-            const pred = this.stumpPredict(stump, trainX);
+            const pred = this.stumpScore(stump, trainX);
 
+            // SAMME: only misclassified samples are up-weighted
             const maxWeight = Math.max(...sampleWeights) * 100;
             for (let j = 0; j < n; j++) {
-                const sign = pred[j] === trainY[j] ? -1 : 1;
-                sampleWeights[j] *= Math.exp(alpha * sign);
-                sampleWeights[j] = Math.min(sampleWeights[j], maxWeight);
+                if (pred[j] !== yPm[j]) {
+                    sampleWeights[j] = Math.min(sampleWeights[j] * Math.exp(alpha), maxWeight);
+                }
             }
 
             const sum = sampleWeights.reduce((a, b) => a + b, 0);
@@ -147,37 +152,34 @@ export class AdaBoostClassifier extends ClassifierBase {
         }
     }
 
+    private decisionScores(testX: number[][]): number[] {
+        const scores = new Array(testX.length).fill(0);
+        for (let i = 0; i < this.estimators.length; i++) {
+            const pred = this.stumpScore(this.estimators[i], testX);
+            const alpha = this.estimatorWeights[i];
+            for (let j = 0; j < scores.length; j++) {
+                scores[j] += alpha * pred[j];
+            }
+        }
+        return scores;
+    }
+
     public predict(testX: number[][]): number[] {
         if (this.estimators.length === 0) {
             throw new Error('Model must be fitted before making predictions');
         }
-
-        const scores = new Array(testX.length).fill(0);
-        for (let i = 0; i < this.estimators.length; i++) {
-            const pred = this.stumpPredict(this.estimators[i], testX);
-            const alpha = this.estimatorWeights[i];
-            for (let j = 0; j < scores.length; j++) {
-                scores[j] += alpha * (pred[j] === 1 ? 1 : -1);
-            }
-        }
-        return scores.map(s => (s >= 0 ? 1 : 0));
+        return this.decisionScores(testX).map(s => (s >= 0 ? this.classes[1] : this.classes[0]));
     }
 
+    /**
+     * Returns [P(classes[0]), P(classes[1])] per sample. The sigmoid over the
+     * ensemble score is a heuristic calibration, not sklearn's SAMME.R proba.
+     */
     public predictProba(testX: number[][]): number[][] {
         if (this.estimators.length === 0) {
             throw new Error('Model must be fitted before making predictions');
         }
-
-        const scores = new Array(testX.length).fill(0);
-        for (let i = 0; i < this.estimators.length; i++) {
-            const pred = this.stumpPredict(this.estimators[i], testX);
-            const alpha = this.estimatorWeights[i];
-            for (let j = 0; j < scores.length; j++) {
-                scores[j] += alpha * (pred[j] === 1 ? 1 : -1);
-            }
-        }
-
-        return scores.map(s => {
+        return this.decisionScores(testX).map(s => {
             const prob1 = 1 / (1 + Math.exp(-s));
             return [1 - prob1, prob1];
         });
