@@ -146,15 +146,49 @@ export class DecisionTreeRegressor {
         this.regTree = this.initTreeNode(sampleY);
         this.buildTree(this.regTree, sampleX, sampleY, 0);
     }
-    private findSample(X: number[], tree: IRegTree): number {
-        if (tree.splitIndex === -1) return tree.y;
+    private findLeaf(X: number[], tree: IRegTree): IRegTree {
+        if (tree.splitIndex === -1) return tree;
         if (X[tree.splitIndex] <= tree.nodeValue) {
-            return this.findSample(X, tree.leftChild);
+            return this.findLeaf(X, tree.leftChild);
         } else {
-            return this.findSample(X, tree.rightChild);
+            return this.findLeaf(X, tree.rightChild);
         }
     }
     public predict (sampleX: number[][]): number[] {
-        return sampleX.map(x => this.findSample(x, this.regTree));
+        return sampleX.map(x => this.findLeaf(x, this.regTree).y);
+    }
+    private collectLeaves(): IRegTree[] {
+        const leaves: IRegTree[] = [];
+        const walk = (t: IRegTree) => {
+            if (t.splitIndex === -1) {
+                leaves.push(t);
+                return;
+            }
+            walk(t.leftChild);
+            walk(t.rightChild);
+        };
+        if (this.regTree) walk(this.regTree);
+        return leaves;
+    }
+    /**
+     * Leaf index (in depth-first order) each sample falls into.
+     */
+    public apply (sampleX: number[][]): number[] {
+        const leafIds: Map<IRegTree, number> = new Map();
+        this.collectLeaves().forEach((leaf, id) => leafIds.set(leaf, id));
+        return sampleX.map(x => leafIds.get(this.findLeaf(x, this.regTree)));
+    }
+    /**
+     * Overwrite leaf predictions (ids as returned by apply). Gradient
+     * boosting classifiers use this for the per-leaf Newton step.
+     */
+    public setLeafValues (values: Map<number, number>): void {
+        const leaves = this.collectLeaves();
+        for (const [leafId, value] of values) {
+            if (leafId < 0 || leafId >= leaves.length) {
+                throw new Error(`leaf id ${leafId} out of range`);
+            }
+            leaves[leafId].y = value;
+        }
     }
 }
