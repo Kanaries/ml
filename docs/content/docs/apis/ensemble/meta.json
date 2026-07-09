@@ -7,6 +7,10 @@
     "randomForestRegressor",
     "baggingClassifier",
     "adaboostClassifier",
-    "adaboost"
+    "adaboost",
+    "gradientBoostingClassifier",
+    "gradientBoostingRegressor",
+    "xgboostClassifier",
+    "xgboostRegressor"
   ]
 }

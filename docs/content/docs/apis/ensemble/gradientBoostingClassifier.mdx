@@ -1,0 +1,116 @@
+---
+title: Gradient Boosting Classifier in JavaScript with @kanaries/ml
+description: Learn what Gradient Boosting Classifier does, when to use it, and how to run GradientBoostingClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Gradient Boosting Classifier in JavaScript
+
+## Algorithm overview
+
+GradientBoostingClassifier builds an additive model of shallow regression trees for classification, using log loss and a per-leaf Newton step so each round sharpens the decision function.
+
+This algorithm is especially useful when:
+
+- A single tree or linear classifier misses non-linear class boundaries.
+- You need calibrated-looking probabilities alongside class predictions.
+- You want a strong boosting baseline for binary or multiclass tabular data.
+
+## JavaScript implementation
+
+@kanaries/ml provides gradient boosting classification in JavaScript following sklearn's semantics, and it switches automatically between binary and multiclass fits:
+
+- **Binary (K = 2):** log loss. `F_0` is the log-odds of the positive class, each round fits one regression tree to the negative gradient `y - p`, then replaces every leaf value with the Newton step `sum(residuals) / sum(p * (1 - p))`.
+- **Multiclass (K > 2):** multinomial deviance. `F_0k = log(prior_k)`, and each round fits K trees (one per class) to `y_k - softmax_k(F)` using the shared pre-round probabilities, with the per-leaf Newton step `(K-1)/K * sum(residuals) / sum(p * (1 - p))`.
+
+Arbitrary numeric labels are supported (sorted internally), and `subsample`, `maxFeatures`, and a seedable `randomState` are available for stochastic, reproducible fits.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"GradientBoostingClassifier"}
+  pythonCode={String.raw`from sklearn.ensemble import GradientBoostingClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])
+proba = clf.predict_proba([[0.9, 0.8]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.GradientBoostingClassifier({ nEstimators: 100, learningRate: 0.1, maxDepth: 3, randomState: 0 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+const proba = clf.predictProba([[0.9, 0.8]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.GradientBoostingClassifier({ nEstimators: 100, learningRate: 0.1, maxDepth: 3, randomState: 0 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+const proba = clf.predictProba([[0.9, 0.8]]);
+```
+
+## Detailed API reference
+
+```ts
+interface GradientBoostingClassifierProps {
+    nEstimators?: number;
+    learningRate?: number;
+    maxDepth?: number;
+    minSamplesSplit?: number;
+    subsample?: number;
+    maxFeatures?: number | 'sqrt' | 'log2';
+    randomState?: number;
+}
+
+constructor(props: GradientBoostingClassifierProps = {})
+```
+
+Every parameter also accepts its snake_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| nEstimators | number | 100 | Number of boosting rounds (binary: 1 tree/round; multiclass: K trees/round) |
+| learningRate | number | 0.1 | Shrinks the contribution of each tree |
+| maxDepth | number | 3 | Maximum depth of each regression tree |
+| minSamplesSplit | number | 2 | Minimum samples required to split a node |
+| subsample | number | 1.0 | Fraction of rows sampled without replacement per round; `< 1` enables stochastic gradient boosting |
+| maxFeatures | number \| 'sqrt' \| 'log2' | undefined | Number/strategy for features considered at each split |
+| randomState | number | undefined | Seed for reproducible fits |
+
+### Algorithm
+For binary problems the model boosts a single decision function with log loss and applies a Newton update to every leaf. For K > 2 classes it fits one tree per class each round against the shared softmax residuals (multinomial deviance) and applies the `(K-1)/K` Newton step per leaf. `predict` and `predictProba` share the same decision function (for binary, `F >= 0` maps to `P >= 0.5`).
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
++ `predictProba(testX: number[][]): number[][]`
+
+`predictProba` returns one column per class, ordered by the sorted class labels (K columns; two columns `[1 - p, p]` in the binary case).
+
+### Implementation workflow
+
+1. Prepare cleaned tabular features and clean class labels (binary or multiclass).
+2. Fit with a conservative learning rate and enough rounds, validating log loss/accuracy on holdout data.
+3. Tune `learningRate`, `nEstimators`, and `maxDepth`, and add `subsample`/`maxFeatures` regularization if the model overfits.
+
+### JavaScript deployment notes
+
+- Because a failed refit validates labels before touching model state, an already-fitted classifier stays intact if a later `fit` call throws.
+- Keep trees shallow (`maxDepth` 2-4) for classic gradient boosting behavior.
+- Read `predictProba` columns in sorted-label order when mapping probabilities back to your class names.

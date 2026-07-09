@@ -61,18 +61,21 @@ const pred = reg.predict([[1.5], [3.5]]);
 ## Detailed API reference
 
 ```ts
-constructor(props?: { estimator?: DecisionTreeRegressor; n_estimators?: number; learning_rate?: number })
+constructor(props?: { estimator?: DecisionTreeRegressor; n_estimators?: number; learning_rate?: number; randomState?: number })
 ```
+
+Both `n_estimators`/`nEstimators`, `learning_rate`/`learningRate`, and `randomState`/`random_state` casings are accepted.
 
 ### Parameters
 | name | type | default | description |
 |-|-|-|-|
 | estimator | DecisionTreeRegressor | depth 3 tree | Base learner used in boosting |
 | n_estimators | number | 50 | Number of boosting rounds |
-| learning_rate | number | 1.0 | Shrinks the contribution of each regressor |
+| learning_rate | number | 1.0 | Shrinks the contribution of each regressor in the weight update |
+| randomState | number | undefined | Seed for the weighted resampling, for reproducible fits |
 
 ### Algorithm
-AdaBoostRegressor combines weak regressors sequentially. Each new estimator focuses on samples that previous models predicted poorly.
+This is AdaBoost.R2 (Drucker, 1997), matching sklearn's `AdaBoostRegressor` with linear loss. Each round draws a weighted sample of rows, fits a regressor, computes per-sample linear losses, and reweights samples so hard examples get more focus in later rounds; `learning_rate` scales the weight update. Prediction is the **weighted median** of the estimators' predictions (not the weighted mean), which is robust to outlier estimators. A perfectly-fitting estimator is kept and stops boosting, and the ensemble is never left empty (the first estimator is retained even if its weighted error is too high), so the model does not silently collapse to predicting 0.
 
 ### Methods
 + `fit(trainX: number[][], trainY: number[]): void`

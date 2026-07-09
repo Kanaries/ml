@@ -77,7 +77,10 @@ constructor(props: AdaBoostClassifierProps = {})
 | randomState | number | undefined | Seed for reproducibility |
 
 ### Algorithm
-AdaBoostClassifier trains decision stumps sequentially and reweights samples so that misclassified points receive more focus in subsequent rounds.
+AdaBoostClassifier trains decision stumps sequentially and reweights samples so that misclassified points receive more focus in subsequent rounds. It selects the number of classes automatically:
+
+- **Binary (K = 2):** discrete AdaBoost over polarity stumps with the one-sided SAMME weight update. Any two numeric labels are supported (they no longer have to be literal `0`/`1`); classes are sorted numerically and predictions are mapped back to the original labels.
+- **Multiclass (K > 2):** SAMME (Zhu et al., 2009), sklearn's `AdaBoostClassifier` algorithm. The weak learner is a weighted-misclassification-optimal multiclass stump (each side predicts its weighted-majority class), a stump is accepted while its weighted error stays below `1 - 1/K`, and `alpha = learning_rate * (log((1 - err) / err) + log(K - 1))`. Misclassified samples are up-weighted by `exp(alpha)`, and `predict` takes the argmax of the alpha-weighted votes.
 
 ### Methods
 
@@ -85,6 +88,8 @@ AdaBoostClassifier trains decision stumps sequentially and reweights samples so 
 + `predict(testX: number[][]): number[]`
 + `predictProba(testX: number[][]): number[][]`
 + `getFeatureImportances(): number[]`
+
+`predictProba` returns one column per class, ordered by the sorted class labels (for multiclass this is the normalized alpha-weighted vote share, a documented heuristic rather than a calibrated probability). `getFeatureImportances` covers both the binary and multiclass paths.
 
 ### Implementation workflow
 

@@ -70,6 +70,20 @@ interface DecisionTreeProps {
 constructor(props: DecisionTreeProps = {})
 ```
 
+Defaults are `max_depth: Infinity` (grow until pure or `min_samples_split` blocks a split), `min_samples_split: 2`, and `criterion: 'entropy'`.
+
+### Algorithm
+The classifier follows CART/sklearn split semantics:
+
+- **Criterion:** `gini` or `entropy` impurity, chosen via `criterion`.
+- **Thresholds:** candidate thresholds are the midpoints of adjacent unique feature values, and the convention is `x <= threshold` goes left (sklearn's convention).
+- **max_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
+- **Non-separable samples:** when no feature separates the samples in a node (for example duplicate rows with conflicting labels), the node becomes a leaf that predicts the majority class rather than creating empty children.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
+
 ### Implementation workflow
 
 1. Prepare cleaned tabular features and split train/validation data.

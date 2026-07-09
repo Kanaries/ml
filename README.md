@@ -216,7 +216,7 @@ The library exposes several categories of algorithms:
 - **Clustering**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `OPTICS`, `MeanShift`, `HDBScan`
 - **Decomposition**: `PCA`
 - **Manifold Learning**: `SpectralEmbedding`, `MDS`, `LocallyLinearEmbedding`, `TSNE`
- - **Ensemble**: `IsolationForest`, `AdaBoostClassifier`
+ - **Ensemble**: `IsolationForest`, `AdaBoostClassifier`, `AdaBoostRegressor`, `BaggingClassifier`, `RandomForestClassifier`, `RandomForestRegressor`, `GradientBoostingClassifier`, `GradientBoostingRegressor`, `XGBoostClassifier`, `XGBoostRegressor`
 - **Metrics**: `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `meanSquaredError`, `r2Score`
 - **Utilities**: `Sampling.trainTestSplit`, `Preprocessing.StandardScaler`, `Preprocessing.MinMaxScaler`, `ModelSelection.KFold`, `ModelSelection.crossValScore`, linear algebra helpers and math functions
 

@@ -29,6 +29,10 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 - [BaggingClassifier](baggingClassifier): bootstrap classifier ensembles with default or custom estimators
 - [AdaBoost Regressor](adaboost): boosted regression for non-linear tabular prediction
 - [AdaBoost Classifier](adaboostClassifier): boosted classification for harder decision boundaries
+- [GradientBoostingRegressor](gradientBoostingRegressor): squared-error gradient boosting for tabular regression
+- [GradientBoostingClassifier](gradientBoostingClassifier): log-loss gradient boosting for binary and multiclass classification
+- [XGBoostRegressor](xgboostRegressor): exact-greedy, regularized XGBoost regression
+- [XGBoostClassifier](xgboostClassifier): exact-greedy, regularized XGBoost classification (binary and multiclass)
 
 ## Detailed module guide
 
@@ -39,6 +43,8 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 3. Use [BaggingClassifier](baggingClassifier) when you want bootstrap aggregation around decision trees or a custom classifier.
 4. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
 5. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
+6. Use [GradientBoostingClassifier](gradientBoostingClassifier) or [GradientBoostingRegressor](gradientBoostingRegressor) when you want stage-wise boosting with fine control over shrinkage and depth.
+7. Use [XGBoostClassifier](xgboostClassifier) or [XGBoostRegressor](xgboostRegressor) when you want regularized, exact-greedy boosting close to the `xgboost` library.
 
 ### JavaScript deployment notes
 

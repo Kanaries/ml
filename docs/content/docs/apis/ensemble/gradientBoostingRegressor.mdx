@@ -1,0 +1,109 @@
+---
+title: Gradient Boosting Regressor in JavaScript with @kanaries/ml
+description: Learn what Gradient Boosting Regressor does, when to use it, and how to run GradientBoostingRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# Gradient Boosting Regressor in JavaScript
+
+## Algorithm overview
+
+GradientBoostingRegressor builds an additive model of shallow regression trees stage by stage, each new tree fitting the residuals of the trees before it.
+
+This algorithm is especially useful when:
+
+- Single trees or linear models underfit non-linear tabular targets.
+- You want strong accuracy with fine control over shrinkage and depth.
+- You need a well-understood boosting baseline that runs in JavaScript.
+
+## JavaScript implementation
+
+@kanaries/ml provides squared-error gradient boosting in JavaScript following sklearn's semantics: the model starts from `F_0 = mean(y)`, and each round fits a regression tree to the residuals `y - F` and updates `F += learningRate * tree(x)`. It supports stochastic gradient boosting through `subsample < 1` (rows are drawn without replacement per round), feature subsampling via `maxFeatures`, and a seedable `randomState` for reproducible fits.
+
+Because the estimator is available in JS, boosted regression can live in the same application layer that owns data fetching, feature building, and API responses.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"GradientBoostingRegressor"}
+  pythonCode={String.raw`from sklearn.ensemble import GradientBoostingRegressor
+
+X = [[0], [1], [2], [3], [4]]
+y = [1.0, 1.8, 3.1, 3.9, 5.2]
+
+reg = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [3.5]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.GradientBoostingRegressor({ nEstimators: 100, learningRate: 0.1, maxDepth: 3, randomState: 0 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.GradientBoostingRegressor({ nEstimators: 100, learningRate: 0.1, maxDepth: 3, randomState: 0 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);
+```
+
+## Detailed API reference
+
+```ts
+interface GradientBoostingRegressorProps {
+    nEstimators?: number;
+    learningRate?: number;
+    maxDepth?: number;
+    minSamplesSplit?: number;
+    subsample?: number;
+    maxFeatures?: number | 'sqrt' | 'log2';
+    randomState?: number;
+}
+
+constructor(props: GradientBoostingRegressorProps = {})
+```
+
+Every parameter also accepts its snake_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| nEstimators | number | 100 | Number of boosting stages (trees) |
+| learningRate | number | 0.1 | Shrinks the contribution of each tree |
+| maxDepth | number | 3 | Maximum depth of each regression tree |
+| minSamplesSplit | number | 2 | Minimum samples required to split a node |
+| subsample | number | 1.0 | Fraction of rows sampled without replacement per round; `< 1` enables stochastic gradient boosting |
+| maxFeatures | number \| 'sqrt' \| 'log2' | undefined | Number/strategy for features considered at each split |
+| randomState | number | undefined | Seed for reproducible fits |
+
+Parameters are validated up front (positive-integer `nEstimators`, finite positive `learningRate`, `subsample` in `(0, 1]`, `maxDepth >= 1`, `minSamplesSplit >= 2`) so invalid configurations fail fast.
+
+### Algorithm
+The model initializes with the mean of the targets. Each round computes the residuals `y - F`, fits a depth-limited regression tree to them, and adds `learningRate * tree(x)` to the running prediction `F`. With `subsample < 1`, each tree is trained on a per-round sample of rows drawn without replacement, while `F` is still updated over all samples.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
+
+### Implementation workflow
+
+1. Start with a conservative learning rate and a moderate number of estimators.
+2. Validate MAE/RMSE on holdout data and watch for overfitting as trees accumulate.
+3. Tune `learningRate` and `nEstimators` together, and use `subsample`/`maxFeatures` for extra regularization.
+
+### JavaScript deployment notes
+
+- Lower learning rates usually need more estimators; treat the pair as a single tuning decision.
+- Keep `maxDepth` small (2-4) for classic gradient boosting behavior on tabular data.
+- This model is best suited to structured tabular regression where boosting improves fit quality over a single tree.

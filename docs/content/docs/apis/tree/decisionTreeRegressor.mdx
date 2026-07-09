@@ -69,6 +69,21 @@ interface RegressionTreeProps {
 constructor(props: RegressionTreeProps = {})
 ```
 
+Defaults are `max_depth: Infinity` (grow until pure or `min_samples_split` blocks a split) and `min_samples_split: 2`.
+
+### Algorithm
+The regressor follows CART/sklearn split semantics:
+
+- **Split criterion:** each candidate split minimizes the weighted sum of squared errors `n_l * var_l + n_r * var_r` (evaluated with a sorted prefix-sum scan), not the unweighted variance sum.
+- **Thresholds:** candidate thresholds are the midpoints of adjacent unique feature values (computed overflow-safe as `a/2 + b/2`), and the convention is `x <= threshold` goes left (sklearn's convention).
+- **max_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
++ `apply(testX: number[][]): number[]` — returns the depth-first leaf id each sample falls into
++ `setLeafValues(values: Map<number, number>): void` — overwrites leaf predictions by leaf id (used by boosting learners such as `GradientBoostingClassifier` for the per-leaf Newton step)
+
 ### Implementation workflow
 
 1. Train with baseline depth constraints and evaluate residuals.

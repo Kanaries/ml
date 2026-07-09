@@ -1,0 +1,122 @@
+---
+title: XGBoost Classifier in JavaScript with @kanaries/ml
+description: Learn what XGBoost Classifier does, when to use it, and how to run XGBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# XGBoost Classifier in JavaScript
+
+## Algorithm overview
+
+XGBoostClassifier implements exact-greedy gradient boosting (Chen & Guestrin, 2016) for classification, growing regularized trees on the first- and second-order gradients of the logistic or softmax objective.
+
+This algorithm is especially useful when:
+
+- You want a high-accuracy boosting classifier with explicit regularization.
+- You need behavior close to the `xgboost` library inside a JavaScript runtime.
+- Binary or multiclass tabular data benefits from second-order tree growth.
+
+## JavaScript implementation
+
+@kanaries/ml provides an exact-greedy XGBoost classifier in JavaScript that switches objective automatically:
+
+- **Binary (K = 2):** `binary:logistic`. `p = sigmoid(F)`, `g = p - y`, `h = p * (1 - p)`, with the initial margin `logit(baseScore)`.
+- **Multiclass (K > 2):** `multi:softprob`. Each round builds K trees on the shared pre-round softmax probabilities with `g = p_k - 1{y=k}` and `h = max(2 * p_k * (1 - p_k), 1e-16)`. Initial margins are 0 because softmax is shift-invariant.
+
+Trees use the same regularized split gain and leaf weights as the regressor, with the `xgboost` defaults (`eta=0.3`, `maxDepth=6`, `lambda=1`, `gamma=0`, `minChildWeight=1`, `baseScore=0.5`) plus `subsample` and `colsampleByTree`. Missing values are not supported: `NaN`/non-finite inputs are rejected with an explicit error.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"XGBoostClassifier"}
+  pythonCode={String.raw`from xgboost import XGBClassifier
+
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]
+y = [0, 1, 1, 0]
+
+clf = XGBClassifier(n_estimators=100, learning_rate=0.3, max_depth=6, reg_lambda=1, random_state=0)
+clf.fit(X, y)
+pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])
+proba = clf.predict_proba([[0.9, 0.8]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.XGBoostClassifier({ nEstimators: 100, learningRate: 0.3, maxDepth: 6, lambda: 1, randomState: 0 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+const proba = clf.predictProba([[0.9, 0.8]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
+const y = [0, 1, 1, 0];
+
+const clf = new Ensemble.XGBoostClassifier({ nEstimators: 100, learningRate: 0.3, maxDepth: 6, lambda: 1, randomState: 0 });
+clf.fit(X, y);
+const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+const proba = clf.predictProba([[0.9, 0.8]]);
+```
+
+## Detailed API reference
+
+```ts
+interface XGBoostProps {
+    nEstimators?: number;
+    learningRate?: number;
+    maxDepth?: number;
+    lambda?: number;
+    gamma?: number;
+    minChildWeight?: number;
+    subsample?: number;
+    colsampleByTree?: number;
+    baseScore?: number;
+    randomState?: number;
+}
+
+constructor(props: XGBoostProps = {})
+```
+
+Every parameter also accepts its snake_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| nEstimators | number | 100 | Number of boosting rounds (multiclass builds K trees/round) |
+| learningRate | number | 0.3 | Step size shrinkage (`eta`); restricted to `(0, 1]` |
+| maxDepth | number | 6 | Maximum depth of each tree |
+| lambda | number | 1 | L2 regularization on leaf weights |
+| gamma | number | 0 | Minimum split-gain (loss reduction) required to make a split |
+| minChildWeight | number | 1 | Minimum hessian sum required in a child |
+| subsample | number | 1 | Fraction of rows sampled per tree |
+| colsampleByTree | number | 1 | Fraction of features sampled per tree |
+| baseScore | number | 0.5 | Base probability for `binary:logistic` (must be in `(0, 1)`) |
+| randomState | number | undefined | Seed for reproducible fits |
+
+### Algorithm
+For two classes the model boosts a single logistic decision function; for K > 2 classes it fits K trees per round against the softmax residuals. Both paths grow exact-greedy trees that maximize the regularized split gain and assign leaf weights `-G/(H+lambda)`. Switching between binary and multiclass fits fully resets model state, and a failed refit leaves a previously fitted classifier intact.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
++ `predictProba(testX: number[][]): number[][]`
+
+`predictProba` returns one column per class, ordered by the sorted class labels (two columns `[1 - p, p]` in the binary case). `predict` breaks argmax ties toward the lower class index.
+
+### Implementation workflow
+
+1. Provide finite tabular features and clean labels (binary or multiclass).
+2. Fit with the defaults, then tune `maxDepth`, `learningRate`, and `nEstimators`.
+3. Add regularization via `lambda`, `gamma`, `minChildWeight`, `subsample`, and `colsampleByTree` if the model overfits.
+
+### JavaScript deployment notes
+
+- `learningRate` (`eta`) must be in `(0, 1]`; smaller values usually need more estimators.
+- `baseScore` must be strictly inside `(0, 1)` because it seeds the logistic margin.
+- There is no missing-value handling, so impute or drop non-finite inputs before fitting.

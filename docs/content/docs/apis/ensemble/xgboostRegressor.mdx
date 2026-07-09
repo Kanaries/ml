@@ -1,0 +1,119 @@
+---
+title: XGBoost Regressor in JavaScript with @kanaries/ml
+description: Learn what XGBoost Regressor does, when to use it, and how to run XGBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+# XGBoost Regressor in JavaScript
+
+## Algorithm overview
+
+XGBoostRegressor implements exact-greedy gradient boosting (Chen & Guestrin, 2016) with a regularized objective, growing each tree on first- and second-order gradients of the loss.
+
+This algorithm is especially useful when:
+
+- You want a high-accuracy boosting regressor with explicit regularization.
+- You need behavior close to the `xgboost` library inside a JavaScript runtime.
+- Structured tabular data benefits from second-order (Newton) tree growth.
+
+## JavaScript implementation
+
+@kanaries/ml provides an exact-greedy XGBoost regressor in JavaScript with the `reg:squarederror` objective (`g = F - y`, `h = 1`). Each tree is grown with the regularized split gain
+
+```
+1/2 * (G_L^2/(H_L+lambda) + G_R^2/(H_R+lambda) - G^2/(H+lambda)) - gamma
+```
+
+and leaf weights `-G/(H+lambda)`, with `minChildWeight` enforced on the hessian sum. The defaults match the `xgboost` library (`eta=0.3`, `maxDepth=6`, `lambda=1`, `gamma=0`, `minChildWeight=1`, `baseScore=0.5`), plus `subsample` and `colsampleByTree` sampling and a seedable `randomState`.
+
+Missing values are not supported: there is no sparsity-aware default direction, so `NaN`/non-finite inputs are rejected with an explicit error rather than silently misrouted.
+
+## Quick start
+
+<AlgorithmComparison
+  title={"XGBoostRegressor"}
+  pythonCode={String.raw`from xgboost import XGBRegressor
+
+X = [[0], [1], [2], [3], [4]]
+y = [1.0, 1.8, 3.1, 3.9, 5.2]
+
+reg = XGBRegressor(n_estimators=100, learning_rate=0.3, max_depth=6, reg_lambda=1, random_state=0)
+reg.fit(X, y)
+pred = reg.predict([[1.5], [3.5]])`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.XGBoostRegressor({ nEstimators: 100, learningRate: 0.3, maxDepth: 6, lambda: 1, randomState: 0 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);`}
+/>
+
+### Quick JavaScript example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3], [4]];
+const y = [1.0, 1.8, 3.1, 3.9, 5.2];
+
+const reg = new Ensemble.XGBoostRegressor({ nEstimators: 100, learningRate: 0.3, maxDepth: 6, lambda: 1, randomState: 0 });
+reg.fit(X, y);
+const pred = reg.predict([[1.5], [3.5]]);
+```
+
+## Detailed API reference
+
+```ts
+interface XGBoostProps {
+    nEstimators?: number;
+    learningRate?: number;
+    maxDepth?: number;
+    lambda?: number;
+    gamma?: number;
+    minChildWeight?: number;
+    subsample?: number;
+    colsampleByTree?: number;
+    baseScore?: number;
+    randomState?: number;
+}
+
+constructor(props: XGBoostProps = {})
+```
+
+Every parameter also accepts its snake_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
+
+### Parameters
+| name | type | default | description |
+|-|-|-|-|
+| nEstimators | number | 100 | Number of boosting rounds (trees) |
+| learningRate | number | 0.3 | Step size shrinkage (`eta`); restricted to `(0, 1]` |
+| maxDepth | number | 6 | Maximum depth of each tree |
+| lambda | number | 1 | L2 regularization on leaf weights |
+| gamma | number | 0 | Minimum split-gain (loss reduction) required to make a split |
+| minChildWeight | number | 1 | Minimum hessian sum required in a child |
+| subsample | number | 1 | Fraction of rows sampled per tree |
+| colsampleByTree | number | 1 | Fraction of features sampled per tree |
+| baseScore | number | 0.5 | Initial prediction (global bias / base margin) |
+| randomState | number | undefined | Seed for reproducible fits |
+
+### Algorithm
+The objective is `reg:squarederror`. Starting from `baseScore`, each round computes gradients `g = F - y` and hessians `h = 1`, then grows an exact-greedy tree that maximizes the regularized split gain and assigns leaf weights `-G/(H+lambda)`. The tree's predictions are added with the learning rate `F += learningRate * tree(x)`. Zero-denominator leaf weights fall back to 0.
+
+### Methods
++ `fit(trainX: number[][], trainY: number[]): void`
++ `predict(testX: number[][]): number[]`
+
+### Implementation workflow
+
+1. Scale-free tabular features work well; verify inputs are finite (`NaN` is rejected).
+2. Fit with the defaults, then tune `maxDepth`, `learningRate`, and `nEstimators`.
+3. Add regularization via `lambda`, `gamma`, `minChildWeight`, `subsample`, and `colsampleByTree` if the model overfits.
+
+### JavaScript deployment notes
+
+- `learningRate` (`eta`) must be in `(0, 1]`; smaller values usually need more estimators.
+- There is no missing-value handling, so impute or drop non-finite inputs before fitting.
+- Behavior tracks the `xgboost` library defaults, making this a drop-in boosting regressor for JS/TS services.
