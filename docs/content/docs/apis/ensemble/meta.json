@@ -7,7 +7,7 @@
     "randomForestRegressor",
     "baggingClassifier",
     "adaboostClassifier",
-    "adaboost",
+    "adaboostRegressor",
     "gradientBoostingClassifier",
     "gradientBoostingRegressor",
     "xgboostClassifier",

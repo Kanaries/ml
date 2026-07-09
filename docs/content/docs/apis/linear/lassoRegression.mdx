@@ -48,3 +48,15 @@ Methods:
 
 - `fit(X: number[][], Y: number[]): void`
 - `predict(X: number[][]): number[]`
+
+## sklearn-style alias: `Lasso`
+
+`Linear.Lasso` extends `Linear.LassoRegression` with identical options and methods. Use it when you prefer the scikit-learn class name:
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.Lasso({ alpha: 0.1, fitIntercept: true });
+model.fit([[0, 1], [1, 1], [2, 0]], [1, 2, 3]);
+const pred = model.predict([[3, 0]]);
+```

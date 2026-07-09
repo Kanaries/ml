@@ -46,3 +46,15 @@ Methods:
 - `predict(X: number[][]): number[]`
 
 `predict` throws if the model has not been fitted or if the feature count differs from the fitted data.
+
+## sklearn-style alias: `Ridge`
+
+`Linear.Ridge` extends `Linear.RidgeRegression` with identical options and methods. Use it when you prefer the scikit-learn class name:
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.Ridge({ alpha: 0.5, fitIntercept: true });
+model.fit([[0], [1], [2], [3]], [1, 2, 3, 4]);
+const pred = model.predict([[4]]);
+```

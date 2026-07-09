@@ -7,8 +7,6 @@
     "polynomialRegression",
     "ridgeRegression",
     "lassoRegression",
-    "ridge",
-    "lasso",
     "elasticNet",
     "ridgeClassifier"
   ]

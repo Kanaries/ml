@@ -6,8 +6,7 @@
     "build": "next build",
     "dev": "next dev --turbo",
     "start": "next start",
-    "postinstall": "fumadocs-mdx",
-    "postbuild": "node scripts/generate-sitemap.mjs"
+    "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
     "@kanaries/ml": "latest",
