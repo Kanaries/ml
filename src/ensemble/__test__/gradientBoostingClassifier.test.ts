@@ -56,7 +56,7 @@ test('a failed refit does not corrupt a fitted model', () => {
     const y = [5, 5, 5, 5, 9, 9, 9, 9];
     const clf = new GradientBoostingClassifier({ nEstimators: 10, randomState: 0 });
     clf.fit(X, y);
-    expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
+    expect(() => clf.fit([[1], [2]], [1, 1])).toThrow();
     expect(clf.predict([[1], [9]])).toEqual([5, 9]);
 });
 
@@ -68,8 +68,6 @@ test('throws on invalid inputs', () => {
     const clf = new GradientBoostingClassifier();
     expect(() => clf.predict([[1]])).toThrow();
     expect(() => clf.fit([[1], [2]], [1, 2, 3])).toThrow();
-    // more than two classes is not supported yet
-    expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
-    // single class is not valid binary classification
+    // a single class is not a valid classification target
     expect(() => clf.fit([[1], [2]], [1, 1])).toThrow();
 });

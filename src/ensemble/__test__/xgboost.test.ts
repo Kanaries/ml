@@ -123,9 +123,8 @@ describe('XGBoostClassifier', () => {
         }
     });
 
-    test('throws on non-binary targets and invalid baseScore', () => {
+    test('throws on single-class targets and invalid baseScore', () => {
         const clf = new XGBoostClassifier();
-        expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
         expect(() => clf.fit([[1], [2]], [1, 1])).toThrow();
         expect(() => new XGBoostClassifier({ baseScore: 1 })).toThrow();
         expect(() => new XGBoostClassifier({ baseScore: 0 })).toThrow();
@@ -148,7 +147,7 @@ describe('XGBoostClassifier', () => {
         const y = [5, 5, 5, 5, 9, 9, 9, 9];
         const clf = new XGBoostClassifier({ nEstimators: 10, randomState: 0 });
         clf.fit(X, y);
-        expect(() => clf.fit([[1], [2], [3]], [0, 1, 2])).toThrow();
+        expect(() => clf.fit([[1], [2]], [1, 1])).toThrow();
         // still predicts with the original label set
         expect(clf.predict([[1], [9]])).toEqual([5, 9]);
     });

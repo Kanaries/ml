@@ -117,6 +117,7 @@ test_data/*
 !test_data/elastic_net.json
 !test_data/gaussian_nb.json
 !test_data/gradient_boosting_classifier.json
+!test_data/gradient_boosting_classifier_multi.json
 !test_data/gradient_boosting_regressor.json
 !test_data/bagging_classifier.json
 !test_data/kneighbors_regressor.json
@@ -128,4 +129,5 @@ test_data/*
 !test_data/radius_neighbors_regressor.json
 !test_data/ridge_classifier.json
 !test_data/xgboost_classifier.json
+!test_data/xgboost_classifier_multi.json
 !test_data/xgboost_regressor.json
