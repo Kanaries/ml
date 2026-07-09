@@ -119,6 +119,7 @@ test_data/*
 !test_data/gradient_boosting_classifier.json
 !test_data/gradient_boosting_classifier_multi.json
 !test_data/gradient_boosting_regressor.json
+!test_data/adaboost_classifier_multi.json
 !test_data/bagging_classifier.json
 !test_data/kneighbors_regressor.json
 !test_data/multinomial_nb.json

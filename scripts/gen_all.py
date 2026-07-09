@@ -44,6 +44,7 @@ scripts = [
     'gen_xgboost_classifier.py',
     'gen_gradient_boosting_classifier_multi.py',
     'gen_xgboost_classifier_multi.py',
+    'gen_adaboost_classifier_multi.py',
     'gen_bernoulli_rbm.py',
     'gen_pca.py',
     'gen_truncated_svd.py',
