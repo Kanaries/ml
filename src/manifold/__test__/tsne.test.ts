@@ -42,3 +42,14 @@ test('tsne separates two well-separated clusters (gradient descends KL)', () => 
     // with a correct KL gradient the clusters separate cleanly
     expect(intra / inter).toBeLessThan(0.5);
 });
+
+test('tsne is reproducible with randomState', () => {
+    const X: number[][] = [];
+    for (let i = 0; i < 6; i++) X.push([i * 0.1, (i * 3 % 6) * 0.1]);
+    for (let i = 0; i < 6; i++) X.push([5 + i * 0.1, 5 + (i * 5 % 6) * 0.1]);
+
+    const opts = { nComponents: 2, perplexity: 3, learningRate: 100, nIter: 50, randomState: 42 };
+    const a = new TSNE(opts).fitTransform(X);
+    const b = new TSNE(opts).fitTransform(X);
+    expect(b).toEqual(a);
+});

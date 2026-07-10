@@ -1,8 +1,11 @@
+import { createRandomGenerator } from '../utils/random';
+
 export interface TSNEOptions {
     nComponents?: number;
     perplexity?: number;
     learningRate?: number;
     nIter?: number;
+    randomState?: number;
 }
 
 export class TSNE {
@@ -10,6 +13,7 @@ export class TSNE {
     private perplexity: number;
     private learningRate: number;
     private nIter: number;
+    private randomState?: number;
     private embedding: number[][] = [];
 
     constructor(options: TSNEOptions = {}) {
@@ -17,6 +21,7 @@ export class TSNE {
         this.perplexity = options.perplexity ?? 30;
         this.learningRate = options.learningRate ?? 200;
         this.nIter = options.nIter ?? 250;
+        this.randomState = options.randomState;
     }
 
     private static squaredDistance(a: number[], b: number[]): number {
@@ -28,12 +33,12 @@ export class TSNE {
         return s;
     }
 
-    private static randomMatrix(rows: number, cols: number): number[][] {
+    private static randomMatrix(rows: number, cols: number, rng: () => number): number[][] {
         const mat: number[][] = [];
         for (let i = 0; i < rows; i++) {
             mat.push([]);
             for (let j = 0; j < cols; j++) {
-                mat[i][j] = (Math.random() - 0.5) * 1e-4;
+                mat[i][j] = (rng() - 0.5) * 1e-4;
             }
         }
         return mat;
@@ -108,7 +113,8 @@ export class TSNE {
             }
         }
         const P = this.computeP(dist);
-        let Y = TSNE.randomMatrix(n, this.nComponents);
+        const rng = createRandomGenerator(this.randomState);
+        let Y = TSNE.randomMatrix(n, this.nComponents, rng);
         let dY = new Array(n).fill(0).map(() => new Array(this.nComponents).fill(0));
         let iY = new Array(n).fill(0).map(() => new Array(this.nComponents).fill(0));
         let momentum = 0.5;

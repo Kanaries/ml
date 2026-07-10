@@ -23,3 +23,15 @@ test('basic sparse pca', () => {
     expect(zeroCount).toBeGreaterThan(0);
     expect(total).toBeGreaterThan(0);
 });
+
+test('sparse pca throws when alpha shrinks all loadings to zero', () => {
+    const X = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 1],
+        [2, 4, 5],
+        [3, 6, 0]
+    ];
+    const spca = new SparsePCA({ nComponents: 2, alpha: 1e6 });
+    expect(() => spca.fit(X)).toThrow('alpha too large: all loadings shrank to zero');
+});

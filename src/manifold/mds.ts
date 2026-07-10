@@ -1,17 +1,22 @@
+import { createRandomGenerator } from '../utils/random';
+
 export interface MDSOptions {
     nComponents?: number;
     dissimilarity?: 'euclidean' | 'precomputed';
+    randomState?: number;
 }
 
 export class MDS {
     private nComponents: number;
     private dissimilarity: 'euclidean' | 'precomputed';
+    private randomState?: number;
     private embedding: number[][];
 
     constructor(options: MDSOptions = {}) {
-        const { nComponents = 2, dissimilarity = 'euclidean' } = options;
+        const { nComponents = 2, dissimilarity = 'euclidean', randomState } = options;
         this.nComponents = nComponents;
         this.dissimilarity = dissimilarity;
+        this.randomState = randomState;
         this.embedding = [];
     }
 
@@ -61,10 +66,10 @@ export class MDS {
         return v.map(x => x / norm);
     }
 
-    private static powerIteration(A: number[][], iter: number = 100): { value: number; vector: number[] } {
+    private static powerIteration(A: number[][], rng: () => number, iter: number = 100): { value: number; vector: number[] } {
         let v: number[] = Array(A.length)
             .fill(0)
-            .map(() => Math.random());
+            .map(() => rng());
         v = MDS.normalize(v);
         for (let i = 0; i < iter; i++) {
             const Av = MDS.matVecMul(A, v);
@@ -110,11 +115,12 @@ export class MDS {
         }
 
         let A = MDS.cloneMatrix(B);
+        const rng = createRandomGenerator(this.randomState);
         const vectors: number[][] = [];
         const values: number[] = [];
         const k = Math.min(this.nComponents, n);
         for (let c = 0; c < k; c++) {
-            const { value, vector } = MDS.powerIteration(A, 200);
+            const { value, vector } = MDS.powerIteration(A, rng, 200);
             vectors.push(vector.slice());
             values.push(value);
             const outer = MDS.outer(vector, vector);

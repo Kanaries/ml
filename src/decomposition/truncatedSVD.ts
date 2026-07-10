@@ -1,3 +1,5 @@
+import { dot, symmetricEigen } from '../algebra/eigen';
+
 export class TruncatedSVD {
     private nComponents: number;
     private components: number[][];
@@ -11,50 +13,6 @@ export class TruncatedSVD {
         this.singularValues = [];
         this.explainedVariance = [];
         this.explainedVarianceRatio = [];
-    }
-
-    private static dot(a: number[], b: number[]): number {
-        let s = 0;
-        for (let i = 0; i < a.length; i++) {
-            s += a[i] * b[i];
-        }
-        return s;
-    }
-
-    private static matVecMul(A: number[][], v: number[]): number[] {
-        return A.map(row => TruncatedSVD.dot(row, v));
-    }
-
-    private static outer(v1: number[], v2: number[]): number[][] {
-        const res: number[][] = [];
-        for (let i = 0; i < v1.length; i++) {
-            res.push([]);
-            for (let j = 0; j < v2.length; j++) {
-                res[i].push(v1[i] * v2[j]);
-            }
-        }
-        return res;
-    }
-
-    private static normalize(v: number[]): number[] {
-        const norm = Math.sqrt(TruncatedSVD.dot(v, v));
-        return v.map(x => x / norm);
-    }
-
-    private static powerIteration(A: number[][], iter: number = 100): { value: number; vector: number[] } {
-        let v: number[] = new Array(A.length).fill(1);
-        v = TruncatedSVD.normalize(v);
-        for (let i = 0; i < iter; i++) {
-            const Av = TruncatedSVD.matVecMul(A, v);
-            v = TruncatedSVD.normalize(Av);
-        }
-        const Av = TruncatedSVD.matVecMul(A, v);
-        const value = TruncatedSVD.dot(v, Av);
-        return { value, vector: v };
-    }
-
-    private static cloneMatrix(A: number[][]): number[][] {
-        return A.map(r => r.slice());
     }
 
     public fit(X: number[][]): void {
@@ -74,13 +32,13 @@ export class TruncatedSVD {
         }
 
         const k = Math.min(this.nComponents, nFeatures);
-        let A = TruncatedSVD.cloneMatrix(XtX);
+        const { values, vectors } = symmetricEigen(XtX, k);
         this.components = [];
         this.singularValues = [];
         this.explainedVariance = [];
 
-        for (let c = 0; c < k; c++) {
-            const { value, vector } = TruncatedSVD.powerIteration(A, 200);
+        for (let c = 0; c < vectors.length; c++) {
+            const vector = vectors[c].slice();
 
             let maxIdx = 0;
             for (let i = 1; i < vector.length; i++) {
@@ -94,16 +52,9 @@ export class TruncatedSVD {
                 }
             }
 
-            this.components.push(vector.slice());
-            const s = Math.sqrt(Math.max(value, 0));
+            this.components.push(vector);
+            const s = Math.sqrt(Math.max(values[c], 0));
             this.singularValues.push(s);
-
-            const outer = TruncatedSVD.outer(vector, vector);
-            for (let i = 0; i < nFeatures; i++) {
-                for (let j = 0; j < nFeatures; j++) {
-                    A[i][j] -= value * outer[i][j];
-                }
-            }
         }
 
         // sklearn definition: explained_variance_[i] = Var(X_transformed[:, i])
@@ -144,7 +95,7 @@ export class TruncatedSVD {
     }
 
     public transform(X: number[][]): number[][] {
-        return X.map(row => this.components.map(comp => TruncatedSVD.dot(row, comp)));
+        return X.map(row => this.components.map(comp => dot(row, comp)));
     }
 
     public fitTransform(X: number[][]): number[][] {

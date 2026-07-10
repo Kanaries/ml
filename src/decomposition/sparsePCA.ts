@@ -1,4 +1,6 @@
 import { PCA } from './pca';
+import { dot, matVecMul, normalizeOrNull, outer } from '../algebra/eigen';
+import { createRandomGenerator } from '../utils/random';
 
 export interface SparsePCAProps {
     nComponents?: number | null;
@@ -37,7 +39,7 @@ export class SparsePCA extends PCA {
             this.mean[j] /= nSamples;
         }
         const Xc = X.map(row => row.map((v, j) => v - this.mean[j]));
-        let cov: number[][] = [];
+        const cov: number[][] = [];
         for (let i = 0; i < nFeatures; i++) {
             cov.push(new Array(nFeatures).fill(0));
         }
@@ -54,30 +56,43 @@ export class SparsePCA extends PCA {
             }
         }
         const k = this.nComponents === null ? nFeatures : Math.min(this.nComponents, nFeatures);
-        let A = PCA.cloneMatrix(cov);
+        const A = cov.map(row => row.slice());
+        const rand = createRandomGenerator(1);
         this.components = [];
         this.explainedVariance = [];
         for (let c = 0; c < k; c++) {
-            let v: number[] = new Array(nFeatures).fill(1 / Math.sqrt(nFeatures));
+            // seeded pseudo-random initialization: deterministic, but avoids
+            // starting on an exact eigenvector (e.g. the uniform vector for
+            // perfectly anti-correlated features), which stalls the iteration
+            let v: number[] | null = null;
+            while (v === null) {
+                v = normalizeOrNull(new Array(nFeatures).fill(0).map(() => rand() * 2 - 1));
+            }
+            let updated = false;
             for (let iter = 0; iter < this.maxIter; iter++) {
                 const oldV = v.slice();
-                let Av = PCA.matVecMul(A, v);
+                const Av = matVecMul(A, v);
                 for (let i = 0; i < Av.length; i++) {
                     const sign = Av[i] >= 0 ? 1 : -1;
                     const val = Math.max(Math.abs(Av[i]) - this.alpha, 0);
                     Av[i] = sign * val;
                 }
-                const norm = Math.sqrt(PCA.dot(Av, Av));
-                if (norm === 0) {
+                const next = normalizeOrNull(Av);
+                if (next === null) {
+                    if (!updated) {
+                        // never silently return the dense random init vector
+                        throw new Error('alpha too large: all loadings shrank to zero');
+                    }
                     break;
                 }
-                v = Av.map(x => x / norm);
+                v = next;
+                updated = true;
                 const diff = Math.sqrt(v.reduce((s, val, i) => s + (val - oldV[i]) ** 2, 0));
                 if (diff < this.tol) {
                     break;
                 }
             }
-            const value = PCA.dot(v, PCA.matVecMul(cov, v));
+            const value = dot(v, matVecMul(cov, v));
             // ensure deterministic sign
             let maxIdx = 0;
             for (let i = 1; i < v.length; i++) {
@@ -92,10 +107,10 @@ export class SparsePCA extends PCA {
             }
             this.components.push(v.slice());
             this.explainedVariance.push(value);
-            const outer = PCA.outer(v, v);
+            const vvT = outer(v, v);
             for (let i = 0; i < nFeatures; i++) {
                 for (let j = 0; j < nFeatures; j++) {
-                    A[i][j] -= value * outer[i][j];
+                    A[i][j] -= value * vvT[i][j];
                 }
             }
         }

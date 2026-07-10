@@ -33,3 +33,31 @@ test('two variables', () => {
     const pred = lr.predict([[2, 3]]);
     expect(pred[0]).toBeCloseTo(4 + 2 * 2 - 3 * 3);
 });
+
+describe('collinear and near-collinear inputs (QR least squares)', () => {
+    test('exactly collinear features throw an informative error', () => {
+        const m = new LinearRegression();
+        expect(() => m.fit([[1, 1], [2, 2], [3, 3]], [1, 2, 3])).toThrow(/collinear|singular/i);
+    });
+
+    test('near-collinear features do not silently produce garbage', () => {
+        const m = new LinearRegression();
+        m.fit(
+            [
+                [1, 1.0000001],
+                [2, 2.0000002],
+                [3, 3.0000004],
+            ],
+            [1, 2, 3]
+        );
+        expect(m.predict([[4, 4]])[0]).toBeCloseTo(4, 2);
+    });
+
+    test('predict before fit throws', () => {
+        expect(() => new LinearRegression().predict([[1]])).toThrow();
+    });
+
+    test('empty input throws', () => {
+        expect(() => new LinearRegression().fit([], [])).toThrow();
+    });
+});

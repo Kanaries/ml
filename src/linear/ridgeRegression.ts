@@ -1,22 +1,4 @@
-import { transpose, Inverse } from '../algebra';
-
-function matMul(A: number[][], B: number[][]): number[][] {
-    const rows = A.length;
-    const cols = B[0].length;
-    const inner = B.length;
-    const result: number[][] = [];
-    for (let i = 0; i < rows; i++) {
-        result.push([]);
-        for (let j = 0; j < cols; j++) {
-            let sum = 0;
-            for (let k = 0; k < inner; k++) {
-                sum += A[i][k] * B[k][j];
-            }
-            result[i].push(sum);
-        }
-    }
-    return result;
-}
+import { lstsq } from '../algebra/lstsq';
 
 export interface RidgeRegressionProps {
     alpha?: number;
@@ -59,26 +41,36 @@ export class RidgeRegression {
         }
 
         const Xb = this.fitIntercept ? X.map(r => [1, ...r]) : X.map(r => [...r]);
-        const Ymat = Y.map(v => [v]);
-        const XT = transpose(Xb);
-        const XTX = matMul(XT, Xb);
+        const nCols = Xb[0].length;
 
-        for (let i = 0; i < XTX.length; i++) {
-            if (this.fitIntercept && i === 0) {
-                continue;
+        // ridge as augmented least squares: append sqrt(alpha) * e_j rows for
+        // every penalized coefficient (the intercept is not penalized), then
+        // solve min ||[X; sqrt(a) D] w - [y; 0]|| by QR — equivalent to
+        // (X'X + alpha D) w = X'y without squaring the condition number
+        const rows = Xb.map(r => r.slice());
+        const target = Y.slice();
+        if (this.alpha > 0) {
+            const sqrtAlpha = Math.sqrt(this.alpha);
+            for (let j = this.fitIntercept ? 1 : 0; j < nCols; j++) {
+                const row = new Array(nCols).fill(0);
+                row[j] = sqrtAlpha;
+                rows.push(row);
+                target.push(0);
             }
-            XTX[i][i] += this.alpha;
+        }
+        const params = lstsq(rows, target);
+        if (params === false) {
+            throw new Error(
+                'X is singular: features are collinear; use alpha > 0 to regularize'
+            );
         }
 
-        const XTY = matMul(XT, Ymat);
-        const params = matMul(Inverse.elementary(XTX) as number[][], XTY);
-
         if (this.fitIntercept) {
-            this.intercept = params[0][0];
-            this.coef = params.slice(1).map(p => p[0]);
+            this.intercept = params[0];
+            this.coef = params.slice(1);
         } else {
             this.intercept = 0;
-            this.coef = params.map(p => p[0]);
+            this.coef = params.slice();
         }
     }
 

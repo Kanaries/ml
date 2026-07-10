@@ -35,3 +35,16 @@ test('mds preserves distances', () => {
         }
     }
 });
+
+test('mds is reproducible with randomState', () => {
+    const X = [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+        [2, 2]
+    ];
+    const a = new MDS({ nComponents: 2, randomState: 7 }).fitTransform(X);
+    const b = new MDS({ nComponents: 2, randomState: 7 }).fitTransform(X);
+    expect(b).toEqual(a);
+});

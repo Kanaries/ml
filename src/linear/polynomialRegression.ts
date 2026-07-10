@@ -1,22 +1,4 @@
-import { transpose, Inverse } from '../algebra';
-
-function matMul(A: number[][], B: number[][]): number[][] {
-    const rows = A.length;
-    const cols = B[0].length;
-    const inner = B.length;
-    const result: number[][] = [];
-    for (let i = 0; i < rows; i++) {
-        result.push([]);
-        for (let j = 0; j < cols; j++) {
-            let sum = 0;
-            for (let k = 0; k < inner; k++) {
-                sum += A[i][k] * B[k][j];
-            }
-            result[i].push(sum);
-        }
-    }
-    return result;
-}
+import { lstsq } from '../algebra/lstsq';
 
 export interface PolynomialRegressionProps {
     degree?: number;
@@ -26,6 +8,7 @@ export class PolynomialRegression {
     private degree: number;
     private coef: number[];
     private intercept: number;
+    private fitted: boolean;
 
     constructor(props: PolynomialRegressionProps = {}) {
         const { degree = 2 } = props;
@@ -35,6 +18,7 @@ export class PolynomialRegression {
         this.degree = degree;
         this.coef = [];
         this.intercept = 0;
+        this.fitted = false;
     }
 
     private transform(X: number[][]): number[][] {
@@ -57,20 +41,30 @@ export class PolynomialRegression {
             throw new Error('X and Y must have the same length');
         }
 
+        const nFeatures = X[0].length;
+        for (const row of X) {
+            if (row.length !== nFeatures) {
+                throw new Error('all rows in X must have the same length');
+            }
+        }
         const Xpoly = this.transform(X);
         const Xb = Xpoly.map(r => [1, ...r]);
-        const Ymat = Y.map(v => [v]);
-        const XT = transpose(Xb);
-        const XTX = matMul(XT, Xb);
-        const XTXInv = Inverse.elementary(XTX) as number[][];
-        const XTY = matMul(XT, Ymat);
-        const params = matMul(XTXInv, XTY);
+        const params = lstsq(Xb, Y);
+        if (params === false) {
+            throw new Error(
+                'polynomial design matrix is singular: too few samples for the requested degree or collinear features'
+            );
+        }
 
-        this.intercept = params[0][0];
-        this.coef = params.slice(1).map(p => p[0]);
+        this.intercept = params[0];
+        this.coef = params.slice(1);
+        this.fitted = true;
     }
 
     public predict(X: number[][]): number[] {
+        if (!this.fitted) {
+            throw new Error('PolynomialRegression must be fitted before calling predict');
+        }
         const Xpoly = this.transform(X);
         return Xpoly.map(row => {
             let sum = this.intercept;

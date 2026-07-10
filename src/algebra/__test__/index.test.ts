@@ -12,22 +12,20 @@ test('basic gussian elimination', () => {
     const result = gaussianElimination(AM) as number[][];
     expect(result instanceof Array).toBe(true)
     expect(result.length > 0).toBe(true);
-    // const ans = [
-    //     [1, 1, 1, 1, 6],
-    //     [0, 1, 1, -1, 0],
-    //     [0, 0, 1, 2/3, 13/3],
-    //     [0, 0, 0, 1, 2]
-    // ];
-    const ans = [
-        [1, 1, 1, 1],
-        [0, 1, 1, -1],
-        [0, 0, 1, 2 / 3],
-        [0, 0, 0, 1],
-    ];
-    for (let i = 0 ; i < A.length; i++) {
-        for (let j = 0 ; j < A[i].length; j++) {
-            expect(result[i][j]).toBeCloseTo(ans[i][j])
+    // partial pivoting changes the intermediate echelon rows, so verify the
+    // SOLUTION via back substitution instead of a hardcoded echelon form
+    const n = A.length;
+    const x = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+        let s = result[i][n];
+        for (let k = i + 1; k < n; k++) {
+            s -= result[i][k] * x[k];
         }
+        x[i] = s / result[i][i];
+    }
+    const expected = [2, -1, 3, 2];
+    for (let i = 0; i < n; i++) {
+        expect(x[i]).toBeCloseTo(expected[i]);
     }
 })
 

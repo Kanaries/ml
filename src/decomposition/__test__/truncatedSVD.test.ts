@@ -19,6 +19,38 @@ test('basic truncated svd', () => {
     }
 });
 
+test('truncated svd stays finite on exactly complementary columns', () => {
+    // (1, 1) is an exact eigenvector of X^T X here, which used to stall the
+    // deterministic all-ones power iteration and produce NaN everywhere.
+    const X = [
+        [1, -1],
+        [2, -2],
+        [3, -3],
+        [-1, 1],
+        [-2, 2]
+    ];
+    const svd = new TruncatedSVD(2);
+    const T = svd.fitTransform(X);
+    for (const row of svd.getComponents()) {
+        for (const v of row) {
+            expect(Number.isFinite(v)).toBe(true);
+        }
+    }
+    for (const s of svd.getSingularValues()) {
+        expect(Number.isFinite(s)).toBe(true);
+        expect(s).toBeGreaterThanOrEqual(0);
+    }
+    for (const ev of svd.getExplainedVariance()) {
+        expect(Number.isFinite(ev)).toBe(true);
+        expect(ev).toBeGreaterThanOrEqual(0);
+    }
+    for (const row of T) {
+        for (const v of row) {
+            expect(Number.isFinite(v)).toBe(true);
+        }
+    }
+});
+
 describe('explained variance (sklearn definition)', () => {
     test('ratio stays within (0, 1] on data with a large mean', () => {
         // deterministic 20x3 data with mean ~100 (typical count-matrix scale)

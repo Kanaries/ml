@@ -1,17 +1,22 @@
+import { createRandomGenerator } from '../utils/random';
+
 export interface SpectralEmbeddingProps {
     nComponents?: number;
     nNeighbors?: number;
+    randomState?: number;
 }
 
 export class SpectralEmbedding {
     private nComponents: number;
     private nNeighbors: number;
+    private randomState?: number;
     private embedding: number[][];
 
     constructor(props: SpectralEmbeddingProps = {}) {
-        const { nComponents = 2, nNeighbors = 10 } = props;
+        const { nComponents = 2, nNeighbors = 10, randomState } = props;
         this.nComponents = nComponents;
         this.nNeighbors = nNeighbors;
+        this.randomState = randomState;
         this.embedding = [];
     }
 
@@ -43,8 +48,8 @@ export class SpectralEmbedding {
         return v.map(x => x / norm);
     }
 
-    private static powerIteration(A: number[][], iter: number = 500): {value: number, vector: number[]} {
-        let v: number[] = Array(A.length).fill(1).map(() => Math.random());
+    private static powerIteration(A: number[][], rng: () => number, iter: number = 500): {value: number, vector: number[]} {
+        let v: number[] = Array(A.length).fill(1).map(() => rng());
         v = SpectralEmbedding.normalize(v);
         for (let i = 0; i < iter; i++) {
             const Av = SpectralEmbedding.matVecMul(A, v);
@@ -109,9 +114,10 @@ export class SpectralEmbedding {
         }
         const k = this.nComponents + 1;
         let B = SpectralEmbedding.cloneMatrix(A);
+        const rng = createRandomGenerator(this.randomState);
         const comps: number[][] = [];
         for (let c = 0; c < k; c++) {
-            let { value, vector } = SpectralEmbedding.powerIteration(B, 1000);
+            let { value, vector } = SpectralEmbedding.powerIteration(B, rng, 1000);
             for (let v of comps) {
                 const proj = SpectralEmbedding.dot(vector, v);
                 for (let i = 0; i < vector.length; i++) vector[i] -= proj * v[i];

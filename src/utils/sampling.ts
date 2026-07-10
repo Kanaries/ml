@@ -1,3 +1,5 @@
+import { createRandomGenerator } from './random';
+
 export function std<T = any> (arr: T[], size: number, rng: () => number = Math.random): T[] {
     const n = arr.length;
     const k = Math.floor(size);
@@ -30,20 +32,6 @@ export interface TrainTestSplitResult<X = any, Y = any> {
     XTest: X[];
     yTrain?: Y[];
     yTest?: Y[];
-}
-
-function createRandomGenerator(seed?: number): () => number {
-    if (seed === undefined) {
-        return Math.random;
-    }
-    let state = Math.floor(seed) % 2147483647;
-    if (state <= 0) {
-        state += 2147483646;
-    }
-    return () => {
-        state = (state * 16807) % 2147483647;
-        return (state - 1) / 2147483646;
-    };
 }
 
 function getTestCount(sampleCount: number, testSize?: number): number {

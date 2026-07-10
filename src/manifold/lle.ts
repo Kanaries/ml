@@ -1,16 +1,19 @@
 import { Inverse } from '../algebra';
+import { createRandomGenerator } from '../utils/random';
 
 export class LocallyLinearEmbedding {
     private nNeighbors: number;
     private nComponents: number;
     private reg: number;
+    private randomState?: number;
     private trainX: number[][] = [];
     private trainY: number[][] = [];
 
-    constructor(nNeighbors: number = 5, nComponents: number = 2, reg: number = 0.001) {
+    constructor(nNeighbors: number = 5, nComponents: number = 2, reg: number = 0.001, randomState?: number) {
         this.nNeighbors = nNeighbors;
         this.nComponents = nComponents;
         this.reg = reg;
+        this.randomState = randomState;
     }
 
     private static dot(a: number[], b: number[]): number {
@@ -41,8 +44,8 @@ export class LocallyLinearEmbedding {
         return A.map(r => r.slice());
     }
 
-    private static powerIteration(A: number[][], iter: number = 100): { value: number; vector: number[] } {
-        let v: number[] = Array(A.length).fill(0).map(() => Math.random());
+    private static powerIteration(A: number[][], rng: () => number, iter: number = 100): { value: number; vector: number[] } {
+        let v: number[] = Array(A.length).fill(0).map(() => rng());
         v = LocallyLinearEmbedding.normalize(v);
         for (let i = 0; i < iter; i++) {
             const Av = LocallyLinearEmbedding.matVecMul(A, v);
@@ -138,9 +141,10 @@ export class LocallyLinearEmbedding {
         let invM = Inverse.elementary(M);
         if (invM === false) throw new Error('failed to invert matrix');
         const A = LocallyLinearEmbedding.cloneMatrix(invM as number[][]);
+        const rng = createRandomGenerator(this.randomState);
         const eigenVecs: number[][] = [];
         for (let c = 0; c < this.nComponents + 1; c++) {
-            const { value, vector } = LocallyLinearEmbedding.powerIteration(A, 200);
+            const { value, vector } = LocallyLinearEmbedding.powerIteration(A, rng, 200);
             eigenVecs.push(vector.slice());
             const outer = LocallyLinearEmbedding.outer(vector, vector);
             for (let i = 0; i < n; i++) {
