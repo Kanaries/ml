@@ -1,0 +1,32 @@
+import numpy as np
+from sklearn.cluster import HDBSCAN
+import json, os
+
+# Varying-density dataset: two tight clusters, one sparse cluster and
+# uniform background noise. A single fixed-eps DBSCAN cannot recover all
+# three clusters at once, which is exactly the scenario HDBSCAN handles.
+np.random.seed(42)
+A = np.random.randn(30, 2) * 0.3 + np.array([0, 0])
+B = np.random.randn(30, 2) * 0.3 + np.array([4, 0])
+C = np.random.randn(40, 2) * 2.0 + np.array([15, 15])
+noise = np.random.uniform(-8, 25, size=(10, 2))
+X = np.vstack([A, B, C, noise])
+
+labels_mcs8 = HDBSCAN(min_cluster_size=8).fit_predict(X)
+n_clusters_8 = len(set(labels_mcs8)) - (1 if -1 in labels_mcs8 else 0)
+n_noise_8 = int(np.sum(labels_mcs8 == -1))
+assert n_clusters_8 == 3, f'expected 3 clusters, got {n_clusters_8}'
+assert n_noise_8 > 0, 'expected at least one noise point'
+
+labels_mcs25 = HDBSCAN(min_cluster_size=25).fit_predict(X)
+
+labels_eps2 = HDBSCAN(min_cluster_size=8, cluster_selection_epsilon=2.0).fit_predict(X)
+
+os.makedirs('test_data', exist_ok=True)
+with open('test_data/hdbscan.json', 'w') as f:
+    json.dump({
+        'X': X.tolist(),
+        'expected_mcs8': labels_mcs8.tolist(),
+        'expected_mcs25': labels_mcs25.tolist(),
+        'expected_eps2': labels_eps2.tolist()
+    }, f)

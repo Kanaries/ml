@@ -9,17 +9,18 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-> **⚠️ Experimental — simplified implementation.** The `HDBScan` class in @kanaries/ml is currently a **DBSCAN-based approximation**, not the full HDBSCAN algorithm. It runs DBSCAN with `cluster_selection_epsilon` as the fixed `eps`, so it does **not** handle clusters of varying density, and `min_cluster_size` does not affect cluster extraction the way it does in scikit-learn's HDBSCAN. If your data has clusters of significantly different densities, results will differ from Python HDBSCAN — consider tuning [DBSCAN](/docs/apis/clusters/dbscan) directly instead. A full HDBSCAN implementation (mutual reachability, MST, hierarchy condensation, stability-based extraction) is under evaluation.
+HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) finds clusters of **varying density** and identifies noise points without forcing every observation into a cluster. Unlike DBSCAN, it does not depend on a single global `eps` radius: it builds a density hierarchy and extracts the most stable clusters from it, so a tight cluster and a sparse cluster can be recovered in the same run. Choose it when:
 
-The full HDBSCAN algorithm finds clusters with varying density and identifies noise points without forcing every point into a cluster. The current @kanaries/ml class covers the fixed-density subset of that behavior:
-
-- Outlier/noise detection is important for your downstream workflow.
+- Your clusters have significantly different densities (the classic DBSCAN failure mode).
 - You do not know an exact cluster count in advance.
-- Your clusters have roughly similar density (a single `eps` fits all of them).
+- Outlier/noise detection is important for your downstream workflow.
 
-## JavaScript implementation
+The `HDBScan` class in @kanaries/ml is a full implementation aligned with scikit-learn's `sklearn.cluster.HDBSCAN`:
 
-@kanaries/ml exposes an `HDBScan` class with an HDBSCAN-like constructor signature so code can be ported now and upgraded transparently if a full implementation lands. Internally it delegates to DBSCAN today (see the note above), which keeps density-based noise detection available directly in browser-based analysis tools or Node.js data services.
+1. **Core distances** — the distance from each point to its `min_samples`-th nearest neighbor (counting the point itself, as scikit-learn does).
+2. **Mutual reachability** — pairwise distances `max(core_a, core_b, d(a, b))`.
+3. **Minimum spanning tree** — Prim's algorithm on the mutual reachability graph.
+4. **Condensed tree and stability extraction** — the single linkage hierarchy is condensed by `min_cluster_size`, and flat clusters are selected with the Excess of Mass (EOM) stability criterion.
 
 ## Quick start
 
@@ -29,13 +30,13 @@ The full HDBSCAN algorithm finds clusters with varying density and identifies no
 
 X = [[0, 0], [0.1, 0.2], [5, 5], [5.2, 5.1], [9, 0]]
 
-model = HDBSCAN(min_cluster_size=2, cluster_selection_epsilon=0.4)
+model = HDBSCAN(min_cluster_size=2)
 labels = model.fit_predict(X)`}
   tsCode={String.raw`import { Clusters } from '@kanaries/ml';
 
 const X = [[0, 0], [0.1, 0.2], [5, 5], [5.2, 5.1], [9, 0]];
 
-const model = new Clusters.HDBScan(2, null, 0.4);
+const model = new Clusters.HDBScan(2);
 const labels = model.fitPredict(X);`}
 />
 
@@ -46,7 +47,7 @@ import { Clusters } from '@kanaries/ml';
 
 const X = [[0, 0], [0.1, 0.2], [5, 5], [5.2, 5.1], [9, 0]];
 
-const model = new Clusters.HDBScan(2, null, 0.4);
+const model = new Clusters.HDBScan(2);
 const labels = model.fitPredict(X);
 ```
 
@@ -56,28 +57,38 @@ const labels = model.fitPredict(X);
 constructor(
     min_cluster_size: number = 5,
     min_samples: number | null = null,
-    cluster_selection_epsilon: number = 0.5,
-    metric: Distance.IDistanceType = 'euclidean'
+    cluster_selection_epsilon: number = 0.0,
+    metric: Distance.IDistanceType = 'euclidean',
+    allow_single_cluster: boolean = false
 )
 ```
 
+- `min_cluster_size` — the smallest group of points that counts as a cluster. Splits producing a side smaller than this are treated as points falling out of the parent cluster. This is the main tuning knob.
+- `min_samples` — controls how conservative the density estimate is (the `k` used for core distances, counting the point itself). Defaults to `min_cluster_size`. Larger values declare more points noise.
+- `cluster_selection_epsilon` — an extraction threshold (not a DBSCAN `eps`): selected clusters born below this distance are merged upward until their parent's birth distance exceeds it. Leave at `0.0` (the default, matching scikit-learn) unless you want to prevent micro-clusters from splitting.
+- `metric` — any distance supported by the `Distance` module.
+- `allow_single_cluster` — when `true`, the hierarchy root may be selected, allowing the whole dataset to form one cluster.
+
 `fitPredict(samplesX: number[][]): number[]` returns cluster labels. Noise points are marked as `-1`.
 
-This is a simplified implementation that internally calls DBSCAN using `cluster_selection_epsilon` as the `eps` parameter.
+`getLabels(): number[]` returns the labels from the last `fitPredict` call.
+
+`getProbabilities(): number[]` returns the cluster membership strength of each sample in `[0, 1]`; noise points have probability `0`.
 
 ```ts
-const hdb = new Clusters.HDBScan(2, null, 0.4);
+const hdb = new Clusters.HDBScan(8);
 const labels = hdb.fitPredict(X);
+const probabilities = hdb.getProbabilities();
 ```
 
 ### Implementation workflow
 
 1. Scale features so distance comparisons are meaningful.
 2. Fit the model and inspect cluster labels plus noise assignments.
-3. Use cluster stability and business metrics to tune density settings.
+3. Tune `min_cluster_size` first; use `min_samples` to adjust how aggressively sparse points are declared noise.
 
 ### JavaScript deployment notes
 
-- Use this class when cluster count is unknown, you expect some observations to remain noise, and cluster densities are roughly uniform.
-- In browser workflows, reserve it for moderate dataset sizes or run it off the main thread.
-- Because the current implementation delegates to DBSCAN, results are equivalent to `DBScan(cluster_selection_epsilon, min_samples)` — do not expect parity with Python HDBSCAN on varying-density data.
+- Use this class when cluster count is unknown, densities vary across clusters, and you expect some observations to remain noise.
+- The implementation builds a dense pairwise distance matrix (O(n²) memory and time), so it is suited to datasets up to a few thousand points. In browser workflows, run it off the main thread for larger inputs.
+- Results match Python `sklearn.cluster.HDBSCAN` labels on the same data and parameters.
