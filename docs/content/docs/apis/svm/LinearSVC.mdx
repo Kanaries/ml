@@ -9,7 +9,7 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Linear support vector classifier optimized with gradient descent on hinge loss. It trains one-versus-rest linear models to separate classes.
+Linear support vector classifier trained with the Pegasos algorithm (primal stochastic subgradient descent on hinge loss). It trains one-versus-rest linear models to separate classes.
 
 LinearSVC trains linear support vector classifiers optimized for high-dimensional and sparse feature spaces.
 
@@ -42,7 +42,7 @@ pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.LinearSVC({ C: 1, maxIter: 500, learningRate: 0.1 });
+const clf = new SVM.LinearSVC({ C: 1, maxIter: 1000, randomState: 0 });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
 />
@@ -55,7 +55,7 @@ import { SVM } from '@kanaries/ml';
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.LinearSVC({ C: 1, maxIter: 500, learningRate: 0.1 });
+const clf = new SVM.LinearSVC({ C: 1, maxIter: 1000, randomState: 0 });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 ```
@@ -66,15 +66,20 @@ const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 interface LinearSVCProps {
     C?: number;
     maxIter?: number;
+    /** @deprecated ignored — Pegasos uses the schedule eta_t = 1/(lambda*t) */
     learningRate?: number;
+    tol?: number;
+    randomState?: number;
 }
 constructor(props: LinearSVCProps = {})
 ```
 
 ### Parameters
-- `C` (number, default `1`): regularization strength
-- `maxIter` (number, default `100`): maximum training iterations
-- `learningRate` (number, default `0.01`): step size for gradient descent
+- `C` (number, default `1`): regularization strength, matching sklearn's `C` semantics (internally `lambda = 1/(n*C)`)
+- `maxIter` (number, default `1000`): maximum number of training epochs (full passes over the data)
+- `tol` (number, default `1e-4`): stopping tolerance — training stops early when the relative improvement of the objective between epochs falls below this value
+- `randomState` (number, optional): seed for the per-epoch shuffling, for reproducible training
+- `learningRate` (deprecated, ignored): the Pegasos optimizer uses the fixed step-size schedule `eta_t = 1/(lambda*t)`, so this option has no effect
 
 ### Implementation workflow
 
