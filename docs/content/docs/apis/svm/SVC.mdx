@@ -9,9 +9,11 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Support Vector Classification. When the kernel is set to `rbf` it applies the kernel trick to transform input features before training a linear classifier.
+> **⚠️ Approximate implementation.** This class is **not** a libsvm-style SVM solver: it does not solve the dual problem (no SMO, no support vectors, no `probability` output). With `kernel: 'rbf'` it maps each sample to its kernel similarities against the training set (an empirical kernel map) and trains a linear classifier on those features; with `kernel: 'linear'` it delegates to `LinearSVC`. This works on small/medium datasets but is not mathematically equivalent to scikit-learn's `SVC` — regularization acts in the mapped space rather than the RKHS, prediction retains the full training set, and hyperparameters do not transfer 1:1 from Python.
 
-SVC trains kernelized support vector classifiers for non-linear decision boundaries.
+Support Vector Classification. When the kernel is set to `rbf` it applies an empirical kernel map to transform input features before training a linear classifier.
+
+SVC approximates kernelized support vector classification for non-linear decision boundaries.
 
 This algorithm is especially useful when:
 

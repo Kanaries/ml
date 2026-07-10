@@ -9,19 +9,17 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-HDBScan finds clusters with varying density and identifies noise points without forcing every point into a cluster.
+> **⚠️ Experimental — simplified implementation.** The `HDBScan` class in @kanaries/ml is currently a **DBSCAN-based approximation**, not the full HDBSCAN algorithm. It runs DBSCAN with `cluster_selection_epsilon` as the fixed `eps`, so it does **not** handle clusters of varying density, and `min_cluster_size` does not affect cluster extraction the way it does in scikit-learn's HDBSCAN. If your data has clusters of significantly different densities, results will differ from Python HDBSCAN — consider tuning [DBSCAN](/docs/apis/clusters/dbscan) directly instead. A full HDBSCAN implementation (mutual reachability, MST, hierarchy condensation, stability-based extraction) is under evaluation.
 
-This algorithm is especially useful when:
+The full HDBSCAN algorithm finds clusters with varying density and identifies noise points without forcing every point into a cluster. The current @kanaries/ml class covers the fixed-density subset of that behavior:
 
-- Cluster shapes are irregular and density changes across regions.
 - Outlier/noise detection is important for your downstream workflow.
 - You do not know an exact cluster count in advance.
+- Your clusters have roughly similar density (a single `eps` fits all of them).
 
 ## JavaScript implementation
 
-@kanaries/ml brings HDBSCAN-style density clustering into JavaScript so you can group irregular shapes and detect noise directly in browser-based analysis tools or Node.js data services. That is especially helpful for exploratory products where users upload data and expect clustering to happen immediately in the same environment.
-
-For teams building interactive analytics, this means dense cluster discovery can stay close to the UI rather than being delegated to a separate Python backend for every run.
+@kanaries/ml exposes an `HDBScan` class with an HDBSCAN-like constructor signature so code can be ported now and upgraded transparently if a full implementation lands. Internally it delegates to DBSCAN today (see the note above), which keeps density-based noise detection available directly in browser-based analysis tools or Node.js data services.
 
 ## Quick start
 
@@ -80,6 +78,6 @@ const labels = hdb.fitPredict(X);
 
 ### JavaScript deployment notes
 
-- Use HDBSCAN when cluster count is unknown and you expect some observations to remain noise.
+- Use this class when cluster count is unknown, you expect some observations to remain noise, and cluster densities are roughly uniform.
 - In browser workflows, reserve it for moderate dataset sizes or run it off the main thread.
-- Compare its behavior with DBSCAN when you need a simpler density-based baseline.
+- Because the current implementation delegates to DBSCAN, results are equivalent to `DBScan(cluster_selection_epsilon, min_samples)` — do not expect parity with Python HDBSCAN on varying-density data.

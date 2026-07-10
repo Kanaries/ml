@@ -1,5 +1,9 @@
-# Core scientific libraries
-numpy
-pandas
-matplotlib
-scikit-learn
+# Pinned environment for generating sklearn reference fixtures (test_data/*.json).
+# Fixtures are byte-compared in CI (fixture-drift job); changing any version here
+# requires regenerating and committing all fixtures in the same PR (yarn gen-data).
+numpy==2.5.1
+scipy==1.18.0
+scikit-learn==1.9.0
+# Optional: xgboost fixtures are skipped gracefully when xgboost is not installed
+# (the committed fixtures stay in place). Install to regenerate them:
+# xgboost==3.1.2

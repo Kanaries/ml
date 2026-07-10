@@ -221,10 +221,10 @@ For side-by-side Python and JavaScript examples across the algorithm docs, see [
 - **[Tree](https://ml.kanaries.net/docs/apis/tree)**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
 - **[Ensemble](https://ml.kanaries.net/docs/apis/ensemble)**: `RandomForestClassifier`, `RandomForestRegressor`, `GradientBoostingClassifier`, `GradientBoostingRegressor`, `XGBoostClassifier`, `XGBoostRegressor`, `AdaBoostClassifier`, `AdaBoostRegressor`, `BaggingClassifier`, `IsolationForest`
 - **[Linear Models](https://ml.kanaries.net/docs/apis/linear)**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `Ridge`, `RidgeRegression`, `RidgeClassifier`, `Lasso`, `LassoRegression`, `ElasticNet`
-- **[Support Vector Machines](https://ml.kanaries.net/docs/apis/svm)**: `SVC`, `NuSVC`, `LinearSVC`, `LinearSVR`
+- **[Support Vector Machines](https://ml.kanaries.net/docs/apis/svm)**: `SVC` (approximate, empirical kernel map — not a libsvm-style solver), `LinearSVC`, `LinearSVR`; `NuSVC` is deprecated (ν semantics not implemented)
 - **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNearestNeighbors`, `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestCentroid`, `BallTree`, `KDTree`
 - **[Naive Bayes](https://ml.kanaries.net/docs/apis/bayes)**: `GaussianNB`, `MultinomialNB`, `ComplementNB`, `BernoulliNB`, `CategoricalNB`
-- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `HDBScan`, `OPTICS`, `MeanShift`
+- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `HDBScan` (experimental, DBSCAN-based approximation), `OPTICS`, `MeanShift`
 - **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`
 - **[Manifold Learning](https://ml.kanaries.net/docs/apis/manifold)**: `TSNE`, `MDS`, `SpectralEmbedding`, `LocallyLinearEmbedding`
 - **[Semi-Supervised](https://ml.kanaries.net/docs/apis/semi_supervised)**: `LabelPropagation`, `LabelSpreading`

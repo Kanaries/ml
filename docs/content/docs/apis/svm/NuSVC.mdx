@@ -9,15 +9,9 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Variant of `SVC` that uses the `nu` parameter to control the fraction of support vectors and the margin errors.
+> **🚫 Deprecated — ν semantics not implemented.** The current `NuSVC` class does **not** implement ν-SVM. It only maps `nu` to a default cost value (`C = 1/nu`) and otherwise behaves exactly like [`SVC`](/docs/apis/svm/SVC); `nu` does not bound the support-vector fraction or margin errors, there is no feasibility check, and passing `C` makes `nu` have no effect at all. Results will not match scikit-learn's `NuSVC`. This class is deprecated and scheduled for removal or reimplementation — use `SVC` or `LinearSVC` instead.
 
-NuSVC provides SVM classification with nu-based control over support vector fraction and margin errors.
-
-This algorithm is especially useful when:
-
-- You prefer `nu` constraints over classic `C` tuning behavior.
-- Dataset boundaries require flexible kernel-based classification.
-- You need explicit control over support-vector complexity.
+In scikit-learn, NuSVC is a variant of `SVC` that uses the `nu` parameter to control the fraction of support vectors and the margin errors. **The @kanaries/ml class does not currently provide that behavior** (see the warning above).
 
 ## JavaScript implementation
 
