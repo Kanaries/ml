@@ -61,10 +61,13 @@ jobs:
       env:
         PYTHON: python
 
+    # Byte-exact comparison is impossible across platforms (libm ULP noise in
+    # np.random.randn feeds every dataset), so drift is checked numerically:
+    # exact for integers/structure, small float tolerance for the rest.
     - name: Fail on fixture drift
       run: |
         git diff --stat test_data/
-        git diff --exit-code test_data/
+        python scripts/check_fixture_drift.py
 
   build:
     runs-on: ubuntu-latest

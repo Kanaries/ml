@@ -1,5 +1,7 @@
-export { SVC, SVCProps } from './svc';
-export { NuSVC, NuSVCProps } from './nuSVC';
+export { SVC } from './svc';
+export type { SVCProps } from './svc';
+export { NuSVC } from './nuSVC';
+export type { NuSVCProps } from './nuSVC';
 export { LinearSVC } from './linearSVC';
 export { LinearSVR } from './linearSVR';
-export { KernelType } from './smo';
+export type { KernelType } from './smo';
