@@ -9,9 +9,9 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-> **🚫 Deprecated — ν semantics not implemented.** The current `NuSVC` class does **not** implement ν-SVM. It only maps `nu` to a default cost value (`C = 1/nu`) and otherwise behaves exactly like [`SVC`](/docs/apis/svm/SVC); `nu` does not bound the support-vector fraction or margin errors, there is no feasibility check, and passing `C` makes `nu` have no effect at all. Results will not match scikit-learn's `NuSVC`. This class is deprecated and scheduled for removal or reimplementation — use `SVC` or `LinearSVC` instead.
+ν-Support Vector Classification. `NuSVC` solves the ν-SVM dual problem with an SMO solver (libsvm `Solver_NU` semantics), like scikit-learn's `NuSVC`. Instead of the cost parameter `C`, it takes `nu ∈ (0, 1]`: an upper bound on the fraction of margin errors and a lower bound on the fraction of support vectors. Raising `nu` therefore reliably increases the number of support vectors.
 
-In scikit-learn, NuSVC is a variant of `SVC` that uses the `nu` parameter to control the fraction of support vectors and the margin errors. **The @kanaries/ml class does not currently provide that behavior** (see the warning above).
+Feasibility constraint: `nu` must satisfy `nu <= 2 * min(n+, n-) / n` for every pair of classes (checked per one-vs-one subproblem); otherwise `fit` throws `specified nu is infeasible`, the same error scikit-learn raises.
 
 ## JavaScript implementation
 
@@ -28,7 +28,7 @@ Keeping NuSVC in the same TypeScript runtime also makes it easier to compare lin
 X = [[0, 0], [1, 1], [1, 0], [0, 1]]
 y = [0, 1, 1, 0]
 
-clf = NuSVC(nu=0.4, kernel='linear', random_state=0)
+clf = NuSVC(nu=0.4, kernel='rbf', gamma='scale')
 clf.fit(X, y)
 pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
   tsCode={String.raw`import { SVM } from '@kanaries/ml';
@@ -36,7 +36,7 @@ pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'linear', maxIter: 400, learningRate: 0.1 });
+const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'rbf', gamma: 'scale' });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
 />
@@ -49,7 +49,7 @@ import { SVM } from '@kanaries/ml';
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'linear', maxIter: 400, learningRate: 0.1 });
+const clf = new SVM.NuSVC({ nu: 0.4, kernel: 'rbf', gamma: 'scale' });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 ```
@@ -59,19 +59,26 @@ const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 ```ts
 interface NuSVCProps {
     nu?: number;
+    kernel?: 'linear' | 'rbf' | 'poly' | 'sigmoid';
+    gamma?: number | 'scale' | 'auto';
+    degree?: number;
+    coef0?: number;
+    tol?: number;
+    maxIter?: number;
 }
 constructor(props: NuSVCProps = {})
 ```
 
 ### Parameters
-- `nu` (number, default `0.5`): trade-off between the number of support vectors and training errors
-- `C` (number, default `1/nu`): regularization strength
-- `maxIter` (number, default `100`): maximum iterations for training
-- `learningRate` (number, default `0.01`): step size for gradient descent
-- `kernel` ('linear' | 'rbf', default `'rbf'`): kernel type
-- `gamma` (number, default `1`): RBF kernel coefficient
+- `nu` (number, default `0.5`): upper bound on the fraction of margin errors, lower bound on the fraction of support vectors; must be in `(0, 1]` and feasible for the class balance
+- `kernel` ('linear' | 'rbf' | 'poly' | 'sigmoid', default `'rbf'`): kernel type
+- `gamma` (number | 'scale' | 'auto', default `'scale'`): kernel coefficient for `rbf`, `poly`, and `sigmoid`
+- `degree` (number, default `3`): degree of the polynomial kernel
+- `coef0` (number, default `0`): independent term of the `poly` and `sigmoid` kernels
+- `tol` (number, default `1e-3`): KKT-violation tolerance for SMO convergence
+- `maxIter` (number, default `-1`): hard limit on SMO pair updates; `-1` runs until convergence
 
-NuSVC shares the same usage as `SVC` but uses the `nu` parameter instead of `C`.
+There is no `C` parameter: `nu` replaces it, exactly as in scikit-learn. NuSVC otherwise shares SVC's API, including `decisionFunction`, `getSupportVectors`, and `getNSupport`.
 
 ### Implementation workflow
 

@@ -64,7 +64,7 @@ describe('SVC hardening', () => {
             [0, 0], [0.2, 0.1], [0.1, 0.3], [1, 1], [0.9, 0.9], [1.1, 0.8],
         ];
         const Y = [0, 0, 0, 1, 1, 1];
-        const svc = new SVC({ kernel: 'rbf', maxIter: 200, randomState: 1 });
+        const svc = new SVC({ kernel: 'rbf' });
         svc.fit(X, Y);
         const before = svc.predict([[0.9, 0.9], [0.1, 0.1]]);
         for (const row of X) {
@@ -88,7 +88,7 @@ describe('SVC hardening', () => {
             X.push([0.05 + i * 0.001, 0.05 + (i * 3 % 10) * 0.001]);
             Y.push(1);
         }
-        const svc = new SVC({ kernel: 'rbf', C: 10, maxIter: 300, randomState: 1 });
+        const svc = new SVC({ kernel: 'rbf', C: 10 });
         svc.fit(X, Y);
         const acc = svc.predict(X).filter((p, i) => p === Y[i]).length / Y.length;
         expect(acc).toBeGreaterThan(0.9);

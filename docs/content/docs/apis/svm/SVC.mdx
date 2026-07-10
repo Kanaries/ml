@@ -9,11 +9,9 @@ import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-> **⚠️ Approximate implementation.** This class is **not** a libsvm-style SVM solver: it does not solve the dual problem (no SMO, no support vectors, no `probability` output). With `kernel: 'rbf'` it maps each sample to its kernel similarities against the training set (an empirical kernel map) and trains a linear classifier on those features; with `kernel: 'linear'` it delegates to `LinearSVC`. This works on small/medium datasets but is not mathematically equivalent to scikit-learn's `SVC` — regularization acts in the mapped space rather than the RKHS, prediction retains the full training set, and hyperparameters do not transfer 1:1 from Python.
+C-Support Vector Classification. `SVC` solves the SVM dual problem with an SMO solver (libsvm-style maximal-violating-pair working-set selection), the same formulation scikit-learn's `SVC` uses. It supports the full sklearn kernel set (`linear`, `rbf`, `poly`, `sigmoid`), handles multiclass problems one-vs-one, and exposes the fitted support vectors and a binary `decisionFunction` whose values line up numerically with scikit-learn's `decision_function`.
 
-Support Vector Classification. When the kernel is set to `rbf` it applies an empirical kernel map to transform input features before training a linear classifier.
-
-SVC approximates kernelized support vector classification for non-linear decision boundaries.
+Not included yet: probability estimates (`predict_proba` / Platt scaling) are on the roadmap and not part of this release.
 
 This algorithm is especially useful when:
 
@@ -36,7 +34,7 @@ For product teams, this means kernel-based classification can live in the same J
 X = [[0, 0], [1, 1], [1, 0], [0, 1]]
 y = [0, 1, 1, 0]
 
-clf = SVC(C=1.0, kernel='rbf', gamma=1.0, random_state=0)
+clf = SVC(C=1.0, kernel='rbf', gamma='scale')
 clf.fit(X, y)
 pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
   tsCode={String.raw`import { SVM } from '@kanaries/ml';
@@ -44,7 +42,7 @@ pred = clf.predict([[0.9, 0.8], [0.1, 0.2]])`}
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 1, maxIter: 400, learningRate: 0.1 });
+const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 'scale' });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);`}
 />
@@ -57,7 +55,7 @@ import { SVM } from '@kanaries/ml';
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 1, maxIter: 400, learningRate: 0.1 });
+const clf = new SVM.SVC({ C: 1, kernel: 'rbf', gamma: 'scale' });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 ```
@@ -67,20 +65,31 @@ const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 ```ts
 interface SVCProps {
     C?: number;
+    kernel?: 'linear' | 'rbf' | 'poly' | 'sigmoid';
+    gamma?: number | 'scale' | 'auto';
+    degree?: number;
+    coef0?: number;
+    tol?: number;
     maxIter?: number;
-    learningRate?: number;
-    kernel?: 'linear' | 'rbf';
-    gamma?: number;
 }
 constructor(props: SVCProps = {})
 ```
 
 ### Parameters
-- `C` (number, default `1`): regularization strength
-- `maxIter` (number, default `100`): maximum iterations for training
-- `learningRate` (number, default `0.01`): step size for the optimizer
-- `kernel` ('linear' | 'rbf', default `'rbf'`): kernel type
-- `gamma` (number, default `1`): RBF kernel coefficient
+- `C` (number, default `1`): regularization strength, inversely proportional to the margin softness
+- `kernel` ('linear' | 'rbf' | 'poly' | 'sigmoid', default `'rbf'`): kernel type
+- `gamma` (number | 'scale' | 'auto', default `'scale'`): kernel coefficient for `rbf`, `poly`, and `sigmoid`; `'scale'` = 1 / (n_features x Var(X)), `'auto'` = 1 / n_features
+- `degree` (number, default `3`): degree of the polynomial kernel
+- `coef0` (number, default `0`): independent term of the `poly` and `sigmoid` kernels
+- `tol` (number, default `1e-3`): KKT-violation tolerance for SMO convergence
+- `maxIter` (number, default `-1`): hard limit on SMO pair updates; `-1` runs until convergence
+
+### Methods
+- `fit(trainX, trainY)`: train the classifier; multiclass data is handled one-vs-one
+- `predict(testX)`: predicted class labels (one-vs-one voting)
+- `decisionFunction(testX)`: signed margins for binary problems; positive values mean `classes[1]`, matching sklearn's convention
+- `getSupportVectors()`: sorted training-set indices of the support vectors
+- `getNSupport()`: number of support vectors per class, like sklearn's `n_support_`
 
 ### Implementation workflow
 
