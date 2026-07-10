@@ -5,8 +5,6 @@ export interface AdaBoostClassifierProps {
     n_estimators?: number;
     learningRate?: number;
     learning_rate?: number;
-    randomState?: number;
-    random_state?: number;
 }
 
 interface Stump {
@@ -54,6 +52,7 @@ export class AdaBoostClassifier extends ClassifierBase {
     private multiEstimators: MultiStump[];
     private multiWeights: number[];
     private classes: number[];
+    private nFeatures: number;
 
     constructor(props: AdaBoostClassifierProps = {}) {
         super();
@@ -66,6 +65,7 @@ export class AdaBoostClassifier extends ClassifierBase {
         this.multiEstimators = [];
         this.multiWeights = [];
         this.classes = [];
+        this.nFeatures = 0;
     }
 
     private validateInput(X: number[][], y: number[]): void {
@@ -209,6 +209,7 @@ export class AdaBoostClassifier extends ClassifierBase {
             throw new Error('AdaBoost needs at least 2 classes');
         }
         this.classes = classes;
+        this.nFeatures = trainX[0].length;
         this.estimators = [];
         this.estimatorWeights = [];
         this.multiEstimators = [];
@@ -247,11 +248,12 @@ export class AdaBoostClassifier extends ClassifierBase {
             const alpha = this.learningRate * Math.log((1 - error) / Math.max(error, 1e-10));
             const pred = this.stumpScore(stump, trainX);
 
-            // SAMME: only misclassified samples are up-weighted
-            const maxWeight = Math.max(...sampleWeights) * 100;
+            // exact SAMME update: only misclassified samples are up-weighted
+            // (no cap, matching the multiclass path); error is bounded away
+            // from 0 and the weights are renormalized below
             for (let j = 0; j < n; j++) {
                 if (pred[j] !== yPm[j]) {
-                    sampleWeights[j] = Math.min(sampleWeights[j] * Math.exp(alpha), maxWeight);
+                    sampleWeights[j] *= Math.exp(alpha);
                 }
             }
 
@@ -395,8 +397,7 @@ export class AdaBoostClassifier extends ClassifierBase {
             : this.multiEstimators.map(s => s.feature);
         const weights = this.classes.length === 2 ? this.estimatorWeights : this.multiWeights;
 
-        const nFeatures = Math.max(...features) + 1;
-        const importances = new Array(nFeatures).fill(0);
+        const importances = new Array(this.nFeatures).fill(0);
         const totalWeight = weights.reduce((a, b) => a + Math.abs(b), 0);
         if (totalWeight > 0) {
             for (let i = 0; i < features.length; i++) {

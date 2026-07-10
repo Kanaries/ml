@@ -1,12 +1,13 @@
 import { DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
+import { SubsetSizeOption } from '../utils/paramResolvers';
 
 export interface RandomForestRegressorProps {
     nEstimators?: number;
     bootstrap?: boolean;
     maxDepth?: number;
     minSamplesSplit?: number;
-    maxFeatures?: number | 'sqrt' | 'log2';
+    maxFeatures?: SubsetSizeOption;
     randomState?: number;
 }
 
@@ -15,7 +16,7 @@ export class RandomForestRegressor {
     private bootstrap: boolean;
     private maxDepth?: number;
     private minSamplesSplit?: number;
-    private maxFeatures: number | 'sqrt' | 'log2';
+    private maxFeatures: SubsetSizeOption;
     private randomState?: number;
     private estimators: DecisionTreeRegressor[];
     private fitted: boolean;
@@ -26,7 +27,8 @@ export class RandomForestRegressor {
             bootstrap = true,
             maxDepth,
             minSamplesSplit,
-            maxFeatures = 1.0,
+            // sklearn's RandomForestRegressor default is all features
+            maxFeatures = 'all',
             randomState,
         } = props;
         this.nEstimators = nEstimators;

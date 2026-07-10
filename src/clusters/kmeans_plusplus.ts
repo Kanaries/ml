@@ -13,6 +13,27 @@ function euclideanSquare(a: number[], b: number[]): number {
 }
 
 /**
+ * Weighted choice over `masses` for a draw `r` in [0, totalMass).
+ * Entries with zero (or negative) mass are skipped so that points with
+ * zero probability can never be selected, even when `r` lands exactly on
+ * a cumulative-sum boundary (e.g. randomState() returning 0).
+ */
+function weightedChoice(masses: number[], r: number): number {
+    let cum = 0;
+    let lastPositive = -1;
+    for (let i = 0; i < masses.length; i++) {
+        if (masses[i] <= 0) continue;
+        cum += masses[i];
+        lastPositive = i;
+        if (r <= cum) {
+            return i;
+        }
+    }
+    // numerical fallback: return the last point with positive mass
+    return lastPositive;
+}
+
+/**
  * Initialize cluster centers according to the kmeans++ strategy.
  * @param X samples matrix
  * @param n_clusters number of clusters
@@ -30,60 +51,41 @@ export function kmeansPlusPlus(
         return { centers: [], indices: [] };
     }
     const nSamples = X.length;
-    const weights = sampleWeight ? sampleWeight.slice() : X.map(() => 1);
+    let weights = sampleWeight ? sampleWeight.slice() : X.map(() => 1);
+    let weightSum = weights.reduce((a, b) => a + b, 0);
+    if (weightSum <= 0) {
+        // degenerate weights: fall back to uniform sampling
+        weights = X.map(() => 1);
+        weightSum = nSamples;
+    }
     const centers: number[][] = [];
     const indices: number[] = [];
 
     // choose first center
-    let weightSum = weights.reduce((a, b) => a + b, 0);
-    let r = randomState() * weightSum;
-    let cum = 0;
-    let firstIdx = 0;
-    for (let i = 0; i < nSamples; i++) {
-        cum += weights[i];
-        if (r <= cum) {
-            firstIdx = i;
-            break;
-        }
-    }
+    const firstIdx = weightedChoice(weights, randomState() * weightSum);
     centers.push(X[firstIdx]);
     indices.push(firstIdx);
 
     const closestDistSq = X.map((x) => euclideanSquare(x, centers[0]));
 
     while (centers.length < n_clusters) {
+        const masses: number[] = new Array(nSamples);
         let distSqSum = 0;
         for (let i = 0; i < nSamples; i++) {
-            distSqSum += closestDistSq[i] * weights[i];
+            masses[i] = closestDistSq[i] * weights[i];
+            distSqSum += masses[i];
         }
         if (distSqSum === 0) {
-            // all points the same, pick random
-            let r2 = randomState() * weightSum;
-            let cum2 = 0;
-            let idx = 0;
-            for (let i = 0; i < nSamples; i++) {
-                cum2 += weights[i];
-                if (r2 <= cum2) {
-                    idx = i;
-                    break;
-                }
-            }
-            if (indices.indexOf(idx) === -1) {
-                centers.push(X[idx]);
-                indices.push(idx);
-            }
-            break;
+            // Remaining probability mass is zero (e.g. all points identical
+            // or every distinct point already chosen). Fall back to a
+            // weighted pick, allowing repeated centers, so that exactly
+            // n_clusters centers are returned (sklearn-style behaviour).
+            const idx = weightedChoice(weights, randomState() * weightSum);
+            centers.push(X[idx]);
+            indices.push(idx);
+            continue;
         }
-        let r2 = randomState() * distSqSum;
-        let cum2 = 0;
-        let nextIdx = 0;
-        for (let i = 0; i < nSamples; i++) {
-            cum2 += closestDistSq[i] * weights[i];
-            if (r2 <= cum2) {
-                nextIdx = i;
-                break;
-            }
-        }
+        const nextIdx = weightedChoice(masses, randomState() * distSqSum);
         centers.push(X[nextIdx]);
         indices.push(nextIdx);
         for (let i = 0; i < nSamples; i++) {

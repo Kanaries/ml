@@ -1,4 +1,5 @@
 import { assert, createRandomGenerator } from "../utils";
+import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { mean } from "../utils/stat";
 import { IDTree } from "./decisionTreeClassifier";
 import { valuesAllSame } from "./utils";
@@ -7,7 +8,7 @@ interface IRegTree extends IDTree {
 interface RegressionTreeProps {
     max_depth?: number;
     min_samples_split?: number;
-    max_features?: number | 'sqrt' | 'log2';
+    max_features?: SubsetSizeOption;
     randomState?: number;
 }
 export class DecisionTreeRegressor {
@@ -15,7 +16,7 @@ export class DecisionTreeRegressor {
     private regTree: IRegTree;
     private min_sample_split: number;
     private max_depth: number;
-    private max_features?: number | 'sqrt' | 'log2';
+    private max_features?: SubsetSizeOption;
     private randomState?: number;
     private random: () => number;
     public constructor (props: RegressionTreeProps = {}) {
@@ -32,18 +33,7 @@ export class DecisionTreeRegressor {
         this.random = createRandomGenerator(this.randomState);
     }
     private selectedFeatureIndices(): number[] {
-        let size = this.feature_number;
-        if (this.max_features !== undefined) {
-            if (this.max_features === 'sqrt') {
-                size = Math.max(1, Math.ceil(Math.sqrt(this.feature_number)));
-            } else if (this.max_features === 'log2') {
-                size = Math.max(1, Math.ceil(Math.log2(this.feature_number)));
-            } else if (this.max_features > 0 && this.max_features <= 1) {
-                size = Math.max(1, Math.ceil(this.feature_number * this.max_features));
-            } else {
-                size = Math.max(1, Math.min(this.feature_number, Math.floor(this.max_features)));
-            }
-        }
+        const size = resolveSubsetSize(this.max_features, this.feature_number);
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));

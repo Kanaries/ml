@@ -4,6 +4,7 @@
  * 2. 多分割本质上可以被二分替代，所以没必要去做更复杂的多分割，目前也没有依据二者表现会有显著的差别。这样我们就可以直接使用二叉树来做。
  */
 import { assert, createRandomGenerator } from "../utils";
+import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { entropy, gini, mode } from "../utils/stat";
 import { getUniqueFreqs, valuesAllSame } from "./utils";
 export type IFeatureSplitType = 'continuous' | 'discrete';
@@ -23,7 +24,7 @@ export interface DecisionTreeProps {
     max_depth?: number;
     min_samples_split?: number;
     criterion?: 'entropy' | 'gini';
-    max_features?: number | 'sqrt' | 'log2';
+    max_features?: SubsetSizeOption;
     randomState?: number;
 }
 
@@ -34,7 +35,7 @@ export class DecisionTreeClassifier {
     private min_samples_split: number;
     private criterion: 'entropy' | 'gini' = 'entropy';
     private impurity: (freqs: number[]) => number;
-    private max_features?: number | 'sqrt' | 'log2';
+    private max_features?: SubsetSizeOption;
     private randomState?: number;
     private random: () => number;
     public constructor(props: DecisionTreeProps = {}) {
@@ -55,18 +56,7 @@ export class DecisionTreeClassifier {
     }
 
     private selectedFeatureIndices(): number[] {
-        let size = this.feature_number;
-        if (this.max_features !== undefined) {
-            if (this.max_features === 'sqrt') {
-                size = Math.max(1, Math.ceil(Math.sqrt(this.feature_number)));
-            } else if (this.max_features === 'log2') {
-                size = Math.max(1, Math.ceil(Math.log2(this.feature_number)));
-            } else if (this.max_features > 0 && this.max_features <= 1) {
-                size = Math.max(1, Math.ceil(this.feature_number * this.max_features));
-            } else {
-                size = Math.max(1, Math.min(this.feature_number, Math.floor(this.max_features)));
-            }
-        }
+        const size = resolveSubsetSize(this.max_features, this.feature_number);
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));

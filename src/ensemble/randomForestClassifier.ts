@@ -1,18 +1,19 @@
 import { ClassifierBase } from '../base';
 import { createRandomGenerator } from '../utils';
 import { DecisionTreeClassifier, DecisionTreeProps } from '../tree';
+import { SubsetSizeOption } from '../utils/paramResolvers';
 
 export interface RandomForestClassifierProps extends DecisionTreeProps {
     nEstimators?: number;
     bootstrap?: boolean;
-    maxFeatures?: number | 'sqrt' | 'log2';
+    maxFeatures?: SubsetSizeOption;
     randomState?: number;
 }
 
 export class RandomForestClassifier extends ClassifierBase {
     private nEstimators: number;
     private bootstrap: boolean;
-    private maxFeatures: number | 'sqrt' | 'log2';
+    private maxFeatures: SubsetSizeOption;
     private randomState?: number;
     private treeProps: DecisionTreeProps;
     private estimators: DecisionTreeClassifier[];

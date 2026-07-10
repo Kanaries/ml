@@ -1,4 +1,4 @@
-export function std<T = any> (arr: T[], size: number): T[] {
+export function std<T = any> (arr: T[], size: number, rng: () => number = Math.random): T[] {
     const n = arr.length;
     const k = Math.floor(size);
     if (n === 0 || k <= 0) {
@@ -11,7 +11,7 @@ export function std<T = any> (arr: T[], size: number): T[] {
     // Reservoir sampling (sampling without replacement).
     const sample = arr.slice(0, k);
     for (let i = k; i < n; i++) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(rng() * (i + 1));
         if (j < k) {
             sample[j] = arr[i];
         }

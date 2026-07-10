@@ -14,6 +14,8 @@ export class LogisticRegression extends ClassifierBase {
     private bias: number;
     private learningRate: number;
     private maxIter: number;
+    private classes: number[];
+    private fitted: boolean;
 
     constructor(props: LogisticRegressionProps = {}) {
         super();
@@ -22,9 +24,23 @@ export class LogisticRegression extends ClassifierBase {
         this.maxIter = maxIter;
         this.weights = [];
         this.bias = 0;
+        this.classes = [];
+        this.fitted = false;
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
+        if (trainX.length === 0 || trainY.length === 0) {
+            throw new Error('X and y must be non-empty');
+        }
+        if (trainX.length !== trainY.length) {
+            throw new Error('X and y must have the same length');
+        }
+        this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
+        if (this.classes.length !== 2) {
+            throw new Error(`LogisticRegression supports exactly 2 classes, got ${this.classes.length}`);
+        }
+        // internally train on {0, 1}; classes_ maps back to the user's labels
+        const y01 = trainY.map(v => (v === this.classes[1] ? 1 : 0));
         const nFeatures = trainX[0].length;
         this.weights = new Array(nFeatures).fill(0);
         this.bias = 0;
@@ -33,7 +49,7 @@ export class LogisticRegression extends ClassifierBase {
             let gradB = 0;
             for (let i = 0; i < trainX.length; i++) {
                 const x = trainX[i];
-                const y = trainY[i];
+                const y = y01[i];
                 let z = this.bias;
                 for (let j = 0; j < nFeatures; j++) {
                     z += this.weights[j] * x[j];
@@ -50,9 +66,13 @@ export class LogisticRegression extends ClassifierBase {
             }
             this.bias -= this.learningRate * gradB / trainX.length;
         }
+        this.fitted = true;
     }
 
     public predict(testX: number[][]): number[] {
+        if (!this.fitted) {
+            throw new Error('LogisticRegression must be fitted before calling predict');
+        }
         const results: number[] = [];
         for (const x of testX) {
             let z = this.bias;
@@ -60,8 +80,12 @@ export class LogisticRegression extends ClassifierBase {
                 z += this.weights[j] * x[j];
             }
             const p = sigmoid(z);
-            results.push(p >= 0.5 ? 1 : 0);
+            results.push(p >= 0.5 ? this.classes[1] : this.classes[0]);
         }
         return results;
+    }
+
+    public getClasses(): number[] {
+        return this.classes.slice();
     }
 }

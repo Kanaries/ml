@@ -24,6 +24,19 @@ function knnLabelPurity(Y: number[][], labels: number[], k: number): number {
     return agree / Y.length;
 }
 
+// TSNE initializes Y with Math.random; pin it for a deterministic, flake-free test
+beforeEach(() => {
+    let seed = 12345;
+    jest.spyOn(Math, 'random').mockImplementation(() => {
+        seed = (seed * 16807) % 2147483647;
+        return (seed - 1) / 2147483646;
+    });
+});
+
+afterEach(() => {
+    jest.restoreAllMocks();
+});
+
 test('tsne embedding preserves sklearn blob structure', () => {
     const p = path.join(__dirname, '../../../test_data/tsne.json');
     const data = JSON.parse(fs.readFileSync(p, 'utf8'));

@@ -37,3 +37,36 @@ test('kmeans++ sample weight', () => {
     expect(result.indices).toEqual([0, 2]);
     mock.mockRestore();
 });
+
+test('kmeans++ identical points still returns n_clusters centers', () => {
+    const X = [
+        [1, 2],
+        [1, 2],
+        [1, 2],
+        [1, 2]
+    ];
+    const mock = jest.spyOn(Math, 'random').mockReturnValue(0.3);
+
+    const result = kmeansPlusPlus(X, 3);
+    expect(result.centers).toHaveLength(3);
+    expect(result.indices).toHaveLength(3);
+    for (const center of result.centers) {
+        expect(center).toEqual([1, 2]);
+    }
+
+    mock.mockRestore();
+});
+
+test('kmeans++ never selects zero-weight points', () => {
+    const X = [
+        [0, 0],
+        [1, 0],
+        [10, 0]
+    ];
+    const weights = [0, 0, 1];
+    // randomState always returns 0: with the old `r <= cum` boundary this
+    // selected index 0, whose probability mass is zero.
+    const result = kmeansPlusPlus(X, 2, weights, () => 0);
+    expect(result.indices).toEqual([2, 2]);
+    expect(result.centers).toEqual([X[2], X[2]]);
+});

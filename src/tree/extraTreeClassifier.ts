@@ -1,4 +1,5 @@
 import { assert, createRandomGenerator } from '../utils';
+import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { entropy, gini, mode } from '../utils/stat';
 import { filterWithIndices, valuesAllSame, getUniqueFreqs } from './utils';
 import type { IDTree } from './decisionTreeClassifier';
@@ -7,7 +8,7 @@ export interface ExtraTreeProps {
     max_depth?: number;
     min_samples_split?: number;
     criterion?: 'entropy' | 'gini';
-    max_features?: number;
+    max_features?: SubsetSizeOption;
     randomState?: number;
 }
 
@@ -18,7 +19,7 @@ export class ExtraTreeClassifier {
     private min_samples_split: number;
     private criterion: 'entropy' | 'gini';
     private impurity: (freqs: number[]) => number;
-    private max_features_prop?: number;
+    private max_features_prop?: SubsetSizeOption;
     private max_features_: number;
     private randomState?: number;
     private random: () => number;
@@ -111,7 +112,7 @@ export class ExtraTreeClassifier {
 
     private treeGenerate(tree: IDTree, sampleX: number[][], sampleY: number[], depth: number) {
         if (sampleX.length < this.min_samples_split) return;
-        if (depth > this.max_depth) return;
+        if (depth >= this.max_depth) return;
         if (valuesAllSame(sampleY)) return;
         const split = this.attributeSelection(sampleX, sampleY);
         if (split.attIndex === -1) return;
@@ -139,8 +140,8 @@ export class ExtraTreeClassifier {
         assert(sampleX.length > 0, 'fit data should not be empty');
         this.random = createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
-        const sqrtFeatures = Math.floor(Math.sqrt(this.feature_number));
-        this.max_features_ = this.max_features_prop ? Math.min(this.feature_number, Math.floor(this.max_features_prop)) : sqrtFeatures;
+        // sklearn's ExtraTreeClassifier defaults max_features to 'sqrt'
+        this.max_features_ = resolveSubsetSize(this.max_features_prop ?? 'sqrt', this.feature_number);
         this.dtree = {
             nodeValue: 0,
             splitIndex: -1,
@@ -151,18 +152,18 @@ export class ExtraTreeClassifier {
         this.treeGenerate(this.dtree, sampleX, sampleY, 0);
     }
 
-    private findSample(X: number[], tree: IDTree, depth: number): number {
-        if (depth >= this.max_depth || tree.splitIndex === -1 || !tree.leftChild || !tree.rightChild) {
+    private findSample(X: number[], tree: IDTree): number {
+        if (tree.splitIndex === -1 || !tree.leftChild || !tree.rightChild) {
             return tree.y;
         }
         if (X[tree.splitIndex] < tree.nodeValue) {
-            return this.findSample(X, tree.leftChild, depth + 1);
+            return this.findSample(X, tree.leftChild);
         } else {
-            return this.findSample(X, tree.rightChild, depth + 1);
+            return this.findSample(X, tree.rightChild);
         }
     }
 
     public predict(sampleX: number[][]): number[] {
-        return sampleX.map(x => this.findSample(x, this.dtree, 0));
+        return sampleX.map(x => this.findSample(x, this.dtree));
     }
 }

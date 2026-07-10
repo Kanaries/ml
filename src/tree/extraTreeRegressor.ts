@@ -1,4 +1,5 @@
-import { assert } from '../utils';
+import { assert, createRandomGenerator } from '../utils';
+import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { mean } from '../utils/stat';
 import { IDTree } from './decisionTreeClassifier';
 import { filterWithIndices, valuesAllSame } from './utils';
@@ -9,7 +10,8 @@ export interface ExtraTreeRegressorProps {
     max_depth?: number;
     min_samples_split?: number;
     splitter?: 'random';
-    max_features?: number | 'sqrt' | 'log2';
+    max_features?: SubsetSizeOption;
+    randomState?: number;
 }
 
 export class ExtraTreeRegressor {
@@ -18,32 +20,26 @@ export class ExtraTreeRegressor {
     private min_samples_split: number;
     private max_depth: number;
     private splitter: 'random';
-    private max_features: number | 'sqrt' | 'log2';
+    private max_features: SubsetSizeOption;
+    private randomState?: number;
+    private random: () => number;
 
     public constructor(props: ExtraTreeRegressorProps = {}) {
-        const { max_depth = Infinity, min_samples_split = 2, splitter = 'random', max_features = 1.0 } = props;
+        // sklearn's ExtraTreeRegressor defaults max_features to all features
+        const { max_depth = Infinity, min_samples_split = 2, splitter = 'random', max_features = 'all', randomState } = props;
         this.max_depth = max_depth;
         this.min_samples_split = min_samples_split;
         this.splitter = splitter;
         this.max_features = max_features;
+        this.randomState = randomState;
+        this.random = createRandomGenerator(this.randomState);
     }
 
     private getFeatureSubset(): number[] {
-        let size: number;
-        if (typeof this.max_features === 'string') {
-            if (this.max_features === 'sqrt') {
-                size = Math.ceil(Math.sqrt(this.feature_number));
-            } else {
-                size = Math.ceil(Math.log2(this.feature_number));
-            }
-        } else if (this.max_features > 0 && this.max_features <= 1) {
-            size = Math.ceil(this.feature_number * this.max_features);
-        } else {
-            size = Math.min(this.feature_number, Math.floor(this.max_features));
-        }
+        const size = resolveSubsetSize(this.max_features, this.feature_number);
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(this.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
         return indices.slice(0, size);
@@ -68,7 +64,7 @@ export class ExtraTreeRegressor {
             const min = Math.min(...values);
             const max = Math.max(...values);
             if (min === max) continue;
-            const feaValue = Math.random() * (max - min) + min;
+            const feaValue = this.random() * (max - min) + min;
             const leftChild = filterWithIndices(values, x => x < feaValue);
             const rightChild = filterWithIndices(values, x => x >= feaValue);
             const leftY = leftChild.indices.map(i => sampleY[i]);
@@ -129,6 +125,7 @@ export class ExtraTreeRegressor {
 
     public fit(sampleX: number[][], sampleY: number[]): void {
         assert(sampleX.length > 0, 'fit data should not be empty');
+        this.random = createRandomGenerator(this.randomState);
         this.feature_number = sampleX[0].length;
         this.regTree = this.initTreeNode(sampleY);
         this.buildTree(this.regTree, sampleX, sampleY, 0);

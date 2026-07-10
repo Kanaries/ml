@@ -1,5 +1,6 @@
 import { ClassifierBase } from '../base';
 import { createRandomGenerator } from '../utils';
+import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { DecisionTreeClassifier, DecisionTreeProps } from '../tree';
 
 function bootstrapSample(X: number[][], y: number[], random: () => number, sampleCount?: number) {
@@ -16,7 +17,8 @@ function bootstrapSample(X: number[][], y: number[], random: () => number, sampl
 
 export interface BaggingClassifierProps extends DecisionTreeProps {
     nEstimators?: number;
-    maxSamples?: number;
+    /** positive integer = absolute count; fraction in (0,1) = share of samples; 'all'/undefined = all */
+    maxSamples?: SubsetSizeOption;
     bootstrap?: boolean;
     randomState?: number;
     estimatorFactory?: (seed?: number) => { fit(X: number[][], y: number[]): void; predict(X: number[][]): number[] };
@@ -24,7 +26,7 @@ export interface BaggingClassifierProps extends DecisionTreeProps {
 
 export class BaggingClassifier extends ClassifierBase {
     private nEstimators: number;
-    private maxSamples?: number;
+    private maxSamples?: SubsetSizeOption;
     private bootstrap: boolean;
     private randomState?: number;
     private estimatorFactory?: (seed?: number) => { fit(X: number[][], y: number[]): void; predict(X: number[][]): number[] };
@@ -57,6 +59,7 @@ export class BaggingClassifier extends ClassifierBase {
             throw new Error('X and y must have the same length');
         }
         const random = createRandomGenerator(this.randomState);
+        const sampleCount = resolveSubsetSize(this.maxSamples, trainX.length, 'maxSamples');
         this.estimators = [];
         for (let i = 0; i < this.nEstimators; i++) {
             const estimatorSeed = Math.floor(random() * 1_000_000_000);
@@ -64,9 +67,9 @@ export class BaggingClassifier extends ClassifierBase {
             let sampleX: number[][];
             let sampleY: number[];
             if (this.bootstrap) {
-                ({ sampleX, sampleY } = bootstrapSample(trainX, trainY, random, this.maxSamples));
+                ({ sampleX, sampleY } = bootstrapSample(trainX, trainY, random, sampleCount));
             } else {
-                const size = this.maxSamples ?? trainX.length;
+                const size = sampleCount;
                 const indices = Array.from({ length: trainX.length }, (_, index) => index);
                 for (let j = indices.length - 1; j > 0; j--) {
                     const k = Math.floor(random() * (j + 1));

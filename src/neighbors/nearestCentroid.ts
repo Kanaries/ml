@@ -6,6 +6,15 @@ export interface NearestCentroidProps {
     p?: number;
 }
 
+function median(values: number[]): number {
+    const sorted = values.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 0) {
+        return (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+    return sorted[mid];
+}
+
 export class NearestCentroid {
     private metric: Distance.IDistanceType;
     private p: number;
@@ -29,21 +38,27 @@ export class NearestCentroid {
         const classIndex = new Map<number, number>();
         this.classes.forEach((label, index) => classIndex.set(label, index));
 
-        const sums = Array.from({ length: this.classes.length }, () => new Array(nFeatures).fill(0));
-        const counts = new Array(this.classes.length).fill(0);
-
+        const grouped: number[][][] = this.classes.map(() => []);
         for (let i = 0; i < trainX.length; i++) {
             const cls = classIndex.get(trainY[i]);
             if (cls === undefined) {
                 continue;
             }
-            counts[cls] += 1;
-            for (let j = 0; j < nFeatures; j++) {
-                sums[cls][j] += trainX[i][j];
-            }
+            grouped[cls].push(trainX[i]);
         }
 
-        this.centroids = sums.map((row, classIdx) => row.map(value => value / counts[classIdx]));
+        // sklearn semantics: manhattan uses the per-feature median as the
+        // centroid; other metrics use the per-feature mean.
+        const useMedian = this.metric === 'manhattan' || this.metric === '1-norm';
+        this.centroids = grouped.map(rows =>
+            Array.from({ length: nFeatures }, (_, j) => {
+                const column = rows.map(row => row[j]);
+                if (useMedian) {
+                    return median(column);
+                }
+                return column.reduce((sum, value) => sum + value, 0) / column.length;
+            })
+        );
         this.fitted = true;
     }
 

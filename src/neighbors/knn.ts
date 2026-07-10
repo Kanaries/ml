@@ -1,15 +1,15 @@
-import { ClassifierBase } from "../base";
-import { Distance } from "../metrics";
-import { mode } from "../utils/stat";
-import { getWeights, IWeightType, votes } from "./utils";
+import { ClassifierBase } from '../base';
+import { Distance } from '../metrics';
+import { getNeighborHits, IWeightType, resolveDistanceWeights, validateFitData, validatePredictData, weightedMode } from './utils';
 
 export class KNearestNeighbors extends ClassifierBase {
-    private samplesX: number[][];
-    private samplesY: number[];
-    private distance: Distance.IDistance;
+    private trainX: number[][];
+    private trainY: number[];
+    private metric: Distance.IDistanceType;
     private kNeighbors: number;
     private weightType: IWeightType;
     private pNorm: number;
+    private fitted: boolean;
     public constructor(
         kNeighbors: number = 5,
         weightType: IWeightType = 'uniform',
@@ -17,38 +17,39 @@ export class KNearestNeighbors extends ClassifierBase {
         pNorm: number = 2
     ) {
         super();
-        this.samplesX = [];
-        this.samplesY = [];
-        this.distance = Distance.useDistance(distanceType);
+        if (!Number.isInteger(kNeighbors) || kNeighbors <= 0) {
+            throw new Error('kNeighbors must be an integer > 0');
+        }
+        if (weightType !== 'uniform' && weightType !== 'distance') {
+            throw new Error(`Do not support weightType: ${weightType}. Use 'uniform' or 'distance' instead.`);
+        }
+        this.trainX = [];
+        this.trainY = [];
+        this.metric = distanceType;
         this.kNeighbors = kNeighbors;
         this.weightType = weightType;
         this.pNorm = pNorm;
+        this.fitted = false;
     }
     public fit(trainX: number[][], trainY: number[]): void {
-        this.samplesX = trainX;
-        this.samplesY = trainY;
+        validateFitData(trainX, trainY);
+        this.trainX = trainX;
+        this.trainY = trainY;
+        this.fitted = true;
     }
     public predict(testX: number[][]): number[] {
-        let Y: number[] = [];
-        const { distance, kNeighbors, samplesY, weightType, pNorm } = this;
-        for (let i = 0; i < testX.length; i++) {
-            const x = testX[i];
-            const neighbors: Array<{ index: number; dis: number }> = this.samplesX.map((sample, index) => {
-                return {
-                    index,
-                    dis: distance(x, sample, pNorm),
-                };
-            });
-            neighbors.sort((a, b) => a.dis - b.dis);
-            const knns = neighbors.slice(0, kNeighbors);
-            const classes = knns.map((nei) => samplesY[nei.index]);
-            const weights = getWeights(
-                knns.map((n) => n.dis),
-                weightType
-            );
-            Y.push(votes(classes, weights));
+        if (!this.fitted) {
+            throw new Error('model is not fitted');
         }
-        return Y;
+        validatePredictData(testX, this.trainX[0].length);
+        return testX.map(sample => {
+            const hits = getNeighborHits(this.trainX, sample, this.metric, this.pNorm).slice(0, Math.min(this.kNeighbors, this.trainX.length));
+            const labels = hits.map(hit => this.trainY[hit.index]);
+            const weights = this.weightType === 'uniform'
+                ? new Array(labels.length).fill(1)
+                : resolveDistanceWeights(hits.map(hit => hit.distance));
+            return weightedMode(labels, weights);
+        });
     }
 }
 
