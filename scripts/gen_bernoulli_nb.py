@@ -3,10 +3,22 @@ import numpy as np
 import json
 import os
 
-rng = np.random.RandomState(0)
-X = rng.randint(2, size=(30, 5))
-y = rng.randint(2, size=30)
-X_test = rng.randint(2, size=(10, 5))
+# Deliberately IMBALANCED classes (24/8) with class-conditional features:
+# sklearn never smooths the class prior with alpha, so an alpha-smoothed prior
+# shifts the decision boundary on imbalanced data. The test-point indices were
+# selected so that alpha-smoothing the prior flips several predictions.
+rng = np.random.RandomState(4)
+p0 = np.array([0.8, 0.6, 0.3, 0.2, 0.5])
+p1 = np.array([0.2, 0.4, 0.7, 0.8, 0.5])
+X = np.vstack([
+    (rng.rand(24, 5) < p0).astype(int),
+    (rng.rand(8, 5) < p1).astype(int),
+])
+y = np.array([0] * 24 + [1] * 8)
+T = (rng.rand(80, 5) < 0.5).astype(int)
+keep = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 20, 60]
+X_test = T[keep]
+
 clf = BernoulliNB()
 clf.fit(X, y)
 pred = clf.predict(X_test)

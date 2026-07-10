@@ -244,3 +244,25 @@ test('SelectKBest keeps highest-scoring features using fRegression', () => {
 
     expect(transformed).toEqual([[0], [1], [2], [3]]);
 });
+
+describe('categorical encoders sort numeric categories numerically (sklearn parity)', () => {
+    test('OrdinalEncoder: [2, 10] must encode 2 -> 0, 10 -> 1', () => {
+        const enc = new OrdinalEncoder();
+        enc.fit([[2], [10], [2]]);
+        expect(enc.transform([[2], [10]])).toEqual([[0], [1]]);
+    });
+
+    test('OneHotEncoder: numeric category order is ascending', () => {
+        const enc = new OneHotEncoder();
+        enc.fit([[2], [10]]);
+        // column order [2, 10]: value 2 -> [1,0], value 10 -> [0,1]
+        expect(enc.transform([[2]])).toEqual([[1, 0]]);
+        expect(enc.transform([[10]])).toEqual([[0, 1]]);
+    });
+
+    test('string categories keep lexicographic order', () => {
+        const enc = new OrdinalEncoder();
+        enc.fit([['b'], ['a'], ['c']]);
+        expect(enc.transform([['a'], ['b'], ['c']])).toEqual([[0], [1], [2]]);
+    });
+});

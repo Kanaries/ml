@@ -53,6 +53,15 @@ function validateMatrix(X: number[][]): void {
     }
 }
 
+// sklearn sorts numeric categories numerically; only mixed/non-numeric
+// columns fall back to lexicographic order ([2, 10] must not become [10, 2]).
+function compareCategories(a: CategoricalValue, b: CategoricalValue): number {
+    if (typeof a === 'number' && typeof b === 'number') {
+        return a - b;
+    }
+    return String(a).localeCompare(String(b));
+}
+
 function validateCategoricalMatrix(X: CategoricalValue[][]): void {
     if (X.length === 0) {
         throw new Error('X must be non-empty');
@@ -411,7 +420,7 @@ export class OrdinalEncoder {
         this.categories = new Array(nFeatures).fill(null).map(() => []);
         for (let j = 0; j < nFeatures; j++) {
             const values = Array.from(new Set(X.map(row => row[j])));
-            values.sort((a, b) => String(a).localeCompare(String(b)));
+            values.sort(compareCategories);
             this.categories[j] = values;
         }
         this.fitted = true;
@@ -487,7 +496,7 @@ export class OneHotEncoder {
         this.retainedCategories = new Array(nFeatures).fill(null).map(() => []);
         for (let j = 0; j < nFeatures; j++) {
             const values = Array.from(new Set(X.map(row => row[j])));
-            values.sort((a, b) => String(a).localeCompare(String(b)));
+            values.sort(compareCategories);
             this.categories[j] = values;
             this.retainedCategories[j] = this.categoriesToEncode(values);
         }

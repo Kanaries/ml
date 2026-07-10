@@ -89,8 +89,9 @@ export class CategoricalNB extends ClassifierBase {
         if (this.classPrior) {
             this.classLogPrior = this.classPrior.map(p => Math.log(p));
         } else if (this.fitPrior) {
+            // sklearn never smooths the class prior with alpha
             const totalCount = this.classCount.reduce((a, b) => a + b, 0);
-            this.classLogPrior = this.classCount.map(c => Math.log((c + this.alpha) / (totalCount + nClasses * this.alpha)));
+            this.classLogPrior = this.classCount.map(c => Math.log(c / totalCount));
         } else {
             this.classLogPrior = new Array(nClasses).fill(Math.log(1 / nClasses));
         }

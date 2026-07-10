@@ -101,12 +101,21 @@ export function f1Score(
     expected: number[],
     options: ClassificationMetricOptions = {},
 ): number {
-    const precision = precisionScore(actual, expected, options);
-    const recall = recallScore(actual, expected, options);
-    if (precision + recall === 0) {
-        return 0;
+    assertSameLength(actual, expected);
+    const { average = 'binary', positiveLabel = 1 } = options;
+    if (average === 'binary') {
+        const precision = precisionForLabel(actual, expected, positiveLabel);
+        const recall = recallForLabel(actual, expected, positiveLabel);
+        return precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
     }
-    return (2 * precision * recall) / (precision + recall);
+    // macro: mean of per-class F1 (not the harmonic mean of macro P/R)
+    const labels = uniqueLabels(actual, expected);
+    const scores = labels.map(label => {
+        const precision = precisionForLabel(actual, expected, label);
+        const recall = recallForLabel(actual, expected, label);
+        return precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    });
+    return scores.reduce((acc, v) => acc + v, 0) / scores.length;
 }
 
 function supportForLabel(expected: number[], label: number): number {

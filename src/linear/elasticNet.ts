@@ -81,7 +81,10 @@ export class ElasticNet {
         this.edgeModel = null;
 
         if (this.l1Ratio === 0) {
-            const ridge = new RidgeRegression({ alpha: this.alpha, fitIntercept: this.fitIntercept });
+            // sklearn ElasticNet minimizes 1/(2n)||y-Xw||^2 + 0.5*alpha*||w||^2,
+            // while Ridge minimizes ||y-Xw||^2 + alpha*||w||^2. The residual term
+            // differs by a factor n, so ElasticNet(alpha, l1_ratio=0) == Ridge(n*alpha).
+            const ridge = new RidgeRegression({ alpha: this.alpha * X.length, fitIntercept: this.fitIntercept });
             ridge.fit(X, Y);
             this.edgeModel = ridge;
             this.fitted = true;

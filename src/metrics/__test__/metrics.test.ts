@@ -92,3 +92,19 @@ test('adjustedRandScore handles perfect and imperfect clustering matches', () =>
     expect(adjustedRandScore([0, 0, 1, 1], [1, 1, 0, 0])).toBeCloseTo(1);
     expect(adjustedRandScore([0, 0, 1, 1], [0, 1, 0, 1])).toBeCloseTo(-0.5);
 });
+
+describe('macro f1 (sklearn definition: mean of per-class F1)', () => {
+    test('matches hand-computed sklearn value', () => {
+        const actual = [1, 0, 0]; // predictions
+        const expected = [1, 1, 0]; // ground truth
+        // class 1: P=1, R=0.5, F1=2/3; class 0: P=0.5, R=1, F1=2/3 -> macro F1 = 2/3
+        expect(f1Score(actual, expected, { average: 'macro' })).toBeCloseTo(2 / 3, 10);
+    });
+
+    test('agrees with precisionRecallFscoreSupport', () => {
+        const actual = [1, 0, 0, 2, 2, 1];
+        const expected = [1, 1, 0, 2, 1, 2];
+        const { fScore } = precisionRecallFscoreSupport(actual, expected, { average: 'macro' });
+        expect(f1Score(actual, expected, { average: 'macro' })).toBeCloseTo(fScore, 10);
+    });
+});

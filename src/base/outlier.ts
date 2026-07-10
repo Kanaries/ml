@@ -1,8 +1,8 @@
 export abstract class OutlierBase {
     public abstract fit (samplesX: number[][]): void;
     public abstract predict(samplesX: number[][]): number[];
-    public fitPredict (samplesX: number[][]) {
+    public fitPredict (samplesX: number[][]): number[] {
         this.fit(samplesX);
-        this.predict(samplesX);
+        return this.predict(samplesX);
     }
 }

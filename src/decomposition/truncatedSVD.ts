@@ -97,7 +97,6 @@ export class TruncatedSVD {
             this.components.push(vector.slice());
             const s = Math.sqrt(Math.max(value, 0));
             this.singularValues.push(s);
-            this.explainedVariance.push((s * s) / (nSamples - 1));
 
             const outer = TruncatedSVD.outer(vector, vector);
             for (let i = 0; i < nFeatures; i++) {
@@ -106,6 +105,19 @@ export class TruncatedSVD {
                 }
             }
         }
+
+        // sklearn definition: explained_variance_[i] = Var(X_transformed[:, i])
+        // (mean-subtracted, ddof=0) — NOT s^2/(n-1); X is not centered here, so
+        // the score columns have non-zero means that must be subtracted.
+        const scores = this.transform(X);
+        this.explainedVariance = this.components.map((_, c) => {
+            let mu = 0;
+            for (let i = 0; i < nSamples; i++) mu += scores[i][c];
+            mu /= nSamples;
+            let v = 0;
+            for (let i = 0; i < nSamples; i++) v += (scores[i][c] - mu) ** 2;
+            return v / nSamples;
+        });
 
         const featureVar = new Array(nFeatures).fill(0);
         const mean = new Array(nFeatures).fill(0);

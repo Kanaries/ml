@@ -91,9 +91,13 @@ export class ComplementNB {
         if (X[0].length !== this.featureLogProb[0].length) {
             throw new Error('input feature size does not match fitted model');
         }
+        // sklearn's ComplementNB JLL is X @ feature_log_prob.T with NO class
+        // prior term (complement weights replace the prior to resist class
+        // imbalance); the prior is only added in the degenerate single-class case.
+        const singleClass = this.classes.length === 1;
         return X.map(row => {
             const scores = this.classes.map((_, classIndex) => {
-                let score = this.classLogPrior[classIndex];
+                let score = singleClass ? this.classLogPrior[classIndex] : 0;
                 for (let j = 0; j < row.length; j++) {
                     score += row[j] * this.featureLogProb[classIndex][j];
                 }

@@ -112,23 +112,34 @@ export class TSNE {
         let dY = new Array(n).fill(0).map(() => new Array(this.nComponents).fill(0));
         let iY = new Array(n).fill(0).map(() => new Array(this.nComponents).fill(0));
         let momentum = 0.5;
+        const exaggerationIters = Math.min(100, Math.floor(this.nIter / 2));
+        const exaggeration = 4;
         for (let iter = 0; iter < this.nIter; iter++) {
+            const exag = iter < exaggerationIters ? exaggeration : 1;
             const { Q, num } = this.computeQ(Y);
             dY = dY.map(row => row.fill(0));
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
                     if (i === j) continue;
-                    const mult = (P[i][j] - Q[i][j]) * num[i][j];
+                    const mult = (exag * P[i][j] - Q[i][j]) * num[i][j];
                     for (let d = 0; d < this.nComponents; d++) {
                         dY[i][d] += mult * (Y[i][d] - Y[j][d]);
                     }
                 }
             }
+            // dY is the KL divergence gradient (up to the factor 4): descend it
             for (let i = 0; i < n; i++) {
                 for (let d = 0; d < this.nComponents; d++) {
-                    iY[i][d] = momentum * iY[i][d] + this.learningRate * dY[i][d] * 4;
+                    iY[i][d] = momentum * iY[i][d] - this.learningRate * dY[i][d] * 4;
                     Y[i][d] += iY[i][d];
                 }
+            }
+            // re-center the embedding to keep it from drifting
+            for (let d = 0; d < this.nComponents; d++) {
+                let mean = 0;
+                for (let i = 0; i < n; i++) mean += Y[i][d];
+                mean /= n;
+                for (let i = 0; i < n; i++) Y[i][d] -= mean;
             }
             if (iter === 100) momentum = 0.8;
         }

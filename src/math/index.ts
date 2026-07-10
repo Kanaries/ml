@@ -15,7 +15,7 @@ export function expected(nums: number[]): number {
 
 export function variance (nums: number[], df: number): number {
     const mu = expected(nums);
-    return expected(nums.map(n => (n - mu) ** 2)) / df;
+    return sum(nums.map(n => (n - mu) ** 2)) / df;
 }
 
 export function covariance(X: number[], Y: number[]): number {
