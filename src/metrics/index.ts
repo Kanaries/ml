@@ -225,6 +225,9 @@ export function rocCurve(
     const pairs = sortScoresDescending(expected, scores);
     const positives = expected.filter(value => value === positiveLabel).length;
     const negatives = expected.length - positives;
+    if (positives === 0 || negatives === 0) {
+        throw new Error('ROC AUC is undefined when only one class is present in the labels');
+    }
 
     const thresholds = [Number.POSITIVE_INFINITY];
     const tpr = [0];

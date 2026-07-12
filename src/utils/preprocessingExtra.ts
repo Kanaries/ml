@@ -409,7 +409,17 @@ export class PowerTransformer extends TransformerBase {
             if (this.method === 'box-cox' && observed.some(v => v <= 0)) {
                 throw new Error('The Box-Cox transformation can only be applied to strictly positive data');
             }
-            const lambda = minimizeScalar(l => this.negativeLogLikelihood(observed, l), -5, 5);
+            // sklearn's Brent search is unbounded; expand the bracket while
+            // the optimum keeps landing on the boundary (e.g. near-constant
+            // positive data can want lambda far below -5)
+            let lo = -5;
+            let hi = 5;
+            let lambda = minimizeScalar(l => this.negativeLogLikelihood(observed, l), lo, hi);
+            for (let round = 0; round < 6 && (lambda - lo <= (hi - lo) / 100 || hi - lambda <= (hi - lo) / 100); round++) {
+                lo *= 4;
+                hi *= 4;
+                lambda = minimizeScalar(l => this.negativeLogLikelihood(observed, l), lo, hi);
+            }
             this.lambdas[j] = lambda;
             if (this.standardize) {
                 const transformed = observed.map(x => this.applyPower(x, lambda));
@@ -503,6 +513,10 @@ export class QuantileTransformer extends TransformerBase {
         }
         if (!Number.isInteger(subsample) || subsample < 1) {
             throw new Error('subsample must be a positive integer');
+        }
+        if (nQuantiles > subsample) {
+            throw new Error(`nQuantiles (${nQuantiles}) cannot be greater than subsample (${subsample}); ` +
+                'quantiles would be fabricated from fewer observations than requested');
         }
         if (outputDistribution !== 'uniform' && outputDistribution !== 'normal') {
             throw new Error(`Unknown outputDistribution "${outputDistribution}". Expected 'uniform' or 'normal'.`);
@@ -935,6 +949,9 @@ export class KNNImputer extends TransformerBase {
     private metric: 'nanEuclidean';
     private fitX: number[][];
     private statistics: number[];
+    /** indices of fit features that had at least one observed value */
+    private validFeatures: number[];
+    private nFeaturesIn: number;
     private fitted: boolean;
 
     constructor(props: KNNImputerProps = {}) {
@@ -954,6 +971,8 @@ export class KNNImputer extends TransformerBase {
         this.metric = metric;
         this.fitX = [];
         this.statistics = [];
+        this.validFeatures = [];
+        this.nFeaturesIn = 0;
         this.fitted = false;
     }
 
@@ -963,20 +982,23 @@ export class KNNImputer extends TransformerBase {
 
     public fit(X: number[][]): void {
         validateMatrix(X);
-        const nFeatures = X[0].length;
-        // sklearn drops fit samples that are missing in every feature
-        this.fitX = X.filter(row => row.some(v => !Number.isNaN(v))).map(row => row.slice());
-        if (this.fitX.length === 0) {
+        this.nFeaturesIn = X[0].length;
+        // sklearn drops fit samples that are missing in every feature ...
+        const rows = X.filter(row => row.some(v => !Number.isNaN(v)));
+        if (rows.length === 0) {
             throw new Error('X has no rows with observed values');
         }
-        this.statistics = new Array(nFeatures).fill(0);
-        for (let j = 0; j < nFeatures; j++) {
-            const observed = observedColumn(this.fitX, j);
-            if (observed.length === 0) {
-                throw new Error(`Feature ${j} has no observed values`);
-            }
-            this.statistics[j] = meanOf(observed);
+        // ... and features with no observed values at all (their columns are
+        // removed from the output rather than crashing fold-local imputation)
+        this.validFeatures = [];
+        for (let j = 0; j < this.nFeaturesIn; j++) {
+            if (rows.some(row => !Number.isNaN(row[j]))) this.validFeatures.push(j);
         }
+        if (this.validFeatures.length === 0) {
+            throw new Error('X has no features with observed values');
+        }
+        this.fitX = rows.map(row => this.validFeatures.map(j => row[j]));
+        this.statistics = this.validFeatures.map((_, j) => meanOf(observedColumn(this.fitX, j)));
         this.fitted = true;
     }
 
@@ -984,10 +1006,11 @@ export class KNNImputer extends TransformerBase {
         if (!this.fitted) {
             throw new Error('KNNImputer must be fitted before calling transform');
         }
-        assertSameFeatureCount(X, this.statistics.length, 'X has different number of features than fitted data');
-        return X.map(row => {
+        assertSameFeatureCount(X, this.nFeaturesIn, 'X has different number of features than fitted data');
+        return X.map(fullRow => {
+            const row = this.validFeatures.map(j => fullRow[j]);
             if (!row.some(v => Number.isNaN(v))) {
-                return row.slice();
+                return row;
             }
             const distances = this.fitX.map(fitRow => nanEuclideanDistance(row, fitRow));
             const out = row.slice();

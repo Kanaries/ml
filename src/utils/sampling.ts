@@ -53,14 +53,20 @@ function resolveSplitCounts(sampleCount: number, testSize?: number, trainSize?: 
         if (!Number.isFinite(testSize) || testSize <= 0) {
             throw new Error('testSize must be a positive finite number');
         }
-        testCount = testSize < 1 ? Math.ceil(sampleCount * testSize) : Math.floor(testSize);
+        if (testSize >= 1 && !Number.isInteger(testSize)) {
+            throw new Error('absolute testSize must be an integer');
+        }
+        testCount = testSize < 1 ? Math.ceil(sampleCount * testSize) : testSize;
     }
     let trainCount: number | undefined;
     if (trainSize !== undefined) {
         if (!Number.isFinite(trainSize) || trainSize <= 0) {
             throw new Error('trainSize must be a positive finite number');
         }
-        trainCount = trainSize < 1 ? Math.floor(sampleCount * trainSize) : Math.floor(trainSize);
+        if (trainSize >= 1 && !Number.isInteger(trainSize)) {
+            throw new Error('absolute trainSize must be an integer');
+        }
+        trainCount = trainSize < 1 ? Math.floor(sampleCount * trainSize) : trainSize;
     }
 
     if (trainCount === undefined) {
@@ -84,7 +90,7 @@ function resolveSplitCounts(sampleCount: number, testSize?: number, trainSize?: 
  * rounding, deterministic ties by category order); never allocates more than a
  * category's count. Used by stratified train/test splitting.
  */
-export function allocateProportionally(counts: number[], total: number): number[] {
+export function allocateProportionally(counts: number[], total: number, random?: () => number): number[] {
     const sum = counts.reduce((acc, c) => acc + c, 0);
     if (total > sum) {
         throw new Error(`cannot allocate ${total} samples across categories holding only ${sum}`);
@@ -92,9 +98,12 @@ export function allocateProportionally(counts: number[], total: number): number[
     const raw = counts.map(c => (c / sum) * total);
     const alloc = raw.map(Math.floor);
     let remaining = total - alloc.reduce((acc, c) => acc + c, 0);
+    // tie-break: random when an RNG is supplied (sklearn randomizes remainder
+    // assignment per draw), else by index for determinism
+    const jitter = counts.map(() => (random ? random() : 0));
     const order = raw
         .map((r, i) => ({ frac: r - Math.floor(r), i }))
-        .sort((a, b) => b.frac - a.frac || a.i - b.i);
+        .sort((a, b) => b.frac - a.frac || jitter[a.i] - jitter[b.i] || a.i - b.i);
     for (const { i } of order) {
         if (remaining === 0) break;
         if (alloc[i] < counts[i]) {

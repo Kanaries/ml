@@ -29,6 +29,7 @@ function validateEntries(entries: ColumnTransformerEntry[]): void {
         }
         const [name, t, columns] = entry;
         if (names.has(name)) throw new Error(`Duplicate transformer name "${name}"`);
+        if (name.includes('__')) throw new Error(`Transformer name "${name}" must not contain "__"`);
         names.add(name);
         if (t !== 'passthrough' && t !== 'drop') {
             const cand = t as TransformerLike;
@@ -58,6 +59,7 @@ export class ColumnTransformer extends BaseEstimator {
     private transformers: ColumnTransformerEntry[];
     private remainder: 'drop' | 'passthrough';
     private remainderColumns: number[];
+    private nFeaturesIn: number;
     private fitted: boolean;
 
     constructor(props: ColumnTransformerProps) {
@@ -70,6 +72,7 @@ export class ColumnTransformer extends BaseEstimator {
         this.transformers = transformers.map(([n, t, c]) => [n, t, c.slice()]);
         this.remainder = remainder;
         this.remainderColumns = [];
+        this.nFeaturesIn = 0;
         this.fitted = false;
     }
 
@@ -119,6 +122,7 @@ export class ColumnTransformer extends BaseEstimator {
         for (const [, , columns] of this.transformers) {
             for (const c of columns) claimed.add(c);
         }
+        this.nFeaturesIn = X[0].length;
         this.remainderColumns = [];
         for (let c = 0; c < X[0].length; c++) {
             if (!claimed.has(c)) this.remainderColumns.push(c);
@@ -132,6 +136,9 @@ export class ColumnTransformer extends BaseEstimator {
 
     public transform(X: number[][]): number[][] {
         if (!this.fitted) throw new Error('ColumnTransformer must be fitted before transform()');
+        if (X.length > 0 && X[0].length !== this.nFeaturesIn) {
+            throw new Error(`X has ${X[0].length} features, but ColumnTransformer was fitted with ${this.nFeaturesIn}`);
+        }
         const blocks: number[][][] = [];
         for (const [, t, columns] of this.transformers) {
             if (t === 'drop') continue;

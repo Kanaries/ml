@@ -68,7 +68,7 @@ The gaps fall into four layers. Ordered by leverage, not by count:
 
 ## 3. Phased Plan
 
-### Phase 0 — Foundation reset (do before adding any new estimator)
+### Phase 0 — Foundation reset (✅ completed 2026-07-11, branch feat/estimator-contract)
 
 1. Land/merge the algorithm-remediation branch so new work builds on correct implementations.
 2. Define the estimator contract: `getParams`/`setParams`/`clone`, `predictProba`/`decisionFunction` where meaningful, `sampleWeight` in `fit`, and `toJSON`/`fromJSON` (versioned schema). Retrofit all ~60 estimators. Breaking API changes are acceptable (internal-usage only).
@@ -76,7 +76,7 @@ The gaps fall into four layers. Ordered by leverage, not by count:
 
 **Exit criteria**: every existing estimator passes conformance; any model can round-trip through JSON.
 
-### Phase 1 — Workflow completeness (make existing estimators usable end-to-end)
+### Phase 1 — Workflow completeness (✅ completed 2026-07-11, same branch)
 
 1. `Pipeline`, `ColumnTransformer`, `FeatureUnion` (built on the Phase 0 contract).
 2. Metrics fill-out (§2.3 list), `classificationReport`.
@@ -85,6 +85,7 @@ The gaps fall into four layers. Ordered by leverage, not by count:
 5. `datasets.make*` generators (unblocks docs, tests, and SEO example pages).
 
 **Exit criteria**: the canonical sklearn tutorial (load → split → pipeline(scale+model) → grid search → report) is reproducible 1:1 in JS.
+**Status**: exit criteria met — see `src/__test__/e2e.tutorial.test.ts`. Independent CodeX reviews ran per phase (`docs/reviews/`); all P0–P2 findings fixed. 1235 tests green.
 
 ### Phase 2 — High-demand estimators
 

@@ -10,6 +10,7 @@
  * function bodies so the circular re-export stays initialization-safe.
  */
 import { BaseEstimator, registerSerializableClass } from '../base/estimator';
+import { ClassifierBase } from '../base/classifier';
 import { createRandomGenerator } from './random';
 import {
     EstimatorLike,
@@ -22,7 +23,7 @@ import {
     StratifiedKFold,
     resolveScoring,
 } from './modelSelection';
-import { trainTestSplit } from './sampling';
+import { allocateProportionally, trainTestSplit } from './sampling';
 
 // sklearn keeps train_test_split in model_selection; ours lives in sampling.ts
 // (it predates this module) and is re-exported here for discoverability.
@@ -75,14 +76,20 @@ function resolveShuffleSizes(
         if (!Number.isFinite(testSize) || testSize <= 0) {
             throw new Error('testSize must be a positive finite number');
         }
-        nTest = testSize < 1 ? Math.ceil(sampleCount * testSize) : Math.floor(testSize);
+        if (testSize >= 1 && !Number.isInteger(testSize)) {
+            throw new Error('absolute testSize must be an integer');
+        }
+        nTest = testSize < 1 ? Math.ceil(sampleCount * testSize) : testSize;
     }
     let nTrain: number | undefined;
     if (trainSize !== undefined) {
         if (!Number.isFinite(trainSize) || trainSize <= 0) {
             throw new Error('trainSize must be a positive finite number');
         }
-        nTrain = trainSize < 1 ? Math.floor(sampleCount * trainSize) : Math.floor(trainSize);
+        if (trainSize >= 1 && !Number.isInteger(trainSize)) {
+            throw new Error('absolute trainSize must be an integer');
+        }
+        nTrain = trainSize < 1 ? Math.floor(sampleCount * trainSize) : trainSize;
     }
     if (nTest === undefined) {
         nTest = sampleCount - nTrain!;
@@ -95,34 +102,6 @@ function resolveShuffleSizes(
             `must fit in ${sampleCount} samples with at least 1 sample each`);
     }
     return { nTest, nTrain };
-}
-
-/** Largest-remainder proportional allocation capped at each category's count. */
-function allocateProportionally(counts: number[], total: number): number[] {
-    const sum = counts.reduce((acc, c) => acc + c, 0);
-    if (total > sum) {
-        throw new Error(`cannot allocate ${total} samples across categories holding only ${sum}`);
-    }
-    const raw = counts.map(c => (c / sum) * total);
-    const alloc = raw.map(Math.floor);
-    let remaining = total - alloc.reduce((acc, c) => acc + c, 0);
-    const order = raw
-        .map((r, i) => ({ frac: r - Math.floor(r), i }))
-        .sort((a, b) => b.frac - a.frac || a.i - b.i);
-    for (const { i } of order) {
-        if (remaining === 0) break;
-        if (alloc[i] < counts[i]) {
-            alloc[i]++;
-            remaining--;
-        }
-    }
-    for (let i = 0; remaining > 0 && i < counts.length; i++) {
-        if (alloc[i] < counts[i]) {
-            alloc[i]++;
-            remaining--;
-        }
-    }
-    return alloc;
 }
 
 function groupByLabel(y: any[]): Map<any, number[]> {
@@ -228,12 +207,13 @@ export class StratifiedShuffleSplit implements SplitterLike {
                 'increase testSize/trainSize or reduce the number of classes');
         }
 
-        const trainAlloc = allocateProportionally(counts, nTrain);
-        const testAlloc = allocateProportionally(counts.map((c, i) => c - trainAlloc[i]), nTest);
-
         const random = createRandomGenerator(this.randomState);
         const folds: FoldIndices[] = [];
         for (let s = 0; s < this.nSplits; s++) {
+            // reallocate per split with randomized tie-breaking so no class is
+            // systematically over-represented across folds (sklearn behavior)
+            const trainAlloc = allocateProportionally(counts, nTrain, random);
+            const testAlloc = allocateProportionally(counts.map((c, i) => c - trainAlloc[i]), nTest, random);
             const trainIndices: number[] = [];
             const testIndices: number[] = [];
             for (let c = 0; c < classIndices.length; c++) {
@@ -529,8 +509,31 @@ export interface CrossValidateResult {
     fitTimeMs: number[];
 }
 
-function resolveCv(cv?: number | SplitterLike): SplitterLike {
-    return typeof cv === 'number' ? new KFold({ nSplits: cv }) : (cv || new KFold());
+/**
+ * Classifier detection for default-CV stratification, sklearn-style. Covers
+ * direct classifiers and pipelines whose final step is a classifier (pipelines
+ * expose their steps through getParams, so no import cycle is needed).
+ */
+function isClassifierLike(estimator: BaseEstimator): boolean {
+    if (estimator instanceof ClassifierBase) return true;
+    const steps = (estimator.getParams() as { steps?: unknown }).steps;
+    if (Array.isArray(steps) && steps.length > 0) {
+        const last = steps[steps.length - 1];
+        return Array.isArray(last) && last[1] instanceof ClassifierBase;
+    }
+    return false;
+}
+
+/**
+ * Explicit splitters pass through; integer/undefined cv becomes
+ * StratifiedKFold for classifiers and KFold otherwise (sklearn semantics).
+ */
+function resolveCv(cv: number | SplitterLike | undefined, estimator?: BaseEstimator): SplitterLike {
+    if (cv !== undefined && typeof cv !== 'number') return cv;
+    const nSplits = typeof cv === 'number' ? cv : 5;
+    return estimator !== undefined && isClassifierLike(estimator)
+        ? new StratifiedKFold({ nSplits })
+        : new KFold({ nSplits });
 }
 
 /**
@@ -604,8 +607,8 @@ export function crossValidate(
         throw new Error('X and y must have the same length');
     }
 
-    const folds = resolveCv(options.cv).split(X, y, options.groups);
     const scorers = resolveMultiScoring(options.scoring);
+    const folds = resolveCv(options.cv, estimator).split(X, y, options.groups);
     const names = Object.keys(scorers);
     const returnTrainScore = options.returnTrainScore ?? false;
 
@@ -681,7 +684,7 @@ export function learningCurve(
         throw new Error('trainSizes must be a non-empty array');
     }
 
-    const folds = resolveCv(options.cv).split(X, y);
+    const folds = resolveCv(options.cv, estimator).split(X, y);
     const scoring = resolveScoring(options.scoring);
     const nMaxTraining = folds[0].trainIndices.length;
 
@@ -760,7 +763,7 @@ export function validationCurve(
         throw new Error('paramRange must be a non-empty array');
     }
 
-    const folds = resolveCv(options.cv).split(X, y);
+    const folds = resolveCv(options.cv, estimator).split(X, y);
     const scoring = resolveScoring(options.scoring);
     const trainScores: number[][] = paramRange.map(() => []);
     const testScores: number[][] = paramRange.map(() => []);

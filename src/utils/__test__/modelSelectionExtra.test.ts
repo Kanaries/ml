@@ -353,8 +353,9 @@ test('learningCurve returns monotone sizes and sizes x folds score matrices', ()
         scoring: 'accuracyScore',
     });
 
-    // default fractions of nMaxTraining=15: floor([1.5, 4.875, 8.25, 11.625, 15])
-    expect(result.trainSizesAbs).toEqual([1, 4, 8, 11, 15]);
+    // classifiers default to StratifiedKFold (sklearn semantics): fold 0's
+    // training part holds 14 samples -> floor([1.4, 4.55, 7.7, 10.85, 14])
+    expect(result.trainSizesAbs).toEqual([1, 4, 7, 10, 14]);
     for (let s = 1; s < result.trainSizesAbs.length; s++) {
         expect(result.trainSizesAbs[s]).toBeGreaterThan(result.trainSizesAbs[s - 1]);
     }
