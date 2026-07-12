@@ -20,6 +20,28 @@ export interface KernelConfig {
 
 const TAU = 1e-12;
 
+/**
+ * Resolve sklearn-style gamma: 'scale' = 1/(n_features * Var(X)) over ALL
+ * entries of X, 'auto' = 1/n_features, numbers pass through.
+ */
+export function resolveGammaValue(gamma: number | 'scale' | 'auto', X: number[][]): number {
+    if (typeof gamma === 'number') {
+        return gamma;
+    }
+    const nFeatures = X[0].length;
+    if (gamma === 'auto') {
+        return 1 / nFeatures;
+    }
+    let sum = 0;
+    let count = 0;
+    for (const row of X) for (const v of row) { sum += v; count++; }
+    const mean = sum / count;
+    let varSum = 0;
+    for (const row of X) for (const v of row) varSum += (v - mean) ** 2;
+    const variance = varSum / count;
+    return variance > 0 ? 1 / (nFeatures * variance) : 1;
+}
+
 export function kernelFunction(x1: number[], x2: number[], cfg: KernelConfig): number {
     if (cfg.kernel === 'rbf') {
         let sum = 0;
@@ -413,4 +435,362 @@ export function solveNuSVC(
         alphaOut[t] = alpha[t] * scale;
     }
     return { alpha: alphaOut, b: -rho * scale, iterations: iter, converged };
+}
+
+// ---------------------------------------------------------------------------
+// Generic solvers (libsvm Solver / Solver_NU with an arbitrary linear term,
+// initial point and upper bound) backing the SVR / nu-SVR / one-class duals.
+// solveCSVC / solveNuSVC above are intentionally left as-is.
+// ---------------------------------------------------------------------------
+
+interface GenericSolution {
+    alpha: Float64Array;
+    rho: number;
+    iterations: number;
+    converged: boolean;
+}
+
+/**
+ * libsvm Solver: min 1/2 a'Qa + p'a  s.t. 0 <= a_i <= C, y'a = 0, with
+ * Q_ij = y_i y_j K_ij. `getRow(i)` returns the i-th row of the *kernel*
+ * matrix (unsigned, length l). `alphaInit` must be feasible; the equality
+ * constraint value it fixes is preserved by every pairwise update.
+ */
+function solveGenericC(
+    l: number,
+    y: number[],
+    p: number[],
+    C: number,
+    getRow: (i: number) => Float64Array,
+    tol: number,
+    maxIter: number,
+    alphaInit?: Float64Array
+): GenericSolution {
+    const alpha = alphaInit ? alphaInit.slice() : new Float64Array(l);
+    const G = Float64Array.from(p);
+    if (alphaInit) {
+        for (let s = 0; s < l; s++) {
+            if (alpha[s] !== 0) {
+                const Ks = getRow(s);
+                const coef = y[s] * alpha[s];
+                for (let t = 0; t < l; t++) {
+                    G[t] += y[t] * coef * Ks[t];
+                }
+            }
+        }
+    }
+    const limit = resolveMaxIter(maxIter, l);
+    let iter = 0;
+    let converged = false;
+    while (iter < limit) {
+        // maximal violating pair, exactly as in solveCSVC
+        let i = -1;
+        let gMax = -Infinity;
+        let j = -1;
+        let gMin = Infinity;
+        for (let t = 0; t < l; t++) {
+            const v = -y[t] * G[t];
+            if (y[t] === 1 ? alpha[t] < C : alpha[t] > 0) {
+                if (v > gMax) {
+                    gMax = v;
+                    i = t;
+                }
+            }
+            if (y[t] === 1 ? alpha[t] > 0 : alpha[t] < C) {
+                if (v < gMin) {
+                    gMin = v;
+                    j = t;
+                }
+            }
+        }
+        if (i === -1 || j === -1 || gMax - gMin < tol) {
+            converged = true;
+            break;
+        }
+        const Ki = getRow(i);
+        const Kj = getRow(j);
+        const { dAi, dAj } = updatePair(alpha, y, i, j, Ki, Kj, G, C, C);
+        updateGradient(G, y, i, j, Ki, Kj, dAi, dAj);
+        iter++;
+    }
+    // libsvm Solver::calculate_rho
+    let ub = Infinity;
+    let lb = -Infinity;
+    let sumFree = 0;
+    let nFree = 0;
+    for (let t = 0; t < l; t++) {
+        const yG = y[t] * G[t];
+        if (alpha[t] >= C) {
+            if (y[t] === -1) {
+                ub = Math.min(ub, yG);
+            } else {
+                lb = Math.max(lb, yG);
+            }
+        } else if (alpha[t] <= 0) {
+            if (y[t] === 1) {
+                ub = Math.min(ub, yG);
+            } else {
+                lb = Math.max(lb, yG);
+            }
+        } else {
+            nFree++;
+            sumFree += yG;
+        }
+    }
+    const rho = nFree > 0 ? sumFree / nFree : (ub + lb) / 2;
+    return { alpha, rho, iterations: iter, converged };
+}
+
+/**
+ * libsvm Solver_NU: same problem as solveGenericC but with the two separate
+ * equality constraints sum_{y_i=+1} a_i = const and sum_{y_i=-1} a_i = const
+ * fixed by `alphaInit`. The working pair is always chosen within one class.
+ * Returns rho = (r1 - r2)/2 and r = (r1 + r2)/2 (libsvm's si->rho / si->r),
+ * unscaled — nu-SVC's 1/r normalization does not apply to nu-SVR.
+ */
+function solveGenericNu(
+    l: number,
+    y: number[],
+    p: number[],
+    C: number,
+    getRow: (i: number) => Float64Array,
+    tol: number,
+    maxIter: number,
+    alphaInit: Float64Array
+): GenericSolution & { r: number } {
+    const alpha = alphaInit.slice();
+    const G = Float64Array.from(p);
+    for (let s = 0; s < l; s++) {
+        if (alpha[s] !== 0) {
+            const Ks = getRow(s);
+            const coef = y[s] * alpha[s];
+            for (let t = 0; t < l; t++) {
+                G[t] += y[t] * coef * Ks[t];
+            }
+        }
+    }
+    const limit = resolveMaxIter(maxIter, l);
+    let iter = 0;
+    let converged = false;
+    while (iter < limit) {
+        // violating pair within each class, take the class with the larger gap
+        let gMaxP = -Infinity;
+        let gMaxP2 = -Infinity;
+        let ip = -1;
+        let jp = -1;
+        let gMaxN = -Infinity;
+        let gMaxN2 = -Infinity;
+        let iN = -1;
+        let jN = -1;
+        for (let t = 0; t < l; t++) {
+            if (y[t] === 1) {
+                if (alpha[t] < C && -G[t] > gMaxP) {
+                    gMaxP = -G[t];
+                    ip = t;
+                }
+                if (alpha[t] > 0 && G[t] > gMaxP2) {
+                    gMaxP2 = G[t];
+                    jp = t;
+                }
+            } else {
+                if (alpha[t] > 0 && G[t] > gMaxN) {
+                    gMaxN = G[t];
+                    iN = t;
+                }
+                if (alpha[t] < C && -G[t] > gMaxN2) {
+                    gMaxN2 = -G[t];
+                    jN = t;
+                }
+            }
+        }
+        const vioP = gMaxP + gMaxP2;
+        const vioN = gMaxN + gMaxN2;
+        if (Math.max(vioP, vioN) < tol) {
+            converged = true;
+            break;
+        }
+        const i = vioP > vioN ? ip : iN;
+        const j = vioP > vioN ? jp : jN;
+        const Ki = getRow(i);
+        const Kj = getRow(j);
+        const { dAi, dAj } = updatePair(alpha, y, i, j, Ki, Kj, G, C, C);
+        updateGradient(G, y, i, j, Ki, Kj, dAi, dAj);
+        iter++;
+    }
+    // libsvm Solver_NU::calculate_rho
+    let nFree1 = 0;
+    let sumFree1 = 0;
+    let ub1 = Infinity;
+    let lb1 = -Infinity;
+    let nFree2 = 0;
+    let sumFree2 = 0;
+    let ub2 = Infinity;
+    let lb2 = -Infinity;
+    for (let t = 0; t < l; t++) {
+        if (y[t] === 1) {
+            if (alpha[t] >= C) {
+                lb1 = Math.max(lb1, G[t]);
+            } else if (alpha[t] <= 0) {
+                ub1 = Math.min(ub1, G[t]);
+            } else {
+                nFree1++;
+                sumFree1 += G[t];
+            }
+        } else {
+            if (alpha[t] >= C) {
+                lb2 = Math.max(lb2, G[t]);
+            } else if (alpha[t] <= 0) {
+                ub2 = Math.min(ub2, G[t]);
+            } else {
+                nFree2++;
+                sumFree2 += G[t];
+            }
+        }
+    }
+    const r1 = nFree1 > 0 ? sumFree1 / nFree1 : (ub1 + lb1) / 2;
+    const r2 = nFree2 > 0 ? sumFree2 / nFree2 : (ub2 + lb2) / 2;
+    return { alpha, rho: (r1 - r2) / 2, r: (r1 + r2) / 2, iterations: iter, converged };
+}
+
+/**
+ * Row provider for the doubled SVR problem: index i of the 2n-variable
+ * problem maps to training sample i mod n, so row_i[t] = K(i mod n, t mod n).
+ * Rows for i and i+n are identical, so the cache is keyed by i mod n.
+ */
+function makeDoubledRows(K: KernelMatrix): (i: number) => Float64Array {
+    const n = K.n;
+    const cache = new Map<number, Float64Array>();
+    const maxRows = n <= 1024 ? n : Math.max(2, Math.floor((256 << 20) / 8 / (2 * n)));
+    return (i: number) => {
+        const base = i % n;
+        const hit = cache.get(base);
+        if (hit) {
+            return hit;
+        }
+        const row = K.getRow(base);
+        const ext = new Float64Array(2 * n);
+        ext.set(row, 0);
+        ext.set(row, n);
+        if (cache.size >= maxRows) {
+            const oldest = cache.keys().next().value as number;
+            cache.delete(oldest);
+        }
+        cache.set(base, ext);
+        return ext;
+    };
+}
+
+export interface SVRSolution {
+    /** signed dual coefficients beta_i = alpha_i - alpha*_i; f(x) = sum_i beta_i K(x_i, x) + b */
+    coef: number[];
+    b: number;
+    iterations: number;
+    converged: boolean;
+}
+
+/**
+ * epsilon-SVR dual (libsvm solve_epsilon_svr), as a 2n-variable C-problem:
+ * variables z = [alpha; alpha*], labels y2 = [+1...; -1...], linear term
+ * p_i = epsilon - y_i (alpha part) / epsilon + y_i (alpha* part),
+ * bounds 0 <= z <= C, constraint sum(alpha) - sum(alpha*) = 0.
+ */
+export function solveEpsilonSVR(
+    K: KernelMatrix,
+    y: number[],
+    C: number,
+    epsilon: number,
+    tol: number,
+    maxIter: number
+): SVRSolution {
+    const n = K.n;
+    const l = 2 * n;
+    const y2 = new Array<number>(l);
+    const p = new Array<number>(l);
+    for (let i = 0; i < n; i++) {
+        y2[i] = 1;
+        p[i] = epsilon - y[i];
+        y2[i + n] = -1;
+        p[i + n] = epsilon + y[i];
+    }
+    const sol = solveGenericC(l, y2, p, C, makeDoubledRows(K), tol, maxIter);
+    const coef = new Array<number>(n);
+    for (let i = 0; i < n; i++) {
+        coef[i] = sol.alpha[i] - sol.alpha[i + n];
+    }
+    return { coef, b: -sol.rho, iterations: sol.iterations, converged: sol.converged };
+}
+
+/**
+ * nu-SVR dual (libsvm solve_nu_svr): epsilon is replaced by the constraint
+ * sum(alpha) + sum(alpha*) <= C * nu * n, handled by starting at
+ * alpha_i = alpha*_i = min(remaining, C) with a total budget of C*nu*n/2 per
+ * side and letting Solver_NU keep both per-class sums fixed. The linear term
+ * is p_i = -y_i / +y_i. The effective tube width is epsilon = -r.
+ */
+export function solveNuSVR(
+    K: KernelMatrix,
+    y: number[],
+    C: number,
+    nu: number,
+    tol: number,
+    maxIter: number
+): SVRSolution & { epsilon: number } {
+    const n = K.n;
+    const l = 2 * n;
+    const y2 = new Array<number>(l);
+    const p = new Array<number>(l);
+    const alpha0 = new Float64Array(l);
+    let budget = (C * nu * n) / 2;
+    for (let i = 0; i < n; i++) {
+        const a = Math.min(budget, C);
+        alpha0[i] = a;
+        alpha0[i + n] = a;
+        budget -= a;
+        y2[i] = 1;
+        p[i] = -y[i];
+        y2[i + n] = -1;
+        p[i + n] = y[i];
+    }
+    const sol = solveGenericNu(l, y2, p, C, makeDoubledRows(K), tol, maxIter, alpha0);
+    const coef = new Array<number>(n);
+    for (let i = 0; i < n; i++) {
+        coef[i] = sol.alpha[i] - sol.alpha[i + n];
+    }
+    return { coef, b: -sol.rho, epsilon: -sol.r, iterations: sol.iterations, converged: sol.converged };
+}
+
+export interface OneClassSolution {
+    /** unsigned dual coefficients; decision f(x) = sum_i alpha_i K(x_i, x) - rho */
+    alpha: number[];
+    rho: number;
+    iterations: number;
+    converged: boolean;
+}
+
+/**
+ * One-class dual (Schölkopf, libsvm solve_one_class):
+ *   min 1/2 a'Ka  s.t.  0 <= a_i <= 1,  sum(a) = nu * n
+ * (libsvm's scaling of the 0 <= a <= 1/(nu*n), sum(a) = 1 formulation by
+ * nu*n — identical decision boundary, and matching sklearn's dual_coef_).
+ * The equality constraint is fixed by the feasible starting point.
+ */
+export function solveOneClass(
+    K: KernelMatrix,
+    nu: number,
+    tol: number,
+    maxIter: number
+): OneClassSolution {
+    const n = K.n;
+    const alpha0 = new Float64Array(n);
+    const nBound = Math.floor(nu * n);
+    for (let i = 0; i < nBound; i++) {
+        alpha0[i] = 1;
+    }
+    if (nBound < n) {
+        alpha0[nBound] = nu * n - nBound;
+    }
+    const y = new Array<number>(n).fill(1);
+    const p = new Array<number>(n).fill(0);
+    const sol = solveGenericC(n, y, p, 1, (i) => K.getRow(i), tol, maxIter, alpha0);
+    return { alpha: Array.from(sol.alpha), rho: sol.rho, iterations: sol.iterations, converged: sol.converged };
 }

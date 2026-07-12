@@ -4,6 +4,9 @@ import { DBScan } from '../dbscan';
 import { MeanShift } from '../meanShift';
 import { OPTICS } from '../optics';
 import { HDBScan } from '../hdbscan';
+import { AgglomerativeClustering } from '../agglomerativeClustering';
+import { SpectralClustering } from '../spectralClustering';
+import { MiniBatchKMeans } from '../miniBatchKMeans';
 
 runEstimatorConformance([
     {
@@ -36,6 +39,27 @@ runEstimatorConformance([
         kind: 'cluster',
         dataset: 'blobs',
         create: () => new HDBScan({ min_cluster_size: 5 }),
+    },
+    {
+        name: 'AgglomerativeClustering',
+        kind: 'cluster',
+        dataset: 'blobs',
+        // fully deterministic (no randomness anywhere)
+        create: () => new AgglomerativeClustering({ nClusters: 3, linkage: 'ward' }),
+    },
+    {
+        name: 'SpectralClustering',
+        kind: 'cluster',
+        dataset: 'blobs',
+        // blobs are >= 6.3 apart: with gamma=1 the between-blob rbf affinity
+        // is ~0, so the graph has 3 near-disconnected components
+        create: () => new SpectralClustering({ nClusters: 3, randomState: 42 }),
+    },
+    {
+        name: 'MiniBatchKMeans',
+        kind: 'cluster',
+        dataset: 'blobs',
+        create: () => new MiniBatchKMeans({ nClusters: 3, randomState: 42, batchSize: 16 }),
     },
 ]);
 

@@ -8,6 +8,9 @@ import { Ridge } from '../ridge';
 import { Lasso } from '../lasso';
 import { ElasticNet } from '../elasticNet';
 import { RidgeClassifier } from '../ridgeClassifier';
+import { SGDClassifier } from '../sgdClassifier';
+import { SGDRegressor } from '../sgdRegressor';
+import { Perceptron } from '../perceptron';
 
 runEstimatorConformance([
     {
@@ -63,5 +66,23 @@ runEstimatorConformance([
         kind: 'classifier',
         dataset: 'multiclass',
         create: () => new RidgeClassifier({ alpha: 1, fitIntercept: true }),
+    },
+    {
+        name: 'SGDClassifier',
+        kind: 'classifier',
+        dataset: 'multiclass',
+        create: () => new SGDClassifier({ loss: 'hinge', maxIter: 200, randomState: 42 }),
+    },
+    {
+        name: 'SGDRegressor',
+        kind: 'regressor',
+        dataset: 'regression',
+        create: () => new SGDRegressor({ maxIter: 200, randomState: 42 }),
+    },
+    {
+        name: 'Perceptron',
+        kind: 'classifier',
+        dataset: 'binary',
+        create: () => new Perceptron({ maxIter: 200, randomState: 42 }),
     },
 ]);

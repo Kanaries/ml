@@ -13,6 +13,13 @@ import * as Bayes from './bayes';
 import * as SemiSupervised from './semi_supervised';
 import * as NeuralNetwork from './neural_network';
 import * as Datasets from './datasets';
+import * as Mixture from './mixture';
+import * as DiscriminantAnalysis from './discriminant_analysis';
+import * as Multiclass from './multiclass';
+import * as MultiOutput from './multioutput';
+import * as Calibration from './calibration';
+import * as Isotonic from './isotonic';
+import * as Dummy from './dummy';
 import * as utils from './utils';
 import * as Base from './base';
 import * as MLPipeline from './pipeline';
@@ -42,5 +49,12 @@ export {
     SemiSupervised,
     NeuralNetwork,
     Datasets,
+    Mixture,
+    DiscriminantAnalysis,
+    Multiclass,
+    MultiOutput,
+    Calibration,
+    Isotonic,
+    Dummy,
     utils
 }

@@ -88,7 +88,7 @@ export class GaussianNB extends ClassifierBase {
         this.fitted = true;
     }
 
-    public predict(X: number[][]): number[] {
+    private jointLogLikelihood(X: number[][]): number[][] {
         if (!this.fitted) {
             throw new Error('GaussianNB must be fitted before calling predict');
         }
@@ -96,20 +96,34 @@ export class GaussianNB extends ClassifierBase {
         if (X[0].length !== this.theta[0].length) {
             throw new Error('input feature size does not match fitted model');
         }
+        return X.map(row => this.classes.map((_, classIndex) => {
+            let score = Math.log(this.classPrior[classIndex]);
+            for (let j = 0; j < row.length; j++) {
+                const variance = this.variances[classIndex][j];
+                const diff = row[j] - this.theta[classIndex][j];
+                score += -0.5 * Math.log(2 * Math.PI * variance);
+                score += -0.5 * (diff * diff) / variance;
+            }
+            return score;
+        }));
+    }
 
-        return X.map(row => {
-            const scores = this.classes.map((_, classIndex) => {
-                let score = Math.log(this.classPrior[classIndex]);
-                for (let j = 0; j < row.length; j++) {
-                    const variance = this.variances[classIndex][j];
-                    const diff = row[j] - this.theta[classIndex][j];
-                    score += -0.5 * Math.log(2 * Math.PI * variance);
-                    score += -0.5 * (diff * diff) / variance;
-                }
-                return score;
-            });
-            return this.classes[argmax(scores)];
+    public predict(X: number[][]): number[] {
+        return this.jointLogLikelihood(X).map(scores => this.classes[argmax(scores)]);
+    }
+
+    /** Class posteriors, columns ordered by sorted `classes` (sklearn's predict_proba). */
+    public predictProba(X: number[][]): number[][] {
+        return this.jointLogLikelihood(X).map(scores => {
+            const maxScore = Math.max(...scores);
+            const exp = scores.map(s => Math.exp(s - maxScore));
+            const total = exp.reduce((acc, v) => acc + v, 0);
+            return exp.map(v => v / total);
         });
+    }
+
+    public getClasses(): number[] {
+        return this.classes.slice();
     }
 }
 registerEstimator('GaussianNB', GaussianNB);

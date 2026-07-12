@@ -7,3 +7,6 @@ export { Ridge } from './ridge';
 export { Lasso } from './lasso';
 export { ElasticNet } from './elasticNet';
 export { RidgeClassifier } from './ridgeClassifier';
+export { SGDClassifier } from './sgdClassifier';
+export { SGDRegressor } from './sgdRegressor';
+export { Perceptron } from './perceptron';

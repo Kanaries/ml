@@ -1,6 +1,6 @@
 import { ClassifierBase } from '../base';
 import { Params, registerEstimator } from '../base/estimator';
-import { KernelConfig, KernelMatrix, KernelType, SMOSolution, kernelFunction, solveCSVC } from './smo';
+import { KernelConfig, KernelMatrix, KernelType, SMOSolution, kernelFunction, resolveGammaValue, solveCSVC } from './smo';
 
 export interface SVCProps {
     C?: number;
@@ -91,22 +91,7 @@ export class SVC extends ClassifierBase {
     }
 
     protected resolveGamma(X: number[][]): number {
-        if (typeof this.gamma === 'number') {
-            return this.gamma;
-        }
-        const nFeatures = X[0].length;
-        if (this.gamma === 'auto') {
-            return 1 / nFeatures;
-        }
-        // 'scale': 1 / (n_features * Var(X)) over ALL entries, like sklearn
-        let sum = 0;
-        let count = 0;
-        for (const row of X) for (const v of row) { sum += v; count++; }
-        const mean = sum / count;
-        let varSum = 0;
-        for (const row of X) for (const v of row) varSum += (v - mean) ** 2;
-        const variance = varSum / count;
-        return variance > 0 ? 1 / (nFeatures * variance) : 1;
+        return resolveGammaValue(this.gamma, X);
     }
 
     /** solve one binary subproblem; y entries are +1/-1. Overridden by NuSVC. */
