@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
 
@@ -87,6 +88,20 @@ export class GradientBoostingClassifier extends ClassifierBase {
         if (!Number.isInteger(this.minSamplesSplit) || this.minSamplesSplit < 2) {
             throw new Error('minSamplesSplit must be an integer >= 2');
         }
+    }
+
+    public getParams(): Params {
+        // canonical camelCase keys; the snake_case aliases remain accepted
+        // by the constructor
+        return {
+            nEstimators: this.nEstimators,
+            learningRate: this.learningRate,
+            maxDepth: this.maxDepth,
+            minSamplesSplit: this.minSamplesSplit,
+            subsample: this.subsample,
+            maxFeatures: this.maxFeatures,
+            randomState: this.randomState,
+        };
     }
 
     private sampleRows(n: number, size: number, random: () => number): number[] {
@@ -227,7 +242,18 @@ export class GradientBoostingClassifier extends ClassifierBase {
         }
     }
 
-    private decisionFunction(testX: number[][]): number[] {
+    /**
+     * Signed distance to the decision boundary: number[] for binary,
+     * number[][] (per-class margins) for multiclass.
+     */
+    public decisionFunction(testX: number[][]): number[] | number[][] {
+        if (!this.fitted) {
+            throw new Error('model is not fitted');
+        }
+        return this.classes.length === 2 ? this.decisionFunctionBinary(testX) : this.decisionFunctionMulti(testX);
+    }
+
+    private decisionFunctionBinary(testX: number[][]): number[] {
         const F = new Array(testX.length).fill(this.initF);
         for (const tree of this.estimators) {
             const pred = tree.predict(testX);
@@ -259,7 +285,7 @@ export class GradientBoostingClassifier extends ClassifierBase {
             throw new Error('model is not fitted');
         }
         if (this.classes.length === 2) {
-            return this.decisionFunction(testX).map(f => {
+            return this.decisionFunctionBinary(testX).map(f => {
                 const p = sigmoid(f);
                 return [1 - p, p];
             });
@@ -272,7 +298,7 @@ export class GradientBoostingClassifier extends ClassifierBase {
             throw new Error('model is not fitted');
         }
         if (this.classes.length === 2) {
-            return this.decisionFunction(testX).map(f => (f >= 0 ? this.classes[1] : this.classes[0]));
+            return this.decisionFunctionBinary(testX).map(f => (f >= 0 ? this.classes[1] : this.classes[0]));
         }
         return this.decisionFunctionMulti(testX).map(margins => {
             let best = 0;
@@ -283,3 +309,4 @@ export class GradientBoostingClassifier extends ClassifierBase {
         });
     }
 }
+registerEstimator('GradientBoostingClassifier', GradientBoostingClassifier);

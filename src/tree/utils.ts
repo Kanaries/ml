@@ -42,6 +42,21 @@ export function filterWithIndices<T = any>(arr: T[], condition: (v: T, i: number
     }
 }
 
+/**
+ * Define a function-valued working field (e.g. a seeded RNG) as a
+ * non-enumerable own property so it is skipped by the estimator-contract
+ * serializer (`toJSON` only walks enumerable own props). Later plain
+ * assignments to the field keep the non-enumerable flag.
+ */
+export function defineHiddenField(obj: object, key: string, value: unknown): void {
+    Object.defineProperty(obj, key, {
+        value,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+    });
+}
+
 export function getUniqueFreqs(arr: any[]): number[] {
     const freqMap: Map<any, number> = new Map();
     for (let item of arr) {

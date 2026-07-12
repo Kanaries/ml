@@ -1,15 +1,46 @@
 import { ClusterBase } from '../base/cluster';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
+
+export interface DBScanProps {
+    /** neighborhood radius */
+    eps?: number;
+    /** minimum neighborhood size (including the point itself) for a core point */
+    minSamples?: number;
+    /** distance metric name */
+    distanceType?: Distance.IDistanceType;
+}
 
 export class DBScan extends ClusterBase {
     private eps: number;
     private minSamples: number;
-    private distance: Distance.IDistance;
-    constructor(eps: number = 0.5, minSamples: number = 5, distanceType: Distance.IDistanceType = 'euclidean') {
+    private distanceType: Distance.IDistanceType;
+    constructor(props?: DBScanProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    constructor(eps?: number, minSamples?: number, distanceType?: Distance.IDistanceType);
+    constructor(arg0: DBScanProps | number = {}, minSamplesArg: number = 5, distanceTypeArg: Distance.IDistanceType = 'euclidean') {
         super();
+        const props: DBScanProps = typeof arg0 === 'number'
+            ? { eps: arg0, minSamples: minSamplesArg, distanceType: distanceTypeArg }
+            : arg0;
+        const { eps = 0.5, minSamples = 5, distanceType = 'euclidean' } = props;
         this.eps = eps;
         this.minSamples = minSamples;
-        this.distance = Distance.useDistance(distanceType);
+        this.distanceType = distanceType;
+        Distance.useDistance(distanceType); // validate the metric name eagerly
+    }
+
+    public getParams(): Params {
+        return {
+            eps: this.eps,
+            minSamples: this.minSamples,
+            distanceType: this.distanceType,
+        };
+    }
+
+    /** resolved lazily from the metric name so instances stay JSON-serializable */
+    private get distance(): Distance.IDistance {
+        return Distance.useDistance(this.distanceType);
     }
 
     public fitPredict(samplesX: number[][]): number[] {
@@ -53,11 +84,13 @@ export class DBScan extends ClusterBase {
 
     private regionQuery(samplesX: number[][], index: number): number[] {
         const neighbors: number[] = [];
+        const distance = this.distance;
         for (let i = 0; i < samplesX.length; i++) {
-            if (this.distance(samplesX[index], samplesX[i]) <= this.eps) {
+            if (distance(samplesX[index], samplesX[i]) <= this.eps) {
                 neighbors.push(i);
             }
         }
         return neighbors;
     }
 }
+registerEstimator('DBScan', DBScan);

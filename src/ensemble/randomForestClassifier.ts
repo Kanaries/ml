@@ -1,7 +1,9 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils';
 import { DecisionTreeClassifier, DecisionTreeProps } from '../tree';
 import { SubsetSizeOption } from '../utils/paramResolvers';
+import { definedProps } from './utils';
 
 export interface RandomForestClassifierProps extends DecisionTreeProps {
     nEstimators?: number;
@@ -26,9 +28,22 @@ export class RandomForestClassifier extends ClassifierBase {
         this.bootstrap = bootstrap;
         this.maxFeatures = maxFeatures;
         this.randomState = randomState;
-        this.treeProps = treeProps;
+        this.treeProps = definedProps(treeProps);
         this.estimators = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            nEstimators: this.nEstimators,
+            bootstrap: this.bootstrap,
+            maxFeatures: this.maxFeatures,
+            randomState: this.randomState,
+            max_depth: this.treeProps.max_depth,
+            min_samples_split: this.treeProps.min_samples_split,
+            criterion: this.treeProps.criterion,
+            max_features: this.treeProps.max_features,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -89,3 +104,4 @@ export class RandomForestClassifier extends ClassifierBase {
         });
     }
 }
+registerEstimator('RandomForestClassifier', RandomForestClassifier);

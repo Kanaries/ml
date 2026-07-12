@@ -12,9 +12,21 @@ import * as Manifold from './manifold';
 import * as Bayes from './bayes';
 import * as SemiSupervised from './semi_supervised';
 import * as NeuralNetwork from './neural_network';
+import * as Datasets from './datasets';
 import * as utils from './utils';
+import * as Base from './base';
+import * as MLPipeline from './pipeline';
+import { loadModel } from './base';
+import { Pipeline, makePipeline, FeatureUnion, ColumnTransformer } from './pipeline';
 
 export {
+    Base,
+    MLPipeline,
+    Pipeline,
+    makePipeline,
+    FeatureUnion,
+    ColumnTransformer,
+    loadModel,
     Tree,
     Neighbors,
     Ensemble,
@@ -29,5 +41,6 @@ export {
     Bayes,
     SemiSupervised,
     NeuralNetwork,
+    Datasets,
     utils
 }

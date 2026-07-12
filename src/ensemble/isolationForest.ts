@@ -1,6 +1,15 @@
 import { OutlierBase } from '../base/outlier';
+import { registerEstimator, Params } from '../base/estimator';
 import { Sampling, assert, createRandomGenerator } from '../utils';
+import { defineHiddenField } from '../tree/utils';
 import { EULER } from '../constants';
+
+export interface IsolationForestProps {
+    subsampling_size?: number;
+    tree_num?: number;
+    contamination?: 'auto' | number;
+    random_state?: number;
+}
 interface IITree {
     field: number;
     exNode: boolean;
@@ -23,16 +32,34 @@ export class IsolationForest extends OutlierBase {
     // score threshold fixed on the training data at fit time when
     // contamination is numeric (sklearn offset_ semantics)
     private offset: number;
-    public constructor (subsampling_size: number = 256, tree_num: number = 100, contamination: 'auto' | number = 'auto', random_state?: number) {
+    public constructor (props?: IsolationForestProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    public constructor (subsampling_size?: number, tree_num?: number, contamination?: 'auto' | number, random_state?: number);
+    public constructor (arg0: IsolationForestProps | number = {}, treeNumArg: number = 100, contaminationArg: 'auto' | number = 'auto', randomStateArg?: number) {
         super();
+        const props: IsolationForestProps = typeof arg0 === 'number'
+            ? { subsampling_size: arg0, tree_num: treeNumArg, contamination: contaminationArg, random_state: randomStateArg }
+            : arg0;
+        const { subsampling_size = 256, tree_num = 100, contamination = 'auto', random_state } = props;
         this.iforest = [];
         this.subsampling_size = subsampling_size;
         this.tree_num = tree_num;
         this.contamination = contamination;
         this.random_state = random_state;
-        this.rng = Math.random;
+        // hidden (non-enumerable) so serialization only sees plain data;
+        // fit() reseeds from random_state so refits reproduce
+        defineHiddenField(this, 'rng', Math.random);
         this.fitted_psi = 0;
         this.offset = 0.5;
+    }
+
+    public getParams(): Params {
+        return {
+            subsampling_size: this.subsampling_size,
+            tree_num: this.tree_num,
+            contamination: this.contamination,
+            random_state: this.random_state,
+        };
     }
     private iTree (samples: number[][], depth: number): IITree {
         if (samples.length <= 1 || depth >= this.max_depth) {
@@ -122,7 +149,7 @@ export class IsolationForest extends OutlierBase {
     public fit (samplesX: number[][]) {
         assert(samplesX.length > 0, 'isolation forest requires non-empty samples');
         this.iforest = [];
-        this.rng = createRandomGenerator(this.random_state);
+        defineHiddenField(this, 'rng', createRandomGenerator(this.random_state));
         const psi = Math.min(this.subsampling_size, samplesX.length);
         this.fitted_psi = psi;
         this.max_depth = Math.ceil(Math.log2(Math.max(psi, 2)));
@@ -148,3 +175,4 @@ export class IsolationForest extends OutlierBase {
         return result.map(r => r > this.offset ? 1 : 0);
     }
 }
+registerEstimator('IsolationForest', IsolationForest);

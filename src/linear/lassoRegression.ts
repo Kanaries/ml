@@ -1,3 +1,6 @@
+import { RegressorBase } from '../base/regressor';
+import { registerEstimator, Params } from '../base/estimator';
+
 function softThreshold(value: number, threshold: number): number {
     if (value > threshold) {
         return value - threshold;
@@ -15,7 +18,7 @@ export interface LassoRegressionProps {
     tol?: number;
 }
 
-export class LassoRegression {
+export class LassoRegression extends RegressorBase {
     private alpha: number;
     private fitIntercept: boolean;
     private maxIter: number;
@@ -25,6 +28,7 @@ export class LassoRegression {
     private fitted: boolean;
 
     public constructor(props: LassoRegressionProps = {}) {
+        super();
         const { alpha = 1, fitIntercept = true, maxIter = 1000, tol = 1e-6 } = props;
         if (!Number.isFinite(alpha) || alpha < 0) {
             throw new Error('alpha must be a finite number >= 0');
@@ -42,6 +46,15 @@ export class LassoRegression {
         this.coef = [];
         this.intercept = 0;
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            alpha: this.alpha,
+            fitIntercept: this.fitIntercept,
+            maxIter: this.maxIter,
+            tol: this.tol,
+        };
     }
 
     public fit(X: number[][], Y: number[]): void {
@@ -150,3 +163,4 @@ export class LassoRegression {
         });
     }
 }
+registerEstimator('LassoRegression', LassoRegression);

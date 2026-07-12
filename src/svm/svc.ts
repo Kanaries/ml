@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { Params, registerEstimator } from '../base/estimator';
 import { KernelConfig, KernelMatrix, KernelType, SMOSolution, kernelFunction, solveCSVC } from './smo';
 
 export interface SVCProps {
@@ -71,6 +72,18 @@ export class SVC extends ClassifierBase {
         this.trainY = [];
         this.classes = [];
         this.models = [];
+    }
+
+    public getParams(): Params {
+        return {
+            C: this.C,
+            kernel: this.kernel,
+            gamma: this.gamma,
+            degree: this.degree,
+            coef0: this.coef0,
+            tol: this.tol,
+            maxIter: this.maxIter,
+        };
     }
 
     protected kernelConfig(): KernelConfig {
@@ -223,3 +236,4 @@ export class SVC extends ClassifierBase {
         return this.classes.map(c => counts.get(c) || 0);
     }
 }
+registerEstimator('SVC', SVC);

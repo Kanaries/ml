@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { RidgeRegression, RidgeRegressionProps } from './ridgeRegression';
 
 function validateClassificationData(X: number[][], y: number[]): void {
@@ -35,6 +36,10 @@ export class RidgeClassifier extends ClassifierBase {
         this.models = [];
     }
 
+    public getParams(): Params {
+        return { alpha: this.alpha, fitIntercept: this.fitIntercept };
+    }
+
     public fit(trainX: number[][], trainY: number[]): void {
         validateClassificationData(trainX, trainY);
         this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
@@ -64,3 +69,4 @@ export class RidgeClassifier extends ClassifierBase {
         });
     }
 }
+registerEstimator('RidgeClassifier', RidgeClassifier);

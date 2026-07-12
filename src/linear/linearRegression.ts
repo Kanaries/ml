@@ -1,13 +1,23 @@
 import { lstsq } from '../algebra/lstsq';
+import { RegressorBase } from '../base/regressor';
+import { registerEstimator, Params } from '../base/estimator';
 
-export class LinearRegression {
+/** LinearRegression takes no parameters; the props object exists for contract uniformity. */
+export type LinearRegressionProps = Record<string, never>;
+
+export class LinearRegression extends RegressorBase {
     private coef: number[];
     private intercept: number;
     private fitted: boolean;
-    public constructor() {
+    public constructor(props: LinearRegressionProps = {}) {
+        super();
+        void props;
         this.coef = [];
         this.intercept = 0;
         this.fitted = false;
+    }
+    public getParams(): Params {
+        return {};
     }
     public fit(X: number[][], Y: number[]): void {
         if (X.length === 0 || Y.length === 0) {
@@ -51,3 +61,4 @@ export class LinearRegression {
         });
     }
 }
+registerEstimator('LinearRegression', LinearRegression);

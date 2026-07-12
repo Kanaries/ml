@@ -1,3 +1,6 @@
+import { BaseEstimator, TransformerBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
+
 export interface StandardScalerProps {
     withMean?: boolean;
     withStd?: boolean;
@@ -29,7 +32,12 @@ export type FeatureScoreFunc = (X: number[][], y: number[]) => number[];
 
 export interface SelectKBestProps {
     k?: number;
-    scoreFunc?: FeatureScoreFunc;
+    /**
+     * Either a scoring function or the string name of a built-in
+     * (e.g. 'fRegression'). Only string names are serializable; passing a raw
+     * function makes `toJSON()` throw (documented codec behavior).
+     */
+    scoreFunc?: FeatureScoreFunc | string;
 }
 
 export type CategoricalValue = string | number | boolean | null;
@@ -84,7 +92,7 @@ function assertSameFeatureCount(X: number[][], featureCount: number, message: st
     }
 }
 
-export class StandardScaler {
+export class StandardScaler extends TransformerBase {
     private withMean: boolean;
     private withStd: boolean;
     private means: number[];
@@ -92,12 +100,17 @@ export class StandardScaler {
     private fitted: boolean;
 
     constructor(props: StandardScalerProps = {}) {
+        super();
         const { withMean = true, withStd = true } = props;
         this.withMean = withMean;
         this.withStd = withStd;
         this.means = [];
         this.scales = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { withMean: this.withMean, withStd: this.withStd };
     }
 
     public fit(X: number[][]): void {
@@ -174,8 +187,9 @@ export class StandardScaler {
         );
     }
 }
+registerEstimator('StandardScaler', StandardScaler);
 
-export class MinMaxScaler {
+export class MinMaxScaler extends TransformerBase {
     private featureRange: [number, number];
     private dataMin: number[];
     private scales: number[];
@@ -183,15 +197,20 @@ export class MinMaxScaler {
     private fitted: boolean;
 
     constructor(props: MinMaxScalerProps = {}) {
+        super();
         const { featureRange = [0, 1] } = props;
         if (featureRange[0] >= featureRange[1]) {
             throw new Error('featureRange min must be less than max');
         }
-        this.featureRange = featureRange;
+        this.featureRange = [featureRange[0], featureRange[1]];
         this.dataMin = [];
         this.scales = [];
         this.offsets = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { featureRange: this.featureRange };
     }
 
     public fit(X: number[][]): void {
@@ -261,14 +280,20 @@ export class MinMaxScaler {
         );
     }
 }
+registerEstimator('MinMaxScaler', MinMaxScaler);
 
-export class MaxAbsScaler {
+export class MaxAbsScaler extends TransformerBase {
     private maxAbs: number[];
     private fitted: boolean;
 
-    constructor() {
+    constructor(_props: Record<string, never> = {}) {
+        super();
         this.maxAbs = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {};
     }
 
     public fit(X: number[][]): void {
@@ -306,12 +331,18 @@ export class MaxAbsScaler {
         return X.map(row => row.map((value, j) => value * this.maxAbs[j]));
     }
 }
+registerEstimator('MaxAbsScaler', MaxAbsScaler);
 
-export class Normalizer {
+export class Normalizer extends TransformerBase {
     private norm: 'l1' | 'l2' | 'max';
 
     constructor(props: NormalizerProps = {}) {
+        super();
         this.norm = props.norm || 'l2';
+    }
+
+    public getParams(): Params {
+        return { norm: this.norm };
     }
 
     public fit(_X: number[][]): void {}
@@ -339,10 +370,24 @@ export class Normalizer {
         return this.transform(X);
     }
 }
+registerEstimator('Normalizer', Normalizer);
 
-export class LabelEncoder {
+/**
+ * Operates on 1-D label arrays rather than X matrices, so it extends
+ * BaseEstimator directly (see the estimator contract, "estimators that fit
+ * none of these signatures").
+ */
+export class LabelEncoder extends BaseEstimator {
     private classes: number[] = [];
     private fitted = false;
+
+    constructor(_props: Record<string, never> = {}) {
+        super();
+    }
+
+    public getParams(): Params {
+        return {};
+    }
 
     public fit(y: number[]): void {
         if (y.length === 0) {
@@ -384,12 +429,18 @@ export class LabelEncoder {
         });
     }
 }
+registerEstimator('LabelEncoder', LabelEncoder);
 
-export class Binarizer {
+export class Binarizer extends TransformerBase {
     private threshold: number;
 
     constructor(props: BinarizerProps = {}) {
+        super();
         this.threshold = props.threshold ?? 0;
+    }
+
+    public getParams(): Params {
+        return { threshold: this.threshold };
     }
 
     public fit(_X: number[][]): void {}
@@ -404,14 +455,26 @@ export class Binarizer {
         return this.transform(X);
     }
 }
+registerEstimator('Binarizer', Binarizer);
 
-export class OrdinalEncoder {
+/**
+ * Operates on categorical matrices (`CategoricalValue[][]`) and its
+ * `inverseTransform` returns categorical values, so it cannot satisfy
+ * TransformerBase's numeric signatures; it extends BaseEstimator directly
+ * per the estimator contract.
+ */
+export class OrdinalEncoder extends BaseEstimator {
     private categories: CategoricalValue[][];
     private fitted: boolean;
 
-    constructor() {
+    constructor(_props: Record<string, never> = {}) {
+        super();
         this.categories = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {};
     }
 
     public fit(X: CategoricalValue[][]): void {
@@ -465,18 +528,28 @@ export class OrdinalEncoder {
         );
     }
 }
+registerEstimator('OrdinalEncoder', OrdinalEncoder);
 
-export class OneHotEncoder {
+/**
+ * Operates on categorical matrices; extends BaseEstimator directly for the
+ * same reason as OrdinalEncoder.
+ */
+export class OneHotEncoder extends BaseEstimator {
     private drop: 'none' | 'first' | 'ifBinary';
     private categories: CategoricalValue[][];
     private retainedCategories: CategoricalValue[][];
     private fitted: boolean;
 
     constructor(props: OneHotEncoderProps = {}) {
+        super();
         this.drop = props.drop ?? 'none';
         this.categories = [];
         this.retainedCategories = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { drop: this.drop };
     }
 
     private categoriesToEncode(values: CategoricalValue[]): CategoricalValue[] {
@@ -568,6 +641,7 @@ export class OneHotEncoder {
         });
     }
 }
+registerEstimator('OneHotEncoder', OneHotEncoder);
 
 function isMissingValue(value: number, missingValues: number | null): boolean {
     if (missingValues === null) {
@@ -600,7 +674,7 @@ function mostFrequent(values: number[]): number {
     return bestValue;
 }
 
-export class SimpleImputer {
+export class SimpleImputer extends TransformerBase {
     private strategy: 'mean' | 'median' | 'mostFrequent' | 'constant';
     private fillValue: number;
     private missingValues: number | null;
@@ -608,12 +682,21 @@ export class SimpleImputer {
     private fitted: boolean;
 
     constructor(props: SimpleImputerProps = {}) {
+        super();
         const { strategy = 'mean', fillValue = 0, missingValues = Number.NaN } = props;
         this.strategy = strategy;
         this.fillValue = fillValue;
         this.missingValues = missingValues;
         this.statistics = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            strategy: this.strategy,
+            fillValue: this.fillValue,
+            missingValues: this.missingValues,
+        };
     }
 
     public fit(X: number[][]): void {
@@ -663,16 +746,22 @@ export class SimpleImputer {
         return this.transform(X);
     }
 }
+registerEstimator('SimpleImputer', SimpleImputer);
 
-export class VarianceThreshold {
+export class VarianceThreshold extends TransformerBase {
     private threshold: number;
     private selectedIndices: number[];
     private fitted: boolean;
 
     constructor(props: VarianceThresholdProps = {}) {
+        super();
         this.threshold = props.threshold ?? 0;
         this.selectedIndices = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { threshold: this.threshold };
     }
 
     public fit(X: number[][]): void {
@@ -715,6 +804,7 @@ export class VarianceThreshold {
         return this.transform(X);
     }
 }
+registerEstimator('VarianceThreshold', VarianceThreshold);
 
 export function fRegression(X: number[][], y: number[]): number[] {
     validateMatrix(X);
@@ -754,17 +844,44 @@ export function fRegression(X: number[][], y: number[]): number[] {
     });
 }
 
-export class SelectKBest {
+/**
+ * Built-in score functions addressable by name in `SelectKBestProps.scoreFunc`
+ * so that fitted selectors remain serializable.
+ */
+const SCORE_FUNCS: Record<string, FeatureScoreFunc> = {
+    fRegression,
+};
+
+export class SelectKBest extends TransformerBase {
     private k: number;
-    private scoreFunc: FeatureScoreFunc;
+    private scoreFunc: FeatureScoreFunc | string;
     private selectedIndices: number[];
     private fitted: boolean;
 
     constructor(props: SelectKBestProps = {}) {
+        super();
         this.k = props.k ?? 10;
-        this.scoreFunc = props.scoreFunc || fRegression;
+        // stored as passed (string name or raw function); resolved lazily at
+        // fit time so string-configured instances stay serializable.
+        this.scoreFunc = props.scoreFunc ?? 'fRegression';
         this.selectedIndices = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { k: this.k, scoreFunc: this.scoreFunc };
+    }
+
+    private resolveScoreFunc(): FeatureScoreFunc {
+        if (typeof this.scoreFunc !== 'string') {
+            return this.scoreFunc;
+        }
+        const fn = SCORE_FUNCS[this.scoreFunc];
+        if (!fn) {
+            throw new Error(`Unknown score function "${this.scoreFunc}". ` +
+                `Built-ins: ${Object.keys(SCORE_FUNCS).join(', ')}.`);
+        }
+        return fn;
     }
 
     public fit(X: number[][], y: number[]): void {
@@ -776,7 +893,7 @@ export class SelectKBest {
         if (!Number.isInteger(this.k) || this.k <= 0 || this.k > nFeatures) {
             throw new Error('k must be an integer between 1 and the number of features');
         }
-        const scores = this.scoreFunc(X, y);
+        const scores = this.resolveScoreFunc()(X, y);
         if (scores.length !== nFeatures) {
             throw new Error('scoreFunc must return one score per feature');
         }
@@ -807,3 +924,10 @@ export class SelectKBest {
         return this.transform(X);
     }
 }
+registerEstimator('SelectKBest', SelectKBest);
+
+// Additional transformers (RobustScaler, PowerTransformer, QuantileTransformer,
+// PolynomialFeatures, KBinsDiscretizer, KNNImputer, LabelBinarizer,
+// FunctionTransformer, MissingIndicator) live in preprocessingExtra.ts and are
+// re-exported here so everything stays importable from this module.
+export * from './preprocessingExtra';

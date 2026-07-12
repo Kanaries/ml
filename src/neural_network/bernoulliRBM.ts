@@ -1,3 +1,6 @@
+import { TransformerBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
+
 export interface BernoulliRBMOptions {
     nComponents?: number;
     learningRate?: number;
@@ -10,41 +13,61 @@ function logistic(x: number): number {
     return 1 / (1 + Math.exp(-x));
 }
 
-function createRandomGenerator(seed?: number): () => number {
+/** Initial Park–Miller LCG state for a seed; `null` means unseeded (Math.random). */
+function initialRngState(seed?: number): number | null {
     if (seed === undefined) {
-        return Math.random;
+        return null;
     }
     let state = Math.floor(seed) % 2147483647;
     if (state <= 0) {
         state += 2147483646;
     }
-    return () => {
-        state = (state * 16807) % 2147483647;
-        return (state - 1) / 2147483646;
-    };
+    return state;
 }
 
 function sampleBernoulli(probs: number[], random: () => number): number[] {
     return probs.map(p => (random() < p ? 1 : 0));
 }
 
-export class BernoulliRBM {
+export class BernoulliRBM extends TransformerBase {
     private nComponents: number;
     private learningRate: number;
     private batchSize: number;
     private nIter: number;
-    private random: () => number;
+    private randomState?: number;
+    /** Serializable RNG state (Park–Miller LCG); `null` when unseeded. */
+    private rngState: number | null;
 
     private components: number[][] = [];
     private interceptHidden: number[] = [];
     private interceptVisible: number[] = [];
 
     constructor(options: BernoulliRBMOptions = {}) {
+        super();
         this.nComponents = options.nComponents ?? 256;
         this.learningRate = options.learningRate ?? 0.1;
         this.batchSize = options.batchSize ?? 10;
         this.nIter = options.nIter ?? 10;
-        this.random = createRandomGenerator(options.randomState);
+        this.randomState = options.randomState;
+        this.rngState = initialRngState(options.randomState);
+    }
+
+    public getParams(): Params {
+        return {
+            nComponents: this.nComponents,
+            learningRate: this.learningRate,
+            batchSize: this.batchSize,
+            nIter: this.nIter,
+            randomState: this.randomState,
+        };
+    }
+
+    private nextRandom(): number {
+        if (this.rngState === null) {
+            return Math.random();
+        }
+        this.rngState = (this.rngState * 16807) % 2147483647;
+        return (this.rngState - 1) / 2147483646;
     }
 
     private initParams(nFeatures: number): void {
@@ -52,7 +75,7 @@ export class BernoulliRBM {
         for (let j = 0; j < this.nComponents; j++) {
             const row: number[] = [];
             for (let i = 0; i < nFeatures; i++) {
-                row.push((this.random() - 0.5) * 0.1);
+                row.push((this.nextRandom() - 0.5) * 0.1);
             }
             this.components.push(row);
         }
@@ -97,9 +120,9 @@ export class BernoulliRBM {
         for (let s = 0; s < bSize; s++) {
             const v0 = batch[s];
             const h0Prob = this.hiddenProb(v0);
-            const h0 = sampleBernoulli(h0Prob, this.random);
+            const h0 = sampleBernoulli(h0Prob, () => this.nextRandom());
             const v1Prob = this.visibleProb(h0);
-            const v1 = sampleBernoulli(v1Prob, this.random);
+            const v1 = sampleBernoulli(v1Prob, () => this.nextRandom());
             const h1Prob = this.hiddenProb(v1);
 
             for (let j = 0; j < this.nComponents; j++) {
@@ -158,9 +181,10 @@ export class BernoulliRBM {
 
     public gibbs(V: number[][]): number[][] {
         return V.map(v => {
-            const h = sampleBernoulli(this.hiddenProb(v), this.random);
-            const v1 = sampleBernoulli(this.visibleProb(h), this.random);
+            const h = sampleBernoulli(this.hiddenProb(v), () => this.nextRandom());
+            const v1 = sampleBernoulli(this.visibleProb(h), () => this.nextRandom());
             return v1;
         });
     }
 }
+registerEstimator('BernoulliRBM', BernoulliRBM);

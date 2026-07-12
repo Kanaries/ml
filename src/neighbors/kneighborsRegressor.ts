@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 import { getNeighborHits, resolveDistanceWeights, validateFitData, validatePredictData, weightedAverage } from './utils';
 
@@ -8,7 +10,7 @@ export interface KNeighborsRegressorProps {
     p?: number;
 }
 
-export class KNeighborsRegressor {
+export class KNeighborsRegressor extends RegressorBase {
     private nNeighbors: number;
     private weights: 'uniform' | 'distance';
     private metric: Distance.IDistanceType;
@@ -17,15 +19,16 @@ export class KNeighborsRegressor {
     private trainY: number[];
     private fitted: boolean;
 
-    constructor();
+    constructor(props?: KNeighborsRegressorProps);
+    /** @deprecated positional form; prefer the props-object constructor */
     constructor(nNeighbors: number, weights?: 'uniform' | 'distance', metric?: Distance.IDistanceType, p?: number);
-    constructor(props: KNeighborsRegressorProps);
     constructor(
         propsOrNeighbors: KNeighborsRegressorProps | number = {},
         weightsArg: 'uniform' | 'distance' = 'uniform',
         metricArg: Distance.IDistanceType = 'euclidean',
         pArg: number = 2,
     ) {
+        super();
         const props = typeof propsOrNeighbors === 'number'
             ? { nNeighbors: propsOrNeighbors, weights: weightsArg, metric: metricArg, p: pArg }
             : propsOrNeighbors;
@@ -40,6 +43,15 @@ export class KNeighborsRegressor {
         this.trainX = [];
         this.trainY = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            nNeighbors: this.nNeighbors,
+            weights: this.weights,
+            metric: this.metric,
+            p: this.p,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -65,3 +77,4 @@ export class KNeighborsRegressor {
         });
     }
 }
+registerEstimator('KNeighborsRegressor', KNeighborsRegressor);

@@ -3,10 +3,12 @@
  * 某一个维度可能个别成员作为单独的分割，其他则作为一个整体，这是直接写离散型分割比较难实现的。
  * 2. 多分割本质上可以被二分替代，所以没必要去做更复杂的多分割，目前也没有依据二者表现会有显著的差别。这样我们就可以直接使用二叉树来做。
  */
+import { ClassifierBase } from "../base";
+import { registerEstimator, Params } from "../base/estimator";
 import { assert, createRandomGenerator } from "../utils";
 import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { entropy, gini, mode } from "../utils/stat";
-import { getUniqueFreqs, valuesAllSame } from "./utils";
+import { defineHiddenField, getUniqueFreqs, valuesAllSame } from "./utils";
 export type IFeatureSplitType = 'continuous' | 'discrete';
 export interface ISlice {
     X: number[][];
@@ -28,17 +30,17 @@ export interface DecisionTreeProps {
     randomState?: number;
 }
 
-export class DecisionTreeClassifier {
+export class DecisionTreeClassifier extends ClassifierBase {
     private dtree: IDTree | null;
     private max_depth: number;
     private feature_number: number;
     private min_samples_split: number;
     private criterion: 'entropy' | 'gini' = 'entropy';
-    private impurity: (freqs: number[]) => number;
     private max_features?: SubsetSizeOption;
     private randomState?: number;
     private random: () => number;
     public constructor(props: DecisionTreeProps = {}) {
+        super();
         const { max_depth = Infinity, criterion = 'entropy', min_samples_split = 2, max_features, randomState } = props;
         this.dtree = null;
         this.max_depth = max_depth;
@@ -47,12 +49,23 @@ export class DecisionTreeClassifier {
         this.min_samples_split = min_samples_split;
         this.max_features = max_features;
         this.randomState = randomState;
-        this.random = createRandomGenerator(this.randomState);
-        if (criterion === 'entropy') {
-            this.impurity = entropy;
-        } else {
-            this.impurity = gini;
-        }
+        // hidden (non-enumerable) so serialization only sees plain data
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
+    }
+
+    public getParams(): Params {
+        return {
+            max_depth: this.max_depth,
+            min_samples_split: this.min_samples_split,
+            criterion: this.criterion,
+            max_features: this.max_features,
+            randomState: this.randomState,
+        };
+    }
+
+    /** Impurity of a class-frequency vector, resolved from `criterion`. */
+    private impurity(freqs: number[]): number {
+        return this.criterion === 'gini' ? gini(freqs) : entropy(freqs);
     }
 
     private selectedFeatureIndices(): number[] {
@@ -174,7 +187,7 @@ export class DecisionTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = createRandomGenerator(this.randomState);
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
         this.dtree = {
             nodeValue: 0,
@@ -199,3 +212,4 @@ export class DecisionTreeClassifier {
         }
     }
 }
+registerEstimator('DecisionTreeClassifier', DecisionTreeClassifier);

@@ -1,3 +1,5 @@
+import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 import { getRadiusHits, resolveDistanceWeights, validateFitData, validatePredictData, weightedMode } from './utils';
 
@@ -9,7 +11,7 @@ export interface RadiusNeighborsClassifierProps {
     outlierLabel?: number | null;
 }
 
-export class RadiusNeighborsClassifier {
+export class RadiusNeighborsClassifier extends ClassifierBase {
     private radius: number;
     private weights: 'uniform' | 'distance';
     private metric: Distance.IDistanceType;
@@ -20,6 +22,7 @@ export class RadiusNeighborsClassifier {
     private outlierLabel: number | null;
 
     constructor(props: RadiusNeighborsClassifierProps = {}) {
+        super();
         const { radius = 1, weights = 'uniform', metric = 'euclidean', p = 2, outlierLabel = null } = props;
         if (!Number.isFinite(radius) || radius < 0) {
             throw new Error('radius must be a finite number >= 0');
@@ -32,6 +35,16 @@ export class RadiusNeighborsClassifier {
         this.trainX = [];
         this.trainY = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            radius: this.radius,
+            weights: this.weights,
+            metric: this.metric,
+            p: this.p,
+            outlierLabel: this.outlierLabel,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -64,3 +77,4 @@ export class RadiusNeighborsClassifier {
         });
     }
 }
+registerEstimator('RadiusNeighborsClassifier', RadiusNeighborsClassifier);

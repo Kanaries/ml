@@ -1,4 +1,5 @@
 import { ClusterBase } from '../base/cluster';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 
 export interface OPTICSOptions {
@@ -11,8 +12,9 @@ export interface OPTICSOptions {
 
 export class OPTICS extends ClusterBase {
     private minSamples: number;
-    private maxEps: number;
-    private distance: Distance.IDistance;
+    /** raw prop value; undefined means "default to eps" (resolved at fit time) */
+    private maxEps: number | undefined;
+    private metric: Distance.IDistanceType;
     private p: number;
     private eps: number;
     private reachability: number[] = [];
@@ -24,9 +26,25 @@ export class OPTICS extends ClusterBase {
         const { min_samples = 5, max_eps, metric = 'euclidean', p = 2, eps = 0.5 } = options;
         this.minSamples = min_samples;
         this.eps = eps;
-        this.maxEps = max_eps !== undefined ? max_eps : eps;
-        this.distance = Distance.useDistance(metric);
+        this.maxEps = max_eps;
+        this.metric = metric;
         this.p = p;
+        Distance.useDistance(metric); // validate the metric name eagerly
+    }
+
+    public getParams(): Params {
+        return {
+            min_samples: this.minSamples,
+            max_eps: this.maxEps,
+            metric: this.metric,
+            p: this.p,
+            eps: this.eps,
+        };
+    }
+
+    /** resolved lazily from the metric name so instances stay JSON-serializable */
+    private get distance(): Distance.IDistance {
+        return Distance.useDistance(this.metric);
     }
 
     public fitPredict(samplesX: number[][]): number[] {
@@ -35,11 +53,12 @@ export class OPTICS extends ClusterBase {
         this.coreDistances = new Array(n).fill(Infinity);
         this.ordering = [];
 
+        const distance = this.distance;
         const distanceMatrix: number[][] = [];
         for (let i = 0; i < n; i++) {
             distanceMatrix[i] = [];
             for (let j = 0; j < n; j++) {
-                distanceMatrix[i][j] = this.distance(samplesX[i], samplesX[j], this.p);
+                distanceMatrix[i][j] = distance(samplesX[i], samplesX[j], this.p);
             }
         }
 
@@ -111,11 +130,12 @@ export class OPTICS extends ClusterBase {
     private regionQuery(point: number, distanceMatrix: number[][]): number[] {
         const neighbors: number[] = [];
         for (let i = 0; i < distanceMatrix.length; i++) {
-            if (distanceMatrix[point][i] <= this.maxEps) {
+            if (distanceMatrix[point][i] <= (this.maxEps ?? this.eps)) {
                 neighbors.push(i);
             }
         }
         return neighbors;
     }
 }
+registerEstimator('OPTICS', OPTICS);
 

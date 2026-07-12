@@ -1,4 +1,5 @@
-import { accuracyScore } from '../metrics';
+import { accuracyScore, f1Score, meanSquaredError, r2Score } from '../metrics';
+import { BaseEstimator, registerEstimator, registerSerializableClass, Params } from '../base/estimator';
 import { createRandomGenerator } from './random';
 
 export interface KFoldProps {
@@ -24,27 +25,77 @@ export interface CrossValScoreOptions {
 }
 
 export interface SplitterLike {
-    split(X: any[], y?: any[]): FoldIndices[];
+    /**
+     * `groups` is only consumed by group-aware splitters (e.g. `GroupKFold`);
+     * all other splitters ignore it.
+     */
+    split(X: any[], y?: any[], groups?: any[]): FoldIndices[];
 }
 
 export interface SearchEstimatorFactory {
     (params: Record<string, any>): EstimatorLike;
 }
 
+export type ScoringFunction = (actual: number[], expected: number[]) => number;
+
+/** A contract-following estimator usable as a search prototype. */
+export type SearchEstimator = BaseEstimator & EstimatorLike;
+
+/**
+ * Built-in scoring functions addressable by name in the `scoring` param so
+ * that search meta-estimators remain serializable. All are
+ * higher-is-better (losses are negated).
+ */
+export const SCORING_FUNCS: Record<string, ScoringFunction> = {
+    accuracyScore: (actual, expected) => accuracyScore(actual, expected),
+    f1Score: (actual, expected) => f1Score(actual, expected),
+    r2Score: (actual, expected) => r2Score(actual, expected),
+    negMeanSquaredError: (actual, expected) => -meanSquaredError(actual, expected),
+};
+
+export function resolveScoring(scoring: ScoringFunction | string | undefined): ScoringFunction | undefined {
+    if (scoring === undefined) {
+        return undefined;
+    }
+    if (typeof scoring === 'function') {
+        return scoring;
+    }
+    const fn = SCORING_FUNCS[scoring];
+    if (!fn) {
+        throw new Error(`Unknown scoring "${scoring}". ` +
+            `Built-ins: ${Object.keys(SCORING_FUNCS).join(', ')}.`);
+    }
+    return fn;
+}
+
 export interface GridSearchCVProps {
-    estimatorFactory: SearchEstimatorFactory;
+    /**
+     * Prototype estimator; each candidate is `estimator.clone().setParams(p)`.
+     * Serializable (the estimator is stored as a registered class instance).
+     * Exactly one of `estimator` / `estimatorFactory` must be provided.
+     */
+    estimator?: SearchEstimator;
+    /** Factory building an estimator from params. NOT serializable. */
+    estimatorFactory?: SearchEstimatorFactory;
     paramGrid: Record<string, any[]>;
     cv?: number | SplitterLike;
-    scoring?: (actual: number[], expected: number[]) => number;
+    /**
+     * Either a scoring function or the string name of a built-in
+     * (e.g. 'accuracyScore'). Only string names are serializable.
+     */
+    scoring?: ScoringFunction | string;
     refit?: boolean;
 }
 
 export interface RandomizedSearchCVProps {
-    estimatorFactory: SearchEstimatorFactory;
+    /** See GridSearchCVProps.estimator. */
+    estimator?: SearchEstimator;
+    /** See GridSearchCVProps.estimatorFactory. */
+    estimatorFactory?: SearchEstimatorFactory;
     paramDistributions: Record<string, any[]>;
     nIter: number;
     cv?: number | SplitterLike;
-    scoring?: (actual: number[], expected: number[]) => number;
+    scoring?: ScoringFunction | string;
     randomState?: number;
     refit?: boolean;
 }
@@ -95,12 +146,12 @@ function parameterCombinations(grid: Record<string, any[]>): Record<string, any>
 }
 
 function evaluateEstimator(
-    estimatorFactory: SearchEstimatorFactory,
+    build: (params: Record<string, any>) => EstimatorLike,
     params: Record<string, any>,
     X: number[][],
     y: number[],
     cv?: number | SplitterLike,
-    scoring?: (actual: number[], expected: number[]) => number,
+    scoring?: ScoringFunction,
 ): number {
     const splitter = resolveSplitter(cv);
     const folds = splitter.split(X, y);
@@ -109,7 +160,7 @@ function evaluateEstimator(
         const trainY = fold.trainIndices.map(i => y[i]);
         const testX = fold.testIndices.map(i => X[i]);
         const testY = fold.testIndices.map(i => y[i]);
-        const estimator = estimatorFactory(params);
+        const estimator = build(params);
         estimator.fit(trainX, trainY);
         if (scoring) {
             return scoring(estimator.predict(testX), testY);
@@ -170,6 +221,9 @@ export class KFold {
         return folds;
     }
 }
+// splitters are NOT estimators, but instances may be stored in a search's
+// `cv` param, so they must be serializable.
+registerSerializableClass('utils.KFold', KFold);
 
 export class StratifiedKFold implements SplitterLike {
     private nSplits: number;
@@ -231,18 +285,34 @@ export class StratifiedKFold implements SplitterLike {
         });
     }
 }
+registerSerializableClass('utils.StratifiedKFold', StratifiedKFold);
 
-export class GridSearchCV {
-    private estimatorFactory: SearchEstimatorFactory;
+function validateSearchSource(props: { estimator?: SearchEstimator; estimatorFactory?: SearchEstimatorFactory }): void {
+    if ((props.estimator === undefined) === (props.estimatorFactory === undefined)) {
+        throw new Error('Provide exactly one of "estimator" (a contract estimator, serializable) ' +
+            'or "estimatorFactory" (a params => estimator function, not serializable)');
+    }
+    if (props.estimator !== undefined && !(props.estimator instanceof BaseEstimator)) {
+        throw new Error('"estimator" must be a BaseEstimator instance; ' +
+            'for arbitrary objects use "estimatorFactory"');
+    }
+}
+
+export class GridSearchCV extends BaseEstimator {
+    private estimator?: SearchEstimator;
+    private estimatorFactory?: SearchEstimatorFactory;
     private paramGrid: Record<string, any[]>;
     private cv?: number | SplitterLike;
-    private scoring?: (actual: number[], expected: number[]) => number;
+    private scoring?: ScoringFunction | string;
     private refit: boolean;
     public bestParams: Record<string, any> | null;
     public bestScore: number;
     public bestEstimator: EstimatorLike | null;
 
     constructor(props: GridSearchCVProps) {
+        super();
+        validateSearchSource(props);
+        this.estimator = props.estimator;
         this.estimatorFactory = props.estimatorFactory;
         this.paramGrid = props.paramGrid;
         this.cv = props.cv;
@@ -251,6 +321,24 @@ export class GridSearchCV {
         this.bestParams = null;
         this.bestScore = Number.NEGATIVE_INFINITY;
         this.bestEstimator = null;
+    }
+
+    public getParams(): Params {
+        return {
+            estimator: this.estimator,
+            estimatorFactory: this.estimatorFactory,
+            paramGrid: this.paramGrid,
+            cv: this.cv,
+            scoring: this.scoring,
+            refit: this.refit,
+        };
+    }
+
+    private buildEstimator(params: Record<string, any>): EstimatorLike {
+        if (this.estimatorFactory) {
+            return this.estimatorFactory(params);
+        }
+        return this.estimator!.clone().setParams(params);
     }
 
     public fit(X: number[][], y: number[]): void {
@@ -262,12 +350,13 @@ export class GridSearchCV {
         }
 
         const combinations = parameterCombinations(this.paramGrid);
+        const scoring = resolveScoring(this.scoring);
         this.bestParams = null;
         this.bestScore = Number.NEGATIVE_INFINITY;
         this.bestEstimator = null;
 
         for (const params of combinations) {
-            const score = evaluateEstimator(this.estimatorFactory, params, X, y, this.cv, this.scoring);
+            const score = evaluateEstimator(p => this.buildEstimator(p), params, X, y, this.cv, scoring);
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestParams = { ...params };
@@ -275,7 +364,7 @@ export class GridSearchCV {
         }
 
         if (this.refit && this.bestParams) {
-            this.bestEstimator = this.estimatorFactory(this.bestParams);
+            this.bestEstimator = this.buildEstimator(this.bestParams);
             this.bestEstimator.fit(X, y);
         }
     }
@@ -291,8 +380,9 @@ export class GridSearchCV {
         if (!this.bestEstimator) {
             throw new Error('search must be fitted before calling score');
         }
-        if (this.scoring) {
-            return this.scoring(this.bestEstimator.predict(X), y);
+        const scoring = resolveScoring(this.scoring);
+        if (scoring) {
+            return scoring(this.bestEstimator.predict(X), y);
         }
         if (typeof this.bestEstimator.score === 'function') {
             return this.bestEstimator.score(X, y);
@@ -300,13 +390,15 @@ export class GridSearchCV {
         return accuracyScore(this.bestEstimator.predict(X), y);
     }
 }
+registerEstimator('GridSearchCV', GridSearchCV);
 
-export class RandomizedSearchCV {
-    private estimatorFactory: SearchEstimatorFactory;
+export class RandomizedSearchCV extends BaseEstimator {
+    private estimator?: SearchEstimator;
+    private estimatorFactory?: SearchEstimatorFactory;
     private paramDistributions: Record<string, any[]>;
     private nIter: number;
     private cv?: number | SplitterLike;
-    private scoring?: (actual: number[], expected: number[]) => number;
+    private scoring?: ScoringFunction | string;
     private randomState?: number;
     private refit: boolean;
     public bestParams: Record<string, any> | null;
@@ -314,9 +406,12 @@ export class RandomizedSearchCV {
     public bestEstimator: EstimatorLike | null;
 
     constructor(props: RandomizedSearchCVProps) {
+        super();
         if (!Number.isInteger(props.nIter) || props.nIter <= 0) {
             throw new Error('nIter must be an integer > 0');
         }
+        validateSearchSource(props);
+        this.estimator = props.estimator;
         this.estimatorFactory = props.estimatorFactory;
         this.paramDistributions = props.paramDistributions;
         this.nIter = props.nIter;
@@ -329,6 +424,26 @@ export class RandomizedSearchCV {
         this.bestEstimator = null;
     }
 
+    public getParams(): Params {
+        return {
+            estimator: this.estimator,
+            estimatorFactory: this.estimatorFactory,
+            paramDistributions: this.paramDistributions,
+            nIter: this.nIter,
+            cv: this.cv,
+            scoring: this.scoring,
+            randomState: this.randomState,
+            refit: this.refit,
+        };
+    }
+
+    private buildEstimator(params: Record<string, any>): EstimatorLike {
+        if (this.estimatorFactory) {
+            return this.estimatorFactory(params);
+        }
+        return this.estimator!.clone().setParams(params);
+    }
+
     public fit(X: number[][], y: number[]): void {
         if (X.length === 0 || y.length === 0) {
             throw new Error('X and y must be non-empty');
@@ -338,6 +453,7 @@ export class RandomizedSearchCV {
         }
 
         const combinations = parameterCombinations(this.paramDistributions);
+        const scoring = resolveScoring(this.scoring);
         const random = createRandomGenerator(this.randomState);
         const order = shuffledIndices(combinations.length, random).slice(0, Math.min(this.nIter, combinations.length));
         this.bestParams = null;
@@ -346,7 +462,7 @@ export class RandomizedSearchCV {
 
         for (const index of order) {
             const params = combinations[index];
-            const score = evaluateEstimator(this.estimatorFactory, params, X, y, this.cv, this.scoring);
+            const score = evaluateEstimator(p => this.buildEstimator(p), params, X, y, this.cv, scoring);
             if (score > this.bestScore) {
                 this.bestScore = score;
                 this.bestParams = { ...params };
@@ -354,7 +470,7 @@ export class RandomizedSearchCV {
         }
 
         if (this.refit && this.bestParams) {
-            this.bestEstimator = this.estimatorFactory(this.bestParams);
+            this.bestEstimator = this.buildEstimator(this.bestParams);
             this.bestEstimator.fit(X, y);
         }
     }
@@ -370,8 +486,9 @@ export class RandomizedSearchCV {
         if (!this.bestEstimator) {
             throw new Error('search must be fitted before calling score');
         }
-        if (this.scoring) {
-            return this.scoring(this.bestEstimator.predict(X), y);
+        const scoring = resolveScoring(this.scoring);
+        if (scoring) {
+            return scoring(this.bestEstimator.predict(X), y);
         }
         if (typeof this.bestEstimator.score === 'function') {
             return this.bestEstimator.score(X, y);
@@ -379,6 +496,7 @@ export class RandomizedSearchCV {
         return accuracyScore(this.bestEstimator.predict(X), y);
     }
 }
+registerEstimator('RandomizedSearchCV', RandomizedSearchCV);
 
 export function crossValScore(
     estimatorFactory: () => EstimatorLike,
@@ -424,3 +542,9 @@ export function crossValScore(
 
     return scores;
 }
+
+// Extended model-selection API (extra splitters, crossValidate, learning /
+// validation curves). Kept in a separate module for readability; re-exported
+// here (at the end of the file, so the classes above are initialized first)
+// to preserve a single import surface.
+export * from './modelSelectionExtra';

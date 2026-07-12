@@ -1,7 +1,9 @@
+import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { assert, createRandomGenerator } from '../utils';
 import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { entropy, gini, mode } from '../utils/stat';
-import { filterWithIndices, valuesAllSame, getUniqueFreqs } from './utils';
+import { defineHiddenField, filterWithIndices, valuesAllSame, getUniqueFreqs } from './utils';
 import type { IDTree } from './decisionTreeClassifier';
 
 export interface ExtraTreeProps {
@@ -12,19 +14,19 @@ export interface ExtraTreeProps {
     randomState?: number;
 }
 
-export class ExtraTreeClassifier {
+export class ExtraTreeClassifier extends ClassifierBase {
     private dtree: IDTree | null = null;
     private max_depth: number;
     private feature_number = 0;
     private min_samples_split: number;
     private criterion: 'entropy' | 'gini';
-    private impurity: (freqs: number[]) => number;
     private max_features_prop?: SubsetSizeOption;
     private max_features_: number;
     private randomState?: number;
     private random: () => number;
 
     public constructor(props: ExtraTreeProps = {}) {
+        super();
         const {
             max_depth = Infinity,
             min_samples_split = 2,
@@ -36,10 +38,25 @@ export class ExtraTreeClassifier {
         this.min_samples_split = min_samples_split;
         this.criterion = criterion;
         this.max_features_prop = max_features;
-        this.impurity = criterion === 'entropy' ? entropy : gini;
         this.max_features_ = 0;
         this.randomState = randomState;
-        this.random = createRandomGenerator(this.randomState);
+        // hidden (non-enumerable) so serialization only sees plain data
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
+    }
+
+    public getParams(): Params {
+        return {
+            max_depth: this.max_depth,
+            min_samples_split: this.min_samples_split,
+            criterion: this.criterion,
+            max_features: this.max_features_prop,
+            randomState: this.randomState,
+        };
+    }
+
+    /** Impurity of a class-frequency vector, resolved from `criterion`. */
+    private impurity(freqs: number[]): number {
+        return this.criterion === 'gini' ? gini(freqs) : entropy(freqs);
     }
 
     private nodeImpurity(sampleY: number[]): number {
@@ -138,7 +155,7 @@ export class ExtraTreeClassifier {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = createRandomGenerator(this.randomState);
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
         // sklearn's ExtraTreeClassifier defaults max_features to 'sqrt'
         this.max_features_ = resolveSubsetSize(this.max_features_prop ?? 'sqrt', this.feature_number);
@@ -167,3 +184,4 @@ export class ExtraTreeClassifier {
         return sampleX.map(x => this.findSample(x, this.dtree));
     }
 }
+registerEstimator('ExtraTreeClassifier', ExtraTreeClassifier);

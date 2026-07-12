@@ -1,3 +1,4 @@
+import { BaseEstimator, registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface TSNEOptions {
@@ -8,7 +9,8 @@ export interface TSNEOptions {
     randomState?: number;
 }
 
-export class TSNE {
+// embedding-only estimator (no out-of-sample transform): extends BaseEstimator
+export class TSNE extends BaseEstimator {
     private nComponents: number;
     private perplexity: number;
     private learningRate: number;
@@ -17,11 +19,22 @@ export class TSNE {
     private embedding: number[][] = [];
 
     constructor(options: TSNEOptions = {}) {
+        super();
         this.nComponents = options.nComponents ?? 2;
         this.perplexity = options.perplexity ?? 30;
         this.learningRate = options.learningRate ?? 200;
         this.nIter = options.nIter ?? 250;
         this.randomState = options.randomState;
+    }
+
+    public getParams(): Params {
+        return {
+            nComponents: this.nComponents,
+            perplexity: this.perplexity,
+            learningRate: this.learningRate,
+            nIter: this.nIter,
+            randomState: this.randomState,
+        };
     }
 
     private static squaredDistance(a: number[], b: number[]): number {
@@ -184,3 +197,4 @@ export class TSNE {
         return this.embedding;
     }
 }
+registerEstimator('TSNE', TSNE);

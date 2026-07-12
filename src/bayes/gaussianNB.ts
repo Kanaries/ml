@@ -1,3 +1,5 @@
+import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { argmax, ensureClassPrior, sortedUniqueLabels, validateMatrix, validateXY } from './utils';
 
 export interface GaussianNBProps {
@@ -5,7 +7,7 @@ export interface GaussianNBProps {
     varSmoothing?: number;
 }
 
-export class GaussianNB {
+export class GaussianNB extends ClassifierBase {
     private priors: number[] | null;
     private varSmoothing: number;
     private classes: number[] = [];
@@ -16,6 +18,7 @@ export class GaussianNB {
     private fitted = false;
 
     constructor(props: GaussianNBProps = {}) {
+        super();
         const { priors = null, varSmoothing = 1e-9 } = props;
         if (!Number.isFinite(varSmoothing) || varSmoothing < 0) {
             throw new Error('varSmoothing must be a finite number >= 0');
@@ -25,6 +28,10 @@ export class GaussianNB {
         }
         this.priors = priors;
         this.varSmoothing = varSmoothing;
+    }
+
+    public getParams(): Params {
+        return { priors: this.priors, varSmoothing: this.varSmoothing };
     }
 
     public fit(X: number[][], y: number[]): void {
@@ -105,3 +112,4 @@ export class GaussianNB {
         });
     }
 }
+registerEstimator('GaussianNB', GaussianNB);

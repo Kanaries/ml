@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { argMax, knnKernel, multiply, rbfKernel, rowNormalize, transpose } from './utils';
 
 export type KernelType = 'rbf' | 'knn' | ((X: number[][], Y: number[][]) => number[][]);
@@ -35,6 +36,17 @@ export class LabelSpreading extends ClassifierBase {
         this.alpha = alpha;
         this.maxIter = maxIter;
         this.tol = tol;
+    }
+
+    public getParams(): Params {
+        return {
+            kernel: this.kernel,
+            gamma: this.gamma,
+            nNeighbors: this.nNeighbors,
+            alpha: this.alpha,
+            maxIter: this.maxIter,
+            tol: this.tol,
+        };
     }
 
     private getKernel(): (X: number[][], Y: number[][]) => number[][] {
@@ -128,3 +140,4 @@ export class LabelSpreading extends ClassifierBase {
         return this.nIter;
     }
 }
+registerEstimator('LabelSpreading', LabelSpreading);

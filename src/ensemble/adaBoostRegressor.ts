@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { DecisionTreeRegressor } from '../tree/decisionTreeRegressor';
 import { createRandomGenerator } from '../utils';
 
@@ -34,7 +36,7 @@ export interface AdaBoostRegressorProps {
  * AdaBoost.R2 (Drucker, 1997), matching sklearn's AdaBoostRegressor with
  * linear loss: weighted resampling per round, weighted-median prediction.
  */
-export class AdaBoostRegressor {
+export class AdaBoostRegressor extends RegressorBase {
     private estimator: DecisionTreeRegressor;
     private n_estimators: number;
     private learning_rate: number;
@@ -43,6 +45,7 @@ export class AdaBoostRegressor {
     private estimator_weights: number[] = [];
 
     constructor(props: AdaBoostRegressorProps = {}) {
+        super();
         const estimator = props.estimator ?? new DecisionTreeRegressor({ max_depth: 3 });
         const n_estimators = props.n_estimators ?? props.nEstimators ?? 50;
         const learning_rate = props.learning_rate ?? props.learningRate ?? 1.0;
@@ -50,6 +53,18 @@ export class AdaBoostRegressor {
         this.n_estimators = n_estimators;
         this.learning_rate = learning_rate;
         this.randomState = props.randomState ?? props.random_state;
+    }
+
+    public getParams(): Params {
+        // canonical keys follow the constructor's preference order; the
+        // nested estimator instance is returned as-is (clone() and the
+        // serialization codec handle BaseEstimator values natively)
+        return {
+            estimator: this.estimator,
+            n_estimators: this.n_estimators,
+            learning_rate: this.learning_rate,
+            randomState: this.randomState,
+        };
     }
 
     public fit(X: number[][], y: number[]): void {
@@ -134,3 +149,4 @@ export class AdaBoostRegressor {
         });
     }
 }
+registerEstimator('AdaBoostRegressor', AdaBoostRegressor);

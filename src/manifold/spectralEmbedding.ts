@@ -1,3 +1,4 @@
+import { BaseEstimator, registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface SpectralEmbeddingProps {
@@ -6,18 +7,28 @@ export interface SpectralEmbeddingProps {
     randomState?: number;
 }
 
-export class SpectralEmbedding {
+// embedding-only estimator (no out-of-sample transform): extends BaseEstimator
+export class SpectralEmbedding extends BaseEstimator {
     private nComponents: number;
     private nNeighbors: number;
     private randomState?: number;
     private embedding: number[][];
 
     constructor(props: SpectralEmbeddingProps = {}) {
+        super();
         const { nComponents = 2, nNeighbors = 10, randomState } = props;
         this.nComponents = nComponents;
         this.nNeighbors = nNeighbors;
         this.randomState = randomState;
         this.embedding = [];
+    }
+
+    public getParams(): Params {
+        return {
+            nComponents: this.nComponents,
+            nNeighbors: this.nNeighbors,
+            randomState: this.randomState,
+        };
     }
 
     private static dot(a: number[], b: number[]): number {
@@ -149,3 +160,4 @@ export class SpectralEmbedding {
         return this.embedding;
     }
 }
+registerEstimator('SpectralEmbedding', SpectralEmbedding);

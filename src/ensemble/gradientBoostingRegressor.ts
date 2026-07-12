@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
 import { mean } from '../utils/stat';
@@ -26,7 +28,7 @@ export interface GradientBoostingRegressorProps {
  * replacement per round (stochastic gradient boosting); trees are still
  * used to update F over all samples.
  */
-export class GradientBoostingRegressor {
+export class GradientBoostingRegressor extends RegressorBase {
     private nEstimators: number;
     private learningRate: number;
     private maxDepth: number;
@@ -39,6 +41,7 @@ export class GradientBoostingRegressor {
     private fitted: boolean;
 
     constructor(props: GradientBoostingRegressorProps = {}) {
+        super();
         this.nEstimators = props.nEstimators ?? props.n_estimators ?? 100;
         this.learningRate = props.learningRate ?? props.learning_rate ?? 0.1;
         this.maxDepth = props.maxDepth ?? props.max_depth ?? 3;
@@ -64,6 +67,20 @@ export class GradientBoostingRegressor {
         if (!Number.isInteger(this.minSamplesSplit) || this.minSamplesSplit < 2) {
             throw new Error('minSamplesSplit must be an integer >= 2');
         }
+    }
+
+    public getParams(): Params {
+        // canonical camelCase keys; the snake_case aliases remain accepted
+        // by the constructor
+        return {
+            nEstimators: this.nEstimators,
+            learningRate: this.learningRate,
+            maxDepth: this.maxDepth,
+            minSamplesSplit: this.minSamplesSplit,
+            subsample: this.subsample,
+            maxFeatures: this.maxFeatures,
+            randomState: this.randomState,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -123,3 +140,4 @@ export class GradientBoostingRegressor {
         return result;
     }
 }
+registerEstimator('GradientBoostingRegressor', GradientBoostingRegressor);

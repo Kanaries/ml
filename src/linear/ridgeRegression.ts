@@ -1,17 +1,20 @@
 import { lstsq } from '../algebra/lstsq';
+import { RegressorBase } from '../base/regressor';
+import { registerEstimator, Params } from '../base/estimator';
 
 export interface RidgeRegressionProps {
     alpha?: number;
     fitIntercept?: boolean;
 }
 
-export class RidgeRegression {
+export class RidgeRegression extends RegressorBase {
     private alpha: number;
     private fitIntercept: boolean;
     private coef: number[];
     private intercept: number;
 
     public constructor(props: RidgeRegressionProps = {}) {
+        super();
         const { alpha = 1, fitIntercept = true } = props;
         if (!Number.isFinite(alpha) || alpha < 0) {
             throw new Error('alpha must be a finite number >= 0');
@@ -20,6 +23,10 @@ export class RidgeRegression {
         this.fitIntercept = fitIntercept;
         this.coef = [];
         this.intercept = 0;
+    }
+
+    public getParams(): Params {
+        return { alpha: this.alpha, fitIntercept: this.fitIntercept };
     }
 
     public fit(X: number[][], Y: number[]): void {
@@ -90,3 +97,4 @@ export class RidgeRegression {
         });
     }
 }
+registerEstimator('RidgeRegression', RidgeRegression);

@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { Params, registerEstimator } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface LinearSVRProps {
@@ -15,10 +17,12 @@ export interface LinearSVRProps {
  * lambda/2 ||w||^2 + (1/n) sum max(0, |w.x + b - y| - epsilon), where
  * lambda = 1/(n*C) so the C semantics match sklearn's LinearSVR.
  */
-export class LinearSVR {
+export class LinearSVR extends RegressorBase {
     private epsilon: number;
     private C: number;
     private maxIter: number;
+    /** @deprecated kept only so params round-trip; the Pegasos schedule ignores it */
+    private learningRate?: number;
     private tol: number;
     private randomState?: number;
     private weights: number[];
@@ -26,18 +30,31 @@ export class LinearSVR {
     private fitted: boolean;
 
     constructor(props: LinearSVRProps = {}) {
-        const { epsilon = 0, C = 1, maxIter = 1000, tol = 1e-4, randomState } = props;
+        super();
+        const { epsilon = 0, C = 1, maxIter = 1000, learningRate, tol = 1e-4, randomState } = props;
         if (!Number.isFinite(C) || C <= 0) {
             throw new Error('C must be a finite number > 0');
         }
         this.epsilon = epsilon;
         this.C = C;
         this.maxIter = maxIter;
+        this.learningRate = learningRate;
         this.tol = tol;
         this.randomState = randomState;
         this.weights = [];
         this.bias = 0;
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            epsilon: this.epsilon,
+            C: this.C,
+            maxIter: this.maxIter,
+            learningRate: this.learningRate,
+            tol: this.tol,
+            randomState: this.randomState,
+        };
     }
 
     private objective(X: number[][], Y: number[], lambda: number): number {
@@ -127,3 +144,4 @@ export class LinearSVR {
         return results;
     }
 }
+registerEstimator('LinearSVR', LinearSVR);

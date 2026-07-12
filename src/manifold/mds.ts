@@ -1,3 +1,4 @@
+import { BaseEstimator, registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface MDSOptions {
@@ -6,18 +7,28 @@ export interface MDSOptions {
     randomState?: number;
 }
 
-export class MDS {
+// embedding-only estimator (no out-of-sample transform): extends BaseEstimator
+export class MDS extends BaseEstimator {
     private nComponents: number;
     private dissimilarity: 'euclidean' | 'precomputed';
     private randomState?: number;
     private embedding: number[][];
 
     constructor(options: MDSOptions = {}) {
+        super();
         const { nComponents = 2, dissimilarity = 'euclidean', randomState } = options;
         this.nComponents = nComponents;
         this.dissimilarity = dissimilarity;
         this.randomState = randomState;
         this.embedding = [];
+    }
+
+    public getParams(): Params {
+        return {
+            nComponents: this.nComponents,
+            dissimilarity: this.dissimilarity,
+            randomState: this.randomState,
+        };
     }
 
     private static pairwiseDist(X: number[][]): number[][] {
@@ -146,3 +157,4 @@ export class MDS {
         return this.embedding;
     }
 }
+registerEstimator('MDS', MDS);

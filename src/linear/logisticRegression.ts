@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 
 function sigmoid(z: number): number {
     return 1 / (1 + Math.exp(-z));
@@ -26,6 +27,10 @@ export class LogisticRegression extends ClassifierBase {
         this.bias = 0;
         this.classes = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { learningRate: this.learningRate, maxIter: this.maxIter };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -89,3 +94,4 @@ export class LogisticRegression extends ClassifierBase {
         return this.classes.slice();
     }
 }
+registerEstimator('LogisticRegression', LogisticRegression);

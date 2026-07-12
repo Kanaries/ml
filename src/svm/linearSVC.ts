@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { Params, registerEstimator } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface LinearSVCProps {
@@ -22,6 +23,8 @@ export interface LinearSVCProps {
 export class LinearSVC extends ClassifierBase {
     private C: number;
     private maxIter: number;
+    /** @deprecated kept only so params round-trip; the Pegasos schedule ignores it */
+    private learningRate?: number;
     private tol: number;
     private randomState?: number;
     private classes: number[];
@@ -30,17 +33,28 @@ export class LinearSVC extends ClassifierBase {
 
     constructor(props: LinearSVCProps = {}) {
         super();
-        const { C = 1, maxIter = 1000, tol = 1e-4, randomState } = props;
+        const { C = 1, maxIter = 1000, learningRate, tol = 1e-4, randomState } = props;
         if (!Number.isFinite(C) || C <= 0) {
             throw new Error('C must be a finite number > 0');
         }
         this.C = C;
         this.maxIter = maxIter;
+        this.learningRate = learningRate;
         this.tol = tol;
         this.randomState = randomState;
         this.classes = [];
         this.weights = [];
         this.biases = [];
+    }
+
+    public getParams(): Params {
+        return {
+            C: this.C,
+            maxIter: this.maxIter,
+            learningRate: this.learningRate,
+            tol: this.tol,
+            randomState: this.randomState,
+        };
     }
 
     private objective(X: number[][], y: number[], w: number[], b: number, lambda: number): number {
@@ -167,3 +181,4 @@ export class LinearSVC extends ClassifierBase {
         return results;
     }
 }
+registerEstimator('LinearSVC', LinearSVC);

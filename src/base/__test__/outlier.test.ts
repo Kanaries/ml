@@ -2,6 +2,9 @@ import { OutlierBase } from '../outlier';
 import { IsolationForest } from '../../ensemble';
 
 class DummyOutlier extends OutlierBase {
+    public getParams(): Record<string, unknown> {
+        return {};
+    }
     public fit(): void {}
     public predict(samplesX: number[][]): number[] {
         return samplesX.map(() => 1);

@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 
 export interface BernoulliNBProps {
     alpha?: number;
@@ -27,6 +28,15 @@ export class BernoulliNB extends ClassifierBase {
         this.binarize = binarize;
         this.fitPrior = fitPrior;
         this.classPrior = classPrior;
+    }
+
+    public getParams(): Params {
+        return {
+            alpha: this.alpha,
+            binarize: this.binarize,
+            fitPrior: this.fitPrior,
+            classPrior: this.classPrior,
+        };
     }
 
     private binarizeX(X: number[][]): number[][] {
@@ -118,3 +128,4 @@ export class BernoulliNB extends ClassifierBase {
         return preds;
     }
 }
+registerEstimator('BernoulliNB', BernoulliNB);
