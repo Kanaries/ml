@@ -139,7 +139,7 @@ export class ExtraTreeRegressor extends RegressorBase {
 
     public fit(sampleX: number[][], sampleY: number[]): void {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = createRandomGenerator(this.randomState);
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
         this.regTree = this.initTreeNode(sampleY);
         this.buildTree(this.regTree, sampleX, sampleY, 0);

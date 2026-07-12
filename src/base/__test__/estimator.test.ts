@@ -71,6 +71,30 @@ describe('tagged JSON codec', () => {
         class Unregistered { x = 1; }
         expect(() => encodeValue(new Unregistered())).toThrow(/registerSerializableClass/);
     });
+
+    it('round-trips NaN/Infinity inside typed arrays', () => {
+        const value = Float64Array.of(NaN, Infinity, -Infinity, 1.5);
+        const revived = decodeValue(JSON.parse(JSON.stringify(encodeValue(value)))) as Float64Array;
+        expect(revived).toBeInstanceOf(Float64Array);
+        expect(Number.isNaN(revived[0])).toBe(true);
+        expect(revived[1]).toBe(Infinity);
+        expect(revived[2]).toBe(-Infinity);
+        expect(revived[3]).toBe(1.5);
+    });
+
+    it('preserves negative zero through JSON text', () => {
+        const revived = decodeValue(JSON.parse(JSON.stringify(encodeValue({ z: -0 })))) as { z: number };
+        expect(Object.is(revived.z, -0)).toBe(true);
+    });
+
+    it('rejects prototype-polluting keys in crafted payloads', () => {
+        // JSON.parse creates __proto__ as an own key; decoding must refuse it
+        const polluted = JSON.parse('{"a": 1, "__proto__": {"hacked": true}}');
+        expect(() => decodeValue(polluted)).toThrow(/unsafe property key/);
+        const viaObjTag = { $obj: [['__proto__', { hacked: true }]] };
+        expect(() => decodeValue(viaObjTag)).toThrow(/unsafe property key/);
+        expect(({} as Record<string, unknown>).hacked).toBeUndefined();
+    });
 });
 
 interface DummyProps { alpha?: number; beta?: string }
@@ -146,6 +170,50 @@ describe('BaseEstimator contract', () => {
         class Other extends DummyEstimator {}
         registerEstimator('test.Other', Other);
         expect(() => Other.fromJSON(new DummyEstimator().toJSON())).toThrow(/not a Other/);
+    });
+
+    it('rejects prototype-polluting keys in model state', () => {
+        const est = new DummyEstimator();
+        est.fit([1]);
+        const json = JSON.parse(JSON.stringify(est));
+        const evil = JSON.parse('{"__proto__": {"hacked": true}}');
+        expect(() => loadModel({ ...json, state: evil })).toThrow(/unsafe property key/);
+        expect((new DummyEstimator() as unknown as Record<string, unknown>).hacked).toBeUndefined();
+    });
+
+    it('rejects inherited object keys in setParams', () => {
+        const est = new DummyEstimator();
+        expect(() => est.setParams({ constructor: 1 } as never)).toThrow(/Invalid parameter/);
+        expect(() => est.setParams({ toString: 1 } as never)).toThrow(/Invalid parameter/);
+    });
+
+    it('nested estimators serialize as full envelopes and revive functional', () => {
+        class Meta extends BaseEstimator {
+            public inner: DummyEstimator;
+            public bag: Map<string, DummyEstimator>;
+            constructor(props: { inner?: DummyEstimator } = {}) {
+                super();
+                this.inner = props.inner ?? new DummyEstimator();
+                this.bag = new Map([['a', new DummyEstimator({ alpha: 5 })]]);
+            }
+            public getParams(): Params {
+                return { inner: this.inner };
+            }
+        }
+        registerEstimator('test.Meta', Meta);
+        const meta = new Meta({ inner: new DummyEstimator({ alpha: 3 }) });
+        meta.inner.fit([2]);
+        const revived = loadModel(JSON.stringify(meta)) as Meta;
+        expect(revived.inner).toBeInstanceOf(DummyEstimator);
+        expect(revived.inner.getCoef()).toEqual([6]);
+        // revived nested estimators must be able to refit (ctor ran)
+        revived.inner.fit([10]);
+        expect(revived.inner.getCoef()).toEqual([30]);
+        expect(revived.bag.get('a')).toBeInstanceOf(DummyEstimator);
+        // clone deep-clones estimators inside Maps too
+        const copy = meta.clone();
+        expect(copy.inner).not.toBe(meta.inner);
+        expect(copy.inner.getParams()).toEqual(meta.inner.getParams());
     });
 
     it('loadModel rejects foreign payloads and unknown estimators', () => {

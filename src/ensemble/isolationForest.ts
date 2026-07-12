@@ -149,7 +149,7 @@ export class IsolationForest extends OutlierBase {
     public fit (samplesX: number[][]) {
         assert(samplesX.length > 0, 'isolation forest requires non-empty samples');
         this.iforest = [];
-        this.rng = createRandomGenerator(this.random_state);
+        defineHiddenField(this, 'rng', createRandomGenerator(this.random_state));
         const psi = Math.min(this.subsampling_size, samplesX.length);
         this.fitted_psi = psi;
         this.max_depth = Math.ceil(Math.log2(Math.max(psi, 2)));

@@ -155,7 +155,7 @@ export class ExtraTreeClassifier extends ClassifierBase {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = createRandomGenerator(this.randomState);
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
         // sklearn's ExtraTreeClassifier defaults max_features to 'sqrt'
         this.max_features_ = resolveSubsetSize(this.max_features_prop ?? 'sqrt', this.feature_number);

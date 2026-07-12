@@ -205,7 +205,8 @@ export interface HDBScanProps {
 
 export class HDBScan extends ClusterBase {
     private minClusterSize: number;
-    private minSamples: number;
+    /** raw prop value; null means "default to min_cluster_size" (resolved at fit time) */
+    private minSamples: number | null;
     private epsilon: number;
     private allowSingleCluster: boolean;
     private metric: Distance.IDistanceType;
@@ -245,7 +246,7 @@ export class HDBScan extends ClusterBase {
             allow_single_cluster = false,
         } = props;
         this.minClusterSize = Math.max(2, min_cluster_size);
-        this.minSamples = min_samples === null || min_samples === undefined ? min_cluster_size : min_samples;
+        this.minSamples = min_samples ?? null;
         this.epsilon = cluster_selection_epsilon;
         this.allowSingleCluster = allow_single_cluster;
         this.metric = metric;
@@ -319,7 +320,7 @@ export class HDBScan extends ClusterBase {
             }
         }
         // clamp so tiny datasets do not crash instead of raising like sklearn
-        const k = Math.min(this.minSamples, n) - 1;
+        const k = Math.min(this.minSamples ?? this.minClusterSize, n) - 1;
         const core: number[] = new Array(n);
         for (let i = 0; i < n; i++) {
             const row = dist[i].slice().sort((a, b) => a - b);

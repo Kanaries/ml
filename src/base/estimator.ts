@@ -63,6 +63,16 @@ export function getRegisteredEstimators(): ReadonlyMap<string, AnyCtor> {
 // Tagged-JSON codec
 // ---------------------------------------------------------------------------
 
+/**
+ * Keys that could mutate an object's prototype chain when assigned from a
+ * crafted payload. Rejected everywhere the codec writes decoded keys.
+ */
+function assertSafeKey(key: string): void {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        throw new Error(`Refusing to decode unsafe property key "${key}"`);
+    }
+}
+
 const TYPED_ARRAY_CTORS: Record<string, (values: number[]) => ArrayBufferView> = {
     Float64Array: (v) => Float64Array.from(v),
     Float32Array: (v) => Float32Array.from(v),
@@ -92,6 +102,7 @@ export function encodeValue(value: unknown): unknown {
         if (Number.isNaN(n)) return { $num: 'nan' };
         if (n === Infinity) return { $num: 'inf' };
         if (n === -Infinity) return { $num: '-inf' };
+        if (Object.is(n, -0)) return { $num: '-0' };
         return n;
     }
     if (t === 'boolean' || t === 'string') return value;
@@ -103,13 +114,19 @@ export function encodeValue(value: unknown): unknown {
     if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
         const name = value.constructor.name;
         if (!TYPED_ARRAY_CTORS[name]) throw new Error(`Unsupported typed array ${name}`);
-        return { $typed: name, values: Array.from(value as unknown as ArrayLike<number>) };
+        // elements go through the codec so NaN/±Infinity survive JSON text
+        return { $typed: name, values: Array.from(value as unknown as ArrayLike<number>, encodeValue) };
     }
     if (value instanceof Map) {
         return { $map: Array.from(value.entries(), ([k, v]) => [encodeValue(k), encodeValue(v)]) };
     }
     if (value instanceof Set) {
         return { $set: Array.from(value, encodeValue) };
+    }
+    if (value instanceof BaseEstimator) {
+        // full envelope: revival runs the constructor, so hidden
+        // (non-enumerable) fields installed there are restored
+        return { $est: value.toJSON() };
     }
     const proto = Object.getPrototypeOf(value);
     if (proto === Object.prototype || proto === null) {
@@ -144,13 +161,17 @@ export function decodeValue(value: unknown): unknown {
             case 'nan': return NaN;
             case 'inf': return Infinity;
             case '-inf': return -Infinity;
+            case '-0': return -0;
             default: throw new Error(`Unknown numeric tag "${obj.$num}"`);
         }
     }
     if (isTag(obj, '$typed')) {
         const make = TYPED_ARRAY_CTORS[obj.$typed as string];
         if (!make) throw new Error(`Unknown typed array "${obj.$typed}"`);
-        return make(obj.values as number[]);
+        return make((obj.values as unknown[]).map(decodeValue) as number[]);
+    }
+    if (isTag(obj, '$est')) {
+        return loadModel(obj.$est as SerializedModel);
     }
     if (isTag(obj, '$map')) {
         return new Map((obj.$map as [unknown, unknown][]).map(([k, v]) => [decodeValue(k), decodeValue(v)]));
@@ -160,7 +181,10 @@ export function decodeValue(value: unknown): unknown {
     }
     if (isTag(obj, '$obj')) {
         const out: Record<string, unknown> = {};
-        for (const [k, v] of obj.$obj as [string, unknown][]) out[k] = decodeValue(v);
+        for (const [k, v] of obj.$obj as [string, unknown][]) {
+            assertSafeKey(k);
+            out[k] = decodeValue(v);
+        }
         return out;
     }
     if (isTag(obj, '$cls')) {
@@ -171,11 +195,17 @@ export function decodeValue(value: unknown): unknown {
         }
         const inst = Object.create(ctor.prototype) as Record<string, unknown>;
         const state = obj.state as Record<string, unknown>;
-        for (const k of Object.keys(state)) inst[k] = decodeValue(state[k]);
+        for (const k of Object.keys(state)) {
+            assertSafeKey(k);
+            inst[k] = decodeValue(state[k]);
+        }
         return inst;
     }
     const out: Record<string, unknown> = {};
-    for (const k of Object.keys(obj)) out[k] = decodeValue(obj[k]);
+    for (const k of Object.keys(obj)) {
+        assertSafeKey(k);
+        out[k] = decodeValue(obj[k]);
+    }
     return out;
 }
 
@@ -199,17 +229,21 @@ export abstract class BaseEstimator {
     public setParams(params: Params): this {
         const known = this.getParams();
         for (const key of Object.keys(params)) {
-            if (!(key in known)) {
+            if (!Object.prototype.hasOwnProperty.call(known, key)) {
                 throw new Error(`Invalid parameter "${key}" for estimator ${this.constructor.name}. ` +
                     `Valid parameters are: ${Object.keys(known).join(', ')}.`);
             }
         }
         const Ctor = this.constructor as new (props: Params) => this;
         const fresh = new Ctor({ ...known, ...params });
-        for (const key of Object.keys(this)) {
+        // rebuild via property descriptors so non-enumerable hidden fields
+        // (e.g. RNG closures) are replaced too, not silently kept
+        for (const key of Object.getOwnPropertyNames(this)) {
             delete (this as Record<string, unknown>)[key];
         }
-        Object.assign(this, fresh);
+        for (const key of Object.getOwnPropertyNames(fresh)) {
+            Object.defineProperty(this, key, Object.getOwnPropertyDescriptor(fresh, key)!);
+        }
         return this;
     }
 
@@ -257,10 +291,19 @@ export abstract class BaseEstimator {
 function cloneNestedEstimators(value: unknown): unknown {
     if (value instanceof BaseEstimator) return value.clone();
     if (Array.isArray(value)) return value.map(cloneNestedEstimators);
-    if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
-        const out: Record<string, unknown> = {};
-        for (const k of Object.keys(value)) out[k] = cloneNestedEstimators((value as Record<string, unknown>)[k]);
-        return out;
+    if (value instanceof Map) {
+        return new Map(Array.from(value.entries(), ([k, v]) => [cloneNestedEstimators(k), cloneNestedEstimators(v)]));
+    }
+    if (value instanceof Set) {
+        return new Set(Array.from(value, cloneNestedEstimators));
+    }
+    if (value !== null && typeof value === 'object') {
+        const proto = Object.getPrototypeOf(value);
+        if (proto === Object.prototype || proto === null) {
+            const out: Record<string, unknown> = {};
+            for (const k of Object.keys(value)) out[k] = cloneNestedEstimators((value as Record<string, unknown>)[k]);
+            return out;
+        }
     }
     return value;
 }
@@ -285,6 +328,7 @@ export function loadModel(json: SerializedModel | string): BaseEstimator {
     }
     const state = model.state as Record<string, unknown>;
     for (const key of Object.keys(state)) {
+        assertSafeKey(key);
         (inst as unknown as Record<string, unknown>)[key] = decodeValue(state[key]);
     }
     return inst;

@@ -187,7 +187,7 @@ export class DecisionTreeClassifier extends ClassifierBase {
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
-        this.random = createRandomGenerator(this.randomState);
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
         this.dtree = {
             nodeValue: 0,

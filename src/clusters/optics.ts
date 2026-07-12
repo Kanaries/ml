@@ -12,7 +12,8 @@ export interface OPTICSOptions {
 
 export class OPTICS extends ClusterBase {
     private minSamples: number;
-    private maxEps: number;
+    /** raw prop value; undefined means "default to eps" (resolved at fit time) */
+    private maxEps: number | undefined;
     private metric: Distance.IDistanceType;
     private p: number;
     private eps: number;
@@ -25,7 +26,7 @@ export class OPTICS extends ClusterBase {
         const { min_samples = 5, max_eps, metric = 'euclidean', p = 2, eps = 0.5 } = options;
         this.minSamples = min_samples;
         this.eps = eps;
-        this.maxEps = max_eps !== undefined ? max_eps : eps;
+        this.maxEps = max_eps;
         this.metric = metric;
         this.p = p;
         Distance.useDistance(metric); // validate the metric name eagerly
@@ -129,7 +130,7 @@ export class OPTICS extends ClusterBase {
     private regionQuery(point: number, distanceMatrix: number[][]): number[] {
         const neighbors: number[] = [];
         for (let i = 0; i < distanceMatrix.length; i++) {
-            if (distanceMatrix[point][i] <= this.maxEps) {
+            if (distanceMatrix[point][i] <= (this.maxEps ?? this.eps)) {
                 neighbors.push(i);
             }
         }

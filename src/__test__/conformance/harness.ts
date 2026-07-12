@@ -164,6 +164,18 @@ export function runEstimatorConformance(specs: EstimatorSpec[]): void {
                 }
             });
 
+            (spec.nonDeterministic ? it.skip : it)('a revived model refits identically to the original and stays serializable', () => {
+                const est = spec.create();
+                fitAndRun(est, spec.kind, data);
+                const revived = loadModel(JSON.stringify(est));
+                const out1 = fitAndRun(est, spec.kind, data);
+                const out2 = fitAndRun(revived, spec.kind, data);
+                expect(out2).toEqual(out1);
+                // refit must not have turned hidden fields into enumerable
+                // (unserializable) state
+                expect(() => JSON.stringify(revived)).not.toThrow();
+            });
+
             it('setParams after fit resets to a working unfitted estimator', () => {
                 const est = spec.create();
                 fitAndRun(est, spec.kind, data);

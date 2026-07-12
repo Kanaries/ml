@@ -38,3 +38,29 @@ runEstimatorConformance([
         create: () => new HDBScan({ min_cluster_size: 5 }),
     },
 ]);
+
+// Regression tests for CodeX Phase 0 review finding #4: getParams must return
+// RAW dependent params, so setParams on the driving param behaves exactly like
+// fresh construction.
+import { blobsDataset } from '../../__test__/conformance/datasets';
+
+describe('dependent-param resolution (raw props in getParams)', () => {
+    const { X } = blobsDataset();
+
+    it('HDBScan: setParams({min_cluster_size}) rederives min_samples', () => {
+        const viaSetParams = new HDBScan({ min_cluster_size: 5 });
+        viaSetParams.setParams({ min_cluster_size: 10 });
+        expect(viaSetParams.getParams()).toEqual(new HDBScan({ min_cluster_size: 10 }).getParams());
+        expect(viaSetParams.fitPredict(X)).toEqual(new HDBScan({ min_cluster_size: 10 }).fitPredict(X));
+        // explicit min_samples still wins
+        expect(new HDBScan({ min_cluster_size: 10, min_samples: 3 }).getParams()).toMatchObject({ min_samples: 3 });
+    });
+
+    it('OPTICS: setParams({eps}) rederives max_eps', () => {
+        const viaSetParams = new OPTICS({ min_samples: 3 });
+        viaSetParams.setParams({ eps: 2 });
+        expect(viaSetParams.getParams()).toEqual(new OPTICS({ min_samples: 3, eps: 2 }).getParams());
+        expect(viaSetParams.fitPredict(X)).toEqual(new OPTICS({ min_samples: 3, eps: 2 }).fitPredict(X));
+        expect(new OPTICS({ eps: 2, max_eps: 5 }).getParams()).toMatchObject({ max_eps: 5 });
+    });
+});
