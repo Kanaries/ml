@@ -925,3 +925,9 @@ export class SelectKBest extends TransformerBase {
     }
 }
 registerEstimator('SelectKBest', SelectKBest);
+
+// Additional transformers (RobustScaler, PowerTransformer, QuantileTransformer,
+// PolynomialFeatures, KBinsDiscretizer, KNNImputer, LabelBinarizer,
+// FunctionTransformer, MissingIndicator) live in preprocessingExtra.ts and are
+// re-exported here so everything stays importable from this module.
+export * from './preprocessingExtra';

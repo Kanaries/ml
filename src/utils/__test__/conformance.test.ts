@@ -4,12 +4,21 @@ import { LogisticRegression } from '../../linear/logisticRegression';
 import {
     Binarizer,
     CategoricalValue,
+    FunctionTransformer,
+    KBinsDiscretizer,
+    KNNImputer,
+    LabelBinarizer,
     LabelEncoder,
     MaxAbsScaler,
     MinMaxScaler,
+    MissingIndicator,
     Normalizer,
     OneHotEncoder,
     OrdinalEncoder,
+    PolynomialFeatures,
+    PowerTransformer,
+    QuantileTransformer,
+    RobustScaler,
     SelectKBest,
     SimpleImputer,
     StandardScaler,
@@ -70,6 +79,131 @@ runEstimatorConformance([
         create: () => new SelectKBest({ k: 1, scoreFunc: 'fRegression' }),
     },
 ]);
+
+// ---------------------------------------------------------------------------
+// preprocessingExtra transformers: full harness on the blobs dataset.
+// KNNImputer and MissingIndicator see no NaN in blobs, so they act as
+// passthrough / all-zeros there — acceptable harness behavior (their real
+// semantics are covered in preprocessingExtra.test.ts).
+// ---------------------------------------------------------------------------
+runEstimatorConformance([
+    {
+        name: 'RobustScaler',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new RobustScaler({ quantileRange: [25, 75], unitVariance: false }),
+    },
+    {
+        name: 'PowerTransformer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new PowerTransformer({ method: 'yeo-johnson', standardize: true }),
+    },
+    {
+        name: 'QuantileTransformer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new QuantileTransformer({ nQuantiles: 20, outputDistribution: 'uniform', randomState: 42 }),
+    },
+    {
+        name: 'PolynomialFeatures',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new PolynomialFeatures({ degree: 2, interactionOnly: false, includeBias: true }),
+    },
+    {
+        name: 'KBinsDiscretizer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new KBinsDiscretizer({ nBins: 3, encode: 'ordinal', strategy: 'quantile' }),
+    },
+    {
+        name: 'KNNImputer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new KNNImputer({ nNeighbors: 3, weights: 'uniform' }),
+    },
+    {
+        name: 'MissingIndicator',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new MissingIndicator({ features: 'all' }),
+    },
+    {
+        name: 'FunctionTransformer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new FunctionTransformer({ func: 'expm1', inverseFunc: 'log1p' }),
+    },
+]);
+
+// ---------------------------------------------------------------------------
+// LabelBinarizer operates on 1-D label arrays: hand-rolled conformance.
+// ---------------------------------------------------------------------------
+describe('LabelBinarizer conformance (hand-rolled)', () => {
+    const y = [1, 2, 6, 4, 2];
+
+    it('is registered under its declared name', () => {
+        expect(getRegisteredEstimators().get('LabelBinarizer')).toBe(LabelBinarizer);
+    });
+
+    it('getParams/setParams round-trips and validates keys', () => {
+        const lb = new LabelBinarizer({ negLabel: -1, posLabel: 1 });
+        const params = lb.getParams();
+        expect(params).toEqual({ negLabel: -1, posLabel: 1 });
+        lb.setParams(params);
+        expect(lb.getParams()).toEqual(params);
+        expect(() => lb.setParams({ __definitely_not_a_param__: 1 })).toThrow(/Invalid parameter/);
+    });
+
+    it('clone copies params onto a fresh instance', () => {
+        const lb = new LabelBinarizer({ negLabel: -1, posLabel: 2 });
+        const copy = lb.clone();
+        expect(copy).not.toBe(lb);
+        expect(copy.constructor).toBe(LabelBinarizer);
+        expect(copy.getParams()).toEqual(lb.getParams());
+    });
+
+    it('survives serialize → JSON text → revive with identical behavior', () => {
+        const lb = new LabelBinarizer();
+        const out = lb.fitTransform(y);
+        const revived = loadModel(JSON.stringify(lb)) as LabelBinarizer;
+        expect(revived.constructor).toBe(LabelBinarizer);
+        expect(revived.getParams()).toEqual(lb.getParams());
+        expect(revived.transform(y)).toEqual(out);
+        expect(revived.inverseTransform(out)).toEqual(y);
+        expect(JSON.parse(JSON.stringify(revived))).toEqual(JSON.parse(JSON.stringify(lb)));
+    });
+
+    it('setParams after fit resets to a working unfitted estimator', () => {
+        const lb = new LabelBinarizer();
+        lb.fit(y);
+        lb.setParams({});
+        expect(() => lb.transform(y)).toThrow(/must be fitted/);
+        expect(lb.fitTransform([0, 1])).toEqual([[0], [1]]);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// FunctionTransformer function-valued param handling (mirrors SelectKBest).
+// ---------------------------------------------------------------------------
+describe('FunctionTransformer func param', () => {
+    it('serializes when configured with built-in names', () => {
+        const ft = new FunctionTransformer({ func: 'log1p', inverseFunc: 'expm1' });
+        expect(ft.getParams()).toEqual({ func: 'log1p', inverseFunc: 'expm1' });
+        expect(() => JSON.stringify(ft)).not.toThrow();
+    });
+
+    it('toJSON throws for a raw function param (documented codec behavior)', () => {
+        const ft = new FunctionTransformer({ func: (v: number) => v * 2 });
+        expect(() => JSON.stringify(ft)).toThrow(/Cannot serialize a value of type "function"/);
+    });
+
+    it('throws at transform time for an unknown built-in name', () => {
+        const ft = new FunctionTransformer({ func: 'notAFunc' });
+        expect(() => ft.transform([[1]])).toThrow(/Unknown function/);
+    });
+});
 
 // ---------------------------------------------------------------------------
 // Categorical-matrix transformers: the harness datasets are continuous

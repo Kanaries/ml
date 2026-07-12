@@ -25,7 +25,11 @@ export interface CrossValScoreOptions {
 }
 
 export interface SplitterLike {
-    split(X: any[], y?: any[]): FoldIndices[];
+    /**
+     * `groups` is only consumed by group-aware splitters (e.g. `GroupKFold`);
+     * all other splitters ignore it.
+     */
+    split(X: any[], y?: any[], groups?: any[]): FoldIndices[];
 }
 
 export interface SearchEstimatorFactory {
@@ -42,14 +46,14 @@ export type SearchEstimator = BaseEstimator & EstimatorLike;
  * that search meta-estimators remain serializable. All are
  * higher-is-better (losses are negated).
  */
-const SCORING_FUNCS: Record<string, ScoringFunction> = {
+export const SCORING_FUNCS: Record<string, ScoringFunction> = {
     accuracyScore: (actual, expected) => accuracyScore(actual, expected),
     f1Score: (actual, expected) => f1Score(actual, expected),
     r2Score: (actual, expected) => r2Score(actual, expected),
     negMeanSquaredError: (actual, expected) => -meanSquaredError(actual, expected),
 };
 
-function resolveScoring(scoring: ScoringFunction | string | undefined): ScoringFunction | undefined {
+export function resolveScoring(scoring: ScoringFunction | string | undefined): ScoringFunction | undefined {
     if (scoring === undefined) {
         return undefined;
     }
@@ -538,3 +542,9 @@ export function crossValScore(
 
     return scores;
 }
+
+// Extended model-selection API (extra splitters, crossValidate, learning /
+// validation curves). Kept in a separate module for readability; re-exported
+// here (at the end of the file, so the classes above are initialized first)
+// to preserve a single import surface.
+export * from './modelSelectionExtra';
