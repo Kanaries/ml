@@ -87,7 +87,7 @@ The gaps fall into four layers. Ordered by leverage, not by count:
 **Exit criteria**: the canonical sklearn tutorial (load → split → pipeline(scale+model) → grid search → report) is reproducible 1:1 in JS.
 **Status**: exit criteria met — see `src/__test__/e2e.tutorial.test.ts`. Independent CodeX reviews ran per phase (`docs/reviews/`); all P0–P2 findings fixed. 1235 tests green.
 
-### Phase 2 — High-demand estimators
+### Phase 2 — High-demand estimators (✅ completed 2026-07-12, branch feat/phase2-estimators)
 
 GaussianMixture (+Bayesian), MLPClassifier/Regressor, SVR/NuSVR/OneClassSVM (reuse SMO core), AgglomerativeClustering + SpectralClustering + MiniBatchKMeans, LDA/QDA, SGD family + Perceptron, Voting/Stacking, OneVsRest/OneVsOne/MultiOutput wrappers, CalibratedClassifierCV, Dummy baselines. All with sklearn-parity fixtures.
 
