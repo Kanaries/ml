@@ -13,8 +13,12 @@ import * as Bayes from './bayes';
 import * as SemiSupervised from './semi_supervised';
 import * as NeuralNetwork from './neural_network';
 import * as utils from './utils';
+import * as Base from './base';
+import { loadModel } from './base';
 
 export {
+    Base,
+    loadModel,
     Tree,
     Neighbors,
     Ensemble,

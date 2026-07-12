@@ -1,4 +1,5 @@
 import { ClusterBase } from '../base/cluster';
+import { registerEstimator, Params } from '../base/estimator';
 import { kmeansPlusPlus } from './kmeans_plusplus';
 import { createRandomGenerator } from '../utils/random';
 
@@ -14,6 +15,31 @@ interface SingleRunResult {
     inertia: number;
 }
 
+export interface KMeansProps {
+    /** number of clusters */
+    n_clusters?: number;
+    /**
+     * relative tolerance on the weighted inertia change used as convergence
+     * criterion (previously named `opt_ratio`; old positional calls keep
+     * working and map to `tol`)
+     */
+    tol?: number;
+    /**
+     * optional user-provided initial centers; when given, they are used
+     * as-is and `n_init` is forced to 1
+     */
+    initCenters?: number[][];
+    /** maximum Lloyd iterations per run */
+    max_iter?: number;
+    /** optional seed for reproducible k-means++ init */
+    random_state?: number;
+    /**
+     * number of k-means++ restarts; the run with the lowest weighted
+     * inertia wins
+     */
+    n_init?: number;
+}
+
 export class KMeans extends ClusterBase {
     private n_clusters: number;
     private tol: number;
@@ -24,20 +50,22 @@ export class KMeans extends ClusterBase {
     private centers: number[][] | null;
     private samplesY: number[];
     private inertia: number;
-    /**
-     * @param n_clusters number of clusters
-     * @param tol relative tolerance on the weighted inertia change used as
-     *            convergence criterion (previously named `opt_ratio`; old
-     *            positional calls keep working and map to `tol`)
-     * @param initCenters optional user-provided initial centers; when given,
-     *                    they are used as-is and `n_init` is forced to 1
-     * @param max_iter maximum Lloyd iterations per run
-     * @param random_state optional seed for reproducible k-means++ init
-     * @param n_init number of k-means++ restarts; the run with the lowest
-     *               weighted inertia wins
-     */
-    constructor(n_clusters: number = 2, tol: number = 1e-4, initCenters?: number[][], max_iter: number = 30, random_state?: number, n_init: number = 10) {
+    constructor(props?: KMeansProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    constructor(n_clusters?: number, tol?: number, initCenters?: number[][], max_iter?: number, random_state?: number, n_init?: number);
+    constructor(arg0: KMeansProps | number = {}, tolArg: number = 1e-4, initCentersArg?: number[][], maxIterArg: number = 30, randomStateArg?: number, nInitArg: number = 10) {
         super();
+        const props: KMeansProps = typeof arg0 === 'number'
+            ? { n_clusters: arg0, tol: tolArg, initCenters: initCentersArg, max_iter: maxIterArg, random_state: randomStateArg, n_init: nInitArg }
+            : arg0;
+        const {
+            n_clusters = 2,
+            tol = 1e-4,
+            initCenters,
+            max_iter = 30,
+            random_state,
+            n_init = 10,
+        } = props;
         this.n_clusters = n_clusters;
         this.tol = tol;
         this.max_iter = max_iter;
@@ -47,6 +75,16 @@ export class KMeans extends ClusterBase {
         this.centers = null;
         this.samplesY = [];
         this.inertia = Infinity;
+    }
+    public getParams(): Params {
+        return {
+            n_clusters: this.n_clusters,
+            tol: this.tol,
+            initCenters: this.userCenters ?? undefined,
+            max_iter: this.max_iter,
+            random_state: this.random_state,
+            n_init: this.n_init,
+        };
     }
     private assignLabels(samplesX: number[][], centers: number[][], sampleWeights: number[]): AssignmentResult {
         const labels: number[] = new Array(samplesX.length).fill(0);
@@ -169,3 +207,4 @@ export class KMeans extends ClusterBase {
         return this.inertia;
     }
 }
+registerEstimator('KMeans', KMeans);
