@@ -7,6 +7,8 @@
  * Leaf weight:
  *   w = -G / (H + lambda)
  */
+import { registerSerializableClass } from '../../base/estimator';
+
 export interface XGBTreeParams {
     maxDepth: number;
     lambda: number;
@@ -138,3 +140,6 @@ export class XGBTree {
         });
     }
 }
+// held in the fitted state of the XGBoost estimators; all instance fields
+// are plain data, so Object.create-based revival restores full behavior
+registerSerializableClass('ensemble.XGBTree', XGBTree);

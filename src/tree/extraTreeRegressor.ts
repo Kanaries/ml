@@ -1,8 +1,10 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { assert, createRandomGenerator } from '../utils';
 import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { mean } from '../utils/stat';
 import { IDTree } from './decisionTreeClassifier';
-import { filterWithIndices, valuesAllSame } from './utils';
+import { defineHiddenField, filterWithIndices, valuesAllSame } from './utils';
 
 interface IRegTree extends IDTree {}
 
@@ -14,7 +16,7 @@ export interface ExtraTreeRegressorProps {
     randomState?: number;
 }
 
-export class ExtraTreeRegressor {
+export class ExtraTreeRegressor extends RegressorBase {
     private feature_number: number;
     private regTree: IRegTree;
     private min_samples_split: number;
@@ -25,6 +27,7 @@ export class ExtraTreeRegressor {
     private random: () => number;
 
     public constructor(props: ExtraTreeRegressorProps = {}) {
+        super();
         // sklearn's ExtraTreeRegressor defaults max_features to all features
         const { max_depth = Infinity, min_samples_split = 2, splitter = 'random', max_features = 'all', randomState } = props;
         this.max_depth = max_depth;
@@ -32,7 +35,18 @@ export class ExtraTreeRegressor {
         this.splitter = splitter;
         this.max_features = max_features;
         this.randomState = randomState;
-        this.random = createRandomGenerator(this.randomState);
+        // hidden (non-enumerable) so serialization only sees plain data
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
+    }
+
+    public getParams(): Params {
+        return {
+            max_depth: this.max_depth,
+            min_samples_split: this.min_samples_split,
+            splitter: this.splitter,
+            max_features: this.max_features,
+            randomState: this.randomState,
+        };
     }
 
     private getFeatureSubset(): number[] {
@@ -144,3 +158,4 @@ export class ExtraTreeRegressor {
         return sampleX.map(x => this.findSample(x, this.regTree));
     }
 }
+registerEstimator('ExtraTreeRegressor', ExtraTreeRegressor);

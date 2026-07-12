@@ -1,16 +1,40 @@
 import { dot, symmetricEigen } from '../algebra/eigen';
+import { TransformerBase } from '../base/transformer';
+import { registerEstimator, Params } from '../base/estimator';
 
-export class PCA {
+export interface PCAProps {
+    /** number of components to keep; null keeps all features */
+    nComponents?: number | null;
+}
+
+export class PCA extends TransformerBase {
     protected nComponents: number | null;
     protected components: number[][];
     protected mean: number[];
     protected explainedVariance: number[];
 
-    constructor(nComponents: number | null = null) {
+    constructor(props?: PCAProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    constructor(nComponents?: number | null);
+    constructor(arg0: PCAProps | number | null = {}) {
+        super();
+        let props: PCAProps;
+        if (typeof arg0 === 'number') {
+            props = { nComponents: arg0 };
+        } else if (arg0 === null) {
+            props = { nComponents: null };
+        } else {
+            props = arg0;
+        }
+        const { nComponents = null } = props;
         this.nComponents = nComponents;
         this.components = [];
         this.mean = [];
         this.explainedVariance = [];
+    }
+
+    public getParams(): Params {
+        return { nComponents: this.nComponents };
     }
 
     public fit(X: number[][]): void {
@@ -104,3 +128,4 @@ export class PCA {
         return this.explainedVariance;
     }
 }
+registerEstimator('PCA', PCA);

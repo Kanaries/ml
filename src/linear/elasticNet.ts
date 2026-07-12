@@ -1,3 +1,6 @@
+import { RegressorBase } from '../base/regressor';
+import { registerEstimator, Params } from '../base/estimator';
+
 function softThreshold(value: number, threshold: number): number {
     if (value > threshold) {
         return value - threshold;
@@ -34,7 +37,7 @@ export interface ElasticNetProps {
     tol?: number;
 }
 
-export class ElasticNet {
+export class ElasticNet extends RegressorBase {
     private alpha: number;
     private l1Ratio: number;
     private fitIntercept: boolean;
@@ -46,6 +49,7 @@ export class ElasticNet {
     private edgeModel: { predict: (X: number[][]) => number[] } | null;
 
     constructor(props: ElasticNetProps = {}) {
+        super();
         const {
             alpha = 1,
             l1Ratio = 0.5,
@@ -74,6 +78,16 @@ export class ElasticNet {
         this.intercept = 0;
         this.fitted = false;
         this.edgeModel = null;
+    }
+
+    public getParams(): Params {
+        return {
+            alpha: this.alpha,
+            l1Ratio: this.l1Ratio,
+            fitIntercept: this.fitIntercept,
+            maxIter: this.maxIter,
+            tol: this.tol,
+        };
     }
 
     public fit(X: number[][], Y: number[]): void {
@@ -190,5 +204,6 @@ export class ElasticNet {
         });
     }
 }
+registerEstimator('ElasticNet', ElasticNet);
 import { LassoRegression } from './lassoRegression';
 import { RidgeRegression } from './ridgeRegression';

@@ -213,10 +213,14 @@ export abstract class BaseEstimator {
         return this;
     }
 
-    /** A new unfitted estimator with identical parameters. */
+    /**
+     * A new unfitted estimator with identical parameters. Nested estimators
+     * inside params (meta-estimators: pipelines, search, ensembles) are
+     * themselves cloned, so the copy shares no mutable estimator state.
+     */
     public clone(): this {
         const Ctor = this.constructor as new (props: Params) => this;
-        return new Ctor(this.getParams());
+        return new Ctor(cloneNestedEstimators(this.getParams()) as Params);
     }
 
     /**
@@ -247,6 +251,18 @@ export abstract class BaseEstimator {
         }
         return model;
     }
+}
+
+/** Recursively clone BaseEstimator values inside a params structure. */
+function cloneNestedEstimators(value: unknown): unknown {
+    if (value instanceof BaseEstimator) return value.clone();
+    if (Array.isArray(value)) return value.map(cloneNestedEstimators);
+    if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+        const out: Record<string, unknown> = {};
+        for (const k of Object.keys(value)) out[k] = cloneNestedEstimators((value as Record<string, unknown>)[k]);
+        return out;
+    }
+    return value;
 }
 
 /** Revive any serialized estimator produced by `estimator.toJSON()`. */

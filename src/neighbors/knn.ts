@@ -1,6 +1,14 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 import { getNeighborHits, IWeightType, resolveDistanceWeights, validateFitData, validatePredictData, weightedMode } from './utils';
+
+export interface KNearestNeighborsProps {
+    kNeighbors?: number;
+    weightType?: IWeightType;
+    distanceType?: Distance.IDistanceType;
+    pNorm?: number;
+}
 
 export class KNearestNeighbors extends ClassifierBase {
     private trainX: number[][];
@@ -10,13 +18,25 @@ export class KNearestNeighbors extends ClassifierBase {
     private weightType: IWeightType;
     private pNorm: number;
     private fitted: boolean;
+    public constructor(props?: KNearestNeighborsProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    public constructor(kNeighbors?: number, weightType?: IWeightType, distanceType?: Distance.IDistanceType, pNorm?: number);
     public constructor(
-        kNeighbors: number = 5,
-        weightType: IWeightType = 'uniform',
-        distanceType: Distance.IDistanceType = 'euclidean',
-        pNorm: number = 2
+        arg0: KNearestNeighborsProps | number = {},
+        weightTypeArg: IWeightType = 'uniform',
+        distanceTypeArg: Distance.IDistanceType = 'euclidean',
+        pNormArg: number = 2
     ) {
         super();
+        const props: KNearestNeighborsProps = typeof arg0 === 'number'
+            ? { kNeighbors: arg0, weightType: weightTypeArg, distanceType: distanceTypeArg, pNorm: pNormArg }
+            : arg0;
+        const {
+            kNeighbors = 5,
+            weightType = 'uniform',
+            distanceType = 'euclidean',
+            pNorm = 2,
+        } = props;
         if (!Number.isInteger(kNeighbors) || kNeighbors <= 0) {
             throw new Error('kNeighbors must be an integer > 0');
         }
@@ -30,6 +50,14 @@ export class KNearestNeighbors extends ClassifierBase {
         this.weightType = weightType;
         this.pNorm = pNorm;
         this.fitted = false;
+    }
+    public getParams(): Params {
+        return {
+            kNeighbors: this.kNeighbors,
+            weightType: this.weightType,
+            distanceType: this.metric,
+            pNorm: this.pNorm,
+        };
     }
     public fit(trainX: number[][], trainY: number[]): void {
         validateFitData(trainX, trainY);
@@ -52,6 +80,7 @@ export class KNearestNeighbors extends ClassifierBase {
         });
     }
 }
+registerEstimator('KNearestNeighbors', KNearestNeighbors);
 
 /** @deprecated Use KNearestNeighbors instead. */
 export const KNearstNeighbors = KNearestNeighbors;

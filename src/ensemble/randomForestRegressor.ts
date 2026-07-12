@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
 import { SubsetSizeOption } from '../utils/paramResolvers';
@@ -11,7 +13,7 @@ export interface RandomForestRegressorProps {
     randomState?: number;
 }
 
-export class RandomForestRegressor {
+export class RandomForestRegressor extends RegressorBase {
     private nEstimators: number;
     private bootstrap: boolean;
     private maxDepth?: number;
@@ -22,6 +24,7 @@ export class RandomForestRegressor {
     private fitted: boolean;
 
     constructor(props: RandomForestRegressorProps = {}) {
+        super();
         const {
             nEstimators = 100,
             bootstrap = true,
@@ -39,6 +42,17 @@ export class RandomForestRegressor {
         this.randomState = randomState;
         this.estimators = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            nEstimators: this.nEstimators,
+            bootstrap: this.bootstrap,
+            maxDepth: this.maxDepth,
+            minSamplesSplit: this.minSamplesSplit,
+            maxFeatures: this.maxFeatures,
+            randomState: this.randomState,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -88,3 +102,4 @@ export class RandomForestRegressor {
         });
     }
 }
+registerEstimator('RandomForestRegressor', RandomForestRegressor);

@@ -1,18 +1,35 @@
 import { dot, symmetricEigen } from '../algebra/eigen';
+import { TransformerBase } from '../base/transformer';
+import { registerEstimator, Params } from '../base/estimator';
 
-export class TruncatedSVD {
+export interface TruncatedSVDProps {
+    /** number of singular vectors to keep */
+    nComponents?: number;
+}
+
+export class TruncatedSVD extends TransformerBase {
     private nComponents: number;
     private components: number[][];
     private singularValues: number[];
     private explainedVariance: number[];
     private explainedVarianceRatio: number[];
 
-    constructor(nComponents: number = 2) {
+    constructor(props?: TruncatedSVDProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    constructor(nComponents?: number);
+    constructor(arg0: TruncatedSVDProps | number = {}) {
+        super();
+        const props: TruncatedSVDProps = typeof arg0 === 'number' ? { nComponents: arg0 } : arg0;
+        const { nComponents = 2 } = props;
         this.nComponents = nComponents;
         this.components = [];
         this.singularValues = [];
         this.explainedVariance = [];
         this.explainedVarianceRatio = [];
+    }
+
+    public getParams(): Params {
+        return { nComponents: this.nComponents };
     }
 
     public fit(X: number[][]): void {
@@ -131,3 +148,4 @@ export class TruncatedSVD {
         return this.explainedVarianceRatio;
     }
 }
+registerEstimator('TruncatedSVD', TruncatedSVD);

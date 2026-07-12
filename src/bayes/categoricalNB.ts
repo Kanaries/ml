@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 
 export interface CategoricalNBProps {
     alpha?: number;
@@ -36,6 +37,16 @@ export class CategoricalNB extends ClassifierBase {
         this.fitPrior = fitPrior;
         this.classPrior = classPrior;
         this.minCategories = minCategories;
+    }
+
+    public getParams(): Params {
+        return {
+            alpha: this.alpha,
+            forceAlpha: this.forceAlpha,
+            fitPrior: this.fitPrior,
+            classPrior: this.classPrior,
+            minCategories: this.minCategories,
+        };
     }
 
     private initCounters(X: number[][]): void {
@@ -132,3 +143,4 @@ export class CategoricalNB extends ClassifierBase {
         return preds;
     }
 }
+registerEstimator('CategoricalNB', CategoricalNB);

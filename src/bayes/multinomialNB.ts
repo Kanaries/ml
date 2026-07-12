@@ -1,3 +1,5 @@
+import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { argmax, classLogPriorFromCounts, ensureClassPrior, sortedUniqueLabels, validateXY } from './utils';
 
 export interface MultinomialNBProps {
@@ -7,7 +9,7 @@ export interface MultinomialNBProps {
     classPrior?: number[] | null;
 }
 
-export class MultinomialNB {
+export class MultinomialNB extends ClassifierBase {
     private alpha: number;
     private forceAlpha: boolean;
     private fitPrior: boolean;
@@ -20,6 +22,7 @@ export class MultinomialNB {
     private fitted = false;
 
     constructor(props: MultinomialNBProps = {}) {
+        super();
         const { alpha = 1.0, forceAlpha = true, fitPrior = true, classPrior = null } = props;
         if (!Number.isFinite(alpha) || alpha < 0) {
             throw new Error('alpha must be a finite number >= 0');
@@ -31,6 +34,15 @@ export class MultinomialNB {
         this.forceAlpha = forceAlpha;
         this.fitPrior = fitPrior;
         this.classPrior = classPrior;
+    }
+
+    public getParams(): Params {
+        return {
+            alpha: this.alpha,
+            forceAlpha: this.forceAlpha,
+            fitPrior: this.fitPrior,
+            classPrior: this.classPrior,
+        };
     }
 
     public fit(X: number[][], y: number[]): void {
@@ -94,3 +106,4 @@ export class MultinomialNB {
         });
     }
 }
+registerEstimator('MultinomialNB', MultinomialNB);

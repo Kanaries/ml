@@ -1,3 +1,5 @@
+import { RegressorBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 import { getRadiusHits, resolveDistanceWeights, validateFitData, validatePredictData, weightedAverage } from './utils';
 
@@ -8,7 +10,7 @@ export interface RadiusNeighborsRegressorProps {
     p?: number;
 }
 
-export class RadiusNeighborsRegressor {
+export class RadiusNeighborsRegressor extends RegressorBase {
     private radius: number;
     private weights: 'uniform' | 'distance';
     private metric: Distance.IDistanceType;
@@ -18,6 +20,7 @@ export class RadiusNeighborsRegressor {
     private fitted: boolean;
 
     constructor(props: RadiusNeighborsRegressorProps = {}) {
+        super();
         const { radius = 1, weights = 'uniform', metric = 'euclidean', p = 2 } = props;
         if (!Number.isFinite(radius) || radius < 0) {
             throw new Error('radius must be a finite number >= 0');
@@ -29,6 +32,15 @@ export class RadiusNeighborsRegressor {
         this.trainX = [];
         this.trainY = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            radius: this.radius,
+            weights: this.weights,
+            metric: this.metric,
+            p: this.p,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -57,3 +69,4 @@ export class RadiusNeighborsRegressor {
         });
     }
 }
+registerEstimator('RadiusNeighborsRegressor', RadiusNeighborsRegressor);

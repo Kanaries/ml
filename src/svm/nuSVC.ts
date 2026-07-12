@@ -1,4 +1,5 @@
 import { SVC } from './svc';
+import { Params, registerEstimator } from '../base/estimator';
 import { KernelMatrix, KernelType, SMOSolution, solveNuSVC } from './smo';
 
 export interface NuSVCProps {
@@ -31,6 +32,18 @@ export class NuSVC extends SVC {
         this.nu = nu;
     }
 
+    public getParams(): Params {
+        return {
+            nu: this.nu,
+            kernel: this.kernel,
+            gamma: this.gamma,
+            degree: this.degree,
+            coef0: this.coef0,
+            tol: this.tol,
+            maxIter: this.maxIter,
+        };
+    }
+
     protected solveBinary(X: number[][], y: number[]): SMOSolution {
         let nPos = 0;
         for (const v of y) {
@@ -46,3 +59,4 @@ export class NuSVC extends SVC {
         return solveNuSVC(K, y, this.nu, this.tol, this.maxIter);
     }
 }
+registerEstimator('NuSVC', NuSVC);

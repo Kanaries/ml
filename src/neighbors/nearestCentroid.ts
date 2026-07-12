@@ -1,3 +1,5 @@
+import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 import { validateFitData, validatePredictData } from './utils';
 
@@ -15,7 +17,7 @@ function median(values: number[]): number {
     return sorted[mid];
 }
 
-export class NearestCentroid {
+export class NearestCentroid extends ClassifierBase {
     private metric: Distance.IDistanceType;
     private p: number;
     private classes: number[];
@@ -23,12 +25,20 @@ export class NearestCentroid {
     private fitted: boolean;
 
     constructor(props: NearestCentroidProps = {}) {
+        super();
         const { metric = 'euclidean', p = 2 } = props;
         this.metric = metric;
         this.p = p;
         this.classes = [];
         this.centroids = [];
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return {
+            metric: this.metric,
+            p: this.p,
+        };
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
@@ -83,3 +93,4 @@ export class NearestCentroid {
         });
     }
 }
+registerEstimator('NearestCentroid', NearestCentroid);

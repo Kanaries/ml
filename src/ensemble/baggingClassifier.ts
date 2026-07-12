@@ -1,7 +1,9 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils';
 import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { DecisionTreeClassifier, DecisionTreeProps } from '../tree';
+import { definedProps } from './utils';
 
 function bootstrapSample(X: number[][], y: number[], random: () => number, sampleCount?: number) {
     const size = sampleCount ?? X.length;
@@ -42,9 +44,28 @@ export class BaggingClassifier extends ClassifierBase {
         this.bootstrap = bootstrap;
         this.randomState = randomState;
         this.estimatorFactory = estimatorFactory;
-        this.treeProps = treeProps;
+        this.treeProps = definedProps(treeProps);
         this.estimators = [];
         this.fitted = false;
+    }
+
+    /**
+     * NOTE: `estimatorFactory` is a function-valued param; it is returned
+     * as-is (clone/setParams keep working), but an instance constructed with
+     * a custom factory cannot be serialized with toJSON().
+     */
+    public getParams(): Params {
+        return {
+            nEstimators: this.nEstimators,
+            maxSamples: this.maxSamples,
+            bootstrap: this.bootstrap,
+            randomState: this.randomState,
+            estimatorFactory: this.estimatorFactory,
+            max_depth: this.treeProps.max_depth,
+            min_samples_split: this.treeProps.min_samples_split,
+            criterion: this.treeProps.criterion,
+            max_features: this.treeProps.max_features,
+        };
     }
 
     private defaultEstimator(seed?: number) {
@@ -108,3 +129,4 @@ export class BaggingClassifier extends ClassifierBase {
         });
     }
 }
+registerEstimator('BaggingClassifier', BaggingClassifier);

@@ -1,5 +1,6 @@
 import { PCA } from './pca';
 import { dot, matVecMul, normalizeOrNull, outer } from '../algebra/eigen';
+import { registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
 export interface SparsePCAProps {
@@ -16,10 +17,19 @@ export class SparsePCA extends PCA {
 
     constructor(props: SparsePCAProps = {}) {
         const { nComponents = null, alpha = 1, maxIter = 100, tol = 1e-8 } = props;
-        super(nComponents);
+        super({ nComponents });
         this.alpha = alpha;
         this.maxIter = maxIter;
         this.tol = tol;
+    }
+
+    public getParams(): Params {
+        return {
+            nComponents: this.nComponents,
+            alpha: this.alpha,
+            maxIter: this.maxIter,
+            tol: this.tol,
+        };
     }
 
     public fit(X: number[][]): void {
@@ -116,3 +126,4 @@ export class SparsePCA extends PCA {
         }
     }
 }
+registerEstimator('SparsePCA', SparsePCA);

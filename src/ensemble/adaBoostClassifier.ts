@@ -1,4 +1,5 @@
 import { ClassifierBase } from '../base';
+import { registerEstimator, Params } from '../base/estimator';
 
 export interface AdaBoostClassifierProps {
     nEstimators?: number;
@@ -66,6 +67,15 @@ export class AdaBoostClassifier extends ClassifierBase {
         this.multiWeights = [];
         this.classes = [];
         this.nFeatures = 0;
+    }
+
+    public getParams(): Params {
+        // canonical camelCase keys; the snake_case aliases remain accepted
+        // by the constructor
+        return {
+            nEstimators: this.nEstimators,
+            learningRate: this.learningRate,
+        };
     }
 
     private validateInput(X: number[][], y: number[]): void {
@@ -407,3 +417,4 @@ export class AdaBoostClassifier extends ClassifierBase {
         return importances;
     }
 }
+registerEstimator('AdaBoostClassifier', AdaBoostClassifier);

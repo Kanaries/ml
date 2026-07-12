@@ -1,7 +1,16 @@
 import { Inverse } from '../algebra';
+import { TransformerBase } from '../base/transformer';
+import { registerEstimator, Params } from '../base/estimator';
 import { createRandomGenerator } from '../utils/random';
 
-export class LocallyLinearEmbedding {
+export interface LocallyLinearEmbeddingProps {
+    nNeighbors?: number;
+    nComponents?: number;
+    reg?: number;
+    randomState?: number;
+}
+
+export class LocallyLinearEmbedding extends TransformerBase {
     private nNeighbors: number;
     private nComponents: number;
     private reg: number;
@@ -9,11 +18,28 @@ export class LocallyLinearEmbedding {
     private trainX: number[][] = [];
     private trainY: number[][] = [];
 
-    constructor(nNeighbors: number = 5, nComponents: number = 2, reg: number = 0.001, randomState?: number) {
+    constructor(props?: LocallyLinearEmbeddingProps);
+    /** @deprecated positional form; prefer the props-object constructor */
+    constructor(nNeighbors?: number, nComponents?: number, reg?: number, randomState?: number);
+    constructor(arg0: LocallyLinearEmbeddingProps | number = {}, nComponentsArg: number = 2, regArg: number = 0.001, randomStateArg?: number) {
+        super();
+        const props: LocallyLinearEmbeddingProps = typeof arg0 === 'number'
+            ? { nNeighbors: arg0, nComponents: nComponentsArg, reg: regArg, randomState: randomStateArg }
+            : arg0;
+        const { nNeighbors = 5, nComponents = 2, reg = 0.001, randomState } = props;
         this.nNeighbors = nNeighbors;
         this.nComponents = nComponents;
         this.reg = reg;
         this.randomState = randomState;
+    }
+
+    public getParams(): Params {
+        return {
+            nNeighbors: this.nNeighbors,
+            nComponents: this.nComponents,
+            reg: this.reg,
+            randomState: this.randomState,
+        };
     }
 
     private static dot(a: number[], b: number[]): number {
@@ -180,8 +206,13 @@ export class LocallyLinearEmbedding {
         return result;
     }
 
+    /**
+     * Fit and return the training embedding directly (not `transform(X)`,
+     * which would re-estimate reconstruction weights out-of-sample).
+     */
     public fitTransform(X: number[][]): number[][] {
         this.fit(X);
         return this.trainY;
     }
 }
+registerEstimator('LocallyLinearEmbedding', LocallyLinearEmbedding);

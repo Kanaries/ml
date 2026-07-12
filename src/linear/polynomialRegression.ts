@@ -1,16 +1,19 @@
 import { lstsq } from '../algebra/lstsq';
+import { RegressorBase } from '../base/regressor';
+import { registerEstimator, Params } from '../base/estimator';
 
 export interface PolynomialRegressionProps {
     degree?: number;
 }
 
-export class PolynomialRegression {
+export class PolynomialRegression extends RegressorBase {
     private degree: number;
     private coef: number[];
     private intercept: number;
     private fitted: boolean;
 
     constructor(props: PolynomialRegressionProps = {}) {
+        super();
         const { degree = 2 } = props;
         if (!Number.isInteger(degree) || degree < 1) {
             throw new Error('degree must be an integer >= 1');
@@ -19,6 +22,10 @@ export class PolynomialRegression {
         this.coef = [];
         this.intercept = 0;
         this.fitted = false;
+    }
+
+    public getParams(): Params {
+        return { degree: this.degree };
     }
 
     private transform(X: number[][]): number[][] {
@@ -75,3 +82,4 @@ export class PolynomialRegression {
         });
     }
 }
+registerEstimator('PolynomialRegression', PolynomialRegression);

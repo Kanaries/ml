@@ -1,4 +1,5 @@
 import { ClusterBase } from '../base/cluster';
+import { registerEstimator, Params } from '../base/estimator';
 import { Distance } from '../metrics';
 
 /**
@@ -189,27 +190,81 @@ class LinkageUnionFind {
     }
 }
 
+export interface HDBScanProps {
+    /** smallest group of points considered a cluster (clamped to >= 2) */
+    min_cluster_size?: number;
+    /** neighborhood size for core distances; defaults to min_cluster_size */
+    min_samples?: number | null;
+    /** clusters split below this distance are merged back together */
+    cluster_selection_epsilon?: number;
+    /** distance metric name */
+    metric?: Distance.IDistanceType;
+    /** allow the root of the tree to be selected as a single cluster */
+    allow_single_cluster?: boolean;
+}
+
 export class HDBScan extends ClusterBase {
     private minClusterSize: number;
     private minSamples: number;
     private epsilon: number;
     private allowSingleCluster: boolean;
-    private distance: Distance.IDistance;
+    private metric: Distance.IDistanceType;
     private labels: number[] = [];
     private probabilities: number[] = [];
+    constructor(props?: HDBScanProps);
+    /** @deprecated positional form; prefer the props-object constructor */
     constructor(
-        min_cluster_size: number = 5,
-        min_samples: number | null = null,
-        cluster_selection_epsilon: number = 0.0,
-        metric: Distance.IDistanceType = 'euclidean',
-        allow_single_cluster: boolean = false
+        min_cluster_size?: number,
+        min_samples?: number | null,
+        cluster_selection_epsilon?: number,
+        metric?: Distance.IDistanceType,
+        allow_single_cluster?: boolean
+    );
+    constructor(
+        arg0: HDBScanProps | number = {},
+        minSamplesArg: number | null = null,
+        epsilonArg: number = 0.0,
+        metricArg: Distance.IDistanceType = 'euclidean',
+        allowSingleClusterArg: boolean = false
     ) {
         super();
+        const props: HDBScanProps = typeof arg0 === 'number'
+            ? {
+                min_cluster_size: arg0,
+                min_samples: minSamplesArg,
+                cluster_selection_epsilon: epsilonArg,
+                metric: metricArg,
+                allow_single_cluster: allowSingleClusterArg,
+            }
+            : arg0;
+        const {
+            min_cluster_size = 5,
+            min_samples = null,
+            cluster_selection_epsilon = 0.0,
+            metric = 'euclidean',
+            allow_single_cluster = false,
+        } = props;
         this.minClusterSize = Math.max(2, min_cluster_size);
-        this.minSamples = min_samples === null ? min_cluster_size : min_samples;
+        this.minSamples = min_samples === null || min_samples === undefined ? min_cluster_size : min_samples;
         this.epsilon = cluster_selection_epsilon;
         this.allowSingleCluster = allow_single_cluster;
-        this.distance = Distance.useDistance(metric);
+        this.metric = metric;
+        Distance.useDistance(metric); // validate the metric name eagerly
+    }
+
+    public getParams(): Params {
+        return {
+            min_cluster_size: this.minClusterSize,
+            min_samples: this.minSamples,
+            cluster_selection_epsilon: this.epsilon,
+            metric: this.metric,
+            allow_single_cluster: this.allowSingleCluster,
+        };
+    }
+
+    /** resolved lazily from the metric name so instances stay JSON-serializable */
+    private get distance(): Distance.IDistance {
+        return Distance.useDistance(this.metric);
     }
 
     public fitPredict(samplesX: number[][]): number[] {
@@ -255,9 +310,10 @@ export class HDBScan extends ClusterBase {
         const n = samplesX.length;
         const dist: number[][] = new Array(n);
         for (let i = 0; i < n; i++) dist[i] = new Array(n).fill(0);
+        const distance = this.distance;
         for (let i = 0; i < n; i++) {
             for (let j = i + 1; j < n; j++) {
-                const d = this.distance(samplesX[i], samplesX[j]);
+                const d = distance(samplesX[i], samplesX[j]);
                 dist[i][j] = d;
                 dist[j][i] = d;
             }
@@ -594,3 +650,4 @@ export class HDBScan extends ClusterBase {
         }
     }
 }
+registerEstimator('HDBScan', HDBScan);

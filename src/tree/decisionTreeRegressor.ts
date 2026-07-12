@@ -1,8 +1,10 @@
+import { RegressorBase } from "../base";
+import { registerEstimator, Params } from "../base/estimator";
 import { assert, createRandomGenerator } from "../utils";
 import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { mean } from "../utils/stat";
 import { IDTree } from "./decisionTreeClassifier";
-import { valuesAllSame } from "./utils";
+import { defineHiddenField, valuesAllSame } from "./utils";
 interface IRegTree extends IDTree {
 }
 interface RegressionTreeProps {
@@ -11,7 +13,7 @@ interface RegressionTreeProps {
     max_features?: SubsetSizeOption;
     randomState?: number;
 }
-export class DecisionTreeRegressor {
+export class DecisionTreeRegressor extends RegressorBase {
     private feature_number: number;
     private regTree: IRegTree;
     private min_sample_split: number;
@@ -20,6 +22,7 @@ export class DecisionTreeRegressor {
     private randomState?: number;
     private random: () => number;
     public constructor (props: RegressionTreeProps = {}) {
+        super();
         const {
             max_depth = Infinity,
             min_samples_split = 2,
@@ -30,7 +33,16 @@ export class DecisionTreeRegressor {
         this.min_sample_split = min_samples_split;
         this.max_features = max_features;
         this.randomState = randomState;
-        this.random = createRandomGenerator(this.randomState);
+        // hidden (non-enumerable) so serialization only sees plain data
+        defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
+    }
+    public getParams(): Params {
+        return {
+            max_depth: this.max_depth,
+            min_samples_split: this.min_sample_split,
+            max_features: this.max_features,
+            randomState: this.randomState,
+        };
     }
     private selectedFeatureIndices(): number[] {
         const size = resolveSubsetSize(this.max_features, this.feature_number);
@@ -182,3 +194,4 @@ export class DecisionTreeRegressor {
         }
     }
 }
+registerEstimator('DecisionTreeRegressor', DecisionTreeRegressor);
