@@ -126,7 +126,9 @@ describe('SGDClassifier', () => {
         for (const loss of ['hinge', 'squaredHinge', 'perceptron'] as const) {
             const clf = new SGDClassifier({ loss, randomState: 42 });
             clf.fit(X, y);
-            expect(() => clf.predictProba(X)).toThrow(/predictProba is only supported/);
+            // margin losses expose NO predictProba capability (sklearn's
+            // available_if semantics) so meta-estimators can feature-detect
+            expect(clf.predictProba).toBeUndefined();
         }
     });
 
@@ -342,7 +344,7 @@ describe('Perceptron', () => {
         const { X, y } = separableBinary();
         const clf = new Perceptron({ randomState: 42 });
         clf.fit(X, y);
-        expect(() => clf.predictProba(X)).toThrow(/predictProba is only supported/);
+        expect(clf.predictProba).toBeUndefined();
     });
 
     it('exposes exactly the Perceptron parameter set', () => {

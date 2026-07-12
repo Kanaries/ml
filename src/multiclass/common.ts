@@ -73,15 +73,17 @@ export function flattenDecision(d: number[] | number[][]): number[] {
 
 /**
  * Per-sample score of the positive class from a fitted binary member trained
- * on labels {0, 1}: predictProba's positive-class column when available, else
- * decisionFunction (flattened), else the raw predict output (0/1 votes).
+ * on labels {0, 1}: decisionFunction (flattened) when available, else
+ * predictProba's positive-class column, else the raw predict output (0/1
+ * votes). decisionFunction comes first to mirror sklearn's _predict_binary
+ * and to stay consistent with OneVsOneClassifier's confidence source.
  */
 export function binaryScores(est: ClassifierLike, X: number[][]): number[] {
-    if (typeof est.predictProba === 'function') {
-        return est.predictProba(X).map((row) => row[row.length - 1]);
-    }
     if (typeof est.decisionFunction === 'function') {
         return flattenDecision(est.decisionFunction(X));
+    }
+    if (typeof est.predictProba === 'function') {
+        return est.predictProba(X).map((row) => row[row.length - 1]);
     }
     return est.predict(X);
 }

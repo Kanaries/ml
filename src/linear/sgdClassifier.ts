@@ -63,6 +63,19 @@ export class SGDClassifier extends ClassifierBase {
     constructor(props: SGDClassifierProps = {}) {
         super();
         this.loss = props.loss ?? 'hinge';
+        if (this.loss !== 'logLoss' && this.loss !== 'modifiedHuber') {
+            // sklearn's available_if semantics: for margin losses the
+            // predictProba CAPABILITY is absent (typeof === 'undefined'), so
+            // meta-estimators (calibration, OvR, stacking, soft voting) fall
+            // back to decisionFunction instead of calling a throwing method.
+            // Non-enumerable -> invisible to serialization and setParams.
+            Object.defineProperty(this, 'predictProba', {
+                value: undefined,
+                enumerable: false,
+                writable: true,
+                configurable: true,
+            });
+        }
         this.penalty = validatePenalty(props.penalty === undefined ? 'l2' : props.penalty);
         this.alpha = props.alpha ?? 1e-4;
         this.l1Ratio = props.l1Ratio ?? 0.15;
