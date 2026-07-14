@@ -1,6 +1,6 @@
 {
   "name": "@kanaries/ml",
-  "version": "0.0.11",
+  "version": "1.0.1",
   "description": "Machine learning library for JavaScript and TypeScript with a scikit-learn-style API: classification, regression, clustering, dimensionality reduction, and anomaly detection in the browser and Node.js.",
   "files": [
     "build",
