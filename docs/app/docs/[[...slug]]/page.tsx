@@ -11,6 +11,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { getDisplayTitle, getDisplayTitleNode } from '@/lib/title';
+import { getMarkdownPath } from '@/lib/agent-docs';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
@@ -24,6 +25,7 @@ export default async function Page(props: {
   const MDXContent = page.data.body;
   const slug = params.slug ?? [];
   const path = slug.length ? `/docs/${slug.join('/')}` : '/docs';
+  const markdownPath = getMarkdownPath(page);
   const canonicalUrl = new URL(path, siteUrl).toString();
   const displayTitle = getDisplayTitle(page.data.title);
   const displayToc = page.data.toc
@@ -60,6 +62,12 @@ export default async function Page(props: {
       <DocsPage toc={displayToc} full={page.data.full}>
         <DocsTitle>{displayTitle}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
+        <a
+          href={markdownPath}
+          className="mb-6 inline-flex text-sm font-medium text-fd-muted-foreground underline decoration-fd-border underline-offset-4 transition-colors hover:text-fd-foreground"
+        >
+          View as Markdown
+        </a>
         <DocsBody>
           <MDXContent
             components={getMDXComponents({
@@ -96,6 +104,7 @@ export async function generateMetadata(props: {
 
   const slug = params.slug ?? [];
   const path = slug.length ? `/docs/${slug.join('/')}` : '/docs';
+  const markdownPath = getMarkdownPath(page);
   const canonicalUrl = new URL(path, siteUrl).toString();
   const title = page.data.title;
   const description = page.data.description;
@@ -110,6 +119,9 @@ export async function generateMetadata(props: {
     description,
     alternates: {
       canonical: canonicalUrl,
+      types: {
+        'text/markdown': new URL(markdownPath, siteUrl).toString(),
+      },
     },
     openGraph: {
       type: 'article',

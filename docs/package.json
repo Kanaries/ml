@@ -3,9 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "agent:generate": "node scripts/generate-agent-docs.mjs",
     "build": "next build",
     "dev": "next dev --turbo",
+    "prebuild": "node scripts/generate-agent-docs.mjs",
+    "predev": "node scripts/generate-agent-docs.mjs",
     "start": "next start",
+    "test": "node --test scripts/__tests__/agent-docs.test.mjs",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
@@ -24,8 +28,15 @@
     "@types/node": "22.15.21",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
+    "gray-matter": "^4.0.3",
     "postcss": "^8.5.3",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
     "tailwindcss": "^4.1.7",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
   }
 }

@@ -34,6 +34,25 @@ A `source.config.ts` config file has been included, you can customise different 
 
 Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
 
+## Agent-readable documentation
+
+The files in `content/docs` are also the source of truth for the agent-facing
+documentation surface:
+
+- `/llms.txt` contains the complete documentation hierarchy and links to the
+  Markdown version of every page. `/llm.txt` is a compatibility alias with the
+  same generated content.
+- Documentation pages expose a Markdown companion URL. Leaf pages append
+  `.md`; directory/index pages use `index.html.md`.
+- `/api/agent/search?q=...&limit=...` returns structured results with both HTML
+  and Markdown URLs.
+
+Run `yarn agent:generate` to refresh these files locally. The command also runs
+before `yarn dev` and `yarn build`. If a new MDX component contains meaningful
+content, add an agent Markdown renderer in `scripts/generate-agent-docs.mjs`;
+generation intentionally fails for unsupported components so content cannot be
+silently omitted.
+
 ## Learn More
 
 To learn more about Next.js and Fumadocs, take a look at the following

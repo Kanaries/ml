@@ -6,6 +6,32 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   transpilePackages: ['@kanaries/ml'],
+  async headers() {
+    return [
+      {
+        source: '/docs/:path*.md',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/markdown; charset=utf-8',
+          },
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, follow',
+          },
+        ],
+      },
+      ...['/llms.txt', '/llm.txt'].map((source) => ({
+        source,
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/plain; charset=utf-8',
+          },
+        ],
+      })),
+    ];
+  },
   async redirects() {
     return [
       {
