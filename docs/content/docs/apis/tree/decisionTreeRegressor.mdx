@@ -4,6 +4,7 @@ description: Learn what Decision Tree Regressor does, when to use it, and how to
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
 
 # Decision Tree Regressor in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides a decision tree regressor for JavaScript applications that need non-linear tabular regression with understandable split rules. This is useful for product-side prediction tasks where engineers want to inspect how the model partitions the feature space rather than relying on a purely opaque regressor.
 
 In Node.js services, this keeps feature generation, prediction, and debugging in the same runtime and makes it easier to reason about errors.
+
+## Interactive decision tree playground
+
+Use the controls to change model complexity and data noise. The blue staircase is fitted live with `Tree.DecisionTreeRegressor`; each flat segment corresponds to a leaf prediction. Click anywhere in the chart to add a numeric observation and watch the tree refit.
+
+<DecisionTreePlayground task="regression" variant="decision" />
 
 ## Quick start
 

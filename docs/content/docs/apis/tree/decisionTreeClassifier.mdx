@@ -4,6 +4,7 @@ description: Learn what Decision Tree Classifier does, when to use it, and how t
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
 
 # Decision Tree Classifier in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml gives JavaScript teams an interpretable decision tree classifier that fits naturally into product logic, browser demos, and Node.js APIs. This is useful when teams care about inspecting split paths, explaining predictions, or debugging model decisions in the same codebase that serves the application.
 
 Because tree behavior is easy to reason about, this implementation is especially practical in products where transparency matters more than squeezing out the last bit of benchmark accuracy.
+
+## Interactive decision tree playground
+
+Change the tree depth, split constraints, dataset, and impurity criterion below. The decision surface and tree diagram are fitted live with `Tree.DecisionTreeClassifier` in your browser. Click the chart to add a class A or class B observation and see which rule changes.
+
+<DecisionTreePlayground task="classification" variant="decision" />
 
 ## Quick start
 

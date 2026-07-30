@@ -4,6 +4,7 @@ description: Learn what Extra Tree Classifier does, when to use it, and how to r
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
 
 # Extra Tree Classifier in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml exposes Extra Tree classification in JavaScript for workflows that want tree-based decisions with more randomized splitting behavior. This is useful for experimentation and for teams that want a fast tree baseline with slightly different bias-variance behavior than a standard decision tree.
 
 Because it runs in JS, you can compare deterministic and randomized tree variants directly inside the same product or service codebase.
+
+## Interactive Extra Tree playground
+
+Extra Trees choose randomized candidate thresholds. Keep the data and parameters fixed, then use **Reroll splits** to see how that randomness changes the learned regions. The model below runs with `Tree.ExtraTreeClassifier` directly in your browser.
+
+<DecisionTreePlayground task="classification" variant="extra" />
 
 ## Quick start
 

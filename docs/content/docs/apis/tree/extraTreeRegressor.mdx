@@ -4,6 +4,7 @@ description: Learn what Extra Tree Regressor does, when to use it, and how to ru
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
 
 # Extra Tree Regressor in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides Extra Tree regression in JavaScript for non-linear tabular prediction with randomized splitting behavior. This can be useful when you want a lightweight tree regressor that differs from a standard decision tree in how it explores split candidates.
 
 For TypeScript-based experimentation, it is a convenient way to compare deterministic and randomized tree regression strategies without switching runtimes.
+
+## Interactive Extra Tree playground
+
+Tune the depth and minimum split size, add your own observations, and reroll the randomized thresholds. The chart and tree diagram are trained live with `Tree.ExtraTreeRegressor`, so every step in the blue prediction line comes from an actual leaf.
+
+<DecisionTreePlayground task="regression" variant="extra" />
 
 ## Quick start
 
