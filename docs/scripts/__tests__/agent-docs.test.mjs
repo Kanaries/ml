@@ -65,6 +65,22 @@ test('preserves code comparisons and provides text fallbacks for interactive com
     );
     assert.match(clustering, /interactive comparison of clustering algorithms/);
     assert.match(clustering, /\/docs\/apis\/clusters\/kmeans\.md/);
+
+    const decisionTreeClassifier = await fs.readFile(
+      path.join(publicRoot, 'docs', 'apis', 'tree', 'decisionTreeClassifier.md'),
+      'utf8',
+    );
+    assert.match(decisionTreeClassifier, /interactive Decision Tree Classifier playground/);
+    assert.match(
+      decisionTreeClassifier,
+      /\[Open the HTML page\]\(https:\/\/ml\.kanaries\.net\/docs\/apis\/tree\/decisionTreeClassifier\)/,
+    );
+
+    const extraTreeRegressor = await fs.readFile(
+      path.join(publicRoot, 'docs', 'apis', 'tree', 'extraTreeRegressor.md'),
+      'utf8',
+    );
+    assert.match(extraTreeRegressor, /interactive Extra Tree Regressor playground/);
   });
 });
 

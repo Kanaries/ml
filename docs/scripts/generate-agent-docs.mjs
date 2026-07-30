@@ -104,6 +104,21 @@ function paragraph(value) {
   return { type: 'paragraph', children: [text(value)] };
 }
 
+function interactiveNotice(description, record, siteUrl) {
+  return [{
+    type: 'blockquote',
+    children: [{
+      type: 'paragraph',
+      children: [
+        text(description),
+        text(' '),
+        { type: 'link', url: `${siteUrl}${record.htmlPath}`, children: [text('Open the HTML page')] },
+        text('.'),
+      ],
+    }],
+  }];
+}
+
 function componentToMarkdown(node, record, siteUrl) {
   if (node.name === 'AlgorithmComparison') {
     const title = getAttribute(node, 'title', record.sourceRelative);
@@ -120,24 +135,37 @@ function componentToMarkdown(node, record, siteUrl) {
     ];
   }
 
+  if (node.name === 'DecisionTreePlayground') {
+    const task = getAttribute(node, 'task', record.sourceRelative);
+    const variant = getAttribute(node, 'variant', record.sourceRelative);
+    const modelNames = {
+      'decision:classification': 'Decision Tree Classifier',
+      'decision:regression': 'Decision Tree Regressor',
+      'extra:classification': 'Extra Tree Classifier',
+      'extra:regression': 'Extra Tree Regressor',
+    };
+    const modelName = modelNames[`${variant}:${task}`];
+
+    if (!modelName) {
+      throw new Error(
+        `${record.sourceRelative}: <DecisionTreePlayground> has unsupported task="${task}" and variant="${variant}".`,
+      );
+    }
+
+    return interactiveNotice(
+      `The HTML version includes an interactive ${modelName} playground. You can tune the tree depth, split constraints, dataset noise, and criterion; add observations; and inspect the fitted predictions and tree structure. The guide, runnable example, and API reference continue below.`,
+      record,
+      siteUrl,
+    );
+  }
+
   const interactiveDescriptions = {
     ClusteringComparison: 'The HTML version includes an interactive comparison of clustering algorithms. The agent-readable algorithm links and selection guidance continue below.',
     LogisticRegressionDemo: 'The HTML version includes an interactive logistic regression visualization. The complete runnable example and API details are included in this Markdown page.',
   };
   const description = interactiveDescriptions[node.name];
   if (description) {
-    return [{
-      type: 'blockquote',
-      children: [{
-        type: 'paragraph',
-        children: [
-          text(description),
-          text(' '),
-          { type: 'link', url: `${siteUrl}${record.htmlPath}`, children: [text('Open the HTML page')] },
-          text('.'),
-        ],
-      }],
-    }];
+    return interactiveNotice(description, record, siteUrl);
   }
 
   throw new Error(
