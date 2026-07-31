@@ -16,7 +16,7 @@ We also have sklearn and numpy installed, so you can use python library to gener
 
 - The documentation site is already connected to GitHub CI/CD outside this repository. Do not require or add Vercel-specific project configuration before publishing documentation changes.
 - For this project, pushing the intended code to GitHub triggers the existing automatic deployment. Verify the live site after the deployment finishes.
-- Google Search Console is used after deployment to submit `https://ml.kanaries.net/sitemap.xml`, request indexing for new or substantially changed pages, and verify indexing/coverage. It is not part of the build or deployment process.
+- Google Search Console is used after deployment to submit `https://ml.kanaries.net/sitemap.xml`, request indexing for new or substantially changed pages, and verify indexing/coverage. It is not part of the build or deployment process. Use the existing `sc-domain:kanaries.net` Domain Property, which already covers `ml.kanaries.net`; do not create a separate URL-prefix property for the subdomain.
 - When Search Console work is needed, use the user's authenticated external Chrome Browser Use session. Do not use the in-app browser for Search Console.
 
 ## API doc writing guidance

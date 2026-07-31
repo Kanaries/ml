@@ -77,9 +77,6 @@ export const metadata: Metadata = {
     description:
       'JavaScript and TypeScript machine learning docs with practical algorithm guides for browser and Node.js.',
   },
-  verification: {
-    google: 'dKPzeugM4g_8GZ5rIE51_-knb15pcYhPlaMrrfHQSRM',
-  },
 };
 
 export default function Layout({ children }: { children: ReactNode }) {
