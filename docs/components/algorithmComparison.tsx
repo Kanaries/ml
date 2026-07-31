@@ -19,7 +19,7 @@ function CodePane({
         <div className="text-sm font-semibold">{label}</div>
         <div className="text-xs text-fd-muted-foreground">{subtitle}</div>
       </div>
-      <pre className="overflow-x-auto p-4 text-[13px] leading-6">
+      <pre className="not-prose overflow-x-auto p-4 text-[13px] leading-6">
         <code>{code}</code>
       </pre>
     </div>
