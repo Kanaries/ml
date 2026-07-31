@@ -12,6 +12,11 @@
   gap: 0.5rem;
 }
 
+.dataInput {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .tabs {
   margin-bottom: 1rem;
 }
@@ -96,7 +101,9 @@
 
 .input,
 .textarea {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   border: 1px solid var(--color-fd-border);
   border-radius: 0.5rem;
   background: var(--color-fd-card);
@@ -119,6 +126,10 @@
 }
 
 .preview {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   max-height: 190px;
   margin-top: 0.75rem;
   overflow: auto;
@@ -128,6 +139,7 @@
 
 .table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
   font: 0.75rem ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }

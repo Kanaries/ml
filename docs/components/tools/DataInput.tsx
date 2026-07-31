@@ -74,7 +74,7 @@ export function DataInput({
   };
 
   return (
-    <div>
+    <div className={styles.dataInput}>
       <div className={styles.inputLabel}>{label}</div>
       <div className={styles.hint}>{hint}</div>
       {examples.length > 0 && (

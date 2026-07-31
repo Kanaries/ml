@@ -23,6 +23,12 @@
 .controls {
   display: grid;
   gap: 1rem;
+  overflow: hidden;
+}
+
+.controls > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .controlGroup {
@@ -63,6 +69,32 @@
   padding: 0.55rem 0.65rem;
   font: inherit;
   font-size: 0.8rem;
+}
+
+.select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.65rem;
+  padding-right: 2.4rem;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m3.5 6 4.5 4.5L12.5 6' stroke='%236c6456' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 0.8rem center;
+  background-repeat: no-repeat;
+}
+
+:global(.dark) .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m3.5 6 4.5 4.5L12.5 6' stroke='%23a89c87' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.select:focus-visible,
+.number:focus-visible,
+.button:focus-visible,
+.buttonPrimary:focus-visible,
+.chip:focus-visible {
+  border-color: var(--tool-accent, #1d3f72);
+  outline: 3px solid color-mix(in srgb, var(--tool-accent, #1d3f72) 18%, transparent);
+  outline-offset: 1px;
 }
 
 .button,
