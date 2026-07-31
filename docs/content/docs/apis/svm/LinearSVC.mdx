@@ -58,6 +58,7 @@ const y = [0, 1, 1, 0];
 const clf = new SVM.LinearSVC({ C: 1, maxIter: 1000, randomState: 0 });
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

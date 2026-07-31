@@ -162,6 +162,7 @@ function componentToMarkdown(node, record, siteUrl) {
   const interactiveDescriptions = {
     ClusteringComparison: 'The HTML version includes an interactive comparison of clustering algorithms. The agent-readable algorithm links and selection guidance continue below.',
     LogisticRegressionDemo: 'The HTML version includes an interactive logistic regression visualization. The complete runnable example and API details are included in this Markdown page.',
+    IsolationForestDemo: 'The HTML version includes an interactive Isolation Forest anomaly scoring demo. The complete runnable example and evaluation guidance continue below.',
   };
   const description = interactiveDescriptions[node.name];
   if (description) {
@@ -411,27 +412,32 @@ export async function generateAgentDocs(options = {}) {
   const siteUrl = normalizeSiteUrl(options.siteUrl ?? process.env.NEXT_PUBLIC_SITE_URL);
   const catalog = await buildCatalog(contentRoot);
   const generatedDocsRoot = path.join(publicRoot, 'docs');
+  const fullDocuments = [];
 
   await fs.rm(generatedDocsRoot, { recursive: true, force: true });
 
   for (const record of catalog.records) {
     const outputPath = path.join(publicRoot, record.outputRelative);
     const markdown = await renderPage(record, catalog, siteUrl);
+    fullDocuments.push(`<!-- Source: ${siteUrl}${record.htmlPath} -->\n\n${markdown.trim()}`);
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, markdown, 'utf8');
   }
 
   const llms = await generateLlms(catalog, contentRoot, siteUrl);
+  const llmsFull = `# @kanaries/ml Full Documentation\n\n> Complete agent-readable snapshot. Canonical index: ${siteUrl}/llms.txt\n\n${fullDocuments.join('\n\n---\n\n')}\n`;
   await fs.mkdir(publicRoot, { recursive: true });
   await Promise.all([
     fs.writeFile(path.join(publicRoot, 'llms.txt'), llms, 'utf8'),
     fs.writeFile(path.join(publicRoot, 'llm.txt'), llms, 'utf8'),
+    fs.writeFile(path.join(publicRoot, 'llms-full.txt'), llmsFull, 'utf8'),
   ]);
 
   return {
     pageCount: catalog.records.length,
     pages: catalog.records.map(({ body: _body, sourceAbsolute: _sourceAbsolute, ...record }) => record),
     llms,
+    llmsFull,
   };
 }
 

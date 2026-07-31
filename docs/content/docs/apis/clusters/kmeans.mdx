@@ -60,6 +60,7 @@ const initCenters = [[0, 0], [1, 1]];
 
 const kmeans = new Clusters.KMeans(2, 0.05, initCenters);
 const labels = kmeans.fitPredict(X, sampleWeights);
+console.log(labels);
 ```
 
 ## Detailed API reference

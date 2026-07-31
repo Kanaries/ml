@@ -32,6 +32,9 @@ test('generates a Markdown companion and llms.txt entry for every documentation 
     assert.equal(result.pages.length, result.pageCount);
     assert.equal(await fs.readFile(path.join(publicRoot, 'llm.txt'), 'utf8'), result.llms);
     assert.equal(await fs.readFile(path.join(publicRoot, 'llms.txt'), 'utf8'), result.llms);
+    assert.equal(await fs.readFile(path.join(publicRoot, 'llms-full.txt'), 'utf8'), result.llmsFull);
+    assert.match(result.llmsFull, /Complete agent-readable snapshot/);
+    assert.match(result.llmsFull, /import \{ Ensemble \} from '@kanaries\/ml'/);
     assert.match(result.llms, /\/api\/agent\/search\?q=\{query\}&limit=\{1-20\}/);
 
     for (const page of result.pages) {

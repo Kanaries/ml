@@ -15,7 +15,8 @@ const inter = Inter({
 const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-fraunces',
-  display: 'swap',
+  display: 'optional',
+  preload: false,
   style: ['normal', 'italic'],
 });
 
@@ -23,7 +24,8 @@ const fraunces = Fraunces({
 const newsreader = Newsreader({
   subsets: ['latin'],
   variable: '--font-newsreader',
-  display: 'swap',
+  display: 'optional',
+  preload: false,
   style: ['normal', 'italic'],
 });
 
@@ -31,7 +33,8 @@ const newsreader = Newsreader({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jbmono',
-  display: 'swap',
+  display: 'optional',
+  preload: false,
 });
 
 const fontVars = [

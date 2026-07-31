@@ -56,6 +56,7 @@ const X = [[0, 0], [0.2, 0.1], [1, 1], [1.1, 1.0], [3, 3]];
 
 const model = new Manifold.SpectralEmbedding({ nComponents: 2, nNeighbors: 2 });
 const embedding = model.fitTransform(X);
+console.log(embedding);
 ```
 
 ## Detailed API reference

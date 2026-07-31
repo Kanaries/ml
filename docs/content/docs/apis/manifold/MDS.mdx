@@ -56,6 +56,7 @@ const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
 
 const mds = new Manifold.MDS({ nComponents: 2 });
 const embedding = mds.fitTransform(X);
+console.log(embedding);
 ```
 
 ## Detailed API reference

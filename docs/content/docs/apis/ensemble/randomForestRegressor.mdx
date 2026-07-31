@@ -26,6 +26,7 @@ const reg = new Ensemble.RandomForestRegressor({
 
 reg.fit([[0], [1], [2], [3]], [0, 1, 4, 9]);
 const pred = reg.predict([[4]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

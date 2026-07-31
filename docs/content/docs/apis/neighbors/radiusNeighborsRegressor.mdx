@@ -21,6 +21,7 @@ import { Neighbors } from '@kanaries/ml';
 const reg = new Neighbors.RadiusNeighborsRegressor({ radius: 1.25, weights: 'distance' });
 reg.fit([[0], [1], [4]], [0, 1, 4]);
 const pred = reg.predict([[0.5], [10]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

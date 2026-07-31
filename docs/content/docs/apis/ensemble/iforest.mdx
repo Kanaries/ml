@@ -53,6 +53,7 @@ const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
 const clf = new Ensemble.IsolationForest(256, 50, 0.25);
 clf.fit(X);
 const pred = clf.predict(X);
+console.log(pred);
 ```
 
 ## Detailed API reference

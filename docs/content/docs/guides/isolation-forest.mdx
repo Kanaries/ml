@@ -1,0 +1,107 @@
+---
+title: Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo
+description: Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and implement outlier scoring with @kanaries/ml in JavaScript or TypeScript.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { IsolationForestDemo } from '@/components/playground/IsolationForestDemo';
+
+Isolation Forest is an unsupervised anomaly-detection algorithm that looks for observations that are easy to separate from the rest of a dataset. Instead of estimating the full density of normal data, it repeatedly chooses a random feature and a random split value. Rare, isolated observations tend to reach a leaf after fewer splits than points inside a dense, ordinary region.
+
+This guide covers the intuition, score, contamination threshold, evaluation workflow, and browser or Node.js implementation. The live demo uses `Ensemble.IsolationForest` from `@kanaries/ml`, so changing a control fits a real JavaScript model locally rather than requesting a Python backend.
+
+## Interactive Isolation Forest demo
+
+Move the contamination slider and watch continuous scores remain stable while flagged labels change. Increase the number of trees to see the ranking stabilize. The five distant points remain fixed; **Generate new normal sample** changes the central cloud and refits the forest.
+
+<IsolationForestDemo />
+
+## How Isolation Forest works
+
+An isolation tree recursively partitions a random subsample. At a node, it selects a feature and draws a split between the observed minimum and maximum. Points below the split go to one child and the rest go to the other. The process continues until a point is isolated, a node contains identical values, or a depth limit is reached.
+
+Consider one transaction far outside a dense group. Many random splits separate it early because empty space lies between it and ordinary observations. A central transaction generally needs more partitions before it is alone. Isolation Forest averages this path length over many randomized trees. Shorter average paths produce higher anomaly scores.
+
+The method is attractive because it does not need anomaly labels for fitting, handles multiple numeric features, and avoids constructing pairwise distances between every sample. It works especially well when anomalies are few and differ from normal observations in feature space.
+
+## Understanding the anomaly score
+
+The score normalizes average path length by the expected path length of an unsuccessful search in a binary search tree of the same subsample size. Scores closer to one indicate easier isolation; scores around one half resemble ordinary observations under the reference. Interpret ranking and stability rather than treating one generic number as universally meaningful.
+
+In `@kanaries/ml`, `anomalyScore(row)` returns the continuous score for one observation. `predict(rows)` applies the fitted threshold and returns `1` for an anomaly and `0` for normal. This differs from scikit-learn, whose `predict` returns `-1` for outliers and `1` for inliers. Normalize label conventions before comparing output or computing metrics.
+
+## Contamination is a threshold decision
+
+Contamination represents the expected fraction of outliers. During fitting it selects a score quantile used to convert scores into labels. Raising contamination usually flags more observations even though the underlying ranking may remain similar. It does not tell the model the true anomaly rate.
+
+Choose contamination from operational capacity and validation evidence. A fraud team that can investigate fifty alerts per day faces a different threshold than a safety monitor where one missed event is costly. If labeled incidents exist, evaluate precision and recall across thresholds. Without labels, inspect top-ranked cases, test stability across time windows, and measure whether alerts lead to useful action.
+
+## JavaScript and Python quick start
+
+<AlgorithmComparison
+  title={"IsolationForest"}
+  pythonCode={String.raw`from sklearn.ensemble import IsolationForest
+
+X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]]
+model = IsolationForest(n_estimators=100, contamination=0.25, random_state=42)
+labels = model.fit_predict(X)  # 1=inlier, -1=outlier
+scores = -model.score_samples(X)`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
+const model = new Ensemble.IsolationForest(
+  256,  // subsampling size
+  100,  // number of trees
+  0.25, // contamination
+  42    // random seed
+);
+model.fit(X);
+const labels = model.predict(X); // 0=normal, 1=anomaly
+const scores = X.map((row) => model.anomalyScore(row));`}
+/>
+
+The complete JavaScript example imports the public package, creates a deterministic estimator, fits numeric rows, and produces labels and scores. It runs in a browser bundler or Node.js. Store fitted preprocessing rules with the model and apply them unchanged to incoming observations.
+
+## Subsampling size and number of trees
+
+Each tree uses at most the configured subsampling size. A smaller sample makes trees fast and can emphasize rare structure, while a larger sample represents more of the distribution but increases work and expected path depth. The traditional default of 256 is a useful starting point, not a universal optimum. When training data is smaller, the implementation uses the available rows.
+
+Tree count controls Monte Carlo stability. Too few trees can produce a noisy ranking because it depends heavily on particular random partitions. Add trees until validation metrics or the top-alert set stops changing materially. More trees increase fitting and scoring cost but do not repair uninformative features, distribution drift, or bad evaluation data.
+
+## Feature preparation and common failure modes
+
+Isolation Forest does not rely on Euclidean distance, so it is less directly scale-sensitive than KNN or K-Means. Scale and transformations still affect ranges from which random thresholds are drawn and can change isolation behavior. Use domain-meaningful transforms for highly skewed quantities, encode categories carefully, and avoid identifiers that make every observation look unique.
+
+High-dimensional irrelevant features dilute the chance that useful separating features are selected. Clustered anomalies can look normal to one another, and local anomalies hidden inside regions of varying density may need Local Outlier Factor or a density-aware method. If normal behavior changes by customer, device, or season, one global forest may mainly rediscover those segments.
+
+## Evaluating anomaly detection without fooling yourself
+
+Random train/test splitting can leak repeated entities and future patterns. Prefer chronological evaluation for monitoring data and group splits when the same account or device appears repeatedly. Fit on a representative historical window, score a later window, and review precision at the alert volume the team can handle. Include delayed labels where possible.
+
+Track score distributions, flagged volume, investigation outcomes, and data quality after deployment. A sudden increase might indicate incidents, a feature-pipeline break, or population drift. Do not silently retrain away a meaningful anomaly wave. Pair monitoring with an escalation process and retain enough context to reproduce each score.
+
+## When to use Isolation Forest in JavaScript
+
+Browser-side scoring is useful for privacy-preserving quality checks, offline analytics, interactive teaching, and immediate feedback before data leaves a device. Node.js scoring keeps feature extraction and product logic in one runtime. For large training sets, train asynchronously or off the main UI thread and measure bundle, latency, and memory budgets.
+
+Use Isolation Forest when labels are scarce, anomalies are relatively rare, and random partitioning can expose them. Use supervised classification when reliable incident labels exist. Compare with robust rules when domain thresholds are known and must be auditable.
+
+Continue to the detailed [Isolation Forest JavaScript API](/docs/apis/ensemble/iforest), compare randomized classification trees in the [Random Forest playground](/playground/random-forest), or inspect alert quality with the [confusion matrix and F1 calculator](/tools/confusion-matrix-calculator).
+
+## Frequently asked questions
+
+### Is Isolation Forest supervised or unsupervised?
+
+It is normally fit without anomaly labels. Labels are still valuable for choosing contamination, measuring alert precision and recall, and deciding whether the ranking solves the operational problem.
+
+### Is a higher anomaly score more anomalous?
+
+Yes in `@kanaries/ml`: shorter average isolation paths produce higher `anomalyScore` values. Always verify conventions because some APIs return normality scores or negate decision values.
+
+### What is a good contamination value?
+
+There is no universal value. Start from plausible incident prevalence and alert capacity, then validate against reviewed examples or delayed outcomes. Report sensitivity across several thresholds.
+
+### Can Isolation Forest detect anomalies in real time?
+
+A fitted forest can score rows quickly and independently. Retraining and feature computation may be heavier. Benchmark the complete pipeline and move expensive fitting off the browser main thread when necessary.

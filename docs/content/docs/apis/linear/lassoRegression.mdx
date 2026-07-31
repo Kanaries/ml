@@ -24,6 +24,7 @@ const y = [1, 2, 3, 4];
 const model = new Linear.LassoRegression({ alpha: 0.1, maxIter: 1000, tol: 1e-6 });
 model.fit(X, y);
 const pred = model.predict([[4, 0]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

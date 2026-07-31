@@ -50,6 +50,7 @@ const X = [[1, 0, 1], [1, 1, 0], [0, 1, 1], [0, 0, 1]];
 
 const rbm = new NeuralNetwork.BernoulliRBM({ nComponents: 2, learningRate: 0.1, batchSize: 2, nIter: 20 });
 const hidden = rbm.fitTransform(X);
+console.log(hidden);
 ```
 
 ## Detailed API reference

@@ -62,6 +62,7 @@ const clf = new Ensemble.XGBoostClassifier({ nEstimators: 100, learningRate: 0.3
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.1, 0.2]]);
 const proba = clf.predictProba([[0.9, 0.8]]);
+console.log(proba);
 ```
 
 ## Detailed API reference

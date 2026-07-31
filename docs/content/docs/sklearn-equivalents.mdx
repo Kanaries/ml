@@ -1,0 +1,108 @@
+---
+title: scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml
+description: Translate scikit-learn estimators and workflows to JavaScript or TypeScript with a searchable sklearn-to-@kanaries/ml API mapping, runnable examples, and compatibility notes.
+---
+
+Use this table when you know the scikit-learn class or function and need the closest `@kanaries/ml` equivalent for a browser or Node.js application. Both libraries use estimator-style `fit`, `predict`, `transform`, and `fitPredict` workflows where the algorithm permits it. Constructor syntax and label conventions can differ, so follow the linked JavaScript API before translating production code.
+
+## Quick translation example
+
+### Python (scikit-learn)
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(
+    n_estimators=100,
+    max_depth=6,
+    random_state=42
+)
+model.fit(X, y)
+predictions = model.predict(test_X)
+```
+
+### JavaScript / TypeScript (@kanaries/ml)
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+
+const model = new Ensemble.RandomForestClassifier({
+  nEstimators: 100,
+  max_depth: 6,
+  randomState: 42,
+});
+model.fit(X, y);
+const predictions = model.predict(testX);
+```
+
+## Estimator and function equivalents
+
+| scikit-learn Python API | @kanaries/ml JavaScript / TypeScript API | Notes |
+| --- | --- | --- |
+| `sklearn.linear_model.LinearRegression` | [`Linear.LinearRegression`](/docs/apis/linear/linearRegression) | `fit`, `predict`, weights, and bias |
+| `sklearn.linear_model.LogisticRegression` | [`Linear.LogisticRegression`](/docs/apis/linear/logisticRegression) | Gradient-based JS options differ from sklearn solver options |
+| `sklearn.linear_model.Ridge` | [`Linear.RidgeRegression`](/docs/apis/linear/ridgeRegression) | L2-regularized regression |
+| `sklearn.linear_model.RidgeClassifier` | [`Linear.RidgeClassifier`](/docs/apis/linear/ridgeClassifier) | Linear classification with L2 penalty |
+| `sklearn.linear_model.Lasso` | [`Linear.LassoRegression`](/docs/apis/linear/lassoRegression) | L1-regularized regression |
+| `sklearn.linear_model.ElasticNet` | [`Linear.ElasticNet`](/docs/apis/linear/elasticNet) | Combined L1 and L2 regularization |
+| `sklearn.preprocessing.PolynomialFeatures` + regression | [`Linear.PolynomialRegression`](/docs/apis/linear/polynomialRegression) | Integrated polynomial regression helper |
+| `sklearn.tree.DecisionTreeClassifier` | [`Tree.DecisionTreeClassifier`](/docs/apis/tree/decisionTreeClassifier) | Gini/entropy, depth, and minimum split controls |
+| `sklearn.tree.DecisionTreeRegressor` | [`Tree.DecisionTreeRegressor`](/docs/apis/tree/decisionTreeRegressor) | Regression tree |
+| `sklearn.tree.ExtraTreeClassifier` | [`Tree.ExtraTreeClassifier`](/docs/apis/tree/extraTreeClassifier) | Randomized thresholds |
+| `sklearn.tree.ExtraTreeRegressor` | [`Tree.ExtraTreeRegressor`](/docs/apis/tree/extraTreeRegressor) | Randomized regression tree |
+| `sklearn.ensemble.RandomForestClassifier` | [`Ensemble.RandomForestClassifier`](/docs/apis/ensemble/randomForestClassifier) | Bootstrap aggregation and feature subsampling |
+| `sklearn.ensemble.RandomForestRegressor` | [`Ensemble.RandomForestRegressor`](/docs/apis/ensemble/randomForestRegressor) | Forest regression |
+| `sklearn.ensemble.IsolationForest` | [`Ensemble.IsolationForest`](/docs/apis/ensemble/iforest) | JS labels: `1` anomaly, `0` normal; sklearn uses `-1` and `1` |
+| `sklearn.ensemble.BaggingClassifier` | [`Ensemble.BaggingClassifier`](/docs/apis/ensemble/baggingClassifier) | Bootstrap ensemble |
+| `sklearn.ensemble.AdaBoostClassifier` | [`Ensemble.AdaBoostClassifier`](/docs/apis/ensemble/adaboostClassifier) | Includes multiclass SAMME behavior |
+| `sklearn.ensemble.AdaBoostRegressor` | [`Ensemble.AdaBoostRegressor`](/docs/apis/ensemble/adaboostRegressor) | Boosted regression |
+| `sklearn.ensemble.GradientBoostingClassifier` | [`Ensemble.GradientBoostingClassifier`](/docs/apis/ensemble/gradientBoostingClassifier) | Stage-wise classification ensemble |
+| `sklearn.ensemble.GradientBoostingRegressor` | [`Ensemble.GradientBoostingRegressor`](/docs/apis/ensemble/gradientBoostingRegressor) | Stage-wise regression ensemble |
+| `xgboost.XGBClassifier` | [`Ensemble.XGBoostClassifier`](/docs/apis/ensemble/xgboostClassifier) | XGBoost-style estimator in the ensemble namespace |
+| `xgboost.XGBRegressor` | [`Ensemble.XGBoostRegressor`](/docs/apis/ensemble/xgboostRegressor) | XGBoost-style regression |
+| `sklearn.neighbors.KNeighborsClassifier` | [`Neighbors.KNearestNeighbors`](/docs/apis/neighbors/knn) | Positional `k`, weighting, and distance options |
+| `sklearn.neighbors.KNeighborsRegressor` | [`Neighbors.KNeighborsRegressor`](/docs/apis/neighbors/kneighborsRegressor) | Neighbor regression |
+| `sklearn.neighbors.RadiusNeighborsClassifier` | [`Neighbors.RadiusNeighborsClassifier`](/docs/apis/neighbors/radiusNeighborsClassifier) | Radius-based classification |
+| `sklearn.neighbors.RadiusNeighborsRegressor` | [`Neighbors.RadiusNeighborsRegressor`](/docs/apis/neighbors/radiusNeighborsRegressor) | Radius-based regression |
+| `sklearn.neighbors.NearestCentroid` | [`Neighbors.NearestCentroid`](/docs/apis/neighbors/nearestCentroid) | Class-centroid classifier |
+| `sklearn.neighbors.BallTree` | [`Neighbors.BallTree`](/docs/apis/neighbors/ballTree) | Spatial neighbor index |
+| `sklearn.neighbors.KDTree` | [`Neighbors.KDTree`](/docs/apis/neighbors/kdTree) | Axis-partitioned neighbor index |
+| `sklearn.cluster.KMeans` | [`Clusters.KMeans`](/docs/apis/clusters/kmeans) | `fitPredict`, centroids, inertia, seeds, and restarts |
+| `sklearn.cluster.kmeans_plusplus` | [`Clusters.kmeansPlusPlus`](/docs/apis/clusters/kmeansPlusPlus) | Center initialization |
+| `sklearn.cluster.DBSCAN` | [`Clusters.DBScan`](/docs/apis/clusters/dbscan) | Note JavaScript class capitalization |
+| `sklearn.cluster.OPTICS` | [`Clusters.OPTICS`](/docs/apis/clusters/optics) | Density ordering |
+| `sklearn.cluster.MeanShift` | [`Clusters.MeanShift`](/docs/apis/clusters/meanShift) | Mode-seeking clustering |
+| `hdbscan.HDBSCAN` | [`Clusters.HDBScan`](/docs/apis/clusters/hdbscan) | HDBSCAN-style density clustering |
+| `sklearn.decomposition.PCA` | [`Decomposition.PCA`](/docs/apis/decomposition/pca) | `fitTransform`, components, variance, inverse transform |
+| `sklearn.decomposition.TruncatedSVD` | [`Decomposition.TruncatedSVD`](/docs/apis/decomposition/truncatedSVD) | Low-rank decomposition without centering |
+| `sklearn.decomposition.SparsePCA` | [`Decomposition.SparsePCA`](/docs/apis/decomposition/sparsePCA) | Sparse components |
+| `sklearn.manifold.TSNE` | [`Manifold.TSNE`](/docs/apis/manifold/tsne) | Nonlinear visualization embedding |
+| `sklearn.manifold.MDS` | [`Manifold.MDS`](/docs/apis/manifold/MDS) | Dissimilarity-preserving embedding |
+| `sklearn.manifold.SpectralEmbedding` | [`Manifold.SpectralEmbedding`](/docs/apis/manifold/spectralEmbedding) | Graph spectral embedding |
+| `sklearn.manifold.LocallyLinearEmbedding` | [`Manifold.LocallyLinearEmbedding`](/docs/apis/manifold/lle) | Local linear manifold embedding |
+| `sklearn.svm.SVC` | [`SVM.SVC`](/docs/apis/svm/SVC) | Linear, RBF, polynomial, and sigmoid kernels |
+| `sklearn.svm.NuSVC` | [`SVM.NuSVC`](/docs/apis/svm/NuSVC) | Nu-parameterized classification |
+| `sklearn.svm.LinearSVC` | [`SVM.LinearSVC`](/docs/apis/svm/LinearSVC) | Linear support vector classification |
+| `sklearn.svm.LinearSVR` | [`SVM.LinearSVR`](/docs/apis/svm/LinearSVR) | Linear support vector regression |
+| `sklearn.naive_bayes.GaussianNB` | [`Bayes.GaussianNB`](/docs/apis/bayes/gaussianNB) | Continuous Gaussian features |
+| `sklearn.naive_bayes.MultinomialNB` | [`Bayes.MultinomialNB`](/docs/apis/bayes/multinomialNB) | Non-negative count features |
+| `sklearn.naive_bayes.ComplementNB` | [`Bayes.ComplementNB`](/docs/apis/bayes/complementNB) | Imbalanced count classification |
+| `sklearn.naive_bayes.BernoulliNB` | [`Bayes.BernoulliNB`](/docs/apis/bayes/bernoulliNB) | Binary features |
+| `sklearn.naive_bayes.CategoricalNB` | [`Bayes.CategoricalNB`](/docs/apis/bayes/categoricalNB) | Encoded categorical features |
+| `sklearn.semi_supervised.LabelPropagation` | [`SemiSupervised.LabelPropagation`](/docs/apis/semi_supervised/labelPropagation) | Graph-based propagation |
+| `sklearn.semi_supervised.LabelSpreading` | [`SemiSupervised.LabelSpreading`](/docs/apis/semi_supervised/labelSpreading) | Regularized label spreading |
+| `sklearn.neural_network.BernoulliRBM` | [`NeuralNetwork.BernoulliRBM`](/docs/apis/neural_network/bernoulliRBM) | Bernoulli restricted Boltzmann machine |
+
+## Metrics and preprocessing equivalents
+
+`Metrics` includes `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `confusionMatrix`, `rocCurve`, `rocAucScore`, `precisionRecallCurve`, `meanSquaredError`, `r2Score`, and `adjustedRandScore`. `utils.Preprocessing` provides `StandardScaler`, `MinMaxScaler`, and `MaxAbsScaler`. `utils.ModelSelection` includes K-fold splitters, grid search, randomized search, and cross-validation. See the [Metrics API](/docs/apis/metrics) and [Utilities API](/docs/apis/utils).
+
+## Translation checklist
+
+1. Match feature preparation and train/test splitting before comparing estimators.
+2. Check constructor names and defaults; JavaScript positional APIs are not always identical to Python keyword arguments.
+3. Fix random seeds where available, but expect random-number streams and tie breaking to differ.
+4. Compare predictions, scores, and tolerances on fixed data rather than serialized internal structures.
+5. Confirm label conventions, especially Isolation Forest and any metric's positive class.
+
+For interactive examples, open the [algorithm playgrounds](/playground). For package-wide installation and runtime guidance, return to the [documentation home](/docs).

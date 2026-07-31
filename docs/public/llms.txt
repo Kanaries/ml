@@ -131,3 +131,8 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 ## KMath
 
 - [KMath Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/KMath/index.html.md): Use lightweight math and descriptive statistics helpers from the @kanaries/ml KMath JavaScript and TypeScript implementation.
+
+## Optional
+
+- [Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo](https://ml.kanaries.net/docs/guides/isolation-forest.md): Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and implement outlier scoring with @kanaries/ml in JavaScript or TypeScript.
+- [scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/sklearn-equivalents.md): Translate scikit-learn estimators and workflows to JavaScript or TypeScript with a searchable sklearn-to-@kanaries/ml API mapping, runnable examples, and compatibility notes.

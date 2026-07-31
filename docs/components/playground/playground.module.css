@@ -1,0 +1,216 @@
+.root {
+  padding: clamp(0.7rem, 2vw, 1.25rem);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.34fr) minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.controls,
+.canvas,
+.card {
+  min-width: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.8rem;
+  background: var(--color-fd-background);
+  padding: 0.9rem;
+}
+
+.controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.controlGroup {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.controlGroup label,
+.label {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rangeRow {
+  display: grid;
+  grid-template-columns: 1fr 3.5rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rangeRow output {
+  font: 700 0.8rem ui-monospace, Menlo, monospace;
+  text-align: right;
+}
+
+.select,
+.number,
+.button,
+.buttonPrimary,
+.chip {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.5rem;
+  background: var(--color-fd-card);
+  color: var(--color-fd-foreground);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.button,
+.buttonPrimary,
+.chip {
+  cursor: pointer;
+}
+
+.buttonPrimary,
+.chipActive {
+  border-color: var(--tool-accent, #1d3f72);
+  background: var(--tool-accent, #1d3f72);
+  color: #fff;
+}
+
+.buttonRow,
+.chips,
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.hint {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.metric {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.55rem;
+  padding: 0.55rem;
+  background: var(--color-fd-card);
+}
+
+.metric span {
+  display: block;
+  overflow: hidden;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.62rem;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 0.18rem;
+  font: 700 1rem ui-monospace, Menlo, monospace;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.chartTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.axisText {
+  fill: var(--color-fd-muted-foreground);
+  font: 10px ui-monospace, Menlo, monospace;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.7rem;
+}
+
+.swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+}
+
+.tableWrap {
+  max-height: 210px;
+  overflow: auto;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.55rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 0.7rem ui-monospace, Menlo, monospace;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--color-fd-border);
+  padding: 0.4rem 0.5rem;
+  text-align: right;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-fd-muted);
+}
+
+.error {
+  border: 1px solid #c66;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, #c44 8%, transparent);
+  color: #a33;
+  padding: 0.65rem;
+  font-size: 0.76rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 880px) {
+  .workspace,
+  .chartGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .root { padding: 0.5rem; }
+  .controls,
+  .canvas,
+  .card { padding: 0.7rem; }
+  .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

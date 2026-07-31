@@ -60,6 +60,7 @@ const y = [0, 1, 1, 0];
 const clf = new Bayes.CategoricalNB({ alpha: 1.0 });
 clf.fit(X, y);
 const pred = clf.predict([[1, 1], [0, 0]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

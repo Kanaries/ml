@@ -56,6 +56,7 @@ const X = [[0, 0, 1], [0, 1, 1], [1, 0, 0], [1, 1, 0]];
 
 const tsne = new Manifold.TSNE({ nComponents: 2, perplexity: 2, learningRate: 50, nIter: 300 });
 const embedding = tsne.fitTransform(X);
+console.log(embedding);
 ```
 
 ## Detailed API reference

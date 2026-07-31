@@ -38,6 +38,14 @@ export const baseOptions: BaseLayoutProps = {
       url: '/docs/apis',
     },
     {
+      text: 'ML Tools',
+      url: '/tools',
+    },
+    {
+      text: 'Playground',
+      url: '/playground',
+    },
+    {
       text: 'GitHub',
       url: 'https://github.com/Kanaries/ml',
     },

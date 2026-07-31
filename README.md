@@ -7,7 +7,7 @@
 
 **@kanaries/ml** is a machine learning library for JavaScript and TypeScript with a scikit-learn-style API. Train and run classification, regression, clustering, dimensionality reduction, and anomaly detection models directly in the browser or in Node.js — no Python service required. If you know scikit-learn, you already know most of this library: estimators follow the same `fit` / `predict` workflow, naming, and options wherever practical.
 
-[Documentation](https://ml.kanaries.net/docs) · [API Reference](https://ml.kanaries.net/docs/apis) · [npm](https://www.npmjs.com/package/@kanaries/ml) · [Issues](https://github.com/Kanaries/ml/issues)
+[Documentation](https://ml.kanaries.net/docs) · [Interactive ML Tools](https://ml.kanaries.net/tools) · [Algorithm Playgrounds](https://ml.kanaries.net/playground) · [API Reference](https://ml.kanaries.net/docs/apis) · [npm](https://www.npmjs.com/package/@kanaries/ml) · [Issues](https://github.com/Kanaries/ml/issues)
 
 ## Features
 
@@ -19,6 +19,8 @@
 - **Runs anywhere JavaScript runs** — browsers, Node.js, and edge runtimes, with Web Worker support via `asyncMode`
 - **TypeScript-first** — written in TypeScript with full type definitions shipped
 - **Zero runtime dependencies** — nothing else gets pulled into your bundle
+
+Try the library without installing anything: use the free browser-based [confusion matrix and F1 calculator](https://ml.kanaries.net/tools/confusion-matrix-calculator), [logistic regression calculator](https://ml.kanaries.net/tools/logistic-regression-calculator), or [interactive algorithm playgrounds](https://ml.kanaries.net/playground). Explore [PCA](https://ml.kanaries.net/playground/pca), [KNN](https://ml.kanaries.net/playground/knn), [gradient descent](https://ml.kanaries.net/playground/gradient-descent), [K-Means](https://ml.kanaries.net/playground/kmeans), [decision trees](https://ml.kanaries.net/playground/decision-tree), and [Random Forest](https://ml.kanaries.net/playground/random-forest) locally with JavaScript/Python comparison code.
 
 ## How it compares
 

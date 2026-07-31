@@ -50,6 +50,7 @@ const X = [[0, 0], [1, 1], [2, 2], [3, 3]];
 const tree = new Neighbors.BallTree(X, 2);
 
 const { distances, indices } = tree.query([[1.2, 1.1]], 2);
+console.log(distances);
 ```
 
 ## Detailed API reference

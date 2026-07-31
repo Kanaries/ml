@@ -26,6 +26,7 @@ const clf = new Neighbors.RadiusNeighborsClassifier({
 
 clf.fit([[0], [1], [4]], [0, 0, 1]);
 const pred = clf.predict([[0.5], [10]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

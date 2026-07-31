@@ -26,6 +26,7 @@ const y = [1, 2, 5, 10];
 const model = new Linear.PolynomialRegression({ degree: 2 });
 model.fit(X, y);
 const pred = model.predict([[4]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

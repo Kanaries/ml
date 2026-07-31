@@ -6,6 +6,23 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   transpilePackages: ['@kanaries/ml'],
+  turbopack: {
+    // @kanaries/ml supports Node worker threads and browser Web Workers from
+    // one ESM entry. Browser bundles never execute the Node branch, but
+    // Turbopack still resolves its static require unless it is aliased.
+    resolveAlias: {
+      worker_threads: './lib/empty-module.ts',
+    },
+  },
+  webpack(config, { isServer }) {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        worker_threads: false,
+      };
+    }
+    return config;
+  },
   async headers() {
     return [
       {

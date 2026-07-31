@@ -63,6 +63,7 @@ const y = [1.0, 2.0, 3.1, 4.1];
 const reg = new Tree.ExtraTreeRegressor({ max_depth: 3 });
 reg.fit(X, y);
 const pred = reg.predict([[1.5], [2.5]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

@@ -21,6 +21,7 @@ import { Bayes } from '@kanaries/ml';
 const clf = new Bayes.GaussianNB({ varSmoothing: 1e-9 });
 clf.fit([[1.0, 2.0], [1.2, 1.9], [4.0, 4.2], [4.2, 4.0]], [0, 0, 1, 1]);
 const pred = clf.predict([[1.1, 2.1], [4.1, 4.1]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

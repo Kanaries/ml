@@ -9,11 +9,12 @@
     "prebuild": "node scripts/generate-agent-docs.mjs",
     "predev": "node scripts/generate-agent-docs.mjs",
     "start": "next start",
-    "test": "node --test scripts/__tests__/agent-docs.test.mjs",
+    "test": "node --test scripts/__tests__/*.test.mjs",
+    "test:production-seo": "node scripts/verify-production-seo.mjs",
     "postinstall": "fumadocs-mdx"
   },
   "dependencies": {
-    "@kanaries/ml": "latest",
+    "@kanaries/ml": "1.0.1",
     "@observablehq/plot": "^0.6.17",
     "fumadocs-core": "15.4.2",
     "fumadocs-mdx": "11.6.6",

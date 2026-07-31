@@ -12,6 +12,13 @@ The library uses yarn as package manager.
 
 We also have sklearn and numpy installed, so you can use python library to generate output for testing the js library.
 
+## Deployment and search operations
+
+- The documentation site is already connected to GitHub CI/CD outside this repository. Do not require or add Vercel-specific project configuration before publishing documentation changes.
+- For this project, pushing the intended code to GitHub triggers the existing automatic deployment. Verify the live site after the deployment finishes.
+- Google Search Console is used after deployment to submit `https://ml.kanaries.net/sitemap.xml`, request indexing for new or substantially changed pages, and verify indexing/coverage. It is not part of the build or deployment process.
+- When Search Console work is needed, use the user's authenticated external Chrome Browser Use session. Do not use the in-app browser for Search Console.
+
 ## API doc writing guidance
 
 When writing or revising API documentation pages for algorithms, do not use a bare algorithm name as the full title or as the only framing. The page should be written to compete on searches for the JavaScript implementation, not just the generic algorithm name that is already dominated by Python content.
@@ -39,4 +46,3 @@ Style constraints:
 - The article should read like a useful guide, not a dry symbol dump.
 - Background and problem framing should come before low-level API details.
 - Comparison blocks are useful, but they should appear after the reader understands what the algorithm is and why the JavaScript implementation matters.
-

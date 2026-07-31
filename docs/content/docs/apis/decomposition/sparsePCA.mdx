@@ -52,6 +52,7 @@ const X = [[1, 2, 0], [2, 1, 0], [3, 4, 1], [4, 3, 1]];
 
 const model = new Decomposition.SparsePCA({ nComponents: 2, alpha: 0.1 });
 const embedding = model.fitTransform(X);
+console.log(embedding);
 ```
 
 ## Detailed API reference

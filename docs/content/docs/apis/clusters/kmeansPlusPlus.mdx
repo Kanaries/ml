@@ -47,6 +47,7 @@ import { Clusters } from '@kanaries/ml';
 const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2], [8, 8]];
 
 const { centers, indices } = Clusters.kmeansPlusPlus(X, 3);
+console.log(centers);
 ```
 
 ## Detailed API reference

@@ -50,6 +50,7 @@ const X = [[0, 0], [0.1, 0.1], [5, 5], [5.2, 5.1], [10, 1]];
 
 const model = new Clusters.OPTICS({ min_samples: 2, eps: 0.6 });
 const labels = model.fitPredict(X);
+console.log(labels);
 ```
 
 ## Detailed API reference

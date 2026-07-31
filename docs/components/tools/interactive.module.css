@@ -1,0 +1,357 @@
+.calculator {
+  padding: clamp(0.85rem, 2vw, 1.4rem);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.tabs,
+.actions,
+.sampleActions,
+.codeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tabs {
+  margin-bottom: 1rem;
+}
+
+.tab,
+.button,
+.buttonSecondary,
+.sampleButton {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.55rem;
+  padding: 0.58rem 0.8rem;
+  background: var(--color-fd-card);
+  color: var(--color-fd-foreground);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+
+.tab:hover,
+.button:hover,
+.buttonSecondary:hover,
+.sampleButton:hover {
+  border-color: var(--tool-accent, #1d3f72);
+  transform: translateY(-1px);
+}
+
+.tabActive,
+.button {
+  border-color: var(--tool-accent, #1d3f72);
+  background: var(--tool-accent, #1d3f72);
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.85fr) minmax(360px, 1.15fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.panel {
+  min-width: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.85rem;
+  background: var(--color-fd-background);
+  padding: 1rem;
+}
+
+.panelTitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.panelHint,
+.hint,
+.muted {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.matrixInputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field label,
+.inputLabel {
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.5rem;
+  background: var(--color-fd-card);
+  color: var(--color-fd-foreground);
+  padding: 0.65rem 0.7rem;
+  font: 0.82rem/1.5 ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  outline: none;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--tool-accent, #1d3f72);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tool-accent, #1d3f72) 14%, transparent);
+}
+
+.textarea {
+  min-height: 210px;
+  resize: vertical;
+  margin-top: 0.45rem;
+}
+
+.preview {
+  max-height: 190px;
+  margin-top: 0.75rem;
+  overflow: auto;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.55rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 0.75rem ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+.table th,
+.table td {
+  min-width: 72px;
+  border-bottom: 1px solid var(--color-fd-border);
+  border-right: 1px solid var(--color-fd-border);
+  padding: 0.42rem 0.5rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-fd-muted);
+  color: var(--color-fd-muted-foreground);
+}
+
+.tableInput {
+  width: 100%;
+  min-width: 58px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  outline: none;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  min-width: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.65rem;
+  padding: 0.72rem;
+  background: var(--color-fd-card);
+}
+
+.statLabel {
+  overflow: hidden;
+  color: var(--color-fd-muted-foreground);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statValue {
+  margin-top: 0.22rem;
+  font: 700 clamp(1rem, 2vw, 1.25rem) ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+.visualGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.chartCard {
+  min-width: 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.7rem;
+  background: var(--color-fd-card);
+  padding: 0.75rem;
+}
+
+.chartTitle {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.axisLabel {
+  fill: var(--color-fd-muted-foreground);
+  font: 10px ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+.barList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(52px, auto) 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.barTrack {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--color-fd-muted);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tool-accent, #1d3f72);
+}
+
+.error {
+  margin: 0.8rem 0;
+  border: 1px solid color-mix(in srgb, #c43b3b 45%, var(--color-fd-border));
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, #c43b3b 8%, transparent);
+  color: #a62f2f;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.actions {
+  margin-top: 0.9rem;
+}
+
+.buttonSecondary {
+  background: transparent;
+}
+
+.modelTable {
+  margin-top: 1rem;
+}
+
+.modelTable td:first-child,
+.modelTable th:first-child {
+  text-align: left;
+}
+
+.sliderGrid {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+}
+
+.sliderRow {
+  display: grid;
+  grid-template-columns: minmax(64px, auto) 1fr 64px;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.75rem;
+}
+
+.probability {
+  margin-top: 0.9rem;
+  border-radius: 0.65rem;
+  padding: 0.8rem;
+  background: var(--tool-accent-soft, rgba(29, 63, 114, 0.1));
+}
+
+.probability strong {
+  font: 700 1.25rem ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+.codeBox {
+  margin-top: 1rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.codeTabs {
+  align-items: center;
+  border-bottom: 1px solid var(--color-fd-border);
+  padding: 0.45rem;
+  background: var(--color-fd-muted);
+}
+
+.codeTabs .tab {
+  padding: 0.35rem 0.6rem;
+}
+
+.codeCopy {
+  margin-left: auto;
+}
+
+.codePre {
+  max-height: 320px;
+  margin: 0;
+  overflow: auto;
+  padding: 1rem;
+  font: 0.75rem/1.65 ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+
+@media (max-width: 900px) {
+  .grid,
+  .visualGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .calculator {
+    padding: 0.55rem;
+  }
+
+  .panel {
+    padding: 0.75rem;
+  }
+
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

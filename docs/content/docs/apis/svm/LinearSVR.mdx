@@ -58,6 +58,7 @@ const y = [1.0, 2.1, 2.9, 4.2];
 const reg = new SVM.LinearSVR({ C: 1, epsilon: 0, maxIter: 1000, randomState: 0 });
 reg.fit(X, y);
 const pred = reg.predict([[1.5], [2.5]]);
+console.log(pred);
 ```
 
 ## Detailed API reference

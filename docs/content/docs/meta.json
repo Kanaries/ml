@@ -2,6 +2,8 @@
   "title": "Documentation",
   "pages": [
     "index",
+    "sklearn-equivalents",
+    "guides",
     "apis"
   ]
 }
