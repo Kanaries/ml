@@ -5,8 +5,8 @@ _Last updated: July 31, 2026 (supersedes the March 2026 roadmap; all of its item
 > **Status note (2026-07-31):** Phases 0–2 below are shipped. Sections 1–2 describe the
 > **pre-Phase-0 state** and are kept as a historical snapshot — do not read them as the
 > current gap list. Phase 3 is now tracked as check items in [TODO.md](../TODO.md)
-> (Waves 0/A/B/C/D with per-item acceptance); Wave 0, Wave A, and Wave B are complete as of
-> 2026-08-01. The Phase 3 list below is superseded, and
+> (Waves 0/A/B/C/D with per-item acceptance); Wave 0, Wave A, Wave B, Wave C, and all ten
+> Phase 3 exit scenarios are complete as of 2026-08-01. The Phase 3 list below is superseded, and
 > IsotonicRegression from it has already shipped. Coverage percentages in §5 predate
 > Phase 2 and will be replaced by the output of `scripts/coverage-vs-sklearn` (Wave 0 item).
 

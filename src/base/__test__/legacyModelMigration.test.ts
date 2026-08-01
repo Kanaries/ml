@@ -23,6 +23,25 @@ describe('format-v1 fitted-state migrations', () => {
         expect(revived.coef).toEqual(model.coef);
     });
 
+    it('revives and refits LogisticRegression payloads from before multiclass and C state existed', () => {
+        const model = new LogisticRegression({ learningRate: 0.2, maxIter: 200 });
+        const X = [[-2], [-1], [1], [2]];
+        const y = [0, 0, 1, 1];
+        model.fit(X, y);
+        const legacy = renameStateKey(model.toJSON(), 'coefState', 'weights');
+        const state = legacy.state as Record<string, unknown>;
+        delete state.C;
+        delete state.coefMatrixState;
+        delete state.biasState;
+        delete (legacy.params as Record<string, unknown>).C;
+
+        const revived = loadModel(legacy) as LogisticRegression;
+        expect(revived.predict(X)).toEqual(y);
+        expect(revived.getParams().C).toBeNull();
+        revived.fit(X, y);
+        expect(revived.predict(X)).toEqual(y);
+    });
+
     it.each([
         ['RidgeRegression', () => new RidgeRegression({ alpha: 1 })],
         ['LinearRegression', () => new LinearRegression()],

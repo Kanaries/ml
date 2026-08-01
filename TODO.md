@@ -122,12 +122,28 @@ Other (7):
 
 ## Phase 3 exit gate
 
+- [x] Iris classification pipeline
+- [x] Digits RBF SVC
+- [x] sparse text classification pipeline
+- [x] pooled Olivetti faces decomposition comparison
+- [x] anomaly detector comparison
+- [x] varied-shape clustering comparison
+- [x] S-curve manifold comparison
+- [x] feature-selection pipelines
+- [x] probability calibration
+- [x] robust regression comparison
+
 `src/__test__/e2e/` scenario corpus: 10 frozen named scenarios, each a spec of an explicit
 algorithm subset + dataset + workflow (frozen at Wave A start; specs exclude algorithms that
 are Deferred — e.g. faces decomposition runs PCA/NMF/FastICA only, manifold comparison runs
 standard LLE only). Parity is 1:1 against the frozen spec, not against full official example
 pages. Exit = 10/10 e2e green + Wave 0/A/B at 100% + Wave C ≥ 80% (trimmed Wave C items move
 to Deferred with a decision note; specs referencing them get revised in the same commit).
+
+The browser/CI fixture projection uses 8x8 average-pooled Olivetti faces and 120 samples per
+clustering shape / S-curve. These explicit projections bound the quadratic and cubic dense
+linear-algebra paths while retaining the named datasets, full frozen algorithm subsets, and
+rotation/permutation-invariant parity metrics.
 
 ## Phase 4 — JS differentiation (after Phase 3)
 

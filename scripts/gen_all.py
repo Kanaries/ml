@@ -58,7 +58,8 @@ scripts = [
     'gen_label_propagation.py',
     'gen_label_spreading.py',
     'gen_wave_b.py',
-    'gen_wave_c.py'
+    'gen_wave_c.py',
+    'gen_phase3_e2e.py'
 ]
 
 for s in scripts:

@@ -5,5 +5,5 @@ export const featureSelection = freezeScenario({
     dataset: { name: 'informative plus noise classification', source: 'fixed make_classification fixture', protocol: '200 samples, 4 informative of 12 features, random_state=42' },
     workflow: ['SelectFromModel and RFE', 'transform train/test without leakage', 'fit LogisticRegression', 'compare masks and held-out accuracy'],
     algorithms: { include: ['SelectFromModel', 'RFE', 'LogisticRegression', 'Pipeline'], exclude: [] },
-    parity: { state: 'pending', blockedBy: [], reason: 'Wave A selectors are present; the full pipeline fixture remains an exit-gate task.' },
+    parity: { state: 'green', blockedBy: [], reason: 'Both selectors execute inside leakage-safe scaled pipelines with support-mask overlap and held-out accuracy gates.' },
 });

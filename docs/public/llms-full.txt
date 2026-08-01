@@ -4107,11 +4107,11 @@ markdown_url: "https://ml.kanaries.net/docs/apis/linear/logisticRegression.md"
 
 ## Algorithm overview
 
-Logistic regression is a classic supervised learning algorithm for binary classification. It models the probability that a sample belongs to class `1` versus class `0`, which makes it useful when you need both a final prediction and an interpretable confidence score.
+Logistic regression is a classic supervised learning algorithm for binary and multiclass classification. It models class probabilities with a sigmoid for two classes and multinomial softmax for three or more classes, which makes it useful when you need both a final prediction and interpretable linear scores.
 
 This algorithm works especially well when:
 
-- you need a strong and explainable baseline for binary classification
+- you need a strong and explainable baseline for binary or multiclass classification
 - you want probability-like outputs for ranking, thresholding, or alerts
 - your decision boundary is approximately linear after feature engineering or scaling
 
@@ -4121,7 +4121,7 @@ Compared with heavier models, logistic regression is fast to train, easy to insp
 
 `@kanaries/ml` provides a JavaScript and TypeScript implementation of logistic regression so you can run classification workflows without leaving the JS ecosystem. That means you can train or serve models in browser applications, Node.js services, and frontend-heavy products that want a scikit-learn-like API without switching to Python at runtime.
 
-This is particularly useful for product decisions, ranking thresholds, and binary prediction tasks where teams want coefficients and prediction logic to stay understandable to both engineers and stakeholders.
+This is particularly useful for product decisions, ranking thresholds, and multiclass prediction tasks where teams want coefficients and prediction logic to stay understandable to both engineers and stakeholders.
 
 ## Quick start
 
@@ -4182,30 +4182,36 @@ console.log(predictions);
 interface LogisticRegressionProps {
     learningRate?: number;
     maxIter?: number;
+    C?: number | null;
 }
 constructor(props: LogisticRegressionProps = {})
 ```
 
-`learningRate` controls the optimizer step size, and `maxIter` controls how many optimization rounds the model runs during fitting.
+`learningRate` controls the optimizer step size, `maxIter` controls how many optimization rounds the model runs, and `C` is the inverse L2 regularization strength. The default `C: null` preserves the unregularized behavior from earlier releases.
 
 ### Parameters
 
 - `learningRate`: gradient descent step size
 - `maxIter`: maximum number of training iterations
+- `C`: inverse L2 regularization strength; smaller positive values regularize more strongly, while `null` disables L2 regularization
 
 ### Methods
 
 - `fit(trainX: number[][], trainY: number[]): void`
 - `predict(testX: number[][]): number[]`
+- `predictProba(testX: number[][]): number[][]`
+- `decisionFunction(testX: number[][]): number[] | number[][]`
 
 #### fit
 
 - `trainX`: training features with shape `[nSamples, nFeatures]`
-- `trainY`: binary labels for each training sample
+- `trainY`: numeric class labels for each training sample; at least two distinct classes are required
 
 #### predict
 
 - `testX`: feature matrix to classify
+
+`predictProba` returns columns in sorted class-label order. `decisionFunction` returns one signed score for a binary fit and one logit column per class for a multiclass fit. The `coef` getter similarly returns one coefficient vector for binary classification or a matrix with one row per class.
 
 ### Usage notes
 

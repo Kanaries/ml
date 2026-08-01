@@ -114,3 +114,4 @@ dist
 test_data/*
 !test_data/
 !test_data/*.json
+!test_data/*.json.gz

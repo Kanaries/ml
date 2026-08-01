@@ -44,3 +44,7 @@ test('implemented roadmap waves leave no scenario blocked on a missing estimator
     expect(blocked.map(scenario => scenario.id)).toEqual([]);
     blocked.forEach(scenario => expect(scenario.parity.state).toBe('pending'));
 });
+
+test('Phase 3 exit gate has numerical parity evidence for all ten scenarios', () => {
+    expect(scenarios.map(scenario => scenario.parity.state)).toEqual(new Array(10).fill('green'));
+});

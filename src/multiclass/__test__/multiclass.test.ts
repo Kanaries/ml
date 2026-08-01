@@ -110,11 +110,11 @@ const lineY = [0, 0, 1, 1, 2, 2];
 const makeLR = () => new LogisticRegression({ learningRate: 0.5, maxIter: 500 });
 
 describe('OneVsRestClassifier', () => {
-    it('turns a binary-only classifier into a multiclass classifier', () => {
-        // LogisticRegression alone rejects 3-class targets...
-        expect(() => makeLR().fit(blobs3.X, blobs3.y)).toThrow(/exactly 2 classes/);
+    it('composes a natively multiclass classifier into explicit one-vs-rest members', () => {
+        const native = makeLR();
+        native.fit(blobs3.X, blobs3.y);
+        expect(accuracyScore(native.predict(blobs3.X), blobs3.y)).toBeGreaterThan(0.95);
 
-        // ...but wrapped in OvR it learns the 3-class problem
         const ovr = new OneVsRestClassifier({ estimator: makeLR() });
         ovr.fit(blobs3.X, blobs3.y);
         const acc = accuracyScore(ovr.predict(blobs3.X), blobs3.y);
@@ -154,7 +154,7 @@ describe('OneVsRestClassifier', () => {
     });
 
     it('predictProba / decisionFunction throw when the members lack them', () => {
-        const ovr = new OneVsRestClassifier({ estimator: makeLR() });
+        const ovr = new OneVsRestClassifier({ estimator: new ConstantZeroStub() });
         ovr.fit(blobs3.X, blobs3.y);
         expect(() => ovr.predictProba(blobs3.X)).toThrow(/predictProba/);
         expect(() => ovr.decisionFunction(blobs3.X)).toThrow(/decisionFunction/);
@@ -174,10 +174,10 @@ describe('OneVsRestClassifier', () => {
     });
 
     it('falls back to raw 0/1 predict scores when members expose no proba/decision', () => {
-        const ovr = new OneVsRestClassifier({ estimator: makeLR() });
+        const ovr = new OneVsRestClassifier({ estimator: new ConstantZeroStub() });
         ovr.fit(blobs3.X, blobs3.y);
         // recompute the expected argmax over the members' raw 0/1 votes
-        // (first class wins ties), which is all LogisticRegression offers
+        // (first class wins ties)
         const votes = ovr.estimators.map((m) => m.predict(blobs3.X));
         const expected = blobs3.X.map((_, i) => {
             let best = 0;
@@ -193,7 +193,7 @@ describe('OneVsRestClassifier', () => {
         const ovr = new OneVsRestClassifier({ estimator: makeLR() });
         ovr.setParams({ estimator__maxIter: 7 });
         const nested = ovr.getParams().estimator as LogisticRegression;
-        expect(nested.getParams()).toEqual({ learningRate: 0.5, maxIter: 7 });
+        expect(nested.getParams()).toEqual({ learningRate: 0.5, maxIter: 7, C: null });
         expect(() => ovr.setParams({ estimator__nope: 1 })).toThrow(/Invalid parameter/);
         expect(() => ovr.setParams({ other__maxIter: 1 })).toThrow(/Invalid parameter/);
         expect(() => ovr.setParams({ bogus: 1 })).toThrow(/Invalid parameter/);
@@ -291,7 +291,7 @@ describe('OneVsOneClassifier', () => {
         const ovo = new OneVsOneClassifier({ estimator: makeLR() });
         ovo.setParams({ estimator__learningRate: 0.05 });
         const nested = ovo.getParams().estimator as LogisticRegression;
-        expect(nested.getParams()).toEqual({ learningRate: 0.05, maxIter: 500 });
+        expect(nested.getParams()).toEqual({ learningRate: 0.05, maxIter: 500, C: null });
         expect(() => ovo.setParams({ other__x: 1 })).toThrow(/Invalid parameter/);
     });
 
