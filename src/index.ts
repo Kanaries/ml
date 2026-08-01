@@ -23,6 +23,8 @@ import * as Dummy from './dummy';
 import * as Data from './data';
 import * as FeatureSelection from './feature_selection';
 import * as Covariance from './covariance';
+import * as FeatureExtraction from './feature_extraction';
+import * as Impute from './impute';
 import { CSRMatrix } from './data';
 import * as utils from './utils';
 import * as Base from './base';
@@ -63,6 +65,8 @@ export {
     Data,
     FeatureSelection,
     Covariance,
+    FeatureExtraction,
+    Impute,
     CSRMatrix,
     utils
 }

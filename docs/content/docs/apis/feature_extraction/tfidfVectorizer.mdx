@@ -1,0 +1,42 @@
+---
+title: TfidfVectorizer JavaScript Implementation for Browser and Node.js
+description: Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js.
+---
+
+# TfidfVectorizer in JavaScript
+
+## Algorithm overview
+
+`TfidfVectorizer` combines vocabulary learning, count vectorization, inverse-document-frequency weighting, and row normalization. Use it for document classification, similarity, and lightweight semantic search baselines.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementation takes raw `string[]`, returns a `CSRMatrix`, works in `Pipeline`, and feeds sparse-aware `MultinomialNB` without converting the entire corpus to dense arrays.
+
+## Quick start example
+
+```ts
+import { Bayes, FeatureExtraction, Pipeline } from '@kanaries/ml';
+
+const pipeline = new Pipeline({ steps: [
+  ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2] })],
+  ['nb', new Bayes.MultinomialNB()],
+] });
+pipeline.fit(['red apple sweet', 'blue sea deep'], [0, 1]);
+console.log(pipeline.predict(['deep blue ocean']));
+```
+
+The equivalent Python workflow uses `Pipeline([('tfidf', TfidfVectorizer()), ('nb', MultinomialNB())])`.
+
+## Detailed API reference
+
+The constructor accepts every [CountVectorizer](countVectorizer) option plus every [TfidfTransformer](tfidfTransformer) option.
+
+- `fit(documents: string[]): void`
+- `transform(documents: string[]): CSRMatrix`
+- `fitTransform(documents: string[]): CSRMatrix`
+- `getFeatureNamesOut(): string[]`
+- `vocabulary: ReadonlyMap<string, number>`
+- `idf: number[]`
+
+Serialize a fitted instance with `JSON.stringify(vectorizer)` and restore it with the root `loadModel` export.

@@ -1,0 +1,30 @@
+---
+title: Non-negative Matrix Factorization (NMF) in JavaScript
+description: Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js.
+---
+
+# NMF in JavaScript
+
+## Algorithm overview
+
+Non-negative Matrix Factorization approximates `X ≈ W × H` while keeping every factor non-negative. The additive representation is useful for topic features, parts-based image representations, and interpretable latent components.
+
+## JavaScript implementation
+
+`@kanaries/ml` uses multiplicative Frobenius-loss updates and supports random and NNDSVD initializations. It runs in browser or Node.js and exposes both learned components and reconstruction error.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const nmf = new Decomposition.NMF({ nComponents: 2, init: 'nndsvda', randomState: 0 });
+const W = nmf.fitTransform([[1, 2, 0], [0, 1, 3], [1, 3, 3]]);
+const approximation = nmf.inverseTransform(W);
+```
+
+## Detailed API reference
+
+Options: `nComponents`, `init: 'random' | 'nndsvd' | 'nndsvda' | 'nndsvdar'`, `maxIter`, `tol`, `alphaW`, `alphaH`, `l1Ratio`, and `randomState`.
+
+Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `reconstructionErr`, and `nIter`. Input must be a finite, rectangular, non-negative matrix.

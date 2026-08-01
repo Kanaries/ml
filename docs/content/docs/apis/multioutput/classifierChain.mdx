@@ -1,0 +1,30 @@
+---
+title: ClassifierChain in JavaScript and TypeScript
+description: Model dependencies between multiple binary labels with the @kanaries/ml JavaScript ClassifierChain implementation in browser or Node.js.
+---
+
+# ClassifierChain in JavaScript
+
+## Algorithm overview
+
+A classifier chain fits one binary classifier per output. Each member sees the original features plus earlier labels, allowing later predictions to depend on earlier outputs rather than assuming label independence.
+
+## JavaScript implementation
+
+Pass any registered single-output classifier to `MultiOutput.ClassifierChain`. A fixed, identity, or seeded random order is supported, and optional cross-validated training extensions reduce target leakage.
+
+## Quick start example
+
+```ts
+import { Bayes, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.ClassifierChain({
+  estimator: new Bayes.GaussianNB(), order: [0, 1],
+});
+chain.fit(X, [[0, 0], [0, 1], [1, 1]]);
+const labels = chain.predict(testX);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, `predictProba(X)`, and exact-match `score(X, Y)`. `chainOrder` and `estimators` return defensive arrays. `predictProba` requires the base classifier to expose probabilities and returns the positive-class probability per output.

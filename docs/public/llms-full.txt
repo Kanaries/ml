@@ -1195,11 +1195,94 @@ new Covariance.MinCovDet({
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/fastICA -->
+
+---
+title: "FastICA in JavaScript and TypeScript"
+description: "Separate statistically independent signals with the @kanaries/ml FastICA JavaScript implementation in browser and Node.js environments."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/fastICA"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/fastICA.md"
+---
+# FastICA in JavaScript
+
+## Algorithm overview
+
+FastICA recovers statistically independent sources from observed mixtures by maximizing non-Gaussianity. Common uses include blind source separation, artifact removal, and exploratory feature extraction.
+
+## JavaScript implementation
+
+`@kanaries/ml` offers parallel and deflation FastICA with deterministic initialization, whitening choices, transforms, and inverse transforms for JS-only signal and analytics workflows.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const ica = new Decomposition.FastICA({
+  nComponents: 2,
+  whiten: 'unit-variance',
+  randomState: 0,
+});
+const sources = ica.fitTransform(observedSignals);
+const reconstructed = ica.inverseTransform(sources);
+```
+
+## Detailed API reference
+
+Options include `nComponents`, `algorithm: 'parallel' | 'deflation'`, `whiten: 'unit-variance' | 'arbitrary-variance' | false`, `fun: 'logcosh' | 'exp' | 'cube'`, `funArgs.alpha`, `maxIter`, `tol`, and `randomState`.
+
+Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `mixing`, `mean`, and `nIter`. With `whiten: false`, input is not centered and `nComponents` is ignored, matching sklearn semantics.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/incrementalPCA -->
+
+---
+title: "Incremental PCA in JavaScript and TypeScript"
+description: "Process numeric data in batches with the @kanaries/ml IncrementalPCA JavaScript implementation for memory-aware browser and Node.js workflows."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/incrementalPCA"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/incrementalPCA.md"
+---
+# Incremental PCA in JavaScript
+
+## Algorithm overview
+
+Incremental PCA updates a low-rank SVD one batch at a time. It is useful when a complete dataset should not be retained in memory, while still producing PCA-style projections and inverse transforms.
+
+## JavaScript implementation
+
+`@kanaries/ml` follows sklearn's mean-corrected incremental SVD update. Call `partialFit` for streamed batches, or `fit` to let the estimator split an in-memory matrix by `batchSize`.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const pca = new Decomposition.IncrementalPCA({ nComponents: 2 });
+pca.partialFit(batchOne).partialFit(batchTwo);
+const embedding = pca.transform(nextBatch);
+```
+
+## Detailed API reference
+
+```ts
+new Decomposition.IncrementalPCA({ nComponents?: number | null, batchSize?: number })
+```
+
+- `partialFit(X: number[][]): this` updates the retained SVD.
+- `fit(X: number[][]): void` resets and processes batches.
+- `transform` and `inverseTransform` project data.
+- `components`, `mean`, `explainedVariance`, `singularValues`, and `nSamplesSeen` expose learned state.
+
+The first `partialFit` batch must contain at least `nComponents` samples and features.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/decomposition -->
 
 ---
 title: "Dimensionality Reduction in JavaScript with @kanaries/ml"
-description: "Explore PCA, Sparse PCA, and Truncated SVD in JavaScript and TypeScript with @kanaries/ml for feature compression, visualization, and preprocessing."
+description: "Explore PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD in JavaScript and TypeScript with @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/decomposition"
 markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/index.html.md"
 ---
@@ -1226,6 +1309,10 @@ If someone searches for "PCA in JavaScript" or "Truncated SVD in TypeScript", th
 - [PCA](/docs/apis/decomposition/pca.md): dense feature compression and variance-preserving projections
 - [Sparse PCA](/docs/apis/decomposition/sparsePCA.md): more interpretable sparse components
 - [Truncated SVD](/docs/apis/decomposition/truncatedSVD.md): latent factors for sparse or vectorized inputs
+- [Kernel PCA](/docs/apis/decomposition/kernelPCA.md): nonlinear kernel embeddings
+- [FastICA](/docs/apis/decomposition/fastICA.md): independent signal separation
+- [NMF](/docs/apis/decomposition/nmf.md): non-negative, parts-based latent factors
+- [Incremental PCA](/docs/apis/decomposition/incrementalPCA.md): batch-wise, memory-aware PCA
 
 ## Detailed module guide
 
@@ -1234,12 +1321,95 @@ If someone searches for "PCA in JavaScript" or "Truncated SVD in TypeScript", th
 1. Use [PCA](/docs/apis/decomposition/pca.md) for dense numeric features when variance preservation matters most.
 2. Use [Truncated SVD](/docs/apis/decomposition/truncatedSVD.md) for sparse matrices such as TF-IDF or one-hot vectors.
 3. Use [Sparse PCA](/docs/apis/decomposition/sparsePCA.md) when component interpretability matters alongside dimensionality reduction.
+4. Use [Kernel PCA](/docs/apis/decomposition/kernelPCA.md) for nonlinear structure, [FastICA](/docs/apis/decomposition/fastICA.md) for independent sources, [NMF](/docs/apis/decomposition/nmf.md) for non-negative additive factors, or [Incremental PCA](/docs/apis/decomposition/incrementalPCA.md) for streamed batches.
 
 ### JavaScript deployment notes
 
 - Standardize dense continuous features before PCA-style methods when appropriate.
 - Use decomposition to simplify data before charting, clustering, or supervised learning.
 - In browser apps, dimensionality reduction is often most valuable when it feeds directly into interactive visualizations.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/kernelPCA -->
+
+---
+title: "Kernel PCA in JavaScript and TypeScript"
+description: "Learn nonlinear dimensionality reduction and run the @kanaries/ml KernelPCA JavaScript implementation in browser or Node.js applications."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/kernelPCA"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/kernelPCA.md"
+---
+# Kernel PCA in JavaScript
+
+## Algorithm overview
+
+Kernel PCA applies PCA to an implicit nonlinear feature space. It can unfold curved structure that ordinary linear PCA cannot represent, using RBF, polynomial, sigmoid, cosine, or linear similarity.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `KernelPCA` for browser visualization and Node.js preprocessing without a Python service. It supports out-of-sample `transform`, and optional kernel-ridge pre-image reconstruction.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const model = new Decomposition.KernelPCA({
+  nComponents: 2,
+  kernel: 'rbf',
+  gamma: 2,
+});
+const embedded = model.fitTransform([[1, 0], [0, 1], [-1, 0], [0, -1]]);
+```
+
+## Detailed API reference
+
+```ts
+new Decomposition.KernelPCA({
+  nComponents?: number | null;
+  kernel?: 'linear' | 'poly' | 'rbf' | 'sigmoid' | 'cosine';
+  gamma?: number; degree?: number; coef0?: number;
+  alpha?: number; fitInverseTransform?: boolean; randomState?: number;
+})
+```
+
+Methods: `fit`, `transform`, `fitTransform`, and `inverseTransform`. Learned `eigenvalues` and `eigenvectors` are exposed as defensive copies. Kernel methods build an O(n²) training matrix, so constrain browser sample counts.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/nmf -->
+
+---
+title: "Non-negative Matrix Factorization (NMF) in JavaScript"
+description: "Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/nmf"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/nmf.md"
+---
+# NMF in JavaScript
+
+## Algorithm overview
+
+Non-negative Matrix Factorization approximates `X ≈ W × H` while keeping every factor non-negative. The additive representation is useful for topic features, parts-based image representations, and interpretable latent components.
+
+## JavaScript implementation
+
+`@kanaries/ml` uses multiplicative Frobenius-loss updates and supports random and NNDSVD initializations. It runs in browser or Node.js and exposes both learned components and reconstruction error.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const nmf = new Decomposition.NMF({ nComponents: 2, init: 'nndsvda', randomState: 0 });
+const W = nmf.fitTransform([[1, 2, 0], [0, 1, 3], [1, 3, 3]]);
+const approximation = nmf.inverseTransform(W);
+```
+
+## Detailed API reference
+
+Options: `nComponents`, `init: 'random' | 'nndsvd' | 'nndsvda' | 'nndsvdar'`, `maxIter`, `tol`, `alphaW`, `alphaH`, `l1Ratio`, and `randomState`.
+
+Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `reconstructionErr`, and `nIter`. Input must be a finite, rectangular, non-negative matrix.
 
 ---
 
@@ -2775,6 +2945,202 @@ The objective is `reg:squarederror`. Starting from `baseScore`, each round compu
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/countVectorizer -->
+
+---
+title: "CountVectorizer in JavaScript and TypeScript"
+description: "Tokenize browser or Node.js text into a memory-efficient CSR count matrix with the @kanaries/ml JavaScript CountVectorizer implementation."
+canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/countVectorizer"
+markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/countVectorizer.md"
+---
+# CountVectorizer in JavaScript
+
+## Algorithm overview
+
+`CountVectorizer` learns a vocabulary from documents and represents each document by token or n-gram frequency. It is a strong baseline for text classification, search features, and document analytics.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementation accepts `string[]` and returns `CSRMatrix`, avoiding a dense allocation when the vocabulary is large. The fitted vectorizer can run in a browser or Node.js and can be serialized with the standard model codec.
+
+## Quick start example
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const vectorizer = new FeatureExtraction.CountVectorizer({
+  ngramRange: [1, 2],
+  minDf: 1,
+  stopWords: ['the'],
+});
+const counts = vectorizer.fitTransform(['the red fox', 'the red bird']);
+console.log(vectorizer.getFeatureNamesOut());
+console.log(counts.toDense());
+```
+
+Python uses `CountVectorizer(ngram_range=(1, 2), stop_words=['the'])`; JavaScript uses camel-case option names and the same `fit`/`transform` workflow.
+
+## Detailed API reference
+
+```ts
+new FeatureExtraction.CountVectorizer({
+  lowercase?: boolean;              // true
+  stopWords?: string[];             // []
+  ngramRange?: [number, number];     // [1, 1]
+  minDf?: number;                    // 1; values below 1 are proportions
+  maxDf?: number;                    // 1; values at or below 1 are proportions
+  maxFeatures?: number;
+  binary?: boolean;                  // false
+  vocabulary?: Record<string, number> | Map<string, number>;
+})
+```
+
+- `fit(documents: string[]): void` learns the vocabulary.
+- `transform(documents: string[]): CSRMatrix` produces sparse counts.
+- `fitTransform(documents: string[]): CSRMatrix` combines both operations.
+- `getFeatureNamesOut(): string[]` returns terms in column order.
+- `vocabulary` returns a defensive `ReadonlyMap` copy.
+
+Because JavaScript has one numeric type, `maxDf: 1` follows the proportional/default interpretation; use an integer greater than one for an absolute document threshold.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction -->
+
+---
+title: "Text Feature Extraction in JavaScript with @kanaries/ml"
+description: "Convert raw text into sparse count and TF-IDF matrices in JavaScript or TypeScript for browser and Node.js machine-learning pipelines."
+canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction"
+markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/index.html.md"
+---
+# Text Feature Extraction in JavaScript
+
+## Module overview
+
+Text estimators need numeric features, but materializing a dense document-by-vocabulary matrix wastes memory. The `FeatureExtraction` module tokenizes strings and returns `CSRMatrix` sparse matrices that can flow through `Pipeline` and sparse-aware Naive Bayes estimators.
+
+## JavaScript implementation
+
+`@kanaries/ml` brings the familiar scikit-learn text workflow to browser and Node.js code: use `CountVectorizer` for token counts, `TfidfTransformer` for weighting existing count matrices, or `TfidfVectorizer` for both steps together.
+
+## Quick start
+
+```ts
+import { Bayes, FeatureExtraction, Pipeline } from '@kanaries/ml';
+
+const model = new Pipeline({ steps: [
+  ['tfidf', new FeatureExtraction.TfidfVectorizer()],
+  ['classifier', new Bayes.MultinomialNB()],
+] });
+
+model.fit(['red apple sweet', 'blue ocean deep'], [0, 1]);
+model.predict(['sweet apple']);
+```
+
+## Choose an API
+
+- [CountVectorizer](/docs/apis/feature_extraction/countVectorizer.md): sparse token and n-gram counts.
+- [TfidfTransformer](/docs/apis/feature_extraction/tfidfTransformer.md): TF-IDF weighting for an existing count matrix.
+- [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer.md): one-step text-to-TF-IDF conversion.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/tfidfTransformer -->
+
+---
+title: "TfidfTransformer in JavaScript and TypeScript"
+description: "Weight dense or CSR term-count matrices with TF-IDF in browser or Node.js using the @kanaries/ml JavaScript implementation."
+canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfTransformer"
+markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfTransformer.md"
+---
+# TfidfTransformer in JavaScript
+
+## Algorithm overview
+
+TF-IDF reduces the influence of terms that occur in many documents while preserving terms that distinguish individual documents. `TfidfTransformer` is useful when counts already come from another source.
+
+## JavaScript implementation
+
+`@kanaries/ml` accepts either `number[][]` or `CSRMatrix` counts and returns a sparse CSR result. This keeps text preprocessing memory-efficient in browser and Node.js pipelines.
+
+## Quick start example
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const tfidf = new FeatureExtraction.TfidfTransformer({ norm: 'l2' });
+const weighted = tfidf.fitTransform([[2, 0, 1], [0, 1, 1]]);
+console.log(weighted.toDense());
+```
+
+## Detailed API reference
+
+```ts
+new FeatureExtraction.TfidfTransformer({
+  norm?: 'l1' | 'l2' | null; // 'l2'
+  useIdf?: boolean;          // true
+  smoothIdf?: boolean;       // true
+  sublinearTf?: boolean;     // false
+})
+```
+
+- `fit(X): void` learns inverse-document-frequency weights.
+- `transform(X): CSRMatrix` applies term-frequency scaling, IDF, and normalization.
+- `fitTransform(X): CSRMatrix` combines both operations.
+- `idf: number[]` returns a defensive copy of the learned weights.
+
+Inputs must contain non-negative term counts and use the fitted feature count.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer -->
+
+---
+title: "TfidfVectorizer JavaScript Implementation for Browser and Node.js"
+description: "Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer"
+markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer.md"
+---
+# TfidfVectorizer in JavaScript
+
+## Algorithm overview
+
+`TfidfVectorizer` combines vocabulary learning, count vectorization, inverse-document-frequency weighting, and row normalization. Use it for document classification, similarity, and lightweight semantic search baselines.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementation takes raw `string[]`, returns a `CSRMatrix`, works in `Pipeline`, and feeds sparse-aware `MultinomialNB` without converting the entire corpus to dense arrays.
+
+## Quick start example
+
+```ts
+import { Bayes, FeatureExtraction, Pipeline } from '@kanaries/ml';
+
+const pipeline = new Pipeline({ steps: [
+  ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2] })],
+  ['nb', new Bayes.MultinomialNB()],
+] });
+pipeline.fit(['red apple sweet', 'blue sea deep'], [0, 1]);
+console.log(pipeline.predict(['deep blue ocean']));
+```
+
+The equivalent Python workflow uses `Pipeline([('tfidf', TfidfVectorizer()), ('nb', MultinomialNB())])`.
+
+## Detailed API reference
+
+The constructor accepts every [CountVectorizer](/docs/apis/feature_extraction/countVectorizer.md) option plus every [TfidfTransformer](/docs/apis/feature_extraction/tfidfTransformer.md) option.
+
+- `fit(documents: string[]): void`
+- `transform(documents: string[]): CSRMatrix`
+- `fitTransform(documents: string[]): CSRMatrix`
+- `getFeatureNamesOut(): string[]`
+- `vocabulary: ReadonlyMap<string, number>`
+- `idf: number[]`
+
+Serialize a fitted instance with `JSON.stringify(vectorizer)` and restore it with the root `loadModel` export.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/feature_selection -->
 
 ---
@@ -2870,6 +3236,58 @@ const information = FeatureSelection.mutualInfoClassif(X, y, { randomState: 42 }
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/impute -->
+
+---
+title: "Missing-Value Imputation in JavaScript"
+description: "Impute correlated numeric features in browser and Node.js with the @kanaries/ml JavaScript IterativeImputer implementation."
+canonical_url: "https://ml.kanaries.net/docs/apis/impute"
+markdown_url: "https://ml.kanaries.net/docs/apis/impute/index.html.md"
+---
+# Missing-Value Imputation in JavaScript
+
+Missing values can break estimators or bias a complete-case analysis. The `Impute` module supplies transformer-style preprocessing that fits only on training data and can be placed inside repeatable JS pipelines.
+
+Use [IterativeImputer](/docs/apis/impute/iterativeImputer.md) when features predict one another and simple column means discard too much structure.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/impute/iterativeImputer -->
+
+---
+title: "IterativeImputer in JavaScript and TypeScript"
+description: "Estimate each missing numeric feature from the others using the @kanaries/ml JavaScript IterativeImputer implementation in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/impute/iterativeImputer"
+markdown_url: "https://ml.kanaries.net/docs/apis/impute/iterativeImputer.md"
+---
+# IterativeImputer in JavaScript
+
+## Algorithm overview
+
+Iterative imputation begins with a column statistic, then repeatedly predicts each feature from the other features. It is useful when missing columns are correlated and a single mean or median would erase that relationship.
+
+## JavaScript implementation
+
+`@kanaries/ml` clones and fits a registered regressor for every imputation step, records the fitted sequence for later `transform`, and supports deterministic ordering and bounds. Until `BayesianRidge` is added, the default base estimator is lightly regularized `RidgeRegression`; supply another registered regressor when needed.
+
+## Quick start example
+
+```ts
+import { Impute } from '@kanaries/ml';
+
+const imputer = new Impute.IterativeImputer({ maxIter: 10, tol: 1e-3 });
+const complete = imputer.fitTransform([[0, 1], [1, 3], [2, NaN], [3, 7]]);
+const future = imputer.transform([[4, NaN]]);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `maxIter`, `tol`, `initialStrategy: 'mean' | 'median' | 'mostFrequent' | 'constant'`, `fillValue`, `imputationOrder: 'ascending' | 'descending' | 'roman' | 'arabic' | 'random'`, `skipComplete`, `minValue`, `maxValue`, and `randomState`.
+
+Methods: `fit`, `fitTransform`, and `transform`. Learned `imputationSequence` and `nIter` are exposed. Missing values must be represented by `NaN`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis -->
 
 ---
@@ -2901,10 +3319,12 @@ This is especially useful when someone searches for "machine learning in JavaScr
 ## Quick navigation
 
 - **[Clusters](/docs/apis/clusters/index.html.md)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
-- **[Decomposition](/docs/apis/decomposition/index.html.md)**: reduce dimensions with PCA, Sparse PCA, and Truncated SVD.
+- **[Decomposition](/docs/apis/decomposition/index.html.md)**: reduce dimensions or separate latent structure with PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD.
 - **[Ensemble](/docs/apis/ensemble/index.html.md)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
 - **[Covariance](/docs/apis/covariance/index.html.md)**: estimate robust covariance and detect elliptical multivariate outliers.
 - **[Feature Selection](/docs/apis/feature_selection/index.html.md)**: select columns with model importance, recursive elimination, or univariate scores.
+- **[Feature Extraction](/docs/apis/feature_extraction/index.html.md)**: turn raw text into sparse count and TF-IDF features.
+- **[Imputation](/docs/apis/impute/index.html.md)**: estimate correlated numeric values missing from feature matrices.
 - **[Linear](/docs/apis/linear/index.html.md)**: start with linear regression, logistic regression, regularized regression, and linear classification baselines.
 - **[Metrics](/docs/apis/metrics/index.html.md)**: evaluate classification, regression, clustering, curves, and distance functions.
 - **[Manifold](/docs/apis/manifold/index.html.md)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
@@ -2914,6 +3334,7 @@ This is especially useful when someone searches for "machine learning in JavaScr
 - **[Bayes](/docs/apis/bayes/index.html.md)**: apply naive Bayes models to binary or categorical features.
 - **[Neural Network](/docs/apis/neural_network/index.html.md)**: learn compact representations with Bernoulli RBM.
 - **[Semi-Supervised](/docs/apis/semi_supervised/index.html.md)**: spread labels through partially labeled datasets.
+- **[Multi-Output](/docs/apis/multioutput/index.html.md)**: predict related label or regression targets with estimator chains.
 - **[Utils](/docs/apis/utils/index.html.md)**: use preprocessing, sampling, model selection, statistics, and async workflow helpers.
 - **[Algebra](/docs/apis/algebra/index.html.md)**: use lightweight matrix helpers such as transpose, determinants, and inverse.
 - **[KMath](/docs/apis/KMath/index.html.md)**: compute lightweight descriptive statistics.
@@ -4228,6 +4649,97 @@ const value = distance([0, 0], [3, 4], 2);
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/multioutput/classifierChain -->
+
+---
+title: "ClassifierChain in JavaScript and TypeScript"
+description: "Model dependencies between multiple binary labels with the @kanaries/ml JavaScript ClassifierChain implementation in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/multioutput/classifierChain"
+markdown_url: "https://ml.kanaries.net/docs/apis/multioutput/classifierChain.md"
+---
+# ClassifierChain in JavaScript
+
+## Algorithm overview
+
+A classifier chain fits one binary classifier per output. Each member sees the original features plus earlier labels, allowing later predictions to depend on earlier outputs rather than assuming label independence.
+
+## JavaScript implementation
+
+Pass any registered single-output classifier to `MultiOutput.ClassifierChain`. A fixed, identity, or seeded random order is supported, and optional cross-validated training extensions reduce target leakage.
+
+## Quick start example
+
+```ts
+import { Bayes, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.ClassifierChain({
+  estimator: new Bayes.GaussianNB(), order: [0, 1],
+});
+chain.fit(X, [[0, 0], [0, 1], [1, 1]]);
+const labels = chain.predict(testX);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, `predictProba(X)`, and exact-match `score(X, Y)`. `chainOrder` and `estimators` return defensive arrays. `predictProba` requires the base classifier to expose probabilities and returns the positive-class probability per output.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/multioutput -->
+
+---
+title: "Multi-Output Machine Learning in JavaScript"
+description: "Predict multiple related labels or numeric targets with chain estimators in browser and Node.js using @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/multioutput"
+markdown_url: "https://ml.kanaries.net/docs/apis/multioutput/index.html.md"
+---
+# Multi-Output Machine Learning in JavaScript
+
+Multi-output models predict several targets for each input row. Independent wrappers are useful when targets do not interact; classifier and regressor chains additionally feed earlier predictions into later members to model target dependencies.
+
+`@kanaries/ml` exposes these estimators under `MultiOutput` with serializable, scikit-learn-style APIs for browser and Node.js.
+
+- [ClassifierChain](/docs/apis/multioutput/classifierChain.md) for related binary labels.
+- [RegressorChain](/docs/apis/multioutput/regressorChain.md) for related numeric outputs.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/multioutput/regressorChain -->
+
+---
+title: "RegressorChain in JavaScript and TypeScript"
+description: "Predict related numeric targets with the @kanaries/ml JavaScript RegressorChain implementation in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/multioutput/regressorChain"
+markdown_url: "https://ml.kanaries.net/docs/apis/multioutput/regressorChain.md"
+---
+# RegressorChain in JavaScript
+
+## Algorithm overview
+
+A regressor chain fits one model per target and appends earlier target values or predictions as features for later members. This can capture dependencies that independent multi-output regressors miss.
+
+## JavaScript implementation
+
+`@kanaries/ml` accepts a registered single-output regressor and supports explicit or seeded random chain order. Set `cv` to use out-of-fold predictions while building training extensions.
+
+## Quick start example
+
+```ts
+import { Linear, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.RegressorChain({
+  estimator: new Linear.RidgeRegression({ alpha: 1 }), order: [1, 0],
+});
+chain.fit(X, targets);
+const predictions = chain.predict(testX);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, and mean-output `score(X, Y)`. Learned `chainOrder` and `estimators` are available as defensive arrays. Ridge regression is a safe base choice when true earlier targets make augmented columns collinear.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/neighbors/ballTree -->
 
 ---
@@ -5014,7 +5526,7 @@ If someone searches for "Bernoulli RBM in JavaScript" or "feature learning in Ty
 
 ---
 title: "Semi-Supervised Learning in JavaScript with @kanaries/ml"
-description: "Explore Label Propagation and Label Spreading in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets."
+description: "Explore Label Propagation, Label Spreading, and self-training in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets."
 canonical_url: "https://ml.kanaries.net/docs/apis/semi_supervised"
 markdown_url: "https://ml.kanaries.net/docs/apis/semi_supervised/index.html.md"
 ---
@@ -5040,6 +5552,7 @@ If someone searches for "semi-supervised learning in JavaScript" or "Label Propa
 
 - [Label Propagation](/docs/apis/semi_supervised/labelPropagation.md): direct graph-based label spreading through neighborhoods
 - [Label Spreading](/docs/apis/semi_supervised/labelSpreading.md): smoother, regularized label diffusion
+- [Self-Training Classifier](/docs/apis/semi_supervised/selfTrainingClassifier.md): confidence-based pseudo-labeling around a probabilistic classifier
 
 ## Detailed module guide
 
@@ -5047,7 +5560,8 @@ If someone searches for "semi-supervised learning in JavaScript" or "Label Propa
 
 1. Use [Label Propagation](/docs/apis/semi_supervised/labelPropagation.md) when neighborhood structure is reliable and direct propagation is acceptable.
 2. Use [Label Spreading](/docs/apis/semi_supervised/labelSpreading.md) when you want a smoother and more regularized alternative.
-3. Validate propagated labels on a trusted subset before using them to train downstream models.
+3. Use [Self-Training Classifier](/docs/apis/semi_supervised/selfTrainingClassifier.md) when a supervised probability model is more appropriate than a similarity graph.
+4. Validate propagated labels on a trusted subset before using them to train downstream models.
 
 ### JavaScript deployment notes
 
@@ -5271,6 +5785,44 @@ and soft clamping controlled by `alpha`.
 - Prefer Label Spreading when graph noise or over-confident propagation is a concern.
 - Tune kernel and regularization settings against a validation subset of known labels.
 - Use it to improve label coverage before training a final supervised model rather than as the only production model.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier -->
+
+---
+title: "Self-Training Classifier in JavaScript and TypeScript"
+description: "Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier"
+markdown_url: "https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier.md"
+---
+# Self-Training Classifier in JavaScript
+
+## Algorithm overview
+
+Self-training repeatedly fits a probabilistic classifier, assigns pseudo-labels to the most confident unlabeled rows, and refits with the expanded labeled set. It helps when labels are scarce but class probabilities are reasonably calibrated.
+
+## JavaScript implementation
+
+`@kanaries/ml` wraps any registered classifier with `predictProba`, including `GaussianNB`. Use `-1` for unlabeled targets and choose a confidence threshold or a fixed number of additions per iteration.
+
+## Quick start example
+
+```ts
+import { Bayes, SemiSupervised } from '@kanaries/ml';
+
+const model = new SemiSupervised.SelfTrainingClassifier({
+  estimator: new Bayes.GaussianNB(), threshold: 0.8, maxIter: 10,
+});
+model.fit([[-3], [-2], [-1], [1], [2], [3]], [0, 0, -1, -1, 1, 1]);
+console.log(model.transduction);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `threshold` (default `.75`), `criterion: 'threshold' | 'kBest'`, `kBest` (default `10`), and `maxIter` (default `10`).
+
+Methods: `fit`, `predict`, `predictProba`. Learned fields: `transduction`, `labeledIteration`, `nIter`, and `terminationCondition`. Seed labels retain iteration `0`; labels that remain unknown retain `-1`.
 
 ---
 
@@ -6334,6 +6886,50 @@ asyncMode<P extends any[], R>(fn: (...args: P) => R): (...args: P) => Promise<R>
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/utils/groupSplitters -->
+
+---
+title: "Group-Aware Cross-Validation Splitters in JavaScript"
+description: "Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/utils/groupSplitters"
+markdown_url: "https://ml.kanaries.net/docs/apis/utils/groupSplitters.md"
+---
+# Group-Aware Cross-Validation in JavaScript
+
+## Algorithm overview
+
+Random sample splits leak information when multiple rows belong to the same user, patient, session, or device. Group-aware splitters keep each group entirely on one side of a fold; stratified group folds additionally balance class proportions.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes both splitters through `utils.ModelSelection`, so browser experiments and Node.js evaluation jobs can use leakage-resistant indices within the same JS workflow.
+
+## Quick start example
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const folds = new utils.ModelSelection.StratifiedGroupKFold({
+  nSplits: 3, shuffle: true, randomState: 42,
+}).split(X, y, patientIds);
+```
+
+## Detailed API reference
+
+```ts
+new utils.ModelSelection.GroupShuffleSplit({
+  nSplits?: number; testSize?: number; trainSize?: number; randomState?: number;
+})
+
+new utils.ModelSelection.StratifiedGroupKFold({
+  nSplits?: number; shuffle?: boolean; randomState?: number;
+})
+```
+
+Both expose `split(X, y?, groups): FoldIndices[]`. `GroupShuffleSplit` samples unique groups and interprets fractional sizes against the group count, not the row count. `StratifiedGroupKFold` requires `y` and greedily balances per-class proportions while never splitting a group.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/utils -->
 
 ---
@@ -6451,6 +7047,8 @@ Both splitters expose:
 - `split(X: any[], y?: any[]): { trainIndices: number[]; testIndices: number[] }[]`
 
 `StratifiedKFold` requires labels and preserves class balance across folds.
+
+For repeated-entity datasets, use [GroupShuffleSplit or StratifiedGroupKFold](/docs/apis/utils/groupSplitters.md) so a user, patient, session, or device never appears in both train and test partitions.
 
 ### Cross-validation
 

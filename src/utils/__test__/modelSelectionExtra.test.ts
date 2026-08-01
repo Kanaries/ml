@@ -6,17 +6,23 @@ import {
     FoldIndices,
     GridSearchCV,
     GroupKFold,
+    GroupShuffleSplit,
     LeaveOneOut,
     RepeatedKFold,
     RepeatedStratifiedKFold,
     ShuffleSplit,
     StratifiedShuffleSplit,
+    StratifiedGroupKFold,
     TimeSeriesSplit,
     crossValidate,
     learningCurve,
     validationCurve,
 } from '../modelSelection';
 import { trainTestSplit } from '../sampling';
+import fs from 'fs';
+import path from 'path';
+
+const waveB = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../test_data/wave_b.json'), 'utf8'));
 
 function sortedTest(fold: FoldIndices): number[] {
     return fold.testIndices.slice().sort((a, b) => a - b);
@@ -337,6 +343,56 @@ test('crossValidate validates its inputs', () => {
         .toThrow('same length');
     expect(() => crossValidate(new LogisticRegression(), CV_X, CV_Y, { scoring: 'nope' }))
         .toThrow('Unknown scoring');
+});
+
+describe('group-aware Wave B splitters', () => {
+    test('GroupShuffleSplit samples whole groups deterministically', () => {
+        const X = Array.from({ length: 12 }, (_, i) => [i]);
+        const groups = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
+        const splitter = new GroupShuffleSplit({ nSplits: 3, testSize: 2, randomState: 42 });
+        const first = splitter.split(X, undefined, groups);
+        expect(first).toEqual(new GroupShuffleSplit({ nSplits: 3, testSize: 2, randomState: 42 }).split(X, undefined, groups));
+        for (const fold of first) {
+            const trainGroups = new Set(fold.trainIndices.map(i => groups[i]));
+            const testGroups = new Set(fold.testIndices.map(i => groups[i]));
+            expect(testGroups.size).toBe(2);
+            expect([...testGroups].some(group => trainGroups.has(group))).toBe(false);
+        }
+    });
+
+    test('StratifiedGroupKFold keeps groups intact and balances classes', () => {
+        const groups = Array.from({ length: 12 }, (_, i) => Math.floor(i / 2));
+        const X = groups.map((_, i) => [i]);
+        const y = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
+        const folds = new StratifiedGroupKFold({ nSplits: 3, shuffle: true, randomState: 42 }).split(X, y, groups);
+        expect(folds).toHaveLength(3);
+        for (const fold of folds) {
+            const trainGroups = new Set(fold.trainIndices.map(i => groups[i]));
+            expect(fold.testIndices.some(i => trainGroups.has(groups[i]))).toBe(false);
+            expect(new Set(fold.testIndices.map(i => y[i]))).toEqual(new Set([0, 1]));
+        }
+    });
+
+    test('StratifiedGroupKFold matches the sklearn deterministic group fixture', () => {
+        const { groups, y, test_indices: expected } = waveB.stratified_group_kfold;
+        const X = Array.from({ length: y.length }, (_, i) => [i]);
+        const folds = new StratifiedGroupKFold({ nSplits: 3 }).split(X, y, groups);
+        expect(folds.map(fold => fold.testIndices)).toEqual(expected);
+    });
+
+    test('StratifiedGroupKFold uses sklearn isclose semantics for near-tied folds', () => {
+        const { groups, y, test_indices: expected } = waveB.stratified_group_kfold.near_tie;
+        const X = Array.from({ length: y.length }, (_, i) => [i]);
+        const folds = new StratifiedGroupKFold({ nSplits: 3 }).split(X, y, groups);
+        expect(folds.map(fold => fold.testIndices)).toEqual(expected);
+    });
+
+    test('StratifiedGroupKFold matches sklearn class-count and randomState validation', () => {
+        expect(() => new StratifiedGroupKFold({ nSplits: 3 }).split([[0], [1], [2], [3]], [0, 0, 1, 1], [0, 1, 2, 3]))
+            .toThrow('cannot be greater than the number of members in each class');
+        expect(() => new StratifiedGroupKFold({ nSplits: 3, randomState: 1 }))
+            .toThrow('has no effect');
+    });
 });
 
 // ---------------------------------------------------------------------------

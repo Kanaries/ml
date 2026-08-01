@@ -2,6 +2,8 @@ import { loadModel } from '../../base/estimator';
 import { runEstimatorConformance } from '../../__test__/conformance/harness';
 import { LabelPropagation } from '../labelPropagation';
 import { LabelSpreading } from '../labelSpreading';
+import { SelfTrainingClassifier } from '../selfTrainingClassifier';
+import { GaussianNB } from '../../bayes';
 
 // The harness fits on fully-labeled y — valid input for label propagation
 // (a y vector with no -1 entries simply clamps every point).
@@ -18,6 +20,7 @@ runEstimatorConformance([
         dataset: 'multiclass',
         create: () => new LabelSpreading({ kernel: 'rbf', gamma: 20, alpha: 0.2, maxIter: 30, tol: 1e-3 }),
     },
+    { name: 'SelfTrainingClassifier', kind: 'classifier', dataset: 'binary', create: () => new SelfTrainingClassifier({ estimator: new GaussianNB(), threshold: .75 }) },
 ]);
 
 // Extra coverage for the class's real usage: semi-labeled input (-1 entries)

@@ -1,0 +1,30 @@
+---
+title: RegressorChain in JavaScript and TypeScript
+description: Predict related numeric targets with the @kanaries/ml JavaScript RegressorChain implementation in browser or Node.js.
+---
+
+# RegressorChain in JavaScript
+
+## Algorithm overview
+
+A regressor chain fits one model per target and appends earlier target values or predictions as features for later members. This can capture dependencies that independent multi-output regressors miss.
+
+## JavaScript implementation
+
+`@kanaries/ml` accepts a registered single-output regressor and supports explicit or seeded random chain order. Set `cv` to use out-of-fold predictions while building training extensions.
+
+## Quick start example
+
+```ts
+import { Linear, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.RegressorChain({
+  estimator: new Linear.RidgeRegression({ alpha: 1 }), order: [1, 0],
+});
+chain.fit(X, targets);
+const predictions = chain.predict(testX);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, and mean-output `score(X, Y)`. Learned `chainOrder` and `estimators` are available as defensive arrays. Ridge regression is a safe base choice when true earlier targets make augmented columns collinear.

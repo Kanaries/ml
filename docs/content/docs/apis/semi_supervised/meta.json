@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "labelPropagation",
-    "labelSpreading"
+    "labelSpreading",
+    "selfTrainingClassifier"
   ]
 }

@@ -14,7 +14,8 @@
 - **50+ estimators** across classification, regression, clustering, dimensionality reduction, manifold learning, anomaly detection, and semi-supervised learning
 - **scikit-learn-style API** — `fit`, `predict`, `fitPredict`, transformers, and metrics that mirror the Python ecosystem
 - **Gradient boosting and ensembles** — `XGBoostClassifier`/`XGBoostRegressor`, `GradientBoosting`, `AdaBoost` (multiclass via SAMME), `RandomForest`, `Bagging`, and `IsolationForest`
-- **Model selection built in** — `KFold`, `StratifiedKFold`, `GridSearchCV`, `RandomizedSearchCV`, and `crossValScore`
+- **Model selection built in** — `KFold`, `StratifiedKFold`, group-aware splitters, `GridSearchCV`, `RandomizedSearchCV`, and `crossValScore`
+- **Sparse text pipelines** — `CountVectorizer`, `TfidfTransformer`, and `TfidfVectorizer` feed CSR matrices directly to sparse-aware Naive Bayes models
 - **Evaluation metrics** — accuracy, precision/recall/F1, confusion matrix, ROC curve, ROC AUC, precision-recall curve, MSE, R², adjusted Rand index
 - **Runs anywhere JavaScript runs** — browsers, Node.js, and edge runtimes, with Web Worker support via `asyncMode`
 - **TypeScript-first** — written in TypeScript with full type definitions shipped
@@ -227,14 +228,17 @@ For side-by-side Python and JavaScript examples across the algorithm docs, see [
 - **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNeighborsClassifier` (`KNearestNeighbors`), `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestCentroid`, `LocalOutlierFactor`, `BallTree`, `KDTree`
 - **[Naive Bayes](https://ml.kanaries.net/docs/apis/bayes)**: `GaussianNB`, `MultinomialNB`, `ComplementNB`, `BernoulliNB`, `CategoricalNB`
 - **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBSCAN` (`DBScan`), `HDBSCAN` (`HDBScan`), `OPTICS`, `MeanShift`
-- **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`
+- **[Text Feature Extraction](https://ml.kanaries.net/docs/apis/feature_extraction)**: `CountVectorizer`, `TfidfTransformer`, `TfidfVectorizer`
+- **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`, `KernelPCA`, `FastICA`, `NMF`, `IncrementalPCA`
 - **[Manifold Learning](https://ml.kanaries.net/docs/apis/manifold)**: `TSNE`, `MDS`, `SpectralEmbedding`, `LocallyLinearEmbedding` (`LLE`), `Isomap`
 - **[Robust Covariance](https://ml.kanaries.net/docs/apis/covariance)**: `MinCovDet`, `EllipticEnvelope`
 - **[Feature Selection](https://ml.kanaries.net/docs/apis/feature_selection)**: `SelectFromModel`, `RFE`, `RFECV`, `chi2`, `fClassif`, `mutualInfoClassif`, `mutualInfoRegression`
-- **[Semi-Supervised](https://ml.kanaries.net/docs/apis/semi_supervised)**: `LabelPropagation`, `LabelSpreading`
+- **[Semi-Supervised](https://ml.kanaries.net/docs/apis/semi_supervised)**: `LabelPropagation`, `LabelSpreading`, `SelfTrainingClassifier`
+- **[Multi-Output](https://ml.kanaries.net/docs/apis/multioutput)**: `MultiOutputClassifier`, `MultiOutputRegressor`, `ClassifierChain`, `RegressorChain`
+- **[Imputation](https://ml.kanaries.net/docs/apis/impute)**: `IterativeImputer`
 - **[Neural Network](https://ml.kanaries.net/docs/apis/neural_network)**: `BernoulliRBM`
 - **[Metrics](https://ml.kanaries.net/docs/apis/metrics)**: `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `precisionRecallFscoreSupport`, `confusionMatrix`, `rocCurve`, `rocAucScore`, `precisionRecallCurve`, `meanSquaredError`, `r2Score`, `adjustedRandScore`
-- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: `Sampling.trainTestSplit`, `Preprocessing.StandardScaler`, `Preprocessing.MinMaxScaler`, `Preprocessing.MaxAbsScaler`, `ModelSelection.KFold`, `ModelSelection.StratifiedKFold`, `ModelSelection.GridSearchCV`, `ModelSelection.RandomizedSearchCV`, `ModelSelection.crossValScore`, `ModelSelection.crossValPredict`, linear algebra helpers and math functions
+- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: `Sampling.trainTestSplit`, preprocessing scalers, `ModelSelection.KFold`, `ModelSelection.StratifiedKFold`, `ModelSelection.GroupShuffleSplit`, `ModelSelection.StratifiedGroupKFold`, search/CV helpers, linear algebra helpers and math functions
 
 `KNearstNeighbors` remains available as a deprecated compatibility alias of `KNearestNeighbors`.
 

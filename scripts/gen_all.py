@@ -56,7 +56,8 @@ scripts = [
     'gen_lle.py',
     'gen_tsne.py',
     'gen_label_propagation.py',
-    'gen_label_spreading.py'
+    'gen_label_spreading.py',
+    'gen_wave_b.py'
 ]
 
 for s in scripts:

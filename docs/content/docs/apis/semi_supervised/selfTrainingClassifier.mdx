@@ -1,0 +1,32 @@
+---
+title: Self-Training Classifier in JavaScript and TypeScript
+description: Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js.
+---
+
+# Self-Training Classifier in JavaScript
+
+## Algorithm overview
+
+Self-training repeatedly fits a probabilistic classifier, assigns pseudo-labels to the most confident unlabeled rows, and refits with the expanded labeled set. It helps when labels are scarce but class probabilities are reasonably calibrated.
+
+## JavaScript implementation
+
+`@kanaries/ml` wraps any registered classifier with `predictProba`, including `GaussianNB`. Use `-1` for unlabeled targets and choose a confidence threshold or a fixed number of additions per iteration.
+
+## Quick start example
+
+```ts
+import { Bayes, SemiSupervised } from '@kanaries/ml';
+
+const model = new SemiSupervised.SelfTrainingClassifier({
+  estimator: new Bayes.GaussianNB(), threshold: 0.8, maxIter: 10,
+});
+model.fit([[-3], [-2], [-1], [1], [2], [3]], [0, 0, -1, -1, 1, 1]);
+console.log(model.transduction);
+```
+
+## Detailed API reference
+
+Options: `estimator`, `threshold` (default `.75`), `criterion: 'threshold' | 'kBest'`, `kBest` (default `10`), and `maxIter` (default `10`).
+
+Methods: `fit`, `predict`, `predictProba`. Learned fields: `transduction`, `labeledIteration`, `nIter`, and `terminationCondition`. Seed labels retain iteration `0`; labels that remain unknown retain `-1`.

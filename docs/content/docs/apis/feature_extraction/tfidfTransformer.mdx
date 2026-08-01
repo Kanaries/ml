@@ -1,0 +1,42 @@
+---
+title: TfidfTransformer in JavaScript and TypeScript
+description: Weight dense or CSR term-count matrices with TF-IDF in browser or Node.js using the @kanaries/ml JavaScript implementation.
+---
+
+# TfidfTransformer in JavaScript
+
+## Algorithm overview
+
+TF-IDF reduces the influence of terms that occur in many documents while preserving terms that distinguish individual documents. `TfidfTransformer` is useful when counts already come from another source.
+
+## JavaScript implementation
+
+`@kanaries/ml` accepts either `number[][]` or `CSRMatrix` counts and returns a sparse CSR result. This keeps text preprocessing memory-efficient in browser and Node.js pipelines.
+
+## Quick start example
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const tfidf = new FeatureExtraction.TfidfTransformer({ norm: 'l2' });
+const weighted = tfidf.fitTransform([[2, 0, 1], [0, 1, 1]]);
+console.log(weighted.toDense());
+```
+
+## Detailed API reference
+
+```ts
+new FeatureExtraction.TfidfTransformer({
+  norm?: 'l1' | 'l2' | null; // 'l2'
+  useIdf?: boolean;          // true
+  smoothIdf?: boolean;       // true
+  sublinearTf?: boolean;     // false
+})
+```
+
+- `fit(X): void` learns inverse-document-frequency weights.
+- `transform(X): CSRMatrix` applies term-frequency scaling, IDF, and normalization.
+- `fitTransform(X): CSRMatrix` combines both operations.
+- `idf: number[]` returns a defensive copy of the learned weights.
+
+Inputs must contain non-negative term counts and use the fitted feature count.

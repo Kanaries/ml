@@ -1,0 +1,38 @@
+---
+title: Group-Aware Cross-Validation Splitters in JavaScript
+description: Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js.
+---
+
+# Group-Aware Cross-Validation in JavaScript
+
+## Algorithm overview
+
+Random sample splits leak information when multiple rows belong to the same user, patient, session, or device. Group-aware splitters keep each group entirely on one side of a fold; stratified group folds additionally balance class proportions.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes both splitters through `utils.ModelSelection`, so browser experiments and Node.js evaluation jobs can use leakage-resistant indices within the same JS workflow.
+
+## Quick start example
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const folds = new utils.ModelSelection.StratifiedGroupKFold({
+  nSplits: 3, shuffle: true, randomState: 42,
+}).split(X, y, patientIds);
+```
+
+## Detailed API reference
+
+```ts
+new utils.ModelSelection.GroupShuffleSplit({
+  nSplits?: number; testSize?: number; trainSize?: number; randomState?: number;
+})
+
+new utils.ModelSelection.StratifiedGroupKFold({
+  nSplits?: number; shuffle?: boolean; randomState?: number;
+})
+```
+
+Both expose `split(X, y?, groups): FoldIndices[]`. `GroupShuffleSplit` samples unique groups and interprets fractional sizes against the group count, not the row count. `StratifiedGroupKFold` requires `y` and greedily balances per-class proportions while never splitting a group.

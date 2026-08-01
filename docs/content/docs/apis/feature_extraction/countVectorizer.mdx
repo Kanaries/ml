@@ -1,0 +1,54 @@
+---
+title: CountVectorizer in JavaScript and TypeScript
+description: Tokenize browser or Node.js text into a memory-efficient CSR count matrix with the @kanaries/ml JavaScript CountVectorizer implementation.
+---
+
+# CountVectorizer in JavaScript
+
+## Algorithm overview
+
+`CountVectorizer` learns a vocabulary from documents and represents each document by token or n-gram frequency. It is a strong baseline for text classification, search features, and document analytics.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementation accepts `string[]` and returns `CSRMatrix`, avoiding a dense allocation when the vocabulary is large. The fitted vectorizer can run in a browser or Node.js and can be serialized with the standard model codec.
+
+## Quick start example
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const vectorizer = new FeatureExtraction.CountVectorizer({
+  ngramRange: [1, 2],
+  minDf: 1,
+  stopWords: ['the'],
+});
+const counts = vectorizer.fitTransform(['the red fox', 'the red bird']);
+console.log(vectorizer.getFeatureNamesOut());
+console.log(counts.toDense());
+```
+
+Python uses `CountVectorizer(ngram_range=(1, 2), stop_words=['the'])`; JavaScript uses camel-case option names and the same `fit`/`transform` workflow.
+
+## Detailed API reference
+
+```ts
+new FeatureExtraction.CountVectorizer({
+  lowercase?: boolean;              // true
+  stopWords?: string[];             // []
+  ngramRange?: [number, number];     // [1, 1]
+  minDf?: number;                    // 1; values below 1 are proportions
+  maxDf?: number;                    // 1; values at or below 1 are proportions
+  maxFeatures?: number;
+  binary?: boolean;                  // false
+  vocabulary?: Record<string, number> | Map<string, number>;
+})
+```
+
+- `fit(documents: string[]): void` learns the vocabulary.
+- `transform(documents: string[]): CSRMatrix` produces sparse counts.
+- `fitTransform(documents: string[]): CSRMatrix` combines both operations.
+- `getFeatureNamesOut(): string[]` returns terms in column order.
+- `vocabulary` returns a defensive `ReadonlyMap` copy.
+
+Because JavaScript has one numeric type, `maxDf: 1` follows the proportional/default interpretation; use an integer greater than one for an absolute document threshold.

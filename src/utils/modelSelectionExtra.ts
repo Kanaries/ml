@@ -310,6 +310,95 @@ export class GroupKFold implements SplitterLike {
 }
 registerSerializableClass('utils.GroupKFold', GroupKFold);
 
+export interface GroupShuffleSplitProps extends ShuffleSplitProps {}
+
+/** Random train/test partitions over unique groups rather than samples. */
+export class GroupShuffleSplit implements SplitterLike {
+    private nSplits: number;
+    private testSize?: number;
+    private trainSize?: number;
+    private randomState?: number;
+    constructor(props: GroupShuffleSplitProps = {}) {
+        const { nSplits = 5, testSize, trainSize, randomState } = props;
+        if (!Number.isInteger(nSplits) || nSplits < 1) throw new Error('nSplits must be an integer >= 1');
+        this.nSplits = nSplits; this.testSize = testSize; this.trainSize = trainSize; this.randomState = randomState;
+    }
+    public split(X: any[], y?: any[], groups?: any[]): FoldIndices[] {
+        if (!groups || groups.length !== X.length) throw new Error('GroupShuffleSplit requires one group per sample');
+        validateXy(X, y);
+        const unique = Array.from(new Set(groups)).sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+        const { nTest, nTrain } = resolveShuffleSizes(unique.length, this.testSize, this.trainSize, .2);
+        const random = createRandomGenerator(this.randomState), folds: FoldIndices[] = [];
+        for (let split = 0; split < this.nSplits; split++) {
+            const order = shuffledIndices(unique.length, random);
+            const testGroups = new Set(order.slice(0, nTest).map(i => unique[i]));
+            const trainGroups = new Set(order.slice(nTest, nTest + nTrain).map(i => unique[i]));
+            const testIndices: number[] = [], trainIndices: number[] = [];
+            groups.forEach((group, i) => { if (testGroups.has(group)) testIndices.push(i); else if (trainGroups.has(group)) trainIndices.push(i); });
+            folds.push({ trainIndices, testIndices });
+        }
+        return folds;
+    }
+}
+registerSerializableClass('utils.GroupShuffleSplit', GroupShuffleSplit);
+
+export interface StratifiedGroupKFoldProps extends GroupKFoldProps { shuffle?: boolean; randomState?: number; }
+
+/** Greedy class-balanced K-fold splitting with groups kept intact. */
+export class StratifiedGroupKFold implements SplitterLike {
+    private nSplits: number;
+    private shuffle: boolean;
+    private randomState?: number;
+    constructor(props: StratifiedGroupKFoldProps = {}) {
+        const { nSplits = 5, shuffle = false, randomState } = props;
+        if (!Number.isInteger(nSplits) || nSplits < 2) throw new Error('nSplits must be an integer >= 2');
+        if (!shuffle && randomState !== undefined) throw new Error('randomState has no effect when shuffle=false');
+        this.nSplits = nSplits; this.shuffle = shuffle; this.randomState = randomState;
+    }
+    public split(X: any[], y?: any[], groups?: any[]): FoldIndices[] {
+        if (!y) throw new Error('StratifiedGroupKFold requires y labels');
+        if (!groups || groups.length !== X.length) throw new Error('StratifiedGroupKFold requires one group per sample');
+        validateXy(X, y);
+        const classes = Array.from(new Set(y)).sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+        const classId = new Map(classes.map((label, i) => [label, i]));
+        const uniqueGroups = Array.from(new Set(groups)).sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+        if (uniqueGroups.length < this.nSplits) throw new Error('nSplits cannot exceed the number of groups');
+        const groupId = new Map(uniqueGroups.map((group, i) => [group, i]));
+        const groupCounts = Array.from({ length: uniqueGroups.length }, () => new Array(classes.length).fill(0));
+        const classTotals = new Array(classes.length).fill(0);
+        for (let i = 0; i < y.length; i++) { const c = classId.get(y[i])!, g = groupId.get(groups[i])!; groupCounts[g][c]++; classTotals[c]++; }
+        if (classTotals.every(total => total < this.nSplits)) throw new Error(`nSplits=${this.nSplits} cannot be greater than the number of members in each class`);
+        let order = Array.from({ length: uniqueGroups.length }, (_, i) => i);
+        if (this.shuffle) { const random = createRandomGenerator(this.randomState); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; } }
+        const spread = (counts: number[]) => { const mean = counts.reduce((a, b) => a + b, 0) / counts.length; return Math.sqrt(counts.reduce((sum, value) => sum + (value - mean) ** 2, 0) / counts.length); };
+        order.sort((a, b) => spread(groupCounts[b]) - spread(groupCounts[a]));
+        const foldCounts = Array.from({ length: this.nSplits }, () => new Array(classes.length).fill(0));
+        const foldGroups: number[][] = Array.from({ length: this.nSplits }, () => []);
+        for (const group of order) {
+            let bestFold = 0, bestScore = Infinity, bestSize = Infinity;
+            for (let fold = 0; fold < this.nSplits; fold++) {
+                for (let c = 0; c < classes.length; c++) foldCounts[fold][c] += groupCounts[group][c];
+                const score = classes.reduce((sum, _, c) => {
+                    const proportions = foldCounts.map(counts => counts[c] / Math.max(1, classTotals[c]));
+                    return sum + spread(proportions);
+                }, 0) / classes.length;
+                for (let c = 0; c < classes.length; c++) foldCounts[fold][c] -= groupCounts[group][c];
+                const size = foldCounts[fold].reduce((a, b) => a + b, 0);
+                const isClose = Number.isFinite(bestScore) && Math.abs(score - bestScore) <= 1e-8 + 1e-5 * Math.abs(bestScore);
+                if (score < bestScore || isClose && size < bestSize) { bestFold = fold; bestScore = score; bestSize = size; }
+            }
+            foldGroups[bestFold].push(group);
+            for (let c = 0; c < classes.length; c++) foldCounts[bestFold][c] += groupCounts[group][c];
+        }
+        return foldGroups.map(assigned => {
+            const assignedSet = new Set(assigned), testIndices: number[] = [], trainIndices: number[] = [];
+            groups.forEach((group, i) => (assignedSet.has(groupId.get(group)!) ? testIndices : trainIndices).push(i));
+            return { trainIndices, testIndices };
+        });
+    }
+}
+registerSerializableClass('utils.StratifiedGroupKFold', StratifiedGroupKFold);
+
 // ---------------------------------------------------------------------------
 // TimeSeriesSplit
 // ---------------------------------------------------------------------------

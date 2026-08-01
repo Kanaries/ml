@@ -61,6 +61,8 @@ Both splitters expose:
 
 `StratifiedKFold` requires labels and preserves class balance across folds.
 
+For repeated-entity datasets, use [GroupShuffleSplit or StratifiedGroupKFold](groupSplitters) so a user, patient, session, or device never appears in both train and test partitions.
+
 ### Cross-validation
 
 ```ts

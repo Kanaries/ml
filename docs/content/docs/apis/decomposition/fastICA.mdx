@@ -1,0 +1,34 @@
+---
+title: FastICA in JavaScript and TypeScript
+description: Separate statistically independent signals with the @kanaries/ml FastICA JavaScript implementation in browser and Node.js environments.
+---
+
+# FastICA in JavaScript
+
+## Algorithm overview
+
+FastICA recovers statistically independent sources from observed mixtures by maximizing non-Gaussianity. Common uses include blind source separation, artifact removal, and exploratory feature extraction.
+
+## JavaScript implementation
+
+`@kanaries/ml` offers parallel and deflation FastICA with deterministic initialization, whitening choices, transforms, and inverse transforms for JS-only signal and analytics workflows.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const ica = new Decomposition.FastICA({
+  nComponents: 2,
+  whiten: 'unit-variance',
+  randomState: 0,
+});
+const sources = ica.fitTransform(observedSignals);
+const reconstructed = ica.inverseTransform(sources);
+```
+
+## Detailed API reference
+
+Options include `nComponents`, `algorithm: 'parallel' | 'deflation'`, `whiten: 'unit-variance' | 'arbitrary-variance' | false`, `fun: 'logcosh' | 'exp' | 'cube'`, `funArgs.alpha`, `maxIter`, `tol`, and `randomState`.
+
+Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `mixing`, `mean`, and `nIter`. With `whiten: false`, input is not centered and `nComponents` is ignored, matching sklearn semantics.

@@ -5,5 +5,5 @@ export const facesDecomposition = freezeScenario({
     dataset: { name: 'Olivetti faces', source: 'sklearn.datasets.fetch_olivetti_faces', protocol: 'first 100 normalized samples, 16 components' },
     workflow: ['fit each included decomposition', 'compare reconstruction error and component shape'],
     algorithms: { include: ['PCA', 'NMF', 'FastICA'], exclude: ['DictionaryLearning', 'MiniBatchDictionaryLearning'] },
-    parity: { state: 'pending', blockedBy: ['Wave B: NMF', 'Wave B: FastICA'], reason: 'The frozen subset deliberately excludes deferred dictionary-learning algorithms.' },
+    parity: { state: 'pending', blockedBy: [], reason: 'Wave B NMF and FastICA are present; the frozen Olivetti fixture remains an exit-gate task and still excludes deferred dictionary-learning algorithms.' },
 });

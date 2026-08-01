@@ -1,0 +1,37 @@
+---
+title: Incremental PCA in JavaScript and TypeScript
+description: Process numeric data in batches with the @kanaries/ml IncrementalPCA JavaScript implementation for memory-aware browser and Node.js workflows.
+---
+
+# Incremental PCA in JavaScript
+
+## Algorithm overview
+
+Incremental PCA updates a low-rank SVD one batch at a time. It is useful when a complete dataset should not be retained in memory, while still producing PCA-style projections and inverse transforms.
+
+## JavaScript implementation
+
+`@kanaries/ml` follows sklearn's mean-corrected incremental SVD update. Call `partialFit` for streamed batches, or `fit` to let the estimator split an in-memory matrix by `batchSize`.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const pca = new Decomposition.IncrementalPCA({ nComponents: 2 });
+pca.partialFit(batchOne).partialFit(batchTwo);
+const embedding = pca.transform(nextBatch);
+```
+
+## Detailed API reference
+
+```ts
+new Decomposition.IncrementalPCA({ nComponents?: number | null, batchSize?: number })
+```
+
+- `partialFit(X: number[][]): this` updates the retained SVD.
+- `fit(X: number[][]): void` resets and processes batches.
+- `transform` and `inverseTransform` project data.
+- `components`, `mean`, `explainedVariance`, `singularValues`, and `nSamplesSeen` expose learned state.
+
+The first `partialFit` batch must contain at least `nComponents` samples and features.

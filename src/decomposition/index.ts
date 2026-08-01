@@ -1,3 +1,11 @@
 export { PCA } from './pca';
 export { TruncatedSVD } from './truncatedSVD';
 export { SparsePCA } from './sparsePCA';
+export { KernelPCA } from './kernelPCA';
+export type { KernelPCAProps, KernelPCAKernel } from './kernelPCA';
+export { IncrementalPCA } from './incrementalPCA';
+export type { IncrementalPCAProps } from './incrementalPCA';
+export { FastICA } from './fastICA';
+export type { FastICAProps, ICAFunction } from './fastICA';
+export { NMF } from './nmf';
+export type { NMFProps, NMFInit } from './nmf';

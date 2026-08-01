@@ -1,0 +1,40 @@
+---
+title: Kernel PCA in JavaScript and TypeScript
+description: Learn nonlinear dimensionality reduction and run the @kanaries/ml KernelPCA JavaScript implementation in browser or Node.js applications.
+---
+
+# Kernel PCA in JavaScript
+
+## Algorithm overview
+
+Kernel PCA applies PCA to an implicit nonlinear feature space. It can unfold curved structure that ordinary linear PCA cannot represent, using RBF, polynomial, sigmoid, cosine, or linear similarity.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `KernelPCA` for browser visualization and Node.js preprocessing without a Python service. It supports out-of-sample `transform`, and optional kernel-ridge pre-image reconstruction.
+
+## Quick start example
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const model = new Decomposition.KernelPCA({
+  nComponents: 2,
+  kernel: 'rbf',
+  gamma: 2,
+});
+const embedded = model.fitTransform([[1, 0], [0, 1], [-1, 0], [0, -1]]);
+```
+
+## Detailed API reference
+
+```ts
+new Decomposition.KernelPCA({
+  nComponents?: number | null;
+  kernel?: 'linear' | 'poly' | 'rbf' | 'sigmoid' | 'cosine';
+  gamma?: number; degree?: number; coef0?: number;
+  alpha?: number; fitInverseTransform?: boolean; randomState?: number;
+})
+```
+
+Methods: `fit`, `transform`, `fitTransform`, and `inverseTransform`. Learned `eigenvalues` and `eigenvectors` are exposed as defensive copies. Kernel methods build an O(n²) training matrix, so constrain browser sample counts.

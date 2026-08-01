@@ -4,6 +4,10 @@
     "index",
     "pca",
     "sparsePCA",
-    "truncatedSVD"
+    "truncatedSVD",
+    "kernelPCA",
+    "fastICA",
+    "nmf",
+    "incrementalPCA"
   ]
 }

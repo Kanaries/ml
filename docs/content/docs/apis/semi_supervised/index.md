@@ -1,6 +1,6 @@
 ---
 title: Semi-Supervised Learning in JavaScript with @kanaries/ml
-description: Explore Label Propagation and Label Spreading in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets.
+description: Explore Label Propagation, Label Spreading, and self-training in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets.
 ---
 
 # Semi-Supervised Learning in JavaScript
@@ -25,6 +25,7 @@ If someone searches for "semi-supervised learning in JavaScript" or "Label Propa
 
 - [Label Propagation](labelPropagation): direct graph-based label spreading through neighborhoods
 - [Label Spreading](labelSpreading): smoother, regularized label diffusion
+- [Self-Training Classifier](selfTrainingClassifier): confidence-based pseudo-labeling around a probabilistic classifier
 
 ## Detailed module guide
 
@@ -32,7 +33,8 @@ If someone searches for "semi-supervised learning in JavaScript" or "Label Propa
 
 1. Use [Label Propagation](labelPropagation) when neighborhood structure is reliable and direct propagation is acceptable.
 2. Use [Label Spreading](labelSpreading) when you want a smoother and more regularized alternative.
-3. Validate propagated labels on a trusted subset before using them to train downstream models.
+3. Use [Self-Training Classifier](selfTrainingClassifier) when a supervised probability model is more appropriate than a similarity graph.
+4. Validate propagated labels on a trusted subset before using them to train downstream models.
 
 ### JavaScript deployment notes
 

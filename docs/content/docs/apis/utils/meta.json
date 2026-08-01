@@ -5,6 +5,7 @@
     "preprocessing",
     "sampling",
     "modelSelection",
+    "groupSplitters",
     "stat",
     "asyncMode"
   ]

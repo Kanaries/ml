@@ -1,0 +1,56 @@
+import { BaseEstimator, Params, registerEstimator } from '../base';
+import { createRandomGenerator } from '../utils/random';
+import { crossValPredict } from '../utils/modelSelection';
+import { SingleOutputEstimator, splitEstimatorParams, validateMultiOutputTargets, validateSingleOutputEstimator } from './common';
+
+export interface ClassifierChainProps { estimator: BaseEstimator; order?: number[] | 'random'; cv?: number | null; randomState?: number; }
+export class ClassifierChain extends BaseEstimator {
+    private estimator: SingleOutputEstimator;
+    private order: number[] | 'random';
+    private cv: number | null;
+    private randomState?: number;
+    private orderState: number[] = [];
+    private estimatorsState: SingleOutputEstimator[] = [];
+    constructor(props: ClassifierChainProps) {
+        super(); const { estimator, order = [], cv = null, randomState } = props ?? {} as ClassifierChainProps;
+        if (order !== 'random' && !Array.isArray(order)) throw new Error('order must be an array or "random"');
+        if (cv !== null && (!Number.isInteger(cv) || cv < 2)) throw new Error('cv must be null or an integer >= 2');
+        this.estimator = validateSingleOutputEstimator(estimator, 'ClassifierChain'); this.order = order; this.cv = cv; this.randomState = randomState;
+    }
+    public getParams(): Params { return { estimator: this.estimator, order: Array.isArray(this.order) ? this.order.slice() : this.order, cv: this.cv, randomState: this.randomState }; }
+    public setParams(params: Params): this { const { own, nested } = splitEstimatorParams(params, this.constructor.name); const next = { ...this.getParams(), ...own }; const estimator = (next.estimator as BaseEstimator).clone(); if (Object.keys(nested).length > 0) estimator.setParams(nested); next.estimator = estimator; return super.setParams(next); }
+    private resolveOrder(outputs: number): number[] {
+        if (this.order === 'random') { const result = Array.from({ length: outputs }, (_, i) => i), random = createRandomGenerator(this.randomState); for (let i = outputs - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; } return result; }
+        if (this.order.length === 0) return Array.from({ length: outputs }, (_, i) => i);
+        if (this.order.length !== outputs || new Set(this.order).size !== outputs || this.order.some(i => !Number.isInteger(i) || i < 0 || i >= outputs)) throw new Error('order must be a permutation of output indices');
+        return this.order.slice();
+    }
+    public fit(X: number[][], Y: number[][]): void {
+        validateMultiOutputTargets(X, Y, 'ClassifierChain'); this.orderState = this.resolveOrder(Y[0].length); this.estimatorsState = [];
+        if (Y.some(row => row.some(value => value !== 0 && value !== 1))) throw new Error('ClassifierChain requires a binary indicator target matrix');
+        let augmented = X.map(row => row.slice());
+        for (const output of this.orderState) {
+            const target = Y.map(row => row[output]);
+            const member = this.estimator.clone() as SingleOutputEstimator; member.fit(augmented, target); this.estimatorsState.push(member);
+            const extension = this.cv === null ? target : crossValPredict(() => this.estimator.clone() as SingleOutputEstimator, augmented, target, { cv: this.cv });
+            augmented = augmented.map((row, i) => [...row, extension[i]]);
+        }
+    }
+    public predict(X: number[][]): number[][] {
+        if (this.estimatorsState.length === 0) throw new Error('ClassifierChain is not fitted');
+        const result = X.map(() => new Array(this.orderState.length).fill(0)); let augmented = X.map(row => row.slice());
+        for (let chain = 0; chain < this.orderState.length; chain++) { const prediction = this.estimatorsState[chain].predict(augmented); const output = this.orderState[chain]; for (let i = 0; i < X.length; i++) result[i][output] = prediction[i]; augmented = augmented.map((row, i) => [...row, prediction[i]]); }
+        return result;
+    }
+    public predictProba(X: number[][]): number[][] {
+        if (this.estimatorsState.length === 0) throw new Error('ClassifierChain is not fitted');
+        if (this.estimatorsState.some(member => typeof member.predictProba !== 'function')) throw new Error('base estimator must implement predictProba');
+        const result = X.map(() => new Array(this.orderState.length).fill(0)); let augmented = X.map(row => row.slice());
+        for (let chain = 0; chain < this.orderState.length; chain++) { const proba = this.estimatorsState[chain].predictProba!(augmented); if (proba.some(row => row.length !== 2)) throw new Error('predictProba requires every chain member to have exactly two classes'); const prediction = this.estimatorsState[chain].predict(augmented); const output = this.orderState[chain]; for (let i = 0; i < X.length; i++) result[i][output] = proba[i][1]; augmented = augmented.map((row, i) => [...row, prediction[i]]); }
+        return result;
+    }
+    public score(X: number[][], Y: number[][]): number { validateMultiOutputTargets(X, Y, 'ClassifierChain'); if (Y[0].length !== this.orderState.length) throw new Error('Y output count does not match fitted model'); const prediction = this.predict(X); return Y.filter((row, i) => row.every((value, j) => value === prediction[i][j])).length / Y.length; }
+    public get chainOrder(): number[] { return this.orderState.slice(); }
+    public get estimators(): SingleOutputEstimator[] { return this.estimatorsState.slice(); }
+}
+registerEstimator('ClassifierChain', ClassifierChain);

@@ -72,6 +72,18 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [SelectFromModel, RFE, and RFECV in JavaScript](https://ml.kanaries.net/docs/apis/feature_selection/selectors.md): Run model-based and recursive feature selection in JavaScript or TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml.
 - [Univariate Feature Scores in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_selection/univariate.md): Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
 
+## Feature Extraction
+
+- [Text Feature Extraction in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/feature_extraction/index.html.md): Convert raw text into sparse count and TF-IDF matrices in JavaScript or TypeScript for browser and Node.js machine-learning pipelines.
+- [CountVectorizer in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_extraction/countVectorizer.md): Tokenize browser or Node.js text into a memory-efficient CSR count matrix with the @kanaries/ml JavaScript CountVectorizer implementation.
+- [TfidfTransformer in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_extraction/tfidfTransformer.md): Weight dense or CSR term-count matrices with TF-IDF in browser or Node.js using the @kanaries/ml JavaScript implementation.
+- [TfidfVectorizer JavaScript Implementation for Browser and Node.js](https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer.md): Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js.
+
+## Imputation
+
+- [Missing-Value Imputation in JavaScript](https://ml.kanaries.net/docs/apis/impute/index.html.md): Impute correlated numeric features in browser and Node.js with the @kanaries/ml JavaScript IterativeImputer implementation.
+- [IterativeImputer in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/impute/iterativeImputer.md): Estimate each missing numeric feature from the others using the @kanaries/ml JavaScript IterativeImputer implementation in browser or Node.js.
+
 ## Neighbors
 
 - [Nearest-Neighbor Algorithms in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/index.html.md): Explore k-nearest neighbors, radius neighbors, centroid classifiers, Ball Tree, and KD Tree in JavaScript and TypeScript with @kanaries/ml.
@@ -103,10 +115,14 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Decomposition
 
-- [Dimensionality Reduction in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/index.html.md): Explore PCA, Sparse PCA, and Truncated SVD in JavaScript and TypeScript with @kanaries/ml for feature compression, visualization, and preprocessing.
+- [Dimensionality Reduction in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/index.html.md): Explore PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD in JavaScript and TypeScript with @kanaries/ml.
 - [PCA in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/pca.md): Learn what PCA does, when to use it, and how to run PCA in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Sparse PCA in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/sparsePCA.md): Learn what Sparse PCA does, when to use it, and how to run SparsePCA in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Truncated SVD in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/truncatedSVD.md): Learn what Truncated SVD does, when to use it, and how to run TruncatedSVD in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Kernel PCA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/kernelPCA.md): Learn nonlinear dimensionality reduction and run the @kanaries/ml KernelPCA JavaScript implementation in browser or Node.js applications.
+- [FastICA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/fastICA.md): Separate statistically independent signals with the @kanaries/ml FastICA JavaScript implementation in browser and Node.js environments.
+- [Non-negative Matrix Factorization (NMF) in JavaScript](https://ml.kanaries.net/docs/apis/decomposition/nmf.md): Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js.
+- [Incremental PCA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/incrementalPCA.md): Process numeric data in batches with the @kanaries/ml IncrementalPCA JavaScript implementation for memory-aware browser and Node.js workflows.
 
 ## Manifold
 
@@ -124,9 +140,16 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Semi-Supervised
 
-- [Semi-Supervised Learning in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/index.html.md): Explore Label Propagation and Label Spreading in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets.
+- [Semi-Supervised Learning in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/index.html.md): Explore Label Propagation, Label Spreading, and self-training in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets.
 - [Label Propagation in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelPropagation.md): Learn what Label Propagation does, when to use it, and how to run LabelPropagation in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Label Spreading in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelSpreading.md): Learn what Label Spreading does, when to use it, and how to run LabelSpreading in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Self-Training Classifier in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier.md): Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js.
+
+## Multi-Output
+
+- [Multi-Output Machine Learning in JavaScript](https://ml.kanaries.net/docs/apis/multioutput/index.html.md): Predict multiple related labels or numeric targets with chain estimators in browser and Node.js using @kanaries/ml.
+- [ClassifierChain in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/multioutput/classifierChain.md): Model dependencies between multiple binary labels with the @kanaries/ml JavaScript ClassifierChain implementation in browser or Node.js.
+- [RegressorChain in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/multioutput/regressorChain.md): Predict related numeric targets with the @kanaries/ml JavaScript RegressorChain implementation in browser or Node.js.
 
 ## Metrics
 
@@ -138,6 +161,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [Preprocessing Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/preprocessing.md): Prepare numeric and categorical features with the @kanaries/ml Preprocessing JavaScript and TypeScript utilities for browser and Node.js machine learning pipelines.
 - [Sampling Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/sampling.md): Split and sample JavaScript arrays for machine learning workflows with the @kanaries/ml Sampling utilities in browser and Node.js applications.
 - [Model Selection Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/modelSelection.md): Run cross-validation, K-fold splits, grid search, and randomized search with the @kanaries/ml ModelSelection JavaScript implementation.
+- [Group-Aware Cross-Validation Splitters in JavaScript](https://ml.kanaries.net/docs/apis/utils/groupSplitters.md): Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js.
 - [Statistical Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/stat.md): Compute simple statistics with the @kanaries/ml Stat JavaScript and TypeScript utilities for browser and Node.js machine learning helpers.
 - [asyncMode in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/asyncMode.md): Learn what asyncMode does, when to use it, and how to run synchronous machine learning work in JavaScript without blocking browser or Node.js execution.
 

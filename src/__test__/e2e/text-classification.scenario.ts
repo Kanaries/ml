@@ -5,5 +5,5 @@ export const textClassification = freezeScenario({
     dataset: { name: '20 Newsgroups subset', source: 'sklearn.datasets.fetch_20newsgroups', protocol: 'four fixed categories, train/test split supplied by dataset' },
     workflow: ['TfidfVectorizer', 'MultinomialNB', 'Pipeline', 'prediction and macro-F1 parity'],
     algorithms: { include: ['TfidfVectorizer', 'MultinomialNB', 'Pipeline'], exclude: [] },
-    parity: { state: 'pending', blockedBy: ['Wave B: TfidfVectorizer'], reason: 'Text vectorizers are intentionally scheduled for Wave B.' },
+    parity: { state: 'pending', blockedBy: [], reason: 'Wave B text estimators are present; the frozen 20 Newsgroups fixture remains an exit-gate task.' },
 });

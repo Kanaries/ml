@@ -42,7 +42,7 @@ test('every frozen scenario has an explicit dataset, workflow, inclusion set, an
 test('future-wave dependencies remain explicit instead of being reported green', () => {
     const blocked = scenarios.filter(scenario => scenario.parity.blockedBy.length > 0);
     expect(blocked.map(scenario => scenario.id)).toEqual([
-        'text-classification', 'faces-decomposition', 'clustering-comparison', 'robust-regression',
+        'clustering-comparison', 'robust-regression',
     ]);
     blocked.forEach(scenario => expect(scenario.parity.state).toBe('pending'));
 });

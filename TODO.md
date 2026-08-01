@@ -1,7 +1,7 @@
 # TODO — Phase 3 Check Items
 
 > Working checklist, one checkbox per check item. Progress is reported as check-item counts
-> (e.g. "Wave A: 9/16") — no time estimates. Last synced with the codebase: 2026-07-31.
+> (e.g. "Wave A: 9/16") — no time estimates. Last synced with the codebase: 2026-08-01.
 > Historical roadmap: [docs/ML_ROADMAP_NEXT.md](docs/ML_ROADMAP_NEXT.md) (its §1–2 are a
 > pre-Phase-0 snapshot; Phases 0–2 shipped 2026-07-11/12 — estimator contract & serialization,
 > Pipeline/ColumnTransformer/FeatureUnion, metrics/preprocessing/model-selection fill-out,
@@ -42,19 +42,19 @@ Utilities (6):
 
 ## Wave B — Text route + high-demand decomposition (13 items)
 
-- [ ] CountVectorizer (needs 0-3)
-- [ ] TfidfTransformer (needs 0-3)
-- [ ] TfidfVectorizer (needs 0-3)
-- [ ] KernelPCA
-- [ ] FastICA
-- [ ] NMF
-- [ ] IncrementalPCA
-- [ ] SelfTrainingClassifier
-- [ ] ClassifierChain
-- [ ] RegressorChain
-- [ ] IterativeImputer (iterative refitting, medium cost)
-- [ ] GroupShuffleSplit
-- [ ] StratifiedGroupKFold
+- [x] CountVectorizer (needs 0-3)
+- [x] TfidfTransformer (needs 0-3)
+- [x] TfidfVectorizer (needs 0-3)
+- [x] KernelPCA
+- [x] FastICA
+- [x] NMF
+- [x] IncrementalPCA
+- [x] SelfTrainingClassifier
+- [x] ClassifierChain
+- [x] RegressorChain
+- [x] IterativeImputer (iterative refitting, medium cost)
+- [x] GroupShuffleSplit
+- [x] StratifiedGroupKFold
 
 ## Wave C — Statistical & kernel long tail (35 items)
 
