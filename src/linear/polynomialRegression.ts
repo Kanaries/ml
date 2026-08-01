@@ -8,7 +8,10 @@ export interface PolynomialRegressionProps {
 
 export class PolynomialRegression extends RegressorBase {
     private degree: number;
-    private coef: number[];
+    // Coefficients belong to expanded polynomial columns, not one-to-one
+    // input features, so this estimator intentionally does not declare the
+    // input-feature `coef` capability.
+    private polynomialCoef: number[];
     private intercept: number;
     private fitted: boolean;
 
@@ -19,7 +22,7 @@ export class PolynomialRegression extends RegressorBase {
             throw new Error('degree must be an integer >= 1');
         }
         this.degree = degree;
-        this.coef = [];
+        this.polynomialCoef = [];
         this.intercept = 0;
         this.fitted = false;
     }
@@ -64,7 +67,7 @@ export class PolynomialRegression extends RegressorBase {
         }
 
         this.intercept = params[0];
-        this.coef = params.slice(1);
+        this.polynomialCoef = params.slice(1);
         this.fitted = true;
     }
 
@@ -75,8 +78,8 @@ export class PolynomialRegression extends RegressorBase {
         const Xpoly = this.transform(X);
         return Xpoly.map(row => {
             let sum = this.intercept;
-            for (let i = 0; i < this.coef.length; i++) {
-                sum += this.coef[i] * row[i];
+            for (let i = 0; i < this.polynomialCoef.length; i++) {
+                sum += this.polynomialCoef[i] * row[i];
             }
             return sum;
         });

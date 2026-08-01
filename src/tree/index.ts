@@ -5,3 +5,4 @@ import { ExtraTreeClassifier } from './extraTreeClassifier';
 export type { DecisionTreeProps } from './decisionTreeClassifier';
 
 export { DecisionTreeClassifier, DecisionTreeRegressor, ExtraTreeClassifier, ExtraTreeRegressor };
+export { treeImportances, normalizedTreeImportances, averageImportances, weightedImportances } from './featureImportances';

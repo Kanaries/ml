@@ -51,7 +51,7 @@ export class SGDRegressor extends RegressorBase {
     private powerT: number;
     private nIterNoChange: number;
 
-    private coef: number[];
+    private coefState: number[];
     private intercept: number;
     private fitted: boolean;
     private nIter: number;
@@ -72,7 +72,7 @@ export class SGDRegressor extends RegressorBase {
         this.eta0 = props.eta0 ?? 0.01;
         this.powerT = props.powerT ?? 0.25;
         this.nIterNoChange = props.nIterNoChange ?? 5;
-        this.coef = [];
+        this.coefState = [];
         this.intercept = 0;
         this.fitted = false;
         this.nIter = 0;
@@ -119,7 +119,7 @@ export class SGDRegressor extends RegressorBase {
             powerT: this.powerT,
             nIterNoChange: this.nIterNoChange,
         });
-        this.coef = weights;
+        this.coefState = weights;
         this.intercept = intercept;
         this.nIter = nIter;
         this.fitted = true;
@@ -131,13 +131,17 @@ export class SGDRegressor extends RegressorBase {
         }
         return testX.map(x => {
             let p = this.intercept;
-            for (let j = 0; j < this.coef.length; j++) p += this.coef[j] * x[j];
+            for (let j = 0; j < this.coefState.length; j++) p += this.coefState[j] * x[j];
             return p;
         });
     }
 
     public getCoef(): number[] {
-        return this.coef.slice();
+        return this.coefState.slice();
+    }
+
+    public get coef(): number[] {
+        return this.getCoef();
     }
 
     public getIntercept(): number {

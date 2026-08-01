@@ -1,0 +1,830 @@
+{
+  "sklearnVersion": "1.5.2",
+  "source": "sklearn.utils.all_estimators()",
+  "estimators": [
+    {
+      "name": "ARDRegression",
+      "kind": "estimator"
+    },
+    {
+      "name": "AdaBoostClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "AdaBoostRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "AdditiveChi2Sampler",
+      "kind": "transformer"
+    },
+    {
+      "name": "AffinityPropagation",
+      "kind": "estimator"
+    },
+    {
+      "name": "AgglomerativeClustering",
+      "kind": "estimator"
+    },
+    {
+      "name": "BaggingClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "BaggingRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "BayesianGaussianMixture",
+      "kind": "estimator"
+    },
+    {
+      "name": "BayesianRidge",
+      "kind": "estimator"
+    },
+    {
+      "name": "BernoulliNB",
+      "kind": "estimator"
+    },
+    {
+      "name": "BernoulliRBM",
+      "kind": "transformer"
+    },
+    {
+      "name": "Binarizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "Birch",
+      "kind": "transformer"
+    },
+    {
+      "name": "BisectingKMeans",
+      "kind": "transformer"
+    },
+    {
+      "name": "CCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "CalibratedClassifierCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "CategoricalNB",
+      "kind": "estimator"
+    },
+    {
+      "name": "ClassifierChain",
+      "kind": "estimator"
+    },
+    {
+      "name": "ColumnTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "ComplementNB",
+      "kind": "estimator"
+    },
+    {
+      "name": "CountVectorizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "DBSCAN",
+      "kind": "estimator"
+    },
+    {
+      "name": "DecisionTreeClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "DecisionTreeRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "DictVectorizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "DictionaryLearning",
+      "kind": "transformer"
+    },
+    {
+      "name": "DummyClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "DummyRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "ElasticNet",
+      "kind": "estimator"
+    },
+    {
+      "name": "ElasticNetCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "EllipticEnvelope",
+      "kind": "estimator"
+    },
+    {
+      "name": "EmpiricalCovariance",
+      "kind": "estimator"
+    },
+    {
+      "name": "ExtraTreeClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "ExtraTreeRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "ExtraTreesClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "ExtraTreesRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "FactorAnalysis",
+      "kind": "transformer"
+    },
+    {
+      "name": "FastICA",
+      "kind": "transformer"
+    },
+    {
+      "name": "FeatureAgglomeration",
+      "kind": "transformer"
+    },
+    {
+      "name": "FeatureHasher",
+      "kind": "transformer"
+    },
+    {
+      "name": "FeatureUnion",
+      "kind": "transformer"
+    },
+    {
+      "name": "FixedThresholdClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "FunctionTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "GammaRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "GaussianMixture",
+      "kind": "estimator"
+    },
+    {
+      "name": "GaussianNB",
+      "kind": "estimator"
+    },
+    {
+      "name": "GaussianProcessClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "GaussianProcessRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "GaussianRandomProjection",
+      "kind": "transformer"
+    },
+    {
+      "name": "GenericUnivariateSelect",
+      "kind": "transformer"
+    },
+    {
+      "name": "GradientBoostingClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "GradientBoostingRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "GraphicalLasso",
+      "kind": "estimator"
+    },
+    {
+      "name": "GraphicalLassoCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "GridSearchCV",
+      "kind": "transformer"
+    },
+    {
+      "name": "HDBSCAN",
+      "kind": "estimator"
+    },
+    {
+      "name": "HashingVectorizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "HistGradientBoostingClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "HistGradientBoostingRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "HuberRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "IncrementalPCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "IsolationForest",
+      "kind": "estimator"
+    },
+    {
+      "name": "Isomap",
+      "kind": "transformer"
+    },
+    {
+      "name": "IsotonicRegression",
+      "kind": "transformer"
+    },
+    {
+      "name": "KBinsDiscretizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "KMeans",
+      "kind": "transformer"
+    },
+    {
+      "name": "KNNImputer",
+      "kind": "transformer"
+    },
+    {
+      "name": "KNeighborsClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "KNeighborsRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "KNeighborsTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "KernelCenterer",
+      "kind": "transformer"
+    },
+    {
+      "name": "KernelDensity",
+      "kind": "estimator"
+    },
+    {
+      "name": "KernelPCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "KernelRidge",
+      "kind": "estimator"
+    },
+    {
+      "name": "LabelBinarizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "LabelEncoder",
+      "kind": "transformer"
+    },
+    {
+      "name": "LabelPropagation",
+      "kind": "estimator"
+    },
+    {
+      "name": "LabelSpreading",
+      "kind": "estimator"
+    },
+    {
+      "name": "Lars",
+      "kind": "estimator"
+    },
+    {
+      "name": "LarsCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "Lasso",
+      "kind": "estimator"
+    },
+    {
+      "name": "LassoCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "LassoLars",
+      "kind": "estimator"
+    },
+    {
+      "name": "LassoLarsCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "LassoLarsIC",
+      "kind": "estimator"
+    },
+    {
+      "name": "LatentDirichletAllocation",
+      "kind": "transformer"
+    },
+    {
+      "name": "LedoitWolf",
+      "kind": "estimator"
+    },
+    {
+      "name": "LinearDiscriminantAnalysis",
+      "kind": "transformer"
+    },
+    {
+      "name": "LinearRegression",
+      "kind": "estimator"
+    },
+    {
+      "name": "LinearSVC",
+      "kind": "estimator"
+    },
+    {
+      "name": "LinearSVR",
+      "kind": "estimator"
+    },
+    {
+      "name": "LocalOutlierFactor",
+      "kind": "estimator"
+    },
+    {
+      "name": "LocallyLinearEmbedding",
+      "kind": "transformer"
+    },
+    {
+      "name": "LogisticRegression",
+      "kind": "estimator"
+    },
+    {
+      "name": "LogisticRegressionCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "MDS",
+      "kind": "estimator"
+    },
+    {
+      "name": "MLPClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "MLPRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "MaxAbsScaler",
+      "kind": "transformer"
+    },
+    {
+      "name": "MeanShift",
+      "kind": "estimator"
+    },
+    {
+      "name": "MinCovDet",
+      "kind": "estimator"
+    },
+    {
+      "name": "MinMaxScaler",
+      "kind": "transformer"
+    },
+    {
+      "name": "MiniBatchDictionaryLearning",
+      "kind": "transformer"
+    },
+    {
+      "name": "MiniBatchKMeans",
+      "kind": "transformer"
+    },
+    {
+      "name": "MiniBatchNMF",
+      "kind": "transformer"
+    },
+    {
+      "name": "MiniBatchSparsePCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "MissingIndicator",
+      "kind": "transformer"
+    },
+    {
+      "name": "MultiLabelBinarizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "MultiOutputClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultiOutputRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultiTaskElasticNet",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultiTaskElasticNetCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultiTaskLasso",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultiTaskLassoCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "MultinomialNB",
+      "kind": "estimator"
+    },
+    {
+      "name": "NMF",
+      "kind": "transformer"
+    },
+    {
+      "name": "NearestCentroid",
+      "kind": "estimator"
+    },
+    {
+      "name": "NearestNeighbors",
+      "kind": "estimator"
+    },
+    {
+      "name": "NeighborhoodComponentsAnalysis",
+      "kind": "transformer"
+    },
+    {
+      "name": "Normalizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "NuSVC",
+      "kind": "estimator"
+    },
+    {
+      "name": "NuSVR",
+      "kind": "estimator"
+    },
+    {
+      "name": "Nystroem",
+      "kind": "transformer"
+    },
+    {
+      "name": "OAS",
+      "kind": "estimator"
+    },
+    {
+      "name": "OPTICS",
+      "kind": "estimator"
+    },
+    {
+      "name": "OneClassSVM",
+      "kind": "estimator"
+    },
+    {
+      "name": "OneHotEncoder",
+      "kind": "transformer"
+    },
+    {
+      "name": "OneVsOneClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "OneVsRestClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "OrdinalEncoder",
+      "kind": "transformer"
+    },
+    {
+      "name": "OrthogonalMatchingPursuit",
+      "kind": "estimator"
+    },
+    {
+      "name": "OrthogonalMatchingPursuitCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "OutputCodeClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "PCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "PLSCanonical",
+      "kind": "transformer"
+    },
+    {
+      "name": "PLSRegression",
+      "kind": "transformer"
+    },
+    {
+      "name": "PLSSVD",
+      "kind": "transformer"
+    },
+    {
+      "name": "PassiveAggressiveClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "PassiveAggressiveRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "PatchExtractor",
+      "kind": "transformer"
+    },
+    {
+      "name": "Perceptron",
+      "kind": "estimator"
+    },
+    {
+      "name": "Pipeline",
+      "kind": "transformer"
+    },
+    {
+      "name": "PoissonRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "PolynomialCountSketch",
+      "kind": "transformer"
+    },
+    {
+      "name": "PolynomialFeatures",
+      "kind": "transformer"
+    },
+    {
+      "name": "PowerTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "QuadraticDiscriminantAnalysis",
+      "kind": "estimator"
+    },
+    {
+      "name": "QuantileRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "QuantileTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "RANSACRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "RBFSampler",
+      "kind": "transformer"
+    },
+    {
+      "name": "RFE",
+      "kind": "transformer"
+    },
+    {
+      "name": "RFECV",
+      "kind": "transformer"
+    },
+    {
+      "name": "RadiusNeighborsClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "RadiusNeighborsRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "RadiusNeighborsTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "RandomForestClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "RandomForestRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "RandomTreesEmbedding",
+      "kind": "transformer"
+    },
+    {
+      "name": "RandomizedSearchCV",
+      "kind": "transformer"
+    },
+    {
+      "name": "RegressorChain",
+      "kind": "estimator"
+    },
+    {
+      "name": "Ridge",
+      "kind": "estimator"
+    },
+    {
+      "name": "RidgeCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "RidgeClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "RidgeClassifierCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "RobustScaler",
+      "kind": "transformer"
+    },
+    {
+      "name": "SGDClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "SGDOneClassSVM",
+      "kind": "estimator"
+    },
+    {
+      "name": "SGDRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "SVC",
+      "kind": "estimator"
+    },
+    {
+      "name": "SVR",
+      "kind": "estimator"
+    },
+    {
+      "name": "SelectFdr",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelectFpr",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelectFromModel",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelectFwe",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelectKBest",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelectPercentile",
+      "kind": "transformer"
+    },
+    {
+      "name": "SelfTrainingClassifier",
+      "kind": "estimator"
+    },
+    {
+      "name": "SequentialFeatureSelector",
+      "kind": "transformer"
+    },
+    {
+      "name": "ShrunkCovariance",
+      "kind": "estimator"
+    },
+    {
+      "name": "SimpleImputer",
+      "kind": "transformer"
+    },
+    {
+      "name": "SkewedChi2Sampler",
+      "kind": "transformer"
+    },
+    {
+      "name": "SparseCoder",
+      "kind": "transformer"
+    },
+    {
+      "name": "SparsePCA",
+      "kind": "transformer"
+    },
+    {
+      "name": "SparseRandomProjection",
+      "kind": "transformer"
+    },
+    {
+      "name": "SpectralBiclustering",
+      "kind": "estimator"
+    },
+    {
+      "name": "SpectralClustering",
+      "kind": "estimator"
+    },
+    {
+      "name": "SpectralCoclustering",
+      "kind": "estimator"
+    },
+    {
+      "name": "SpectralEmbedding",
+      "kind": "estimator"
+    },
+    {
+      "name": "SplineTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "StackingClassifier",
+      "kind": "transformer"
+    },
+    {
+      "name": "StackingRegressor",
+      "kind": "transformer"
+    },
+    {
+      "name": "StandardScaler",
+      "kind": "transformer"
+    },
+    {
+      "name": "TSNE",
+      "kind": "estimator"
+    },
+    {
+      "name": "TargetEncoder",
+      "kind": "transformer"
+    },
+    {
+      "name": "TfidfTransformer",
+      "kind": "transformer"
+    },
+    {
+      "name": "TfidfVectorizer",
+      "kind": "transformer"
+    },
+    {
+      "name": "TheilSenRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "TransformedTargetRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "TruncatedSVD",
+      "kind": "transformer"
+    },
+    {
+      "name": "TunedThresholdClassifierCV",
+      "kind": "estimator"
+    },
+    {
+      "name": "TweedieRegressor",
+      "kind": "estimator"
+    },
+    {
+      "name": "VarianceThreshold",
+      "kind": "transformer"
+    },
+    {
+      "name": "VotingClassifier",
+      "kind": "transformer"
+    },
+    {
+      "name": "VotingRegressor",
+      "kind": "transformer"
+    }
+  ]
+}

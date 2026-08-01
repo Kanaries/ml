@@ -5,6 +5,7 @@ import { resolveSubsetSize, SubsetSizeOption } from '../utils/paramResolvers';
 import { entropy, gini, mode } from '../utils/stat';
 import { defineHiddenField, filterWithIndices, valuesAllSame, getUniqueFreqs } from './utils';
 import type { IDTree } from './decisionTreeClassifier';
+import { normalizedTreeImportances, treeImportances } from './featureImportances';
 
 export interface ExtraTreeProps {
     max_depth?: number;
@@ -135,6 +136,7 @@ export class ExtraTreeClassifier extends ClassifierBase {
         if (split.attIndex === -1) return;
         tree.splitIndex = split.attIndex;
         tree.nodeValue = split.splitValue;
+        tree.weightedImpurityDecrease = Math.max(0, split.gain) * sampleX.length;
         tree.leftChild = {
             splitIndex: -1,
             nodeValue: 0,
@@ -182,6 +184,14 @@ export class ExtraTreeClassifier extends ClassifierBase {
 
     public predict(sampleX: number[][]): number[] {
         return sampleX.map(x => this.findSample(x, this.dtree));
+    }
+    public get featureImportances(): number[] {
+        if (!this.dtree) throw new Error('ExtraTreeClassifier must be fitted before featureImportances');
+        return normalizedTreeImportances(this.dtree, this.feature_number);
+    }
+    public getRawFeatureImportances(): number[] {
+        if (!this.dtree) throw new Error('ExtraTreeClassifier must be fitted before featureImportances');
+        return treeImportances(this.dtree, this.feature_number, false);
     }
 }
 registerEstimator('ExtraTreeClassifier', ExtraTreeClassifier);

@@ -9,6 +9,7 @@ import { assert, createRandomGenerator } from "../utils";
 import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { entropy, gini, mode } from "../utils/stat";
 import { defineHiddenField, getUniqueFreqs, valuesAllSame } from "./utils";
+import { normalizedTreeImportances, treeImportances } from './featureImportances';
 export type IFeatureSplitType = 'continuous' | 'discrete';
 export interface ISlice {
     X: number[][];
@@ -21,6 +22,8 @@ export interface IDTree {
     y: number;
     leftChild: IDTree | null;
     rightChild: IDTree | null;
+    /** sample-weighted impurity decrease contributed by this split */
+    weightedImpurityDecrease?: number;
 } 
 export interface DecisionTreeProps {
     max_depth?: number;
@@ -107,6 +110,7 @@ export class DecisionTreeClassifier extends ClassifierBase {
         }
         tree.splitIndex = split.attIndex;
         tree.nodeValue = split.splitValue;
+        tree.weightedImpurityDecrease = Math.max(0, split.gain) * sampleX.length;
 
         tree.leftChild = {
             splitIndex: -1,
@@ -200,6 +204,14 @@ export class DecisionTreeClassifier extends ClassifierBase {
     }
     public predict(sampleX: number[][]): number[] {
         return sampleX.map((x) => this.findSample(x, this.dtree));
+    }
+    public get featureImportances(): number[] {
+        if (!this.dtree) throw new Error('DecisionTreeClassifier must be fitted before featureImportances');
+        return normalizedTreeImportances(this.dtree, this.feature_number);
+    }
+    public getRawFeatureImportances(): number[] {
+        if (!this.dtree) throw new Error('DecisionTreeClassifier must be fitted before featureImportances');
+        return treeImportances(this.dtree, this.feature_number, false);
     }
     private findSample(X: number[], tree: IDTree): number {
         if (tree.splitIndex === -1) {

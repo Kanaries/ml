@@ -11,5 +11,7 @@ import { VotingClassifier, VotingRegressor } from './voting';
 import { StackingClassifier, StackingRegressor } from './stacking';
 
 export { IsolationForest, AdaBoostClassifier, AdaBoostRegressor, BaggingClassifier, GradientBoostingClassifier, GradientBoostingRegressor, RandomForestClassifier, RandomForestRegressor, XGBoostClassifier, XGBoostRegressor, VotingClassifier, VotingRegressor, StackingClassifier, StackingRegressor };
+export { fitForest, predictForestClassification, predictForestRegression } from './forest';
+export type { ForestMember, ForestFitOptions } from './forest';
 export type { VotingClassifierProps, VotingRegressorProps, ClassifierLike, RegressorLike, NamedEstimator } from './voting';
 export type { StackingClassifierProps, StackingRegressorProps, StackMethod } from './stacking';

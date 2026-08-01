@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>CSR browser benchmark</title>
+<pre id="result">RUNNING</pre>
+<script type="module">
+import { Bayes, Data } from '/build/index.mjs';
+
+try {
+    const nRows = 20_000;
+    const nCols = 30_000;
+    const nonZerosPerRow = 20;
+    const data = [];
+    const indices = [];
+    const indptr = [0];
+    const labels = new Array(nRows);
+    for (let row = 0; row < nRows; row++) {
+        labels[row] = row % 2;
+        const pairs = [];
+        for (let k = 0; k < nonZerosPerRow; k++) {
+            pairs.push([(row * 31 + k * 997) % nCols, 1]);
+        }
+        pairs.sort((a, b) => a[0] - b[0]);
+        for (const [column, value] of pairs) {
+            indices.push(column);
+            data.push(value);
+        }
+        indptr.push(data.length);
+    }
+    const matrix = new Data.CSRMatrix(data, indices, indptr, [nRows, nCols]);
+    const model = new Bayes.MultinomialNB();
+    const started = performance.now();
+    model.fit(matrix, labels);
+    const predictions = model.predict(matrix);
+    if (predictions.length !== nRows) throw new Error('prediction length mismatch');
+    document.querySelector('#result').textContent = 'PASS ' + JSON.stringify({
+        shape: matrix.shape,
+        nnz: matrix.nnz,
+        fitAndPredictMs: +(performance.now() - started).toFixed(1),
+    });
+} catch (error) {
+    document.querySelector('#result').textContent = 'FAIL ' + (error?.stack ?? error);
+}
+</script>

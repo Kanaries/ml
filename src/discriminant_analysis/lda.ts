@@ -53,7 +53,7 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
     /** projection matrix, nFeatures x nDiscriminantAxes */
     private scalings: number[][];
     /** per-class linear scores: coef[k] . x + intercept[k], shape [nClasses][nFeatures] */
-    private coef: number[][];
+    private coefState: number[][];
     private intercept: number[];
     private explainedVarianceRatio: number[];
     private maxComponents: number;
@@ -74,7 +74,7 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
         this.means = [];
         this.xbar = [];
         this.scalings = [];
-        this.coef = [];
+        this.coefState = [];
         this.intercept = [];
         this.explainedVarianceRatio = [];
         this.maxComponents = 0;
@@ -268,7 +268,7 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
             for (let j = 0; j < p; j++) xb += xbar[j] * row[j];
             intercept[k] -= xb;
         }
-        this.coef = coef;
+        this.coefState = coef;
         this.intercept = intercept;
     }
 
@@ -403,7 +403,7 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
             for (let j = 0; j < p; j++) mk += this.means[k][j] * row[j];
             intercept[k] = -0.5 * mk + Math.log(this.classPriors[k]);
         }
-        this.coef = coef;
+        this.coefState = coef;
         this.intercept = intercept;
     }
 
@@ -417,7 +417,7 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
     private decisionScores(X: number[][]): number[][] {
         validatePredictInput(X, this.nFeatures, 'LinearDiscriminantAnalysis');
         return X.map((row) => {
-            return this.coef.map((c, k) => {
+            return this.coefState.map((c, k) => {
                 let s = this.intercept[k];
                 for (let j = 0; j < row.length; j++) s += c[j] * row[j];
                 return s;
@@ -481,9 +481,13 @@ export class LinearDiscriminantAnalysis extends ClassifierBase {
     public getCoef(): number[][] {
         this.assertFitted('getCoef');
         if (this.classes.length === 2) {
-            return [this.coef[1].map((v, j) => v - this.coef[0][j])];
+            return [this.coefState[1].map((v, j) => v - this.coefState[0][j])];
         }
-        return this.coef.map((row) => row.slice());
+        return this.coefState.map((row) => row.slice());
+    }
+
+    public get coef(): number[][] {
+        return this.getCoef();
     }
 
     /** Intercepts in sklearn shape: length 1 for binary, nClasses otherwise. */

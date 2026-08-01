@@ -5,6 +5,7 @@ import { resolveSubsetSize, SubsetSizeOption } from "../utils/paramResolvers";
 import { mean } from "../utils/stat";
 import { IDTree } from "./decisionTreeClassifier";
 import { defineHiddenField, valuesAllSame } from "./utils";
+import { normalizedTreeImportances, treeImportances } from './featureImportances';
 interface IRegTree extends IDTree {
 }
 interface RegressionTreeProps {
@@ -135,6 +136,10 @@ export class DecisionTreeRegressor extends RegressorBase {
         }
         tree.splitIndex = selection.minErrFeaIndex;
         tree.nodeValue = selection.minErrValue;
+        const sampleMean = mean(sampleY);
+        let nodeError = 0;
+        for (const value of sampleY) nodeError += (value - sampleMean) ** 2;
+        tree.weightedImpurityDecrease = Math.max(0, nodeError - selection.minErr);
 
         tree.leftChild = this.initTreeNode(leftY);
         tree.rightChild = this.initTreeNode(rightY);
@@ -158,6 +163,14 @@ export class DecisionTreeRegressor extends RegressorBase {
     }
     public predict (sampleX: number[][]): number[] {
         return sampleX.map(x => this.findLeaf(x, this.regTree).y);
+    }
+    public get featureImportances(): number[] {
+        if (!this.regTree) throw new Error('DecisionTreeRegressor must be fitted before featureImportances');
+        return normalizedTreeImportances(this.regTree, this.feature_number);
+    }
+    public getRawFeatureImportances(): number[] {
+        if (!this.regTree) throw new Error('DecisionTreeRegressor must be fitted before featureImportances');
+        return treeImportances(this.regTree, this.feature_number, false);
     }
     private collectLeaves(): IRegTree[] {
         const leaves: IRegTree[] = [];

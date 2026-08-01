@@ -6,13 +6,13 @@ import { registerEstimator, Params } from '../base/estimator';
 export type LinearRegressionProps = Record<string, never>;
 
 export class LinearRegression extends RegressorBase {
-    private coef: number[];
+    private coefState: number[];
     private intercept: number;
     private fitted: boolean;
     public constructor(props: LinearRegressionProps = {}) {
         super();
         void props;
-        this.coef = [];
+        this.coefState = [];
         this.intercept = 0;
         this.fitted = false;
     }
@@ -42,7 +42,7 @@ export class LinearRegression extends RegressorBase {
             );
         }
         this.intercept = params[0];
-        this.coef = params.slice(1);
+        this.coefState = params.slice(1);
         this.fitted = true;
     }
     public predict(X: number[][]): number[] {
@@ -50,15 +50,18 @@ export class LinearRegression extends RegressorBase {
             throw new Error('LinearRegression must be fitted before calling predict');
         }
         return X.map(row => {
-            if (row.length !== this.coef.length) {
+            if (row.length !== this.coefState.length) {
                 throw new Error('input feature size does not match fitted model');
             }
             let sum = this.intercept;
-            for (let i = 0; i < this.coef.length; i++) {
-                sum += this.coef[i] * row[i];
+            for (let i = 0; i < this.coefState.length; i++) {
+                sum += this.coefState[i] * row[i];
             }
             return sum;
         });
+    }
+    public get coef(): number[] {
+        return this.coefState.slice();
     }
 }
 registerEstimator('LinearRegression', LinearRegression);

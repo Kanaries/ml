@@ -1,6 +1,7 @@
 import { RegressorBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
 import { DecisionTreeRegressor } from '../tree/decisionTreeRegressor';
+import { weightedImportances } from '../tree/featureImportances';
 import { createRandomGenerator } from '../utils';
 
 function weightedSampleIndices(weights: number[], size: number, random: () => number): number[] {
@@ -147,6 +148,13 @@ export class AdaBoostRegressor extends RegressorBase {
             }
             return pairs[pairs.length - 1].pred;
         });
+    }
+    public get featureImportances(): number[] {
+        if (this.estimators.length === 0) throw new Error('model is not fitted');
+        return weightedImportances(
+            this.estimators.map(tree => tree.featureImportances),
+            this.estimator_weights,
+        );
     }
 }
 registerEstimator('AdaBoostRegressor', AdaBoostRegressor);

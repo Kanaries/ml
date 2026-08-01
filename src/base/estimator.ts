@@ -308,6 +308,36 @@ function cloneNestedEstimators(value: unknown): unknown {
     return value;
 }
 
+const LEGACY_STATE_KEYS: Record<string, Record<string, string>> = {
+    LinearRegression: { coef: 'coefState' },
+    LogisticRegression: { weights: 'coefState' },
+    RidgeRegression: { coef: 'coefState' },
+    Ridge: { coef: 'coefState' },
+    LassoRegression: { coef: 'coefState' },
+    Lasso: { coef: 'coefState' },
+    ElasticNet: { coef: 'coefState' },
+    SGDClassifier: { coef: 'coefState' },
+    Perceptron: { coef: 'coefState' },
+    SGDRegressor: { coef: 'coefState' },
+    LinearDiscriminantAnalysis: { coef: 'coefState' },
+    PolynomialRegression: { coef: 'polynomialCoef' },
+};
+
+/** Preserve format-v1 models across private fitted-state field renames. */
+function migrateLegacyState(estimator: string, state: Record<string, unknown>): Record<string, unknown> {
+    const mapping = LEGACY_STATE_KEYS[estimator];
+    if (!mapping) return state;
+    const migrated = { ...state };
+    for (const [oldKey, newKey] of Object.entries(mapping)) {
+        if (Object.prototype.hasOwnProperty.call(migrated, oldKey)
+            && !Object.prototype.hasOwnProperty.call(migrated, newKey)) {
+            migrated[newKey] = migrated[oldKey];
+            delete migrated[oldKey];
+        }
+    }
+    return migrated;
+}
+
 /** Revive any serialized estimator produced by `estimator.toJSON()`. */
 export function loadModel(json: SerializedModel | string): BaseEstimator {
     const model: SerializedModel = typeof json === 'string' ? JSON.parse(json) : json;
@@ -326,7 +356,7 @@ export function loadModel(json: SerializedModel | string): BaseEstimator {
     for (const key of Object.keys(inst)) {
         delete (inst as unknown as Record<string, unknown>)[key];
     }
-    const state = model.state as Record<string, unknown>;
+    const state = migrateLegacyState(model.estimator, model.state as Record<string, unknown>);
     for (const key of Object.keys(state)) {
         assertSafeKey(key);
         (inst as unknown as Record<string, unknown>)[key] = decodeValue(state[key]);

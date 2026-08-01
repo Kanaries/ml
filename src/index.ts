@@ -20,6 +20,8 @@ import * as MultiOutput from './multioutput';
 import * as Calibration from './calibration';
 import * as Isotonic from './isotonic';
 import * as Dummy from './dummy';
+import * as Data from './data';
+import { CSRMatrix } from './data';
 import * as utils from './utils';
 import * as Base from './base';
 import * as MLPipeline from './pipeline';
@@ -56,5 +58,7 @@ export {
     Calibration,
     Isotonic,
     Dummy,
+    Data,
+    CSRMatrix,
     utils
 }

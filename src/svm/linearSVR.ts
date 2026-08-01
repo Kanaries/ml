@@ -143,5 +143,9 @@ export class LinearSVR extends RegressorBase {
         }
         return results;
     }
+
+    public get coef(): number[] {
+        return this.weights.slice();
+    }
 }
 registerEstimator('LinearSVR', LinearSVR);

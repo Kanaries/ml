@@ -1,5 +1,7 @@
 import { ClassifierBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
+import { forEachNonZeroInRow, matrixShape, type NumericMatrix } from '../data';
+import { ensureClassPrior, validateMatrix, validateXY } from './utils';
 
 export interface BernoulliNBProps {
     alpha?: number;
@@ -9,6 +11,7 @@ export interface BernoulliNBProps {
 }
 
 export class BernoulliNB extends ClassifierBase {
+    public readonly acceptedInputKinds = ['dense', 'csr'] as const;
     private alpha: number;
     private binarize: number | null;
     private fitPrior: boolean;
@@ -39,17 +42,16 @@ export class BernoulliNB extends ClassifierBase {
         };
     }
 
-    private binarizeX(X: number[][]): number[][] {
-        if (this.binarize === null) return X.map(r => r.slice());
-        const threshold = this.binarize;
-        return X.map(row => row.map(v => (v > threshold ? 1 : 0)));
+    private transformedValue(value: number): number {
+        return this.binarize === null ? value : (value > this.binarize ? 1 : 0);
     }
 
-    public fit(trainX: number[][], trainY: number[]): void {
-        const X = this.binarizeX(trainX);
+    public fit(trainX: NumericMatrix, trainY: number[]): void {
+        validateXY(trainX, trainY);
         this.classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
         const nClasses = this.classes.length;
-        const nFeatures = X[0].length;
+        const [nSamples, nFeatures] = matrixShape(trainX);
+        const prior = ensureClassPrior(this.classPrior, nClasses, 'classPrior');
 
         this.classCount = new Array(nClasses).fill(0);
         this.featureCount = Array.from({ length: nClasses }, () => new Array(nFeatures).fill(0));
@@ -57,17 +59,30 @@ export class BernoulliNB extends ClassifierBase {
         const classIndex = new Map<number, number>();
         this.classes.forEach((c, i) => classIndex.set(c, i));
 
-        for (let i = 0; i < X.length; i++) {
+        for (let i = 0; i < nSamples; i++) {
             const idx = classIndex.get(trainY[i])!;
             this.classCount[idx] += 1;
-            for (let j = 0; j < nFeatures; j++) {
-                this.featureCount[idx][j] += X[i][j];
+        }
+
+        // A negative threshold makes implicit sparse zeros active. In the
+        // binarize=null case raw feature values are retained, matching
+        // sklearn's Y.T @ X feature counts.
+        const implicitValue = this.transformedValue(0);
+        if (implicitValue !== 0) {
+            for (let c = 0; c < nClasses; c++) {
+                this.featureCount[c].fill(this.classCount[c] * implicitValue);
             }
+        }
+        for (let i = 0; i < nSamples; i++) {
+            const idx = classIndex.get(trainY[i])!;
+            forEachNonZeroInRow(trainX, i, (j, value) => {
+                this.featureCount[idx][j] += this.transformedValue(value) - implicitValue;
+            });
         }
 
         // class log prior
-        if (this.classPrior) {
-            this.classLogPrior = this.classPrior.map(p => Math.log(p));
+        if (prior) {
+            this.classLogPrior = prior.map(p => Math.log(p));
         } else if (this.fitPrior) {
             // sklearn never smooths the class prior with alpha
             const totalCount = this.classCount.reduce((a, b) => a + b, 0);
@@ -90,29 +105,41 @@ export class BernoulliNB extends ClassifierBase {
         }
     }
 
-    private jointLogLikelihood(X: number[][]): number[][] {
-        const nSamples = X.length;
+    private jointLogLikelihood(X: NumericMatrix): number[][] {
+        const [nSamples, nFeatures] = matrixShape(X);
+        if (nFeatures !== this.featureLogProb[0].length) {
+            throw new Error('input feature size does not match fitted model');
+        }
         const nClasses = this.classes.length;
         const jll: number[][] = Array.from({ length: nSamples }, () => new Array(nClasses).fill(0));
+        const implicitValue = this.transformedValue(0);
+        const baselineTotals = this.classes.map((_, c) => {
+            let total = this.classLogPrior[c];
+            for (let j = 0; j < nFeatures; j++) {
+                total += implicitValue * this.featureLogProb[c][j]
+                    + (1 - implicitValue) * this.negLogProb[c][j];
+            }
+            return total;
+        });
         for (let i = 0; i < nSamples; i++) {
             for (let c = 0; c < nClasses; c++) {
-                let sum = this.classLogPrior[c];
-                for (let j = 0; j < X[i].length; j++) {
-                    if (X[i][j]) {
-                        sum += this.featureLogProb[c][j];
-                    } else {
-                        sum += this.negLogProb[c][j];
-                    }
-                }
+                let sum = baselineTotals[c];
+                forEachNonZeroInRow(X, i, (j, value) => {
+                    const delta = this.transformedValue(value) - implicitValue;
+                    sum += delta * (this.featureLogProb[c][j] - this.negLogProb[c][j]);
+                });
                 jll[i][c] = sum;
             }
         }
         return jll;
     }
 
-    public predict(testX: number[][]): number[] {
-        const X = this.binarizeX(testX);
-        const jll = this.jointLogLikelihood(X);
+    public predict(testX: NumericMatrix): number[] {
+        if (this.classes.length === 0) throw new Error('BernoulliNB must be fitted before calling predict');
+        const [nSamples] = matrixShape(testX);
+        if (nSamples === 0) return [];
+        validateMatrix(testX);
+        const jll = this.jointLogLikelihood(testX);
         const preds: number[] = [];
         for (const row of jll) {
             let best = 0;

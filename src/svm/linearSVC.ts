@@ -180,5 +180,9 @@ export class LinearSVC extends ClassifierBase {
         }
         return results;
     }
+
+    public get coef(): number[][] {
+        return this.weights.map(row => row.slice());
+    }
 }
 registerEstimator('LinearSVC', LinearSVC);

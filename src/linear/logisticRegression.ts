@@ -11,7 +11,7 @@ export interface LogisticRegressionProps {
 }
 
 export class LogisticRegression extends ClassifierBase {
-    private weights: number[];
+    private coefState: number[];
     private bias: number;
     private learningRate: number;
     private maxIter: number;
@@ -23,7 +23,7 @@ export class LogisticRegression extends ClassifierBase {
         const { learningRate = 0.1, maxIter = 1000 } = props;
         this.learningRate = learningRate;
         this.maxIter = maxIter;
-        this.weights = [];
+        this.coefState = [];
         this.bias = 0;
         this.classes = [];
         this.fitted = false;
@@ -47,7 +47,7 @@ export class LogisticRegression extends ClassifierBase {
         // internally train on {0, 1}; classes_ maps back to the user's labels
         const y01 = trainY.map(v => (v === this.classes[1] ? 1 : 0));
         const nFeatures = trainX[0].length;
-        this.weights = new Array(nFeatures).fill(0);
+        this.coefState = new Array(nFeatures).fill(0);
         this.bias = 0;
         for (let iter = 0; iter < this.maxIter; iter++) {
             const gradW = new Array(nFeatures).fill(0);
@@ -57,7 +57,7 @@ export class LogisticRegression extends ClassifierBase {
                 const y = y01[i];
                 let z = this.bias;
                 for (let j = 0; j < nFeatures; j++) {
-                    z += this.weights[j] * x[j];
+                    z += this.coefState[j] * x[j];
                 }
                 const pred = sigmoid(z);
                 const diff = pred - y;
@@ -67,7 +67,7 @@ export class LogisticRegression extends ClassifierBase {
                 gradB += diff;
             }
             for (let j = 0; j < nFeatures; j++) {
-                this.weights[j] -= this.learningRate * gradW[j] / trainX.length;
+                this.coefState[j] -= this.learningRate * gradW[j] / trainX.length;
             }
             this.bias -= this.learningRate * gradB / trainX.length;
         }
@@ -82,7 +82,7 @@ export class LogisticRegression extends ClassifierBase {
         for (const x of testX) {
             let z = this.bias;
             for (let j = 0; j < x.length; j++) {
-                z += this.weights[j] * x[j];
+                z += this.coefState[j] * x[j];
             }
             const p = sigmoid(z);
             results.push(p >= 0.5 ? this.classes[1] : this.classes[0]);
@@ -92,6 +92,10 @@ export class LogisticRegression extends ClassifierBase {
 
     public getClasses(): number[] {
         return this.classes.slice();
+    }
+
+    public get coef(): number[] {
+        return this.coefState.slice();
     }
 }
 registerEstimator('LogisticRegression', LogisticRegression);

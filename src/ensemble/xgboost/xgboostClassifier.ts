@@ -10,6 +10,7 @@ import {
     validateXGBoostFitInput,
 } from './xgboostBase';
 import { XGBTree } from './xgbTree';
+import { averageImportances } from '../../tree/featureImportances';
 
 export interface XGBoostClassifierProps extends XGBoostProps {}
 
@@ -52,6 +53,7 @@ export class XGBoostClassifier extends ClassifierBase {
     private baseMargin: number;
     private fitted: boolean;
     private classes: number[];
+    private nFeatures: number;
 
     constructor(props: XGBoostClassifierProps = {}) {
         super();
@@ -61,6 +63,7 @@ export class XGBoostClassifier extends ClassifierBase {
         this.baseMargin = 0;
         this.fitted = false;
         this.classes = [];
+        this.nFeatures = 0;
         if (!(this.params.baseScore > 0 && this.params.baseScore < 1)) {
             throw new Error('baseScore must be in (0, 1) for binary:logistic');
         }
@@ -72,6 +75,7 @@ export class XGBoostClassifier extends ClassifierBase {
 
     public fit(trainX: number[][], trainY: number[]): void {
         validateXGBoostFitInput(trainX, trainY);
+        this.nFeatures = trainX[0].length;
         // validate before mutating state so a failed refit leaves a
         // previously fitted model intact
         const classes = Array.from(new Set(trainY)).sort((a, b) => a - b);
@@ -208,6 +212,14 @@ export class XGBoostClassifier extends ClassifierBase {
             }
             return this.classes[best];
         });
+    }
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        const trees = this.classes.length === 2 ? this.trees : this.multiTrees.flat();
+        if (!Number.isInteger(this.nFeatures) || this.nFeatures <= 0) {
+            throw new Error('featureImportances are unavailable for this legacy XGBoost model; refit the model');
+        }
+        return averageImportances(trees.map(tree => tree.featureImportances(this.nFeatures)));
     }
 }
 registerEstimator('XGBoostClassifier', XGBoostClassifier);

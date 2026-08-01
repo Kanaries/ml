@@ -22,6 +22,7 @@ interface XGBNode {
     weight: number;
     leftChild: XGBNode | null;
     rightChild: XGBNode | null;
+    gain: number;
 }
 
 export class XGBTree {
@@ -69,6 +70,7 @@ export class XGBTree {
             weight: this.leafWeight(G, H),
             leftChild: null,
             rightChild: null,
+            gain: 0,
         };
         if (depth >= this.params.maxDepth || rows.length < 2) {
             return node;
@@ -122,6 +124,7 @@ export class XGBTree {
         }
         node.splitIndex = bestFeature;
         node.threshold = bestThreshold;
+        node.gain = bestGain;
         node.leftChild = this.build(X, g, h, featureIndices, leftRows, depth + 1);
         node.rightChild = this.build(X, g, h, featureIndices, rightRows, depth + 1);
         return node;
@@ -138,6 +141,35 @@ export class XGBTree {
             }
             return node.weight;
         });
+    }
+
+    public featureImportances(nFeatures: number): number[] {
+        const out = new Array(nFeatures).fill(0);
+        const visit = (node: XGBNode | null): void => {
+            if (!node) return;
+            if (node.splitIndex >= 0 && node.splitIndex < nFeatures) {
+                if (node.gain === undefined) {
+                    throw new Error('featureImportances are unavailable for this legacy XGBoost model; refit the model');
+                }
+                out[node.splitIndex] += Math.max(0, node.gain);
+            }
+            visit(node.leftChild);
+            visit(node.rightChild);
+        };
+        visit(this.root);
+        return out;
+    }
+
+    public featureCountHint(): number {
+        let maxFeature = -1;
+        const visit = (node: XGBNode | null): void => {
+            if (!node) return;
+            maxFeature = Math.max(maxFeature, node.splitIndex);
+            visit(node.leftChild);
+            visit(node.rightChild);
+        };
+        visit(this.root);
+        return maxFeature + 1;
     }
 }
 // held in the fitted state of the XGBoost estimators; all instance fields

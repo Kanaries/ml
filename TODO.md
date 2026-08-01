@@ -13,10 +13,10 @@ stated DoD + all existing tests green.
 
 ## Wave 0 — Architecture prerequisites (4 items)
 
-- [ ] 0-1 `featureImportances`/`coef` as an **optional capability** protocol — implemented only by estimators with the semantics (linear → `coef`, trees/forests/boosting → `featureImportances`; kernel SVMs etc. explicitly opt out); conformance checks only declared capabilities; SelectFromModel/RFE gate on capability detection
-- [ ] 0-2 Forest skeleton generalization: RandomForest takes a parameterized base estimator, behavior unchanged (prereq for ExtraTrees)
-- [ ] 0-3 Data-abstraction upgrade: string-feature input path + minimal CSR sparse representation; Pipeline/TransformerBase unpinned from `number[][]`; NB family accepts sparse (prereq for text route; memory benchmark: 20k docs × 30k vocab in-browser)
-- [ ] 0-4 `scripts/coverage-vs-sklearn` script (sklearn 1.5 `all_estimators()` denominator, alias-deduped; coverage numbers come only from this)
+- [x] 0-1 `featureImportances`/`coef` as an **optional capability** protocol — implemented only by estimators with the semantics (linear → `coef`, trees/forests/boosting → `featureImportances`; kernel SVMs etc. explicitly opt out); conformance checks only declared capabilities; SelectFromModel/RFE gate on capability detection
+- [x] 0-2 Forest skeleton generalization: RandomForest takes a parameterized base estimator, behavior unchanged (prereq for ExtraTrees)
+- [x] 0-3 Data-abstraction upgrade: string-feature input path + minimal CSR sparse representation; Pipeline/TransformerBase unpinned from `number[][]`; NB family accepts sparse (prereq for text route; memory benchmark: 20k docs × 30k vocab in-browser)
+- [x] 0-4 `scripts/coverage-vs-sklearn` script (sklearn 1.5 `all_estimators()` denominator, alias-deduped; coverage numbers come only from this)
 
 ## Wave A — Promise gaps + symmetry (16 items)
 

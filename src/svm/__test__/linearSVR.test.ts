@@ -8,7 +8,7 @@ test('basic', () => {
         X.push([x]);
         y.push(2 * x + 1);
     }
-    const reg = new LinearSVR({ learningRate: 0.01, maxIter: 200 });
+    const reg = new LinearSVR({ learningRate: 0.01, maxIter: 200, randomState: 0 });
     reg.fit(X, y);
     const pred = reg.predict([[25], [30]]);
     expect(Math.abs(pred[0] - (2 * 25 + 1))).toBeLessThan(2);

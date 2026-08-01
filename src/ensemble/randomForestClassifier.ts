@@ -1,9 +1,9 @@
 import { ClassifierBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
-import { createRandomGenerator } from '../utils';
-import { DecisionTreeClassifier, DecisionTreeProps } from '../tree';
+import { averageImportances, DecisionTreeClassifier, DecisionTreeProps } from '../tree';
 import { SubsetSizeOption } from '../utils/paramResolvers';
 import { definedProps } from './utils';
+import { fitForest, predictForestClassification } from './forest';
 
 export interface RandomForestClassifierProps extends DecisionTreeProps {
     nEstimators?: number;
@@ -47,36 +47,17 @@ export class RandomForestClassifier extends ClassifierBase {
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
-        if (trainX.length === 0 || trainY.length === 0) {
-            throw new Error('X and y must be non-empty');
-        }
-        if (trainX.length !== trainY.length) {
-            throw new Error('X and y must have the same length');
-        }
-        const random = createRandomGenerator(this.randomState);
-        this.estimators = [];
-        for (let i = 0; i < this.nEstimators; i++) {
-            const tree = new DecisionTreeClassifier({
+        this.estimators = fitForest(trainX, trainY, {
+            nEstimators: this.nEstimators,
+            bootstrap: this.bootstrap,
+            randomState: this.randomState,
+            createEstimator: randomState => new DecisionTreeClassifier({
                 criterion: 'gini',
                 ...this.treeProps,
                 max_features: this.maxFeatures,
-                randomState: Math.floor(random() * 1_000_000_000),
-            });
-            const sampleX: number[][] = [];
-            const sampleY: number[] = [];
-            if (this.bootstrap) {
-                for (let j = 0; j < trainX.length; j++) {
-                    const index = Math.floor(random() * trainX.length);
-                    sampleX.push(trainX[index]);
-                    sampleY.push(trainY[index]);
-                }
-            } else {
-                sampleX.push(...trainX);
-                sampleY.push(...trainY);
-            }
-            tree.fit(sampleX, sampleY);
-            this.estimators.push(tree);
-        }
+                randomState,
+            }),
+        });
         this.fitted = true;
     }
 
@@ -84,24 +65,13 @@ export class RandomForestClassifier extends ClassifierBase {
         if (!this.fitted) {
             throw new Error('model is not fitted');
         }
-        return testX.map((_, rowIndex) => {
-            const votes = new Map<number, number>();
-            for (const estimator of this.estimators) {
-                const label = estimator.predict([testX[rowIndex]])[0];
-                votes.set(label, (votes.get(label) || 0) + 1);
-            }
-            let bestLabel = 0;
-            let bestCount = -1;
-            const labels = Array.from(votes.keys()).sort((a, b) => a - b);
-            for (const label of labels) {
-                const count = votes.get(label)!;
-                if (count > bestCount) {
-                    bestCount = count;
-                    bestLabel = label;
-                }
-            }
-            return bestLabel;
-        });
+        return predictForestClassification(this.estimators, testX);
+    }
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        // sklearn averages each tree's normalized vector. Normalizing the
+        // aggregate again also handles single-node (all-zero) trees.
+        return averageImportances(this.estimators.map(tree => tree.featureImportances));
     }
 }
 registerEstimator('RandomForestClassifier', RandomForestClassifier);

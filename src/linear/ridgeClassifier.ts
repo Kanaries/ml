@@ -68,5 +68,9 @@ export class RidgeClassifier extends ClassifierBase {
             return bestClass;
         });
     }
+
+    public get coef(): number[][] {
+        return this.models.map(model => model.coef);
+    }
 }
 registerEstimator('RidgeClassifier', RidgeClassifier);

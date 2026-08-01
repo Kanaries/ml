@@ -9,6 +9,7 @@ import {
     validateXGBoostFitInput,
 } from './xgboostBase';
 import { XGBTree } from './xgbTree';
+import { averageImportances } from '../../tree/featureImportances';
 
 export interface XGBoostRegressorProps extends XGBoostProps {}
 
@@ -29,6 +30,7 @@ export class XGBoostRegressor extends RegressorBase {
     private trees: XGBTree[];
     private baseMargin: number;
     private fitted: boolean;
+    private nFeatures: number;
 
     constructor(props: XGBoostRegressorProps = {}) {
         super();
@@ -36,6 +38,7 @@ export class XGBoostRegressor extends RegressorBase {
         this.trees = [];
         this.baseMargin = 0;
         this.fitted = false;
+        this.nFeatures = 0;
     }
 
     public getParams(): Params {
@@ -44,6 +47,7 @@ export class XGBoostRegressor extends RegressorBase {
 
     public fit(trainX: number[][], trainY: number[]): void {
         validateXGBoostFitInput(trainX, trainY);
+        this.nFeatures = trainX[0].length;
         this.baseMargin = this.params.baseScore;
         this.trees = fitBoostedTrees(trainX, trainY, this.baseMargin, this.params, squaredErrorGradients);
         this.fitted = true;
@@ -54,6 +58,14 @@ export class XGBoostRegressor extends RegressorBase {
             throw new Error('model is not fitted');
         }
         return predictBoostedMargin(this.trees, this.baseMargin, this.params.learningRate, testX);
+    }
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        if (!Number.isInteger(this.nFeatures) || this.nFeatures <= 0) {
+            throw new Error('featureImportances are unavailable for this legacy XGBoost model; refit the model');
+        }
+        const raw = this.trees.map(tree => tree.featureImportances(this.nFeatures));
+        return averageImportances(raw);
     }
 }
 registerEstimator('XGBoostRegressor', XGBoostRegressor);

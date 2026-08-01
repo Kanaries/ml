@@ -54,7 +54,7 @@ export class SGDClassifier extends ClassifierBase {
 
     protected classes: number[];
     /** One weight row per class (a single row for binary problems). */
-    protected coef: number[][];
+    protected coefState: number[][];
     /** One intercept per weight row. */
     protected intercept: number[];
     /** Epochs run by the slowest-converging binary problem. */
@@ -89,7 +89,7 @@ export class SGDClassifier extends ClassifierBase {
         this.powerT = props.powerT ?? 0.5;
         this.nIterNoChange = props.nIterNoChange ?? 5;
         this.classes = [];
-        this.coef = [];
+        this.coefState = [];
         this.intercept = [];
         this.nIter = 0;
     }
@@ -121,7 +121,7 @@ export class SGDClassifier extends ClassifierBase {
             throw new Error(`SGDClassifier needs at least 2 classes, got ${this.classes.length}`);
         }
         const rand = createRandomGenerator(this.randomState);
-        this.coef = [];
+        this.coefState = [];
         this.intercept = [];
         this.nIter = 0;
         // Binary: one weight vector for the positive (larger) class.
@@ -146,20 +146,20 @@ export class SGDClassifier extends ClassifierBase {
                 powerT: this.powerT,
                 nIterNoChange: this.nIterNoChange,
             });
-            this.coef.push(weights);
+            this.coefState.push(weights);
             this.intercept.push(intercept);
             this.nIter = Math.max(this.nIter, nIter);
         }
     }
 
     private assertFitted(): void {
-        if (this.coef.length === 0) {
+        if (this.coefState.length === 0) {
             throw new Error(`${this.constructor.name} must be fitted before calling predict`);
         }
     }
 
     private scoreRow(x: number[], k: number): number {
-        const w = this.coef[k];
+        const w = this.coefState[k];
         let s = this.intercept[k];
         for (let j = 0; j < w.length; j++) s += w[j] * x[j];
         return s;
@@ -174,7 +174,7 @@ export class SGDClassifier extends ClassifierBase {
         if (this.classes.length === 2) {
             return testX.map(x => this.scoreRow(x, 0));
         }
-        return testX.map(x => this.coef.map((_, k) => this.scoreRow(x, k)));
+        return testX.map(x => this.coefState.map((_, k) => this.scoreRow(x, k)));
     }
 
     public predict(testX: number[][]): number[] {
@@ -185,7 +185,7 @@ export class SGDClassifier extends ClassifierBase {
         return testX.map(x => {
             let best = 0;
             let bestScore = -Infinity;
-            for (let k = 0; k < this.coef.length; k++) {
+            for (let k = 0; k < this.coefState.length; k++) {
                 const s = this.scoreRow(x, k);
                 if (s > bestScore) {
                     bestScore = s;
@@ -220,7 +220,7 @@ export class SGDClassifier extends ClassifierBase {
         }
         const nClasses = this.classes.length;
         return testX.map(x => {
-            const probs = this.coef.map((_, k) => toProb(this.scoreRow(x, k)));
+            const probs = this.coefState.map((_, k) => toProb(this.scoreRow(x, k)));
             let sum = 0;
             for (const p of probs) sum += p;
             if (sum === 0) {
@@ -237,7 +237,11 @@ export class SGDClassifier extends ClassifierBase {
 
     /** Fitted weights, one row per class (a single row for binary problems). */
     public getCoef(): number[][] {
-        return this.coef.map(row => row.slice());
+        return this.coefState.map(row => row.slice());
+    }
+
+    public get coef(): number[][] {
+        return this.getCoef();
     }
 
     public getIntercept(): number[] {

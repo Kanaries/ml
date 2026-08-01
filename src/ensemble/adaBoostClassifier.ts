@@ -416,5 +416,9 @@ export class AdaBoostClassifier extends ClassifierBase {
         }
         return importances;
     }
+
+    public get featureImportances(): number[] {
+        return this.getFeatureImportances();
+    }
 }
 registerEstimator('AdaBoostClassifier', AdaBoostClassifier);

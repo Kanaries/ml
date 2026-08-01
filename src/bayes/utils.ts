@@ -1,23 +1,26 @@
-export function validateMatrix(X: number[][]): void {
-    if (X.length === 0) {
+import { isCSRMatrix, matrixShape, type NumericMatrix } from '../data';
+
+export function validateMatrix(X: NumericMatrix): void {
+    const [nRows, nFeatures] = matrixShape(X);
+    if (nRows === 0) {
         throw new Error('X must be non-empty');
     }
-    const nFeatures = X[0].length;
     if (nFeatures === 0) {
         throw new Error('X must contain at least one feature');
     }
-    for (let i = 1; i < X.length; i++) {
+    if (!isCSRMatrix(X)) for (let i = 1; i < X.length; i++) {
         if (X[i].length !== nFeatures) {
             throw new Error('all rows in X must have the same length');
         }
     }
 }
 
-export function validateXY(X: number[][], y: number[]): void {
-    if (X.length !== y.length) {
+export function validateXY(X: NumericMatrix, y: number[]): void {
+    const [nRows] = matrixShape(X);
+    if (nRows !== y.length) {
         throw new Error('X and y must have the same length');
     }
-    if (X.length === 0 || y.length === 0) {
+    if (nRows === 0 || y.length === 0) {
         throw new Error('X and y must be non-empty');
     }
     validateMatrix(X);

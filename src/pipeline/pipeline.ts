@@ -1,4 +1,6 @@
 import { BaseEstimator, Params, registerEstimator } from '../base/estimator';
+import type { FeatureData, FeatureDataKind, NumericMatrix } from '../data';
+import { CSRMatrix, isCSRMatrix } from '../data';
 
 /**
  * Structural interfaces: pipeline steps are validated at runtime by shape,
@@ -6,21 +8,63 @@ import { BaseEstimator, Params, registerEstimator } from '../base/estimator';
  * modules loaded lazily.
  */
 interface TransformerLike extends BaseEstimator {
-    fit(X: number[][], y?: number[]): void;
-    transform(X: number[][]): number[][];
+    readonly acceptedInputKinds?: readonly FeatureDataKind[];
+    fit(X: FeatureData, y?: number[]): void;
+    transform(X: FeatureData): FeatureData;
+}
+
+function featureDataKind(X: FeatureData): FeatureDataKind {
+    if (isCSRMatrix(X)) return 'csr';
+    return X.length > 0 && typeof X[0] === 'string' ? 'text' : 'dense';
+}
+
+function transformAtStep(name: string, transformer: TransformerLike, X: FeatureData): FeatureData {
+    const kind = featureDataKind(X);
+    const accepted = transformer.acceptedInputKinds ?? ['dense'];
+    if (!accepted.includes(kind)) {
+        throw new Error(`Pipeline step "${name}" does not accept ${kind} input`);
+    }
+    try {
+        return transformer.transform(X);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Pipeline step "${name}" failed to transform ${kind} input: ${message}`);
+    }
+}
+
+function fitTransformerAtStep(name: string, transformer: TransformerLike, X: FeatureData, y?: number[]): void {
+    const kind = featureDataKind(X);
+    const accepted = transformer.acceptedInputKinds ?? ['dense'];
+    if (!accepted.includes(kind)) {
+        throw new Error(`Pipeline step "${name}" does not accept ${kind} input`);
+    }
+    transformer.fit(X, y);
 }
 interface PredictorLike extends BaseEstimator {
-    fit(X: number[][], y?: number[], sampleWeight?: number[]): void;
-    predict(X: number[][]): number[];
-    predictProba?(X: number[][]): number[][];
-    score?(X: number[][], y: number[]): number;
+    readonly acceptedInputKinds?: readonly FeatureDataKind[];
+    fit(X: NumericMatrix, y?: number[], sampleWeight?: number[]): void;
+    predict(X: NumericMatrix): number[];
+    predictProba?(X: NumericMatrix): number[][];
+    score?(X: NumericMatrix, y: number[]): number;
 }
 
-export type PipelineStep = [name: string, estimator: BaseEstimator];
+export type PipelineStep = readonly [name: string, estimator: BaseEstimator];
 
-export interface PipelineProps {
+type Last<T extends readonly unknown[]> = T extends readonly [...unknown[], infer L]
+    ? L
+    : T extends readonly (infer E)[] ? E : never;
+type StepEstimator<T> = T extends readonly [string, infer E] ? E : never;
+type TransformerOutput<T> = T extends { transform(X: never): infer O }
+    ? Extract<O, FeatureData>
+    : FeatureData;
+
+/** Output type of the final step when it is a transformer. */
+export type PipelineOutput<TSteps extends readonly PipelineStep[]> =
+    TransformerOutput<StepEstimator<Last<TSteps>>>;
+
+export interface PipelineProps<TSteps extends readonly PipelineStep[] = readonly PipelineStep[]> {
     /** Ordered [name, estimator] pairs; all but the last must be transformers. */
-    steps: PipelineStep[];
+    steps: TSteps;
 }
 
 function isTransformer(est: unknown): est is TransformerLike {
@@ -29,7 +73,25 @@ function isTransformer(est: unknown): est is TransformerLike {
         && typeof (est as TransformerLike).transform === 'function';
 }
 
-function validateSteps(steps: PipelineStep[]): void {
+function requireNumericData(X: FeatureData, consumer: string): NumericMatrix {
+    if (isCSRMatrix(X)) return X;
+    if (X.length === 0 || Array.isArray(X[0])) return X as number[][];
+    throw new Error(
+        `${consumer} received raw string documents. Add a text transformer before the numeric estimator.`,
+    );
+}
+
+function numericAtFinalStep(name: string, predictor: PredictorLike, X: FeatureData): NumericMatrix {
+    const numeric = requireNumericData(X, `Pipeline step "${name}"`);
+    const kind = featureDataKind(numeric);
+    const accepted = predictor.acceptedInputKinds ?? ['dense'];
+    if (!accepted.includes(kind)) {
+        throw new Error(`Pipeline step "${name}" does not accept ${kind} input`);
+    }
+    return numeric;
+}
+
+function validateSteps(steps: readonly PipelineStep[]): void {
     if (!Array.isArray(steps) || steps.length === 0) {
         throw new Error('Pipeline requires a non-empty steps array');
     }
@@ -58,10 +120,10 @@ function validateSteps(steps: PipelineStep[]): void {
  * `Pipeline`. Nested params are addressable as `step__param` in `setParams`
  * (and therefore in grid search): `pipe.setParams({ svc__C: 10 })`.
  */
-export class Pipeline extends BaseEstimator {
+export class Pipeline<const TSteps extends readonly PipelineStep[] = readonly PipelineStep[]> extends BaseEstimator {
     private steps: PipelineStep[];
 
-    constructor(props: PipelineProps) {
+    constructor(props: PipelineProps<TSteps>) {
         super();
         const { steps } = props ?? {};
         validateSteps(steps);
@@ -111,76 +173,91 @@ export class Pipeline extends BaseEstimator {
     }
 
     /** Fit all transformers, transforming the data through, then fit the final estimator. */
-    public fit(X: number[][], y?: number[], sampleWeight?: number[]): void {
+    public fit(X: FeatureData, y?: number[], sampleWeight?: number[]): void {
         const Xt = this.fitIntermediate(X, y);
-        (this.finalStep as PredictorLike).fit(Xt, y, sampleWeight);
+        const finalStep = this.finalStep;
+        const name = this.steps[this.steps.length - 1][0];
+        if (isTransformer(finalStep)) {
+            fitTransformerAtStep(name, finalStep, Xt, y);
+            return;
+        }
+        const final = finalStep as PredictorLike;
+        final.fit(numericAtFinalStep(name, final, Xt), y, sampleWeight);
     }
 
-    private fitIntermediate(X: number[][], y?: number[]): number[][] {
+    private fitIntermediate(X: FeatureData, y?: number[]): FeatureData {
         let Xt = X;
-        for (const [, est] of this.steps.slice(0, -1)) {
+        for (const [name, est] of this.steps.slice(0, -1)) {
             const t = est as TransformerLike;
-            t.fit(Xt, y);
-            Xt = t.transform(Xt);
+            fitTransformerAtStep(name, t, Xt, y);
+            Xt = transformAtStep(name, t, Xt);
         }
         return Xt;
     }
 
-    private applyIntermediate(X: number[][]): number[][] {
+    private applyIntermediate(X: FeatureData): FeatureData {
         let Xt = X;
-        for (const [, est] of this.steps.slice(0, -1)) {
-            Xt = (est as TransformerLike).transform(Xt);
+        for (const [name, est] of this.steps.slice(0, -1)) {
+            Xt = transformAtStep(name, est as TransformerLike, Xt);
         }
         return Xt;
     }
 
-    public predict(X: number[][]): number[] {
+    public predict(X: FeatureData): number[] {
         const final = this.finalStep as PredictorLike;
         if (typeof final.predict !== 'function') {
             throw new Error('The final pipeline step does not implement predict()');
         }
-        return final.predict(this.applyIntermediate(X));
+        const name = this.steps[this.steps.length - 1][0];
+        return final.predict(numericAtFinalStep(name, final, this.applyIntermediate(X)));
     }
 
-    public predictProba(X: number[][]): number[][] {
+    public predictProba(X: FeatureData): number[][] {
         const final = this.finalStep as PredictorLike;
         if (typeof final.predictProba !== 'function') {
             throw new Error('The final pipeline step does not implement predictProba()');
         }
-        return final.predictProba(this.applyIntermediate(X));
+        const name = this.steps[this.steps.length - 1][0];
+        return final.predictProba(numericAtFinalStep(name, final, this.applyIntermediate(X)));
     }
 
     /** Transform through every step (requires the final step to be a transformer too). */
-    public transform(X: number[][]): number[][] {
+    public transform(X: FeatureData): PipelineOutput<TSteps> {
         const final = this.finalStep;
         if (!isTransformer(final)) {
             throw new Error('The final pipeline step does not implement transform()');
         }
-        return final.transform(this.applyIntermediate(X));
+        return transformAtStep(this.steps[this.steps.length - 1][0], final, this.applyIntermediate(X)) as PipelineOutput<TSteps>;
     }
 
-    public fitTransform(X: number[][], y?: number[]): number[][] {
+    public fitTransform(X: FeatureData, y?: number[]): PipelineOutput<TSteps> {
         const final = this.finalStep;
         if (!isTransformer(final)) {
             throw new Error('The final pipeline step does not implement transform()');
         }
         const Xt = this.fitIntermediate(X, y);
-        final.fit(Xt, y);
-        return final.transform(Xt);
+        const name = this.steps[this.steps.length - 1][0];
+        fitTransformerAtStep(name, final, Xt, y);
+        return transformAtStep(name, final, Xt) as PipelineOutput<TSteps>;
     }
 
-    public score(X: number[][], y: number[]): number {
+    public score(X: FeatureData, y: number[]): number {
         const final = this.finalStep as PredictorLike;
         if (typeof final.score !== 'function') {
             throw new Error('The final pipeline step does not implement score()');
         }
-        return final.score(this.applyIntermediate(X), y);
+        const name = this.steps[this.steps.length - 1][0];
+        return final.score(numericAtFinalStep(name, final, this.applyIntermediate(X)), y);
     }
 }
 registerEstimator('Pipeline', Pipeline);
 
 /** `makePipeline(new StandardScaler(), new SVC())` — names derived from class names. */
-export function makePipeline(...estimators: BaseEstimator[]): Pipeline {
+type NamedSteps<T extends readonly BaseEstimator[]> = {
+    readonly [K in keyof T]: readonly [name: string, estimator: T[K]];
+};
+
+export function makePipeline<const T extends readonly BaseEstimator[]>(...estimators: T): Pipeline<NamedSteps<T>> {
     const counts = new Map<string, number>();
     const steps: PipelineStep[] = estimators.map((est) => {
         const base = est.constructor.name.toLowerCase();
@@ -191,9 +268,9 @@ export function makePipeline(...estimators: BaseEstimator[]): Pipeline {
     // if a later duplicate forced numbering, renumber the first occurrence too
     for (const [base, total] of counts) {
         if (total > 1) {
-            const first = steps.find(([name]) => name === base);
-            if (first) first[0] = `${base}-1`;
+            const firstIndex = steps.findIndex(([name]) => name === base);
+            if (firstIndex >= 0) steps[firstIndex] = [`${base}-1`, steps[firstIndex][1]];
         }
     }
-    return new Pipeline({ steps });
+    return new Pipeline({ steps }) as Pipeline<NamedSteps<T>>;
 }

@@ -23,7 +23,7 @@ export class LassoRegression extends RegressorBase {
     private fitIntercept: boolean;
     private maxIter: number;
     private tol: number;
-    private coef: number[];
+    private coefState: number[];
     private intercept: number;
     private fitted: boolean;
 
@@ -43,7 +43,7 @@ export class LassoRegression extends RegressorBase {
         this.fitIntercept = fitIntercept;
         this.maxIter = maxIter;
         this.tol = tol;
-        this.coef = [];
+        this.coefState = [];
         this.intercept = 0;
         this.fitted = false;
     }
@@ -140,9 +140,9 @@ export class LassoRegression extends RegressorBase {
             }
         }
 
-        this.coef = coef;
+        this.coefState = coef;
         this.intercept = this.fitIntercept
-            ? yMean - xMeans.reduce((sum, mean, idx) => sum + mean * this.coef[idx], 0)
+            ? yMean - xMeans.reduce((sum, mean, idx) => sum + mean * this.coefState[idx], 0)
             : 0;
         this.fitted = true;
     }
@@ -152,15 +152,18 @@ export class LassoRegression extends RegressorBase {
             throw new Error('model is not fitted');
         }
         return X.map(row => {
-            if (row.length !== this.coef.length) {
+            if (row.length !== this.coefState.length) {
                 throw new Error('input feature size does not match fitted model');
             }
             let sum = this.intercept;
-            for (let i = 0; i < this.coef.length; i++) {
-                sum += this.coef[i] * row[i];
+            for (let i = 0; i < this.coefState.length; i++) {
+                sum += this.coefState[i] * row[i];
             }
             return sum;
         });
+    }
+    public get coef(): number[] {
+        return this.coefState.slice();
     }
 }
 registerEstimator('LassoRegression', LassoRegression);

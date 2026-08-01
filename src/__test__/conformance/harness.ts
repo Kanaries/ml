@@ -8,6 +8,11 @@
  */
 import { BaseEstimator, getRegisteredEstimators, loadModel } from '../../base/estimator';
 import {
+    coefficientImportances,
+    hasCoefficientCapability,
+    hasFeatureImportanceCapability,
+} from '../../base/capabilities';
+import {
     Dataset,
     binaryDataset,
     binaryFeaturesDataset,
@@ -140,6 +145,24 @@ export function runEstimatorConformance(specs: EstimatorSpec[]): void {
                 const out = fitAndRun(est, spec.kind, data);
                 expect(out).toBeTruthy();
                 expect((out as unknown[]).length).toBe(data.X.length);
+            });
+
+            it('validates every optional capability declared by the estimator', () => {
+                const est = spec.create();
+                fitAndRun(est, spec.kind, data);
+                const nFeatures = data.X[0].length;
+                if (hasCoefficientCapability(est)) {
+                    const importance = coefficientImportances(est.coef);
+                    expect(importance).toHaveLength(nFeatures);
+                    expect(importance.every(Number.isFinite)).toBe(true);
+                }
+                if (hasFeatureImportanceCapability(est)) {
+                    const importance = est.featureImportances;
+                    expect(importance).toHaveLength(nFeatures);
+                    expect(importance.every(value => Number.isFinite(value) && value >= 0)).toBe(true);
+                    const total = importance.reduce((sum, value) => sum + value, 0);
+                    expect(total === 0 || Math.abs(total - 1) < 1e-9).toBe(true);
+                }
             });
 
             (spec.nonDeterministic ? it.skip : it)('refitting a clone reproduces identical output', () => {

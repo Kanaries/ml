@@ -1,8 +1,8 @@
 import { RegressorBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
-import { DecisionTreeRegressor } from '../tree';
-import { createRandomGenerator } from '../utils';
+import { averageImportances, DecisionTreeRegressor } from '../tree';
 import { SubsetSizeOption } from '../utils/paramResolvers';
+import { fitForest, predictForestRegression } from './forest';
 
 export interface RandomForestRegressorProps {
     nEstimators?: number;
@@ -56,36 +56,17 @@ export class RandomForestRegressor extends RegressorBase {
     }
 
     public fit(trainX: number[][], trainY: number[]): void {
-        if (trainX.length === 0 || trainY.length === 0) {
-            throw new Error('X and y must be non-empty');
-        }
-        if (trainX.length !== trainY.length) {
-            throw new Error('X and y must have the same length');
-        }
-        const random = createRandomGenerator(this.randomState);
-        this.estimators = [];
-        for (let i = 0; i < this.nEstimators; i++) {
-            const tree = new DecisionTreeRegressor({
+        this.estimators = fitForest(trainX, trainY, {
+            nEstimators: this.nEstimators,
+            bootstrap: this.bootstrap,
+            randomState: this.randomState,
+            createEstimator: randomState => new DecisionTreeRegressor({
                 max_depth: this.maxDepth,
                 min_samples_split: this.minSamplesSplit,
                 max_features: this.maxFeatures,
-                randomState: Math.floor(random() * 1_000_000_000),
-            });
-            const sampleX: number[][] = [];
-            const sampleY: number[] = [];
-            if (this.bootstrap) {
-                for (let j = 0; j < trainX.length; j++) {
-                    const index = Math.floor(random() * trainX.length);
-                    sampleX.push(trainX[index]);
-                    sampleY.push(trainY[index]);
-                }
-            } else {
-                sampleX.push(...trainX);
-                sampleY.push(...trainY);
-            }
-            tree.fit(sampleX, sampleY);
-            this.estimators.push(tree);
-        }
+                randomState,
+            }),
+        });
         this.fitted = true;
     }
 
@@ -93,13 +74,11 @@ export class RandomForestRegressor extends RegressorBase {
         if (!this.fitted) {
             throw new Error('model is not fitted');
         }
-        return testX.map((_, rowIndex) => {
-            let sum = 0;
-            for (const estimator of this.estimators) {
-                sum += estimator.predict([testX[rowIndex]])[0];
-            }
-            return sum / this.estimators.length;
-        });
+        return predictForestRegression(this.estimators, testX);
+    }
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        return averageImportances(this.estimators.map(tree => tree.featureImportances));
     }
 }
 registerEstimator('RandomForestRegressor', RandomForestRegressor);

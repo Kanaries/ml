@@ -1,6 +1,6 @@
 import { RegressorBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
-import { DecisionTreeRegressor } from '../tree';
+import { averageImportances, DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
 import { mean } from '../utils/stat';
 
@@ -138,6 +138,10 @@ export class GradientBoostingRegressor extends RegressorBase {
             }
         }
         return result;
+    }
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        return averageImportances(this.estimators.map(tree => tree.getRawFeatureImportances()));
     }
 }
 registerEstimator('GradientBoostingRegressor', GradientBoostingRegressor);

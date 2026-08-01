@@ -1,6 +1,6 @@
 import { ClassifierBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
-import { DecisionTreeRegressor } from '../tree';
+import { averageImportances, DecisionTreeRegressor } from '../tree';
 import { createRandomGenerator } from '../utils';
 
 export interface GradientBoostingClassifierProps {
@@ -307,6 +307,12 @@ export class GradientBoostingClassifier extends ClassifierBase {
             }
             return this.classes[best];
         });
+    }
+
+    public get featureImportances(): number[] {
+        if (!this.fitted) throw new Error('model is not fitted');
+        const trees = this.classes.length === 2 ? this.estimators : this.multiEstimators.flat();
+        return averageImportances(trees.map(tree => tree.getRawFeatureImportances()));
     }
 }
 registerEstimator('GradientBoostingClassifier', GradientBoostingClassifier);

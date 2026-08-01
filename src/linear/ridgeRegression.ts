@@ -10,7 +10,7 @@ export interface RidgeRegressionProps {
 export class RidgeRegression extends RegressorBase {
     private alpha: number;
     private fitIntercept: boolean;
-    private coef: number[];
+    private coefState: number[];
     private intercept: number;
 
     public constructor(props: RidgeRegressionProps = {}) {
@@ -21,7 +21,7 @@ export class RidgeRegression extends RegressorBase {
         }
         this.alpha = alpha;
         this.fitIntercept = fitIntercept;
-        this.coef = [];
+        this.coefState = [];
         this.intercept = 0;
     }
 
@@ -74,27 +74,30 @@ export class RidgeRegression extends RegressorBase {
 
         if (this.fitIntercept) {
             this.intercept = params[0];
-            this.coef = params.slice(1);
+            this.coefState = params.slice(1);
         } else {
             this.intercept = 0;
-            this.coef = params.slice();
+            this.coefState = params.slice();
         }
     }
 
     public predict(X: number[][]): number[] {
-        if (this.coef.length === 0) {
+        if (this.coefState.length === 0) {
             throw new Error('model is not fitted');
         }
         return X.map(row => {
-            if (row.length !== this.coef.length) {
+            if (row.length !== this.coefState.length) {
                 throw new Error('input feature size does not match fitted model');
             }
             let sum = this.intercept;
-            for (let i = 0; i < this.coef.length; i++) {
-                sum += this.coef[i] * row[i];
+            for (let i = 0; i < this.coefState.length; i++) {
+                sum += this.coefState[i] * row[i];
             }
             return sum;
         });
+    }
+    public get coef(): number[] {
+        return this.coefState.slice();
     }
 }
 registerEstimator('RidgeRegression', RidgeRegression);

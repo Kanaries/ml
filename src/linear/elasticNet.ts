@@ -43,7 +43,7 @@ export class ElasticNet extends RegressorBase {
     private fitIntercept: boolean;
     private maxIter: number;
     private tol: number;
-    private coef: number[];
+    private coefState: number[];
     private intercept: number;
     private fitted: boolean;
     private edgeModel: { predict: (X: number[][]) => number[] } | null;
@@ -74,7 +74,7 @@ export class ElasticNet extends RegressorBase {
         this.fitIntercept = fitIntercept;
         this.maxIter = maxIter;
         this.tol = tol;
-        this.coef = [];
+        this.coefState = [];
         this.intercept = 0;
         this.fitted = false;
         this.edgeModel = null;
@@ -101,6 +101,7 @@ export class ElasticNet extends RegressorBase {
             const ridge = new RidgeRegression({ alpha: this.alpha * X.length, fitIntercept: this.fitIntercept });
             ridge.fit(X, Y);
             this.edgeModel = ridge;
+            this.coefState = ridge.coef;
             this.fitted = true;
             return;
         }
@@ -114,6 +115,7 @@ export class ElasticNet extends RegressorBase {
             });
             lasso.fit(X, Y);
             this.edgeModel = lasso;
+            this.coefState = lasso.coef;
             this.fitted = true;
             return;
         }
@@ -178,9 +180,9 @@ export class ElasticNet extends RegressorBase {
             }
         }
 
-        this.coef = coef;
+        this.coefState = coef;
         this.intercept = this.fitIntercept
-            ? yMean - xMeans.reduce((sum, mean, idx) => sum + mean * this.coef[idx], 0)
+            ? yMean - xMeans.reduce((sum, mean, idx) => sum + mean * this.coefState[idx], 0)
             : 0;
         this.fitted = true;
     }
@@ -193,15 +195,18 @@ export class ElasticNet extends RegressorBase {
             return this.edgeModel.predict(X);
         }
         return X.map(row => {
-            if (row.length !== this.coef.length) {
+            if (row.length !== this.coefState.length) {
                 throw new Error('input feature size does not match fitted model');
             }
             let sum = this.intercept;
-            for (let i = 0; i < this.coef.length; i++) {
-                sum += this.coef[i] * row[i];
+            for (let i = 0; i < this.coefState.length; i++) {
+                sum += this.coefState[i] * row[i];
             }
             return sum;
         });
+    }
+    public get coef(): number[] {
+        return this.coefState.slice();
     }
 }
 registerEstimator('ElasticNet', ElasticNet);
