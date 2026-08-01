@@ -1,0 +1,31 @@
+---
+title: Univariate Feature Scores in JavaScript and TypeScript
+description: Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
+---
+
+# Univariate feature scores in JavaScript
+
+## Algorithm overview
+
+Univariate scores examine one feature at a time. Chi-square is suited to non-negative count features, ANOVA F measures class separation, and mutual information detects more general nonlinear dependence using discrete counts or k-nearest-neighbor entropy estimates.
+
+## JavaScript implementation
+
+`@kanaries/ml` makes these score functions available in browser and Node.js code through `FeatureSelection`, including seeded jitter for repeated continuous values.
+
+## Quick start example
+
+```ts
+import { FeatureSelection } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 0], [5, 1], [6, 0]];
+const y = [0, 0, 1, 1];
+const [fScores, pValues] = FeatureSelection.fClassif(X, y);
+const information = FeatureSelection.mutualInfoClassif(X, y, { randomState: 42 });
+```
+
+## Detailed API reference
+
+- `chi2(X, y)` and `fClassif(X, y)` return `[scores, pValues]`.
+- `mutualInfoClassif(X, y, options?)` and `mutualInfoRegression(X, y, options?)` return one non-negative score per feature.
+- Mutual-information options are `discreteFeatures?: boolean | boolean[]`, `nNeighbors?: number` (default `3`), and `randomState?: number`.

@@ -25,6 +25,7 @@ export class ExtraTreeClassifier extends ClassifierBase {
     private max_features_: number;
     private randomState?: number;
     private random: () => number;
+    private classesState: number[] = [];
 
     public constructor(props: ExtraTreeProps = {}) {
         super();
@@ -88,23 +89,10 @@ export class ExtraTreeClassifier extends ClassifierBase {
         const featureIndices = this.selectFeatures();
         for (const i of featureIndices) {
             const values = sampleX.map(r => r[i]);
-            const uniqueVals = Array.from(new Set(values));
-            if (uniqueVals.length <= 1) continue;
-            let lo: number;
-            let hi: number;
-            if (uniqueVals.length === 2) {
-                const [v1, v2] = uniqueVals.sort((x, y) => x - y);
-                lo = v1;
-                hi = v2;
-            } else {
-                let a = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
-                let b = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
-                while (a === b) {
-                    b = uniqueVals[Math.floor(this.random() * uniqueVals.length)];
-                }
-                lo = Math.min(a, b);
-                hi = Math.max(a, b);
-            }
+            let lo = Infinity;
+            let hi = -Infinity;
+            for (const value of values) { lo = Math.min(lo, value); hi = Math.max(hi, value); }
+            if (lo === hi) continue;
             const splitValue = this.random() * (hi - lo) + lo;
             const left = filterWithIndices(values, v => v < splitValue);
             const right = filterWithIndices(values, v => v >= splitValue);
@@ -137,54 +125,82 @@ export class ExtraTreeClassifier extends ClassifierBase {
         tree.splitIndex = split.attIndex;
         tree.nodeValue = split.splitValue;
         tree.weightedImpurityDecrease = Math.max(0, split.gain) * sampleX.length;
-        tree.leftChild = {
-            splitIndex: -1,
-            nodeValue: 0,
-            leftChild: null,
-            rightChild: null,
-            y: mode(split.left.Y),
-        };
-        tree.rightChild = {
-            splitIndex: -1,
-            nodeValue: 0,
-            leftChild: null,
-            rightChild: null,
-            y: mode(split.right.Y),
-        };
+        tree.leftChild = this.initTreeNode(split.left.Y);
+        tree.rightChild = this.initTreeNode(split.right.Y);
         this.treeGenerate(tree.leftChild, split.left.X, split.left.Y, depth + 1);
         this.treeGenerate(tree.rightChild, split.right.X, split.right.Y, depth + 1);
     }
 
     public fit(sampleX: number[][], sampleY: number[]) {
         assert(sampleX.length > 0, 'fit data should not be empty');
+        assert(sampleX.length === sampleY.length, 'X and y must have the same length');
         defineHiddenField(this, 'random', createRandomGenerator(this.randomState));
         this.feature_number = sampleX[0].length;
+        this.classesState = Array.from(new Set(sampleY)).sort((a, b) => a - b);
         // sklearn's ExtraTreeClassifier defaults max_features to 'sqrt'
         this.max_features_ = resolveSubsetSize(this.max_features_prop ?? 'sqrt', this.feature_number);
-        this.dtree = {
+        this.dtree = this.initTreeNode(sampleY);
+        this.treeGenerate(this.dtree, sampleX, sampleY, 0);
+    }
+
+    private initTreeNode(sampleY: number[]): IDTree {
+        const counts = new Map<number, number>();
+        for (const label of sampleY) counts.set(label, (counts.get(label) ?? 0) + 1);
+        return {
             nodeValue: 0,
             splitIndex: -1,
             y: mode(sampleY),
             leftChild: null,
             rightChild: null,
+            classProbabilities: this.classesState.map(label => (counts.get(label) ?? 0) / sampleY.length),
         };
-        this.treeGenerate(this.dtree, sampleX, sampleY, 0);
     }
 
-    private findSample(X: number[], tree: IDTree): number {
+    private findLeaf(X: number[], tree: IDTree): IDTree {
         if (tree.splitIndex === -1 || !tree.leftChild || !tree.rightChild) {
-            return tree.y;
+            return tree;
         }
         if (X[tree.splitIndex] < tree.nodeValue) {
-            return this.findSample(X, tree.leftChild);
+            return this.findLeaf(X, tree.leftChild);
         } else {
-            return this.findSample(X, tree.rightChild);
+            return this.findLeaf(X, tree.rightChild);
         }
+    }
+
+    private resolvedClasses(): number[] {
+        if (this.classesState?.length) return this.classesState;
+        if (!this.dtree) return [];
+        const labels = new Set<number>();
+        const visit = (node: IDTree): void => {
+            if (node.splitIndex === -1 || !node.leftChild || !node.rightChild) labels.add(node.y);
+            else { visit(node.leftChild); visit(node.rightChild); }
+        };
+        visit(this.dtree);
+        return Array.from(labels).sort((a, b) => a - b);
     }
 
     public predict(sampleX: number[][]): number[] {
-        return sampleX.map(x => this.findSample(x, this.dtree));
+        if (!this.dtree) throw new Error('ExtraTreeClassifier is not fitted');
+        const classes = this.resolvedClasses();
+        return sampleX.map(x => {
+            const leaf = this.findLeaf(x, this.dtree!);
+            if (!leaf.classProbabilities || leaf.classProbabilities.length !== classes.length) return leaf.y;
+            return classes[leaf.classProbabilities.indexOf(Math.max(...leaf.classProbabilities))];
+        });
     }
+    public predictProba(sampleX: number[][]): number[][] {
+        if (!this.dtree) throw new Error('ExtraTreeClassifier is not fitted');
+        const classes = this.resolvedClasses();
+        return sampleX.map(x => {
+            const leaf = this.findLeaf(x, this.dtree!);
+            if (leaf.classProbabilities?.length === classes.length) return leaf.classProbabilities.slice();
+            // Pre-Wave-A serialized trees stored only the majority leaf label.
+            // Preserve their prediction path and expose the only honest
+            // recoverable distribution: a one-hot vector for that label.
+            return classes.map(label => label === leaf.y ? 1 : 0);
+        });
+    }
+    public get classes(): number[] { return this.resolvedClasses().slice(); }
     public get featureImportances(): number[] {
         if (!this.dtree) throw new Error('ExtraTreeClassifier must be fitted before featureImportances');
         return normalizedTreeImportances(this.dtree, this.feature_number);

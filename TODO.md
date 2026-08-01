@@ -21,24 +21,24 @@ stated DoD + all existing tests green.
 ## Wave A — Promise gaps + symmetry (16 items)
 
 Estimators (10):
-- [ ] LocalOutlierFactor
-- [ ] EllipticEnvelope
-- [ ] MinCovDet (FAST-MCD, high complexity)
-- [ ] Isomap (neighbor graph + shortest paths + spectral embedding; not assembled from MDS)
-- [ ] BaggingRegressor
-- [ ] ExtraTreesClassifier (needs 0-2)
-- [ ] ExtraTreesRegressor (needs 0-2)
-- [ ] SelectFromModel (meta-transformer — estimator acceptance; needs 0-1)
-- [ ] RFE (meta-transformer — estimator acceptance; needs 0-1)
-- [ ] RFECV (meta-transformer — estimator acceptance; needs 0-1)
+- [x] LocalOutlierFactor
+- [x] EllipticEnvelope
+- [x] MinCovDet (FAST-MCD, high complexity)
+- [x] Isomap (neighbor graph + shortest paths + spectral embedding; not assembled from MDS)
+- [x] BaggingRegressor
+- [x] ExtraTreesClassifier (needs 0-2)
+- [x] ExtraTreesRegressor (needs 0-2)
+- [x] SelectFromModel (meta-transformer — estimator acceptance; needs 0-1)
+- [x] RFE (meta-transformer — estimator acceptance; needs 0-1)
+- [x] RFECV (meta-transformer — estimator acceptance; needs 0-1)
 
 Utilities (6):
-- [ ] crossValPredict
-- [ ] chi2
-- [ ] fClassif
-- [ ] mutualInfoClassif (k-NN entropy estimator)
-- [ ] mutualInfoRegression
-- [ ] sklearn naming aliases (DBSCAN, HDBSCAN, KNeighborsClassifier, …; old names kept)
+- [x] crossValPredict
+- [x] chi2
+- [x] fClassif
+- [x] mutualInfoClassif (k-NN entropy estimator)
+- [x] mutualInfoRegression
+- [x] sklearn naming aliases (DBSCAN, HDBSCAN, KNeighborsClassifier, …; old names kept)
 
 ## Wave B — Text route + high-demand decomposition (13 items)
 

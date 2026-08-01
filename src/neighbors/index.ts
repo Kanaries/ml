@@ -1,7 +1,10 @@
 export { KNearestNeighbors, KNearstNeighbors } from './knn';
+export { KNearestNeighbors as KNeighborsClassifier } from './knn';
 export { BallTree } from './ballTree';
 export { KDTree } from './kdTree';
 export { KNeighborsRegressor } from './kneighborsRegressor';
 export { RadiusNeighborsClassifier } from './radiusNeighborsClassifier';
 export { RadiusNeighborsRegressor } from './radiusNeighborsRegressor';
 export { NearestCentroid } from './nearestCentroid';
+export { LocalOutlierFactor } from './localOutlierFactor';
+export type { LocalOutlierFactorProps } from './localOutlierFactor';

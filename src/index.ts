@@ -21,6 +21,8 @@ import * as Calibration from './calibration';
 import * as Isotonic from './isotonic';
 import * as Dummy from './dummy';
 import * as Data from './data';
+import * as FeatureSelection from './feature_selection';
+import * as Covariance from './covariance';
 import { CSRMatrix } from './data';
 import * as utils from './utils';
 import * as Base from './base';
@@ -59,6 +61,8 @@ export {
     Isotonic,
     Dummy,
     Data,
+    FeatureSelection,
+    Covariance,
     CSRMatrix,
     utils
 }

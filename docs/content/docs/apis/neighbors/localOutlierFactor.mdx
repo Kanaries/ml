@@ -1,0 +1,32 @@
+---
+title: Local Outlier Factor in JavaScript with @kanaries/ml
+description: Detect density-based local anomalies in JavaScript or TypeScript with the LocalOutlierFactor implementation in @kanaries/ml for browser and Node.js.
+---
+
+# Local Outlier Factor in JavaScript
+
+## Algorithm overview
+
+Local Outlier Factor (LOF) compares a sample's local reachability density with the densities of its nearest neighbors. It is useful when anomalies live in sparse local regions even though the dataset has several clusters with different densities.
+
+## JavaScript implementation
+
+`Neighbors.LocalOutlierFactor` runs density-based anomaly detection in browser or Node.js code. Training-set detection and novelty detection are deliberately separate, matching sklearn's two usage modes.
+
+## Quick start example
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const X = [[0, 0], [.1, .2], [.2, .1], [1, 1], [8, 8]];
+const labels = new Neighbors.LocalOutlierFactor({ nNeighbors: 2, contamination: .2 })
+  .fitPredict(X);
+
+const novelty = new Neighbors.LocalOutlierFactor({ nNeighbors: 2, novelty: true });
+novelty.fit(X);
+console.log(novelty.predict([[.15, .1], [20, 20]]));
+```
+
+## Detailed API reference
+
+The constructor accepts `nNeighbors?: number`, `contamination?: number | 'auto'`, and `novelty?: boolean`. With `novelty: false`, call `fitPredict(X)` and read `negativeOutlierFactor`. With `novelty: true`, call `fit(X)` followed by `scoreSamples(X)`, `decisionFunction(X)`, or `predict(X)`. The fitted threshold is available as `offset`.

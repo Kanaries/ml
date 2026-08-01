@@ -1,0 +1,29 @@
+---
+title: Isomap in JavaScript and TypeScript with @kanaries/ml
+description: Preserve nonlinear geodesic distances with the Isomap JavaScript implementation in @kanaries/ml, including out-of-sample transforms for browser and Node.js.
+---
+
+# Isomap in JavaScript
+
+## Algorithm overview
+
+Isomap builds a nearest-neighbor graph, computes all-pairs shortest-path distances, and embeds those geodesic distances with classical multidimensional scaling. It is useful when Euclidean distance cuts across a curved manifold but graph paths follow its true geometry.
+
+## JavaScript implementation
+
+`Manifold.Isomap` provides both `fitTransform` and out-of-sample `transform` in browser and Node.js. The implementation stores an O(n²) distance matrix and uses an O(n³) shortest-path phase, so it is intended for moderate interactive datasets rather than unbounded production traffic.
+
+## Quick start example
+
+```ts
+import { Manifold } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2]];
+const model = new Manifold.Isomap({ nNeighbors: 2, nComponents: 2 });
+const embedding = model.fitTransform(X);
+const newPoints = model.transform([[2.5, 1]]);
+```
+
+## Detailed API reference
+
+`new Manifold.Isomap({ nNeighbors?: number, nComponents?: number })` defaults to 5 neighbors and 2 components. Methods are `fit(X)`, `fitTransform(X)`, and `transform(X)`. Read-only `embedding` and `distMatrix` properties expose the fitted coordinates and geodesic distances. If the neighbor graph is disconnected, the implementation warns and joins each component pair at its closest Euclidean samples, matching sklearn's non-precomputed recovery path.

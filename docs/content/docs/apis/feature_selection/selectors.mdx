@@ -1,0 +1,35 @@
+---
+title: SelectFromModel, RFE, and RFECV in JavaScript
+description: Run model-based and recursive feature selection in JavaScript or TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml.
+---
+
+# Model-based feature selection in JavaScript
+
+## Algorithm overview
+
+`SelectFromModel` keeps features above an importance threshold. `RFE` repeatedly removes the least important features. `RFECV` evaluates RFE feature counts with cross-validation and chooses the best count. All three require an estimator that exposes `featureImportances` or `coef`.
+
+## JavaScript implementation
+
+The `FeatureSelection` namespace brings these sklearn-style meta-estimators to browser and Node.js workflows. Each selector clones its estimator, so the supplied prototype remains unfitted.
+
+## Quick start example
+
+```ts
+import { FeatureSelection, Tree } from '@kanaries/ml';
+
+const X = [[0, 1, 9], [1, 0, 9], [8, 1, 9], [9, 0, 9]];
+const y = [0, 0, 1, 1];
+const selector = new FeatureSelection.RFE({
+  estimator: new Tree.DecisionTreeClassifier({ randomState: 42 }),
+  nFeaturesToSelect: 1,
+});
+selector.fit(X, y);
+console.log(selector.getSupport(true), selector.transform(X));
+```
+
+## Detailed API reference
+
+- `SelectFromModel({ estimator, threshold?, maxFeatures? })`: threshold accepts a number, `mean`, `median`, `k*mean`, or `k*median`. Exposes `fit`, `transform`, `getSupport`, and `fittedEstimator`.
+- `RFE({ estimator, nFeaturesToSelect?, step? })`: counts may be integers or fractions. Exposes `fit`, `transform`, `predict`, `score`, `getSupport`, and `ranking`.
+- `RFECV({ estimator, minFeaturesToSelect?, step?, cv?, scoring? })`: classifier defaults use stratified folds. It additionally exposes `gridScores` and `cvResults` with `nFeatures` and `meanTestScore`.

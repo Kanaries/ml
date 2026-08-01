@@ -1,0 +1,42 @@
+---
+title: MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml
+description: Compute robust multivariate location, covariance, support masks, and Mahalanobis distances with the MinCovDet JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# MinCovDet (FAST-MCD) in JavaScript
+
+## Algorithm overview
+
+Minimum Covariance Determinant finds a subset whose covariance determinant is small, then reweights observations using robust Mahalanobis distances. This makes location and covariance estimates resistant to multivariate outliers. The implementation uses FAST-MCD elemental starts, C-steps, consistency correction, and chi-square reweighting.
+
+## JavaScript implementation
+
+`Covariance.MinCovDet` runs in browsers and Node.js without a Python service. It is appropriate for moderate tabular datasets; repeated matrix inversions make it substantially more expensive than empirical covariance.
+
+## Quick start example
+
+```ts
+import { Covariance } from '@kanaries/ml';
+
+const X = [[0, 0], [.1, .2], [.2, .1], [-.1, 0], [8, 8]];
+const robust = new Covariance.MinCovDet({ supportFraction: .8, randomState: 42 });
+robust.fit(X);
+
+console.log(robust.location, robust.covariance);
+console.log(robust.support, robust.mahalanobis(X));
+```
+
+## Detailed API reference
+
+```ts
+new Covariance.MinCovDet({
+  supportFraction?: number; // (0, 1]; default uses sklearn's h formula
+  randomState?: number;
+  assumeCentered?: boolean; // default false
+})
+```
+
+- `fit(X): void` estimates raw and reweighted robust covariance.
+- `mahalanobis(X): number[]` returns squared robust Mahalanobis distances.
+- `location`, `covariance`, `precision`, and `support` expose reweighted results.
+- `rawLocation`, `rawCovariance`, and `rawSupport` expose the pre-reweighting FAST-MCD result.

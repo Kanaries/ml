@@ -27,6 +27,7 @@ If someone searches for "t-SNE in JavaScript" or "Spectral Embedding in TypeScri
 - [MDS](MDS): embeddings that preserve pairwise distance structure
 - [Locally Linear Embedding](lle): non-linear manifold learning based on local reconstructions
 - [Spectral Embedding](spectralEmbedding): graph-based low-dimensional embeddings
+- [Isomap](isomap): geodesic-distance embeddings with out-of-sample transforms
 
 ## Detailed module guide
 
@@ -35,6 +36,7 @@ If someone searches for "t-SNE in JavaScript" or "Spectral Embedding in TypeScri
 1. Use [t-SNE](tsne) for exploratory cluster visualization.
 2. Use [MDS](MDS) when the main input or objective is a distance matrix.
 3. Use [Locally Linear Embedding](lle) or [Spectral Embedding](spectralEmbedding) when local geometry or graph structure is central to the task.
+4. Use [Isomap](isomap) when global distances along a curved manifold matter and you need to transform new samples.
 
 ### JavaScript deployment notes
 

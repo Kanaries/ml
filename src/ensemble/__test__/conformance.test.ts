@@ -2,6 +2,9 @@ import { runEstimatorConformance } from '../../__test__/conformance/harness';
 import { AdaBoostClassifier } from '../adaBoostClassifier';
 import { AdaBoostRegressor } from '../adaBoostRegressor';
 import { BaggingClassifier } from '../baggingClassifier';
+import { BaggingRegressor } from '../baggingRegressor';
+import { ExtraTreesClassifier } from '../extraTreesClassifier';
+import { ExtraTreesRegressor } from '../extraTreesRegressor';
 import { GradientBoostingClassifier } from '../gradientBoostingClassifier';
 import { GradientBoostingRegressor } from '../gradientBoostingRegressor';
 import { IsolationForest } from '../isolationForest';
@@ -35,6 +38,18 @@ runEstimatorConformance([
         kind: 'classifier',
         dataset: 'multiclass',
         create: () => new BaggingClassifier({ nEstimators: 5, max_depth: 5, randomState: 42 }),
+    },
+    {
+        name: 'BaggingRegressor', kind: 'regressor', dataset: 'regression',
+        create: () => new BaggingRegressor({ nEstimators: 5, randomState: 42 }),
+    },
+    {
+        name: 'ExtraTreesClassifier', kind: 'classifier', dataset: 'multiclass',
+        create: () => new ExtraTreesClassifier({ nEstimators: 5, max_depth: 5, randomState: 42 }),
+    },
+    {
+        name: 'ExtraTreesRegressor', kind: 'regressor', dataset: 'regression',
+        create: () => new ExtraTreesRegressor({ nEstimators: 5, max_depth: 5, randomState: 42 }),
     },
     {
         // deterministic stump search — the estimator has no randomness at all

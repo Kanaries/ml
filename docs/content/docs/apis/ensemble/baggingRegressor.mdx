@@ -1,0 +1,29 @@
+---
+title: BaggingRegressor in JavaScript with @kanaries/ml
+description: Reduce regression variance with bootstrap aggregation using the BaggingRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+---
+
+# BaggingRegressor in JavaScript
+
+## Algorithm overview
+
+BaggingRegressor fits cloned regressors on random sample subsets and averages their predictions. It is useful for reducing the variance of unstable learners such as regression trees.
+
+## JavaScript implementation
+
+`Ensemble.BaggingRegressor` defaults to decision trees and can clone any registered regressor that implements `fit` and `predict`. Seedable sampling makes browser and Node.js runs reproducible.
+
+## Quick start example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+const X = [[0], [1], [2], [3], [4]];
+const y = [0, 1, 4, 9, 16];
+const model = new Ensemble.BaggingRegressor({ nEstimators: 25, maxSamples: .8, randomState: 42 });
+model.fit(X, y);
+console.log(model.predict([[2.5]]));
+```
+
+## Detailed API reference
+
+Constructor options are `estimator?`, `nEstimators?` (default 10), `maxSamples?` (integer or fraction), `bootstrap?` (default true), and `randomState?`. Methods are `fit(X, y)` and `predict(X)`.

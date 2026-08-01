@@ -10,7 +10,6 @@
  * function bodies so the circular re-export stays initialization-safe.
  */
 import { BaseEstimator, registerSerializableClass } from '../base/estimator';
-import { ClassifierBase } from '../base/classifier';
 import { createRandomGenerator } from './random';
 import {
     EstimatorLike,
@@ -22,6 +21,7 @@ import {
     SplitterLike,
     StratifiedKFold,
     resolveScoring,
+    isClassifierLike,
 } from './modelSelection';
 import { allocateProportionally, trainTestSplit } from './sampling';
 
@@ -507,21 +507,6 @@ export interface CrossValidateResult {
     trainScore?: Record<string, number[]>;
     /** Wall-clock fit time per fold in milliseconds. */
     fitTimeMs: number[];
-}
-
-/**
- * Classifier detection for default-CV stratification, sklearn-style. Covers
- * direct classifiers and pipelines whose final step is a classifier (pipelines
- * expose their steps through getParams, so no import cycle is needed).
- */
-function isClassifierLike(estimator: BaseEstimator): boolean {
-    if (estimator instanceof ClassifierBase) return true;
-    const steps = (estimator.getParams() as { steps?: unknown }).steps;
-    if (Array.isArray(steps) && steps.length > 0) {
-        const last = steps[steps.length - 1];
-        return Array.isArray(last) && last[1] instanceof ClassifierBase;
-    }
-    return false;
 }
 
 /**

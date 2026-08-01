@@ -221,18 +221,20 @@ For side-by-side Python and JavaScript examples across the algorithm docs, see [
 ## Supported Algorithms
 
 - **[Tree](https://ml.kanaries.net/docs/apis/tree)**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
-- **[Ensemble](https://ml.kanaries.net/docs/apis/ensemble)**: `RandomForestClassifier`, `RandomForestRegressor`, `GradientBoostingClassifier`, `GradientBoostingRegressor`, `XGBoostClassifier`, `XGBoostRegressor`, `AdaBoostClassifier`, `AdaBoostRegressor`, `BaggingClassifier`, `IsolationForest`
+- **[Ensemble](https://ml.kanaries.net/docs/apis/ensemble)**: `RandomForestClassifier`, `RandomForestRegressor`, `ExtraTreesClassifier`, `ExtraTreesRegressor`, `GradientBoostingClassifier`, `GradientBoostingRegressor`, `XGBoostClassifier`, `XGBoostRegressor`, `AdaBoostClassifier`, `AdaBoostRegressor`, `BaggingClassifier`, `BaggingRegressor`, `IsolationForest`
 - **[Linear Models](https://ml.kanaries.net/docs/apis/linear)**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `Ridge`, `RidgeRegression`, `RidgeClassifier`, `Lasso`, `LassoRegression`, `ElasticNet`
 - **[Support Vector Machines](https://ml.kanaries.net/docs/apis/svm)**: `SVC`, `NuSVC` (SMO dual solvers, one-vs-one multiclass, linear/rbf/poly/sigmoid kernels), `LinearSVC`, `LinearSVR`
-- **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNearestNeighbors`, `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestCentroid`, `BallTree`, `KDTree`
+- **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNeighborsClassifier` (`KNearestNeighbors`), `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestCentroid`, `LocalOutlierFactor`, `BallTree`, `KDTree`
 - **[Naive Bayes](https://ml.kanaries.net/docs/apis/bayes)**: `GaussianNB`, `MultinomialNB`, `ComplementNB`, `BernoulliNB`, `CategoricalNB`
-- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBScan`, `HDBScan`, `OPTICS`, `MeanShift`
+- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBSCAN` (`DBScan`), `HDBSCAN` (`HDBScan`), `OPTICS`, `MeanShift`
 - **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`
-- **[Manifold Learning](https://ml.kanaries.net/docs/apis/manifold)**: `TSNE`, `MDS`, `SpectralEmbedding`, `LocallyLinearEmbedding`
+- **[Manifold Learning](https://ml.kanaries.net/docs/apis/manifold)**: `TSNE`, `MDS`, `SpectralEmbedding`, `LocallyLinearEmbedding` (`LLE`), `Isomap`
+- **[Robust Covariance](https://ml.kanaries.net/docs/apis/covariance)**: `MinCovDet`, `EllipticEnvelope`
+- **[Feature Selection](https://ml.kanaries.net/docs/apis/feature_selection)**: `SelectFromModel`, `RFE`, `RFECV`, `chi2`, `fClassif`, `mutualInfoClassif`, `mutualInfoRegression`
 - **[Semi-Supervised](https://ml.kanaries.net/docs/apis/semi_supervised)**: `LabelPropagation`, `LabelSpreading`
 - **[Neural Network](https://ml.kanaries.net/docs/apis/neural_network)**: `BernoulliRBM`
 - **[Metrics](https://ml.kanaries.net/docs/apis/metrics)**: `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `precisionRecallFscoreSupport`, `confusionMatrix`, `rocCurve`, `rocAucScore`, `precisionRecallCurve`, `meanSquaredError`, `r2Score`, `adjustedRandScore`
-- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: `Sampling.trainTestSplit`, `Preprocessing.StandardScaler`, `Preprocessing.MinMaxScaler`, `Preprocessing.MaxAbsScaler`, `ModelSelection.KFold`, `ModelSelection.StratifiedKFold`, `ModelSelection.GridSearchCV`, `ModelSelection.RandomizedSearchCV`, `ModelSelection.crossValScore`, linear algebra helpers and math functions
+- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: `Sampling.trainTestSplit`, `Preprocessing.StandardScaler`, `Preprocessing.MinMaxScaler`, `Preprocessing.MaxAbsScaler`, `ModelSelection.KFold`, `ModelSelection.StratifiedKFold`, `ModelSelection.GridSearchCV`, `ModelSelection.RandomizedSearchCV`, `ModelSelection.crossValScore`, `ModelSelection.crossValPredict`, linear algebra helpers and math functions
 
 `KNearstNeighbors` remains available as a deprecated compatibility alias of `KNearestNeighbors`.
 

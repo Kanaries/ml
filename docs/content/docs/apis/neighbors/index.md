@@ -30,6 +30,7 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 - [NearestCentroid](nearestCentroid): fast classification by closest class centroid
 - [Ball Tree](ballTree): faster repeated nearest-neighbor search in metric spaces
 - [KD Tree](kdTree): efficient spatial indexing for repeated lookup on suitable data
+- [Local Outlier Factor](localOutlierFactor): density-based local anomaly detection and novelty scoring
 
 ## Detailed module guide
 
@@ -40,6 +41,7 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 3. Use [RadiusNeighborsClassifier](radiusNeighborsClassifier) when a fixed physical or semantic radius matters more than fixed `k`.
 4. Use [NearestCentroid](nearestCentroid) for a very fast linear-time classifier baseline.
 5. Use [Ball Tree](ballTree) or [KD Tree](kdTree) when repeated query speed matters.
+6. Use [Local Outlier Factor](localOutlierFactor) when anomalies are defined by unusually low local density.
 
 ### JavaScript deployment notes
 

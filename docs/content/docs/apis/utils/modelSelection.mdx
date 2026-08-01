@@ -28,6 +28,13 @@ const scores = utils.ModelSelection.crossValScore(
   { cv: 3, scoring: Metrics.accuracyScore },
 );
 console.log(scores);
+
+const predictions = utils.ModelSelection.crossValPredict(
+  () => new Linear.RidgeClassifier({ alpha: 1 }),
+  X,
+  y,
+  { cv: 3 },
+);
 ```
 
 ## Detailed API reference
@@ -69,6 +76,19 @@ utils.ModelSelection.crossValScore(
 ```
 
 The estimator returned by `estimatorFactory` must implement `fit` and `predict`. If no `scoring` is provided, the helper uses the estimator `score` method when available, otherwise accuracy.
+
+### Out-of-fold predictions
+
+```ts
+utils.ModelSelection.crossValPredict(
+  estimatorFactory: () => EstimatorLike,
+  X: number[][],
+  y: number[],
+  options?: { cv?: number | SplitterLike; groups?: unknown[] },
+): number[]
+```
+
+`crossValPredict` fits a fresh estimator for every fold and restores predictions to the original sample order. Numeric/default CV uses `StratifiedKFold` for classifiers and `KFold` for regressors. A custom splitter must place every sample in exactly one test fold; overlaps and incomplete partitions raise errors.
 
 ### Search estimators
 

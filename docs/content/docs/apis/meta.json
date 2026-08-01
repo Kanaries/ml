@@ -6,6 +6,8 @@
     "linear",
     "tree",
     "ensemble",
+    "covariance",
+    "feature_selection",
     "neighbors",
     "svm",
     "bayes",

@@ -24,6 +24,8 @@ export interface IDTree {
     rightChild: IDTree | null;
     /** sample-weighted impurity decrease contributed by this split */
     weightedImpurityDecrease?: number;
+    /** Class probabilities at this node, ordered by the fitted tree classes. */
+    classProbabilities?: number[];
 } 
 export interface DecisionTreeProps {
     max_depth?: number;

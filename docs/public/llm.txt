@@ -50,12 +50,27 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [RandomForestClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/randomForestClassifier.md): Train bootstrap decision-tree ensembles with the RandomForestClassifier JavaScript and TypeScript implementation in @kanaries/ml.
 - [RandomForestRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/randomForestRegressor.md): Predict continuous targets with tree ensembles using the RandomForestRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 - [BaggingClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/baggingClassifier.md): Train bootstrap classifier ensembles with the BaggingClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+- [BaggingRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/baggingRegressor.md): Reduce regression variance with bootstrap aggregation using the BaggingRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+- [ExtraTreesClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/extraTreesClassifier.md): Train extremely randomized classification trees in JavaScript or TypeScript with ExtraTreesClassifier from @kanaries/ml for browser and Node.js.
+- [ExtraTreesRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/extraTreesRegressor.md): Train extremely randomized regression trees in JavaScript or TypeScript with ExtraTreesRegressor from @kanaries/ml for browser and Node.js.
 - [AdaBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier.md): Learn what AdaBoost Classifier does, when to use it, and how to run AdaBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [AdaBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor.md): Learn what AdaBoost Regressor does, when to use it, and how to run AdaBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Gradient Boosting Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier.md): Learn what Gradient Boosting Classifier does, when to use it, and how to run GradientBoostingClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Gradient Boosting Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor.md): Learn what Gradient Boosting Regressor does, when to use it, and how to run GradientBoostingRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [XGBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier.md): Learn what XGBoost Classifier does, when to use it, and how to run XGBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [XGBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor.md): Learn what XGBoost Regressor does, when to use it, and how to run XGBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+
+## Covariance
+
+- [Robust Covariance in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/index.html.md): Estimate robust covariance and detect multivariate outliers in JavaScript or TypeScript with MinCovDet and EllipticEnvelope from @kanaries/ml.
+- [MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/minCovDet.md): Compute robust multivariate location, covariance, support masks, and Mahalanobis distances with the MinCovDet JavaScript and TypeScript implementation in @kanaries/ml.
+- [EllipticEnvelope Anomaly Detection in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/ellipticEnvelope.md): Detect multivariate outliers with robust covariance using the EllipticEnvelope JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js.
+
+## Feature Selection
+
+- [Feature Selection in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/feature_selection/index.html.md): Select informative columns in browser or Node.js machine-learning workflows with model-based, recursive, and univariate JavaScript feature selection in @kanaries/ml.
+- [SelectFromModel, RFE, and RFECV in JavaScript](https://ml.kanaries.net/docs/apis/feature_selection/selectors.md): Run model-based and recursive feature selection in JavaScript or TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml.
+- [Univariate Feature Scores in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_selection/univariate.md): Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
 
 ## Neighbors
 
@@ -67,6 +82,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [NearestCentroid in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/nearestCentroid.md): Classify samples by the closest class centroid using the NearestCentroid JavaScript and TypeScript implementation in @kanaries/ml.
 - [Ball Tree in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/ballTree.md): Learn what Ball Tree does, when to use it, and how to run BallTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [KD Tree in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/kdTree.md): Learn what KD Tree does, when to use it, and how to run KDTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Local Outlier Factor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/localOutlierFactor.md): Detect density-based local anomalies in JavaScript or TypeScript with the LocalOutlierFactor implementation in @kanaries/ml for browser and Node.js.
 
 ## SVM
 
@@ -99,6 +115,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [Locally Linear Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/lle.md): Learn what Locally Linear Embedding does, when to use it, and how to run LocallyLinearEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [t-SNE in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/tsne.md): Learn what t-SNE does, when to use it, and how to run TSNE in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Spectral Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/spectralEmbedding.md): Learn what Spectral Embedding does, when to use it, and how to run SpectralEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Isomap in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/isomap.md): Preserve nonlinear geodesic distances with the Isomap JavaScript implementation in @kanaries/ml, including out-of-sample transforms for browser and Node.js.
 
 ## Neural Network
 

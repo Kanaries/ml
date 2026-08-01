@@ -4,6 +4,7 @@ import { KNeighborsRegressor } from '../kneighborsRegressor';
 import { RadiusNeighborsClassifier } from '../radiusNeighborsClassifier';
 import { RadiusNeighborsRegressor } from '../radiusNeighborsRegressor';
 import { NearestCentroid } from '../nearestCentroid';
+import { LocalOutlierFactor } from '../localOutlierFactor';
 
 runEstimatorConformance([
     {
@@ -39,5 +40,9 @@ runEstimatorConformance([
         kind: 'classifier',
         dataset: 'multiclass',
         create: () => new NearestCentroid(),
+    },
+    {
+        name: 'LocalOutlierFactor', kind: 'outlier', dataset: 'blobs',
+        create: () => new LocalOutlierFactor({ nNeighbors: 5, contamination: 0.1, novelty: true }),
     },
 ]);

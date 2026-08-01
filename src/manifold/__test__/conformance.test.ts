@@ -3,6 +3,7 @@ import { LocallyLinearEmbedding } from '../lle';
 import { MDS } from '../mds';
 import { SpectralEmbedding } from '../spectralEmbedding';
 import { TSNE } from '../tsne';
+import { Isomap } from '../isomap';
 
 runEstimatorConformance([
     {
@@ -32,5 +33,9 @@ runEstimatorConformance([
         kind: 'transformer',
         dataset: 'blobs',
         create: () => new LocallyLinearEmbedding({ nNeighbors: 5, nComponents: 2, reg: 1e-3, randomState: 42 }),
+    },
+    {
+        name: 'Isomap', kind: 'transformer', dataset: 'blobs',
+        create: () => new Isomap({ nNeighbors: 15, nComponents: 2 }),
     },
 ]);

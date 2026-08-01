@@ -1,0 +1,27 @@
+---
+title: ExtraTreesClassifier in JavaScript with @kanaries/ml
+description: Train extremely randomized classification trees in JavaScript or TypeScript with ExtraTreesClassifier from @kanaries/ml for browser and Node.js.
+---
+
+# ExtraTreesClassifier in JavaScript
+
+## Algorithm overview
+
+Extremely randomized trees combine many trees whose split thresholds are sampled randomly. The added randomization can reduce variance while retaining nonlinear decision boundaries.
+
+## JavaScript implementation
+
+`Ensemble.ExtraTreesClassifier` trains independent `ExtraTreeClassifier` members, averages their leaf class probabilities, and predicts the highest-probability class. It supports deterministic seeds and exposes averaged feature importances.
+
+## Quick start example
+
+```ts
+import { Ensemble } from '@kanaries/ml';
+const model = new Ensemble.ExtraTreesClassifier({ nEstimators: 100, max_features: 'sqrt', randomState: 42 });
+model.fit([[0, 0], [0, 1], [3, 3], [4, 3]], [0, 0, 1, 1]);
+console.log(model.predict([[.2, .1], [3.5, 3]]), model.featureImportances);
+```
+
+## Detailed API reference
+
+Options include `nEstimators?`, `bootstrap?`, `randomState?`, `max_features?` (integer, fraction, `sqrt`, `log2`, or `all`), and the `ExtraTreeClassifier` depth/split options. Methods are `fit(X, y)`, `predictProba(X)`, and `predict(X)`; classification averages leaf probabilities before taking the highest-probability class. `classes` and `featureImportances` are available after fitting.

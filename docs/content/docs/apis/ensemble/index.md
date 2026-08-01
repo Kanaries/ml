@@ -27,6 +27,9 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 - [RandomForestClassifier](randomForestClassifier): majority-vote tree ensembles for classification
 - [RandomForestRegressor](randomForestRegressor): averaged tree ensembles for regression
 - [BaggingClassifier](baggingClassifier): bootstrap classifier ensembles with default or custom estimators
+- [BaggingRegressor](baggingRegressor): bootstrap regression ensembles with default or custom estimators
+- [ExtraTreesClassifier](extraTreesClassifier): extremely randomized trees for classification
+- [ExtraTreesRegressor](extraTreesRegressor): extremely randomized trees for regression
 - [AdaBoost Regressor](adaboost): boosted regression for non-linear tabular prediction
 - [AdaBoost Classifier](adaboostClassifier): boosted classification for harder decision boundaries
 - [GradientBoostingRegressor](gradientBoostingRegressor): squared-error gradient boosting for tabular regression
@@ -41,10 +44,12 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 1. Use [Isolation Forest](iforest) when labels are unavailable and the main goal is outlier detection.
 2. Use [RandomForestClassifier](randomForestClassifier) or [RandomForestRegressor](randomForestRegressor) when tree variance is high and nonlinear patterns matter.
 3. Use [BaggingClassifier](baggingClassifier) when you want bootstrap aggregation around decision trees or a custom classifier.
-4. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
-5. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
-6. Use [GradientBoostingClassifier](gradientBoostingClassifier) or [GradientBoostingRegressor](gradientBoostingRegressor) when you want stage-wise boosting with fine control over shrinkage and depth.
-7. Use [XGBoostClassifier](xgboostClassifier) or [XGBoostRegressor](xgboostRegressor) when you want regularized, exact-greedy boosting close to the `xgboost` library.
+4. Use [BaggingRegressor](baggingRegressor) when bootstrap averaging should reduce regression variance.
+5. Use [ExtraTreesClassifier](extraTreesClassifier) or [ExtraTreesRegressor](extraTreesRegressor) for strongly randomized tree ensembles.
+6. Use [AdaBoost Classifier](adaboostClassifier) when a simple classifier misses hard examples.
+7. Use [AdaBoost Regressor](adaboost) when a single regressor is too weak for the target pattern.
+8. Use [GradientBoostingClassifier](gradientBoostingClassifier) or [GradientBoostingRegressor](gradientBoostingRegressor) when you want stage-wise boosting with fine control over shrinkage and depth.
+9. Use [XGBoostClassifier](xgboostClassifier) or [XGBoostRegressor](xgboostRegressor) when you want regularized, exact-greedy boosting close to the `xgboost` library.
 
 ### JavaScript deployment notes
 

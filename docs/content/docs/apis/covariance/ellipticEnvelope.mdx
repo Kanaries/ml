@@ -1,0 +1,29 @@
+---
+title: EllipticEnvelope Anomaly Detection in JavaScript with @kanaries/ml
+description: Detect multivariate outliers with robust covariance using the EllipticEnvelope JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js.
+---
+
+# EllipticEnvelope anomaly detection in JavaScript
+
+## Algorithm overview
+
+EllipticEnvelope fits a robust Gaussian-shaped envelope around inliers and flags samples whose robust Mahalanobis distance exceeds a contamination-based threshold. It works best when the inlier cloud is approximately elliptical.
+
+## JavaScript implementation
+
+`Covariance.EllipticEnvelope` wraps `MinCovDet`, so JavaScript applications can score or label tabular anomalies locally in a browser or Node.js process.
+
+## Quick start example
+
+```ts
+import { Covariance } from '@kanaries/ml';
+
+const X = [[0, 0], [.1, .2], [.2, .1], [-.1, 0], [8, 8]];
+const detector = new Covariance.EllipticEnvelope({ contamination: .2, randomState: 42 });
+detector.fit(X);
+console.log(detector.predict(X)); // 1 for inlier, -1 for outlier
+```
+
+## Detailed API reference
+
+The constructor accepts `contamination` in `(0, 0.5]` plus all `MinCovDet` options. Methods are `fit(X)`, `scoreSamples(X)`, `decisionFunction(X)`, and `predict(X)`. The fitted `offset`, `location`, and `covariance` are readable properties.

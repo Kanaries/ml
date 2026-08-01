@@ -1,5 +1,6 @@
 import { accuracyScore, f1Score, meanSquaredError, r2Score } from '../metrics';
 import { BaseEstimator, registerEstimator, registerSerializableClass, Params } from '../base/estimator';
+import { ClassifierBase } from '../base/classifier';
 import { createRandomGenerator } from './random';
 
 export interface KFoldProps {
@@ -17,6 +18,16 @@ export interface EstimatorLike {
     fit(trainX: number[][], trainY: number[]): void;
     predict(testX: number[][]): number[];
     score?: (X: number[][], Y: number[]) => number;
+}
+
+/** sklearn-style classifier detection, including Pipeline final estimators. */
+export function isClassifierLike(estimator: unknown): boolean {
+    if (estimator instanceof ClassifierBase) return true;
+    if (!(estimator instanceof BaseEstimator)) return false;
+    const steps = (estimator.getParams() as { steps?: unknown }).steps;
+    if (!Array.isArray(steps) || steps.length === 0) return false;
+    const last = steps[steps.length - 1];
+    return Array.isArray(last) && last[1] instanceof ClassifierBase;
 }
 
 export interface CrossValScoreOptions {
@@ -541,6 +552,42 @@ export function crossValScore(
     }
 
     return scores;
+}
+
+/** Out-of-fold predictions, restored to the original sample order. */
+export function crossValPredict(
+    estimatorFactory: () => EstimatorLike,
+    X: number[][],
+    y: number[],
+    options: { cv?: number | SplitterLike; groups?: unknown[] } = {},
+): number[] {
+    if (X.length === 0 || X.length !== y.length) throw new Error('X and y must be non-empty and have the same length');
+    let splitter: SplitterLike;
+    if (typeof options.cv === 'object') splitter = options.cv;
+    else {
+        const probe = estimatorFactory();
+        const nSplits = options.cv ?? 5;
+        splitter = isClassifierLike(probe)
+            ? new StratifiedKFold({ nSplits })
+            : new KFold({ nSplits });
+    }
+    const folds = splitter.split(X, y, options.groups);
+    const predictions = new Array<number>(X.length);
+    const seen = new Array<boolean>(X.length).fill(false);
+    for (const fold of folds) {
+        const estimator = estimatorFactory();
+        estimator.fit(fold.trainIndices.map(i => X[i]), fold.trainIndices.map(i => y[i]));
+        const values = estimator.predict(fold.testIndices.map(i => X[i]));
+        if (values.length !== fold.testIndices.length) throw new Error('estimator returned the wrong number of predictions');
+        for (let i = 0; i < values.length; i++) {
+            const index = fold.testIndices[i];
+            if (seen[index]) throw new Error('cross-validation test folds overlap');
+            seen[index] = true;
+            predictions[index] = values[i];
+        }
+    }
+    if (seen.some(value => !value)) throw new Error('cross-validation folds do not form a complete partition');
+    return predictions;
 }
 
 // Extended model-selection API (extra splitters, crossValidate, learning /

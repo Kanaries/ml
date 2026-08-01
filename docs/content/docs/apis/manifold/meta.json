@@ -5,6 +5,7 @@
     "MDS",
     "lle",
     "tsne",
-    "spectralEmbedding"
+    "spectralEmbedding",
+    "isomap"
   ]
 }

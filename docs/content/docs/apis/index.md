@@ -28,6 +28,8 @@ This is especially useful when someone searches for "machine learning in JavaScr
 - **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
 - **[Decomposition](/docs/apis/decomposition)**: reduce dimensions with PCA, Sparse PCA, and Truncated SVD.
 - **[Ensemble](/docs/apis/ensemble)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
+- **[Covariance](/docs/apis/covariance)**: estimate robust covariance and detect elliptical multivariate outliers.
+- **[Feature Selection](/docs/apis/feature_selection)**: select columns with model importance, recursive elimination, or univariate scores.
 - **[Linear](/docs/apis/linear)**: start with linear regression, logistic regression, regularized regression, and linear classification baselines.
 - **[Metrics](/docs/apis/metrics)**: evaluate classification, regression, clustering, curves, and distance functions.
 - **[Manifold](/docs/apis/manifold)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
@@ -54,3 +56,18 @@ This is especially useful when someone searches for "machine learning in JavaScr
 1. If you are new to the library, start with [Linear](/docs/apis/linear), [Tree](/docs/apis/tree), or [Clusters](/docs/apis/clusters).
 2. Move to [Ensemble](/docs/apis/ensemble) and [SVM](/docs/apis/svm) when simple baselines are not expressive enough.
 3. Use [Metrics](/docs/apis/metrics), [Decomposition](/docs/apis/decomposition), [Manifold](/docs/apis/manifold), and [Utils](/docs/apis/utils) to improve evaluation, preprocessing, visualization, and application integration.
+
+### sklearn-compatible naming aliases
+
+Canonical sklearn spellings are available alongside the legacy names so existing JavaScript code remains compatible:
+
+| Canonical export | Legacy export | Namespace |
+| --- | --- | --- |
+| `DBSCAN` | `DBScan` | `Clusters` |
+| `HDBSCAN` | `HDBScan` | `Clusters` |
+| `KNeighborsClassifier` | `KNearestNeighbors` | `Neighbors` |
+| `LDA` | `LinearDiscriminantAnalysis` | `DiscriminantAnalysis` |
+| `QDA` | `QuadraticDiscriminantAnalysis` | `DiscriminantAnalysis` |
+| `LLE` | `LocallyLinearEmbedding` | `Manifold` |
+
+Both names reference the same constructor; aliases do not duplicate estimator coverage or change serialized model names.

@@ -33,7 +33,9 @@ export type EstimatorKind =
     /** fitTransform(X) only (no out-of-sample transform) */
     | 'embedding'
     /** fit(X) + predict(X) */
-    | 'outlier';
+    | 'outlier'
+    /** fit(X) + mahalanobis(X) */
+    | 'covariance';
 
 export type DatasetName = 'binary' | 'multiclass' | 'regression' | 'blobs' | 'counts' | 'binaryFeatures';
 
@@ -68,6 +70,7 @@ const DEFAULT_DATASET: Record<EstimatorKind, DatasetName> = {
     transformer: 'blobs',
     embedding: 'blobs',
     outlier: 'blobs',
+    covariance: 'blobs',
 };
 
 interface FittableEstimator extends BaseEstimator {
@@ -76,6 +79,7 @@ interface FittableEstimator extends BaseEstimator {
     transform?(X: number[][]): number[][];
     fitTransform?(X: number[][], y?: number[]): number[][];
     fitPredict?(X: number[][]): number[];
+    mahalanobis?(X: number[][]): number[];
 }
 
 /** Fit the estimator on the dataset and return its primary output. */
@@ -96,6 +100,9 @@ function fitAndRun(est: BaseEstimator, kind: EstimatorKind, data: Dataset): unkn
         case 'outlier':
             e.fit!(data.X);
             return e.predict!(data.X);
+        case 'covariance':
+            e.fit!(data.X);
+            return e.mahalanobis!(data.X);
     }
 }
 
@@ -107,6 +114,8 @@ function runFitted(est: BaseEstimator, kind: EstimatorKind, data: Dataset): unkn
         case 'regressor':
         case 'outlier':
             return e.predict!(data.X);
+        case 'covariance':
+            return e.mahalanobis!(data.X);
         case 'transformer':
             return e.transform!(data.X);
         case 'cluster':
