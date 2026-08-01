@@ -1,0 +1,28 @@
+---
+title: Feature Hashing and Dictionary Vectorization in JavaScript
+description: Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction.
+---
+
+# Feature hashing in JavaScript
+
+## Algorithm overview
+
+Hashing maps features into a fixed-width sparse matrix without storing a vocabulary. Dictionary vectorization instead learns explicit names, which is preferable when interpretability matters.
+
+## JavaScript implementation
+
+`HashingVectorizer` tokenizes text, `FeatureHasher` accepts dictionaries, pairs, or strings, and `DictVectorizer` expands numeric and categorical dictionary values.
+
+## Quick start
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const documents = ['red fox', 'blue fox'];
+const X = new FeatureExtraction.HashingVectorizer({ nFeatures: 4096 }).fitTransform(documents);
+console.log(X.shape);
+```
+
+## Detailed API reference
+
+Both hashers use sklearn-compatible MurmurHash3 indices and signed collisions. `DictVectorizer` exposes `vocabulary`, `getFeatureNamesOut()`, `inverseTransform()`, and `restrict()`, and can return CSR or dense output.

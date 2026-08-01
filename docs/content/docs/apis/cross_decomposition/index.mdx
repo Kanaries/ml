@@ -1,0 +1,30 @@
+---
+title: PLS Regression and CCA in JavaScript
+description: Model two related data blocks with PLSRegression and canonical correlation analysis in JavaScript or TypeScript.
+---
+
+# PLS and CCA in JavaScript
+
+## Algorithm overview
+
+Partial least squares finds latent directions that predict a target block, while canonical correlation analysis finds directions with high cross-block correlation. Both help with correlated, multivariate features.
+
+## JavaScript implementation
+
+`PLSRegression` uses mode-A NIPALS with regression deflation. `CCA` uses mode-B weights with canonical deflation.
+
+## Quick start
+
+```ts
+import { CrossDecomposition } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 2], [2, 3], [3, 5]];
+const Y = [[1], [2], [4], [7]];
+const model = new CrossDecomposition.PLSRegression({ nComponents: 2 });
+model.fit(X, Y);
+console.log(model.predict([[4, 6]]));
+```
+
+## Detailed API reference
+
+Both expose weights, loadings, rotations, iteration counts, `transform`, and `predict`.

@@ -18,11 +18,15 @@ A regressor chain fits one model per target and appends earlier target values or
 ```ts
 import { Linear, MultiOutput } from '@kanaries/ml';
 
+const X = [[0], [1], [2], [3]];
+const targets = [[0, 1], [1, 3], [2, 5], [3, 7]];
+const testX = [[4]];
 const chain = new MultiOutput.RegressorChain({
   estimator: new Linear.RidgeRegression({ alpha: 1 }), order: [1, 0],
 });
 chain.fit(X, targets);
 const predictions = chain.predict(testX);
+console.log(predictions);
 ```
 
 ## Detailed API reference

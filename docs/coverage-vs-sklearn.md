@@ -5,13 +5,13 @@
 
 | Kind | Covered | Denominator | Coverage |
 |---|---:|---:|---:|
-| estimator | 70 | 118 | 59.3% |
-| transformer | 49 | 88 | 55.7% |
+| estimator | 89 | 118 | 75.4% |
+| transformer | 63 | 88 | 71.6% |
 
-## Missing estimators (48)
+## Missing estimators (29)
 
-ARDRegression · AffinityPropagation · BayesianRidge · ElasticNetCV · EmpiricalCovariance · FixedThresholdClassifier · GammaRegressor · GaussianProcessClassifier · GaussianProcessRegressor · GraphicalLasso · GraphicalLassoCV · HistGradientBoostingClassifier · HistGradientBoostingRegressor · HuberRegressor · KernelDensity · KernelRidge · Lars · LarsCV · LassoCV · LassoLars · LassoLarsCV · LassoLarsIC · LedoitWolf · LogisticRegressionCV · MultiTaskElasticNet · MultiTaskElasticNetCV · MultiTaskLasso · MultiTaskLassoCV · NearestNeighbors · OAS · OrthogonalMatchingPursuit · OrthogonalMatchingPursuitCV · OutputCodeClassifier · PassiveAggressiveClassifier · PassiveAggressiveRegressor · PoissonRegressor · QuantileRegressor · RANSACRegressor · RidgeCV · RidgeClassifierCV · SGDOneClassSVM · ShrunkCovariance · SpectralBiclustering · SpectralCoclustering · TheilSenRegressor · TransformedTargetRegressor · TunedThresholdClassifierCV · TweedieRegressor
+ElasticNetCV · FixedThresholdClassifier · GaussianProcessClassifier · GaussianProcessRegressor · GraphicalLassoCV · HistGradientBoostingClassifier · HistGradientBoostingRegressor · Lars · LarsCV · LassoCV · LassoLars · LassoLarsCV · LassoLarsIC · LogisticRegressionCV · MultiTaskElasticNet · MultiTaskElasticNetCV · MultiTaskLasso · MultiTaskLassoCV · OrthogonalMatchingPursuit · OrthogonalMatchingPursuitCV · OutputCodeClassifier · PassiveAggressiveClassifier · PassiveAggressiveRegressor · RidgeCV · RidgeClassifierCV · SGDOneClassSVM · SpectralBiclustering · SpectralCoclustering · TunedThresholdClassifierCV
 
-## Missing transformers (39)
+## Missing transformers (25)
 
-AdditiveChi2Sampler · Birch · BisectingKMeans · CCA · DictVectorizer · DictionaryLearning · FactorAnalysis · FeatureAgglomeration · FeatureHasher · GaussianRandomProjection · GenericUnivariateSelect · HashingVectorizer · KNeighborsTransformer · KernelCenterer · LatentDirichletAllocation · MiniBatchDictionaryLearning · MiniBatchNMF · MiniBatchSparsePCA · MultiLabelBinarizer · NeighborhoodComponentsAnalysis · Nystroem · PLSCanonical · PLSRegression · PLSSVD · PatchExtractor · PolynomialCountSketch · RBFSampler · RadiusNeighborsTransformer · RandomTreesEmbedding · SelectFdr · SelectFpr · SelectFwe · SelectPercentile · SequentialFeatureSelector · SkewedChi2Sampler · SparseCoder · SparseRandomProjection · SplineTransformer · TargetEncoder
+AdditiveChi2Sampler · DictionaryLearning · FeatureAgglomeration · GenericUnivariateSelect · KNeighborsTransformer · KernelCenterer · MiniBatchDictionaryLearning · MiniBatchNMF · MiniBatchSparsePCA · NeighborhoodComponentsAnalysis · Nystroem · PLSCanonical · PLSSVD · PatchExtractor · PolynomialCountSketch · RBFSampler · RadiusNeighborsTransformer · RandomTreesEmbedding · SelectFdr · SelectFpr · SelectFwe · SelectPercentile · SequentialFeatureSelector · SkewedChi2Sampler · SparseCoder

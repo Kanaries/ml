@@ -22,6 +22,7 @@ const X = [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2]];
 const model = new Manifold.Isomap({ nNeighbors: 2, nComponents: 2 });
 const embedding = model.fitTransform(X);
 const newPoints = model.transform([[2.5, 1]]);
+console.log({ embedding, newPoints });
 ```
 
 ## Detailed API reference

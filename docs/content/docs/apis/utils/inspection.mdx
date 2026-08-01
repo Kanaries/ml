@@ -1,0 +1,40 @@
+---
+title: Permutation Importance and Partial Dependence in JavaScript
+description: Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml.
+---
+
+# Model Inspection in JavaScript
+
+## Algorithm overview
+
+Permutation importance measures how much a fitted model's score degrades when one feature is shuffled. Partial dependence averages predictions while forcing one or two features across a grid. Together they help identify influential inputs and visualize broad model response patterns.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes model-agnostic inspection functions that work with fitted estimators in browser and Node.js. They do not depend on tree internals or linear coefficients, so the same workflow works across compatible models.
+
+## Quick start
+
+```ts
+import { Linear, utils } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 0], [2, 1], [3, 1]];
+const y = [0, 2, 4, 6];
+const model = new Linear.LinearRegression();
+model.fit(X, y);
+
+const importance = utils.permutationImportance(model, X, y, {
+  nRepeats: 10,
+  randomState: 42,
+});
+const dependence = utils.partialDependence(model, X, [0], {
+  gridResolution: 50,
+});
+console.log({ importance, dependence });
+```
+
+## Detailed API reference
+
+`permutationImportance(estimator, X, y, { nRepeats?, randomState?, scoring? })` returns `importances`, `importancesMean`, and `importancesStd` by feature.
+
+`partialDependence(estimator, X, features, { gridResolution?, percentiles? })` supports one or two numeric feature indices and returns `gridValues` plus averaged predictions shaped by the requested grid.

@@ -1,6 +1,9 @@
 import { BaseEstimator, TransformerBase } from '../base';
 import { registerEstimator, Params } from '../base/estimator';
 
+export { SplineTransformer, TargetEncoder } from './preprocessingAdvanced';
+export type { SplineTransformerProps, SplineKnots, SplineExtrapolation, TargetEncoderProps, Category, TargetLabel } from './preprocessingAdvanced';
+
 export interface StandardScalerProps {
     withMean?: boolean;
     withStd?: boolean;

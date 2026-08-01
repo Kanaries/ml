@@ -223,22 +223,24 @@ For side-by-side Python and JavaScript examples across the algorithm docs, see [
 
 - **[Tree](https://ml.kanaries.net/docs/apis/tree)**: `DecisionTreeClassifier`, `DecisionTreeRegressor`, `ExtraTreeClassifier`, `ExtraTreeRegressor`
 - **[Ensemble](https://ml.kanaries.net/docs/apis/ensemble)**: `RandomForestClassifier`, `RandomForestRegressor`, `ExtraTreesClassifier`, `ExtraTreesRegressor`, `GradientBoostingClassifier`, `GradientBoostingRegressor`, `XGBoostClassifier`, `XGBoostRegressor`, `AdaBoostClassifier`, `AdaBoostRegressor`, `BaggingClassifier`, `BaggingRegressor`, `IsolationForest`
-- **[Linear Models](https://ml.kanaries.net/docs/apis/linear)**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `Ridge`, `RidgeRegression`, `RidgeClassifier`, `Lasso`, `LassoRegression`, `ElasticNet`
+- **[Linear Models](https://ml.kanaries.net/docs/apis/linear)**: `LinearRegression`, `LogisticRegression`, `PolynomialRegression`, `Ridge`, `Lasso`, `ElasticNet`, `HuberRegressor`, `RANSACRegressor`, `TheilSenRegressor`, `QuantileRegressor`, `BayesianRidge`, `ARDRegression`, `PoissonRegressor`, `GammaRegressor`, `TweedieRegressor`
 - **[Support Vector Machines](https://ml.kanaries.net/docs/apis/svm)**: `SVC`, `NuSVC` (SMO dual solvers, one-vs-one multiclass, linear/rbf/poly/sigmoid kernels), `LinearSVC`, `LinearSVR`
-- **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNeighborsClassifier` (`KNearestNeighbors`), `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestCentroid`, `LocalOutlierFactor`, `BallTree`, `KDTree`
+- **[Neighbors](https://ml.kanaries.net/docs/apis/neighbors)**: `KNeighborsClassifier` (`KNearestNeighbors`), `KNeighborsRegressor`, `RadiusNeighborsClassifier`, `RadiusNeighborsRegressor`, `NearestNeighbors`, `NearestCentroid`, `LocalOutlierFactor`, `BallTree`, `KDTree`
 - **[Naive Bayes](https://ml.kanaries.net/docs/apis/bayes)**: `GaussianNB`, `MultinomialNB`, `ComplementNB`, `BernoulliNB`, `CategoricalNB`
-- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `kmeansPlusPlus`, `DBSCAN` (`DBScan`), `HDBSCAN` (`HDBScan`), `OPTICS`, `MeanShift`
-- **[Text Feature Extraction](https://ml.kanaries.net/docs/apis/feature_extraction)**: `CountVectorizer`, `TfidfTransformer`, `TfidfVectorizer`
-- **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`, `KernelPCA`, `FastICA`, `NMF`, `IncrementalPCA`
+- **[Clustering](https://ml.kanaries.net/docs/apis/clusters)**: `KMeans`, `Birch`, `AffinityPropagation`, `BisectingKMeans`, `DBSCAN` (`DBScan`), `HDBSCAN` (`HDBScan`), `OPTICS`, `MeanShift`
+- **[Text Feature Extraction](https://ml.kanaries.net/docs/apis/feature_extraction)**: `CountVectorizer`, `TfidfTransformer`, `TfidfVectorizer`, `HashingVectorizer`, `DictVectorizer`, `FeatureHasher`
+- **[Decomposition](https://ml.kanaries.net/docs/apis/decomposition)**: `PCA`, `TruncatedSVD`, `SparsePCA`, `KernelPCA`, `FastICA`, `NMF`, `IncrementalPCA`, `FactorAnalysis`, `LatentDirichletAllocation`
+- **[Cross Decomposition](https://ml.kanaries.net/docs/apis/cross_decomposition)**: `PLSRegression`, `CCA`
 - **[Manifold Learning](https://ml.kanaries.net/docs/apis/manifold)**: `TSNE`, `MDS`, `SpectralEmbedding`, `LocallyLinearEmbedding` (`LLE`), `Isomap`
-- **[Robust Covariance](https://ml.kanaries.net/docs/apis/covariance)**: `MinCovDet`, `EllipticEnvelope`
+- **[Covariance](https://ml.kanaries.net/docs/apis/covariance)**: `EmpiricalCovariance`, `ShrunkCovariance`, `LedoitWolf`, `OAS`, `GraphicalLasso`, `MinCovDet`, `EllipticEnvelope`
 - **[Feature Selection](https://ml.kanaries.net/docs/apis/feature_selection)**: `SelectFromModel`, `RFE`, `RFECV`, `chi2`, `fClassif`, `mutualInfoClassif`, `mutualInfoRegression`
 - **[Semi-Supervised](https://ml.kanaries.net/docs/apis/semi_supervised)**: `LabelPropagation`, `LabelSpreading`, `SelfTrainingClassifier`
 - **[Multi-Output](https://ml.kanaries.net/docs/apis/multioutput)**: `MultiOutputClassifier`, `MultiOutputRegressor`, `ClassifierChain`, `RegressorChain`
 - **[Imputation](https://ml.kanaries.net/docs/apis/impute)**: `IterativeImputer`
 - **[Neural Network](https://ml.kanaries.net/docs/apis/neural_network)**: `BernoulliRBM`
 - **[Metrics](https://ml.kanaries.net/docs/apis/metrics)**: `accuracyScore`, `precisionScore`, `recallScore`, `f1Score`, `precisionRecallFscoreSupport`, `confusionMatrix`, `rocCurve`, `rocAucScore`, `precisionRecallCurve`, `meanSquaredError`, `r2Score`, `adjustedRandScore`
-- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: `Sampling.trainTestSplit`, preprocessing scalers, `ModelSelection.KFold`, `ModelSelection.StratifiedKFold`, `ModelSelection.GroupShuffleSplit`, `ModelSelection.StratifiedGroupKFold`, search/CV helpers, linear algebra helpers and math functions
+- **[Utilities](https://ml.kanaries.net/docs/apis/utils)**: preprocessing scalers, `SplineTransformer`, `TargetEncoder`, `MultiLabelBinarizer`, `permutationImportance`, `partialDependence`, splitters, search/CV helpers, linear algebra helpers and math functions
+- **Composition / kernels / projections**: `TransformedTargetRegressor`, `KernelRidge`, `KernelDensity`, `GaussianRandomProjection`, `SparseRandomProjection`
 
 `KNearstNeighbors` remains available as a deprecated compatibility alias of `KNearestNeighbors`.
 

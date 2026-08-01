@@ -4,6 +4,8 @@ export { SparsePCA } from './sparsePCA';
 export { KernelPCA } from './kernelPCA';
 export type { KernelPCAProps, KernelPCAKernel } from './kernelPCA';
 export { IncrementalPCA } from './incrementalPCA';
+export { FactorAnalysis } from './factorAnalysis';
+export { LatentDirichletAllocation } from './latentDirichletAllocation';
 export type { IncrementalPCAProps } from './incrementalPCA';
 export { FastICA } from './fastICA';
 export type { FastICAProps, ICAFunction } from './fastICA';

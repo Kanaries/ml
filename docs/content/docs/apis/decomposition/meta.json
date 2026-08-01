@@ -8,6 +8,8 @@
     "kernelPCA",
     "fastICA",
     "nmf",
-    "incrementalPCA"
+    "incrementalPCA",
+    "factorAnalysis",
+    "latentDirichletAllocation"
   ]
 }

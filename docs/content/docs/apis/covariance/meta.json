@@ -1,4 +1,4 @@
 {
   "title": "Covariance",
-  "pages": ["index", "minCovDet", "ellipticEnvelope"]
+  "pages": ["index", "minCovDet", "ellipticEnvelope", "covarianceEstimators"]
 }

@@ -1,0 +1,29 @@
+---
+title: Robust Regression in JavaScript and TypeScript
+description: Fit Huber, RANSAC, Theil-Sen, and quantile regression models in browser or Node.js applications with @kanaries/ml.
+---
+
+# Robust regression in JavaScript
+
+Ordinary least squares can move sharply when targets contain outliers. `HuberRegressor` softens large residuals, `RANSACRegressor` fits a consensus set, `TheilSenRegressor` aggregates many subsample fits, and `QuantileRegressor` estimates a conditional quantile instead of a mean.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes sklearn-style constructors and `fit`/`predict` methods that run in browser or Node.js. Use Huber for moderate contamination, RANSAC for clear gross outliers, Theil-Sen for small robust datasets, and quantile regression for medians or prediction bands.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.RANSACRegressor({ randomState: 42 });
+model.fit([[0], [1], [2], [3]], [0, 1, 20, 3]);
+console.log(model.predict([[4]]));
+```
+
+## Detailed API reference
+
+- `HuberRegressor({ epsilon=1.35, alpha=0.0001, maxIter=100, tol=1e-5, fitIntercept=true })` exposes `coef`, `intercept`, `scale`, and `outliers`.
+- `RANSACRegressor({ estimator, minSamples, residualThreshold, maxTrials=100, stopProbability=.99, randomState })` exposes `estimatorFitted`, `inlierMask`, and `nTrials`.
+- `TheilSenRegressor({ nSubsamples, maxSubpopulation=10000, maxIter=300, tol=1e-3, randomState })` exposes `coef`, `intercept`, and `nIter`.
+- `QuantileRegressor({ quantile=.5, alpha=1, fitIntercept=true, maxIter=5000, tol=1e-7 })` solves the pinball-loss problem with an ADMM optimizer.

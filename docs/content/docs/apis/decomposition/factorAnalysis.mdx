@@ -1,0 +1,29 @@
+---
+title: Factor Analysis in JavaScript and TypeScript
+description: Fit a latent Gaussian factor model with per-feature noise in browser or Node.js using @kanaries/ml FactorAnalysis.
+---
+
+# Factor analysis in JavaScript
+
+## Algorithm overview
+
+Factor analysis explains correlated observations with a smaller set of latent variables while estimating separate noise variance for every feature. It is useful when measurement noise matters more than PCA's total-variance objective.
+
+## JavaScript implementation
+
+`FactorAnalysis` runs the sklearn-style EM/SVD update in JavaScript and supports optional varimax or quartimax rotation.
+
+## Quick start
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 1], [2, 4, 1], [3, 6, 2], [4, 8, 2]];
+const model = new Decomposition.FactorAnalysis({ nComponents: 2 });
+const scores = model.fitTransform(X);
+console.log(scores);
+```
+
+## Detailed API reference
+
+Constructor options are `nComponents`, `tol`, `maxIter`, `noiseVarianceInit`, and `rotation`. Fitted state includes `components`, `mean`, `noiseVariance`, `loglike`, and `nIter`, plus `getCovariance()` and `getPrecision()`.

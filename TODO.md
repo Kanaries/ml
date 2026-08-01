@@ -59,59 +59,59 @@ Utilities (6):
 ## Wave C — Statistical & kernel long tail (35 items)
 
 Robust/probabilistic linear (6):
-- [ ] HuberRegressor
-- [ ] RANSACRegressor
-- [ ] TheilSenRegressor (subsample combinatorics, medium cost)
-- [ ] QuantileRegressor (needs LP solver, highest cost in this wave)
-- [ ] BayesianRidge
-- [ ] ARDRegression
+- [x] HuberRegressor
+- [x] RANSACRegressor
+- [x] TheilSenRegressor (subsample combinatorics, medium cost)
+- [x] QuantileRegressor (ADMM solver)
+- [x] BayesianRidge
+- [x] ARDRegression
 
 GLMs (3) — per-item solver/link/regularization alignment, no shared-IRLS shortcut:
-- [ ] PoissonRegressor
-- [ ] GammaRegressor
-- [ ] TweedieRegressor
+- [x] PoissonRegressor
+- [x] GammaRegressor
+- [x] TweedieRegressor
 
 Kernel methods (2):
-- [ ] KernelRidge (Cholesky solve on kernel matrix; reuses kernel fns, not SMO)
-- [ ] KernelDensity
+- [x] KernelRidge (kernel-system solve; reuses kernel fns, not SMO)
+- [x] KernelDensity
 
 Clustering (3):
-- [ ] Birch
-- [ ] AffinityPropagation (O(n²) memory — document sample-size ceiling)
-- [ ] BisectingKMeans
+- [x] Birch
+- [x] AffinityPropagation (O(n²) memory — documented sample-size ceiling)
+- [x] BisectingKMeans
 
 Decomposition (2):
-- [ ] FactorAnalysis
-- [ ] LatentDirichletAllocation
+- [x] FactorAnalysis
+- [x] LatentDirichletAllocation
 
 Covariance (5):
-- [ ] EmpiricalCovariance
-- [ ] ShrunkCovariance
-- [ ] LedoitWolf
-- [ ] OAS
-- [ ] GraphicalLasso
+- [x] EmpiricalCovariance
+- [x] ShrunkCovariance
+- [x] LedoitWolf
+- [x] OAS
+- [x] GraphicalLasso
 
 Cross-decomposition (2):
-- [ ] PLSRegression
-- [ ] CCA
+- [x] PLSRegression
+- [x] CCA
 
 Random projection (2):
-- [ ] GaussianRandomProjection
-- [ ] SparseRandomProjection
+- [x] GaussianRandomProjection
+- [x] SparseRandomProjection
 
 Text extras (3):
-- [ ] HashingVectorizer
-- [ ] DictVectorizer
-- [ ] FeatureHasher
+- [x] HashingVectorizer
+- [x] DictVectorizer
+- [x] FeatureHasher
 
 Other (7):
-- [ ] TransformedTargetRegressor
-- [ ] NearestNeighbors (unsupervised query wrapper over KDTree/BallTree)
-- [ ] permutationImportance
-- [ ] partialDependence
-- [ ] SplineTransformer
-- [ ] TargetEncoder
-- [ ] MultiLabelBinarizer
+- [x] TransformedTargetRegressor
+- [x] NearestNeighbors (unsupervised query wrapper over KDTree/BallTree)
+- [x] permutationImportance
+- [x] partialDependence
+- [x] SplineTransformer
+- [x] TargetEncoder
+- [x] MultiLabelBinarizer
 
 ## Wave D — Heavy projects (4 items; excluded from the Phase 3 exit gate)
 

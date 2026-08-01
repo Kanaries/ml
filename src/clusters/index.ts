@@ -7,8 +7,11 @@ import { HDBScan } from './hdbscan';
 import { AgglomerativeClustering } from './agglomerativeClustering';
 import { SpectralClustering } from './spectralClustering';
 import { MiniBatchKMeans } from './miniBatchKMeans';
+import { Birch } from './birch';
+import { AffinityPropagation } from './affinityPropagation';
+import { BisectingKMeans } from './bisectingKMeans';
 
-export { KMeans, DBScan, HDBScan, MeanShift, OPTICS, kmeansPlusPlus, AgglomerativeClustering, SpectralClustering, MiniBatchKMeans };
+export { KMeans, DBScan, HDBScan, MeanShift, OPTICS, kmeansPlusPlus, AgglomerativeClustering, SpectralClustering, MiniBatchKMeans, Birch, AffinityPropagation, BisectingKMeans };
 /** sklearn-compatible names; legacy camel-cased exports remain supported. */
 export const DBSCAN = DBScan;
 export type DBSCAN = DBScan;

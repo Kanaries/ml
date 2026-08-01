@@ -1,0 +1,29 @@
+---
+title: Latent Dirichlet Allocation Topic Modeling in JavaScript
+description: Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml.
+---
+
+# Latent Dirichlet Allocation in JavaScript
+
+## Algorithm overview
+
+LDA models each document as a mixture of latent topics and each topic as a distribution over words. It is useful for exploratory topic discovery after count vectorization.
+
+## JavaScript implementation
+
+`LatentDirichletAllocation` accepts dense or `CSRMatrix` non-negative counts and performs batch variational updates entirely in browser or Node.js.
+
+## Quick start
+
+```ts
+import { Decomposition, FeatureExtraction } from '@kanaries/ml';
+
+const documents = ['cats chase mice', 'dogs chase balls', 'cats and dogs'];
+const counts = new FeatureExtraction.CountVectorizer().fitTransform(documents);
+const topics = new Decomposition.LatentDirichletAllocation({ nComponents: 5, randomState: 0 }).fitTransform(counts);
+console.log(topics);
+```
+
+## Detailed API reference
+
+Options include topic priors, `maxIter`, `maxDocUpdateIter`, and `meanChangeTol`. `components` contains unnormalized topic-word parameters.

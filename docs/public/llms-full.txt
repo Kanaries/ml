@@ -487,6 +487,42 @@ Feature values must be non-negative.
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/clusters/advancedClustering -->
+
+---
+title: "Birch, Affinity Propagation, and Bisecting K-Means in JavaScript"
+description: "Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans."
+canonical_url: "https://ml.kanaries.net/docs/apis/clusters/advancedClustering"
+markdown_url: "https://ml.kanaries.net/docs/apis/clusters/advancedClustering.md"
+---
+# Advanced clustering in JavaScript
+
+## Algorithm overview
+
+`Birch` incrementally compresses observations into clustering-feature subclusters, `AffinityPropagation` discovers exemplars by message passing, and `BisectingKMeans` recursively splits high-inertia groups.
+
+## JavaScript implementation
+
+These estimators run locally in browser or Node.js and follow the library's `fitPredict` convention. Affinity propagation stores several O(n²) matrices; as a practical browser ceiling, keep it below roughly 2,000 samples unless you have benchmarked the target device's memory budget.
+
+## Quick start
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [[-2, -2], [-1.8, -2.1], [2, 2], [2.1, 1.9]];
+const labels = new Clusters.Birch({ threshold: 0.5, nClusters: 3 }).fitPredict(X);
+console.log(labels);
+```
+
+Birch also supports `partialFit`; AffinityPropagation exposes exemplar indices and `nIter`; BisectingKMeans exposes final centers and inertia.
+
+## Detailed API reference
+
+`Birch` accepts `threshold`, `branchingFactor`, and `nClusters`. `AffinityPropagation` accepts `damping`, `preference`, `maxIter`, `convergenceIter`, and `randomState`. `BisectingKMeans` accepts `nClusters`, `bisectingStrategy`, the inner K-Means iteration settings, and `randomState`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/clusters/dbscan -->
 
 ---
@@ -680,6 +716,7 @@ If someone searches for "clustering in JavaScript", "K-Means in JavaScript", or 
 - [Mean Shift](/docs/apis/clusters/meanShift.md): mode-seeking clustering without predefining cluster count
 - [OPTICS](/docs/apis/clusters/optics.md): density-based clustering for irregular cluster shapes
 - [k-means++ Initialization](/docs/apis/clusters/kmeansPlusPlus.md): improved centroid seeding for K-Means pipelines
+- [Advanced Clustering](/docs/apis/clusters/advancedClustering.md): Birch, Affinity Propagation, and Bisecting K-Means
 
 ## Detailed module guide
 
@@ -1094,6 +1131,82 @@ const labels = optics.fitPredict(X);
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/compose -->
+
+---
+title: "Transformed Target Regression in JavaScript and TypeScript"
+description: "Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor."
+canonical_url: "https://ml.kanaries.net/docs/apis/compose"
+markdown_url: "https://ml.kanaries.net/docs/apis/compose/index.html.md"
+---
+# Transformed Target Regression in JavaScript
+
+## Algorithm overview
+
+Regression targets are often skewed, strictly positive, or easier to model after a monotonic transformation. `TransformedTargetRegressor` applies that transformation during training and automatically maps predictions back to the original units.
+
+## JavaScript implementation
+
+`@kanaries/ml` composes any serializable regressor with a transformer that implements `fit`, `transform`, and `inverseTransform`. Both components are cloned before fitting, work in browser or Node.js, and survive model serialization.
+
+## Quick start
+
+```ts
+import { Compose, Linear, utils } from '@kanaries/ml';
+
+const model = new Compose.TransformedTargetRegressor({
+  regressor: new Linear.LinearRegression(),
+  transformer: new utils.Preprocessing.FunctionTransformer({
+    func: 'log1p',
+    inverseFunc: 'expm1',
+  }),
+});
+
+model.fit([[0], [1], [2]], [1, 3, 7]);
+model.predict([[3]]); // approximately [15]
+```
+
+## Detailed API reference
+
+`new TransformedTargetRegressor({ regressor?, transformer?, func?, inverseFunc? })` defaults to linear regression and an identity transform. Pass either a transformer or a `func`/`inverseFunc` pair; the two forms are mutually exclusive. `fit(X, y)` trains cloned components, `predict(X)` returns inverse-transformed values, and `score(X, y)` reports R² in the original target space. Nested parameters use `regressor__param` and `transformer__param` in `setParams`.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators -->
+
+---
+title: "Covariance Estimation and Graphical Lasso in JavaScript"
+description: "Estimate empirical, shrunk, Ledoit-Wolf, OAS, and sparse inverse covariance matrices in JavaScript or TypeScript."
+canonical_url: "https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators"
+markdown_url: "https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators.md"
+---
+# Covariance estimation in JavaScript
+
+## Algorithm overview
+
+Covariance matrices describe joint feature variation and power Mahalanobis distance, Gaussian scoring, and graphical models. Shrinkage improves conditioning when data is limited; graphical lasso produces a sparse precision matrix.
+
+## JavaScript implementation
+
+Choose `EmpiricalCovariance` for maximum-likelihood covariance, `ShrunkCovariance` for a fixed shrinkage amount, `LedoitWolf` or `OAS` for data-driven shrinkage, and `GraphicalLasso` for L1-regularized conditional dependence.
+
+## Quick start
+
+```ts
+import { Covariance } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 0], [2, 1], [3, 2]];
+const model = new Covariance.OAS();
+model.fit(X);
+console.log(model.mahalanobis([[1, 1]]));
+```
+
+## Detailed API reference
+
+Every estimator exposes `location`, `covariance`, and `precision`. The adaptive shrinkage classes expose `shrinkageValue`; `GraphicalLasso` uses block coordinate descent, accepts `alpha`, `maxIter`, `tol`, `enetTol`, and `assumeCentered`, and exposes `nIter`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/covariance/ellipticEnvelope -->
 
 ---
@@ -1145,6 +1258,8 @@ Robust covariance estimators describe the center and spread of multivariate data
 
 Choose `MinCovDet` when you need robust location, covariance, support masks, or Mahalanobis distances. Choose `EllipticEnvelope` when you need `predict`, `scoreSamples`, and `decisionFunction` with a contamination threshold.
 
+For classical, shrinkage, and sparse inverse covariance, see [Covariance Estimators](/docs/apis/covariance/covarianceEstimators.md).
+
 ---
 
 <!-- Source: https://ml.kanaries.net/docs/apis/covariance/minCovDet -->
@@ -1195,6 +1310,77 @@ new Covariance.MinCovDet({
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/cross_decomposition -->
+
+---
+title: "PLS Regression and CCA in JavaScript"
+description: "Model two related data blocks with PLSRegression and canonical correlation analysis in JavaScript or TypeScript."
+canonical_url: "https://ml.kanaries.net/docs/apis/cross_decomposition"
+markdown_url: "https://ml.kanaries.net/docs/apis/cross_decomposition/index.html.md"
+---
+# PLS and CCA in JavaScript
+
+## Algorithm overview
+
+Partial least squares finds latent directions that predict a target block, while canonical correlation analysis finds directions with high cross-block correlation. Both help with correlated, multivariate features.
+
+## JavaScript implementation
+
+`PLSRegression` uses mode-A NIPALS with regression deflation. `CCA` uses mode-B weights with canonical deflation.
+
+## Quick start
+
+```ts
+import { CrossDecomposition } from '@kanaries/ml';
+
+const X = [[0, 1], [1, 2], [2, 3], [3, 5]];
+const Y = [[1], [2], [4], [7]];
+const model = new CrossDecomposition.PLSRegression({ nComponents: 2 });
+model.fit(X, Y);
+console.log(model.predict([[4, 6]]));
+```
+
+## Detailed API reference
+
+Both expose weights, loadings, rotations, iteration counts, `transform`, and `predict`.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/factorAnalysis -->
+
+---
+title: "Factor Analysis in JavaScript and TypeScript"
+description: "Fit a latent Gaussian factor model with per-feature noise in browser or Node.js using @kanaries/ml FactorAnalysis."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/factorAnalysis"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/factorAnalysis.md"
+---
+# Factor analysis in JavaScript
+
+## Algorithm overview
+
+Factor analysis explains correlated observations with a smaller set of latent variables while estimating separate noise variance for every feature. It is useful when measurement noise matters more than PCA's total-variance objective.
+
+## JavaScript implementation
+
+`FactorAnalysis` runs the sklearn-style EM/SVD update in JavaScript and supports optional varimax or quartimax rotation.
+
+## Quick start
+
+```ts
+import { Decomposition } from '@kanaries/ml';
+
+const X = [[1, 2, 1], [2, 4, 1], [3, 6, 2], [4, 8, 2]];
+const model = new Decomposition.FactorAnalysis({ nComponents: 2 });
+const scores = model.fitTransform(X);
+console.log(scores);
+```
+
+## Detailed API reference
+
+Constructor options are `nComponents`, `tol`, `maxIter`, `noiseVarianceInit`, and `rotation`. Fitted state includes `components`, `mean`, `noiseVariance`, `loglike`, and `nIter`, plus `getCovariance()` and `getPrecision()`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/decomposition/fastICA -->
 
 ---
@@ -1218,6 +1404,7 @@ FastICA recovers statistically independent sources from observed mixtures by max
 ```ts
 import { Decomposition } from '@kanaries/ml';
 
+const observedSignals = [[0, 1], [1, 0], [2, 1], [1, 2], [-1, 0]];
 const ica = new Decomposition.FastICA({
   nComponents: 2,
   whiten: 'unit-variance',
@@ -1225,6 +1412,7 @@ const ica = new Decomposition.FastICA({
 });
 const sources = ica.fitTransform(observedSignals);
 const reconstructed = ica.inverseTransform(sources);
+console.log({ sources, reconstructed });
 ```
 
 ## Detailed API reference
@@ -1258,9 +1446,13 @@ Incremental PCA updates a low-rank SVD one batch at a time. It is useful when a 
 ```ts
 import { Decomposition } from '@kanaries/ml';
 
+const batchOne = [[0, 1, 2], [1, 2, 3], [2, 1, 4]];
+const batchTwo = [[3, 4, 2], [4, 3, 1], [5, 5, 0]];
+const nextBatch = [[2, 3, 2]];
 const pca = new Decomposition.IncrementalPCA({ nComponents: 2 });
 pca.partialFit(batchOne).partialFit(batchTwo);
 const embedding = pca.transform(nextBatch);
+console.log(embedding);
 ```
 
 ## Detailed API reference
@@ -1313,6 +1505,8 @@ If someone searches for "PCA in JavaScript" or "Truncated SVD in TypeScript", th
 - [FastICA](/docs/apis/decomposition/fastICA.md): independent signal separation
 - [NMF](/docs/apis/decomposition/nmf.md): non-negative, parts-based latent factors
 - [Incremental PCA](/docs/apis/decomposition/incrementalPCA.md): batch-wise, memory-aware PCA
+- [Factor Analysis](/docs/apis/decomposition/factorAnalysis.md): latent Gaussian factors with per-feature noise
+- [Latent Dirichlet Allocation](/docs/apis/decomposition/latentDirichletAllocation.md): topic mixtures from word counts
 
 ## Detailed module guide
 
@@ -1360,6 +1554,7 @@ const model = new Decomposition.KernelPCA({
   gamma: 2,
 });
 const embedded = model.fitTransform([[1, 0], [0, 1], [-1, 0], [0, -1]]);
+console.log(embedded);
 ```
 
 ## Detailed API reference
@@ -1374,6 +1569,41 @@ new Decomposition.KernelPCA({
 ```
 
 Methods: `fit`, `transform`, `fitTransform`, and `inverseTransform`. Learned `eigenvalues` and `eigenvectors` are exposed as defensive copies. Kernel methods build an O(n²) training matrix, so constrain browser sample counts.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation -->
+
+---
+title: "Latent Dirichlet Allocation Topic Modeling in JavaScript"
+description: "Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation"
+markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation.md"
+---
+# Latent Dirichlet Allocation in JavaScript
+
+## Algorithm overview
+
+LDA models each document as a mixture of latent topics and each topic as a distribution over words. It is useful for exploratory topic discovery after count vectorization.
+
+## JavaScript implementation
+
+`LatentDirichletAllocation` accepts dense or `CSRMatrix` non-negative counts and performs batch variational updates entirely in browser or Node.js.
+
+## Quick start
+
+```ts
+import { Decomposition, FeatureExtraction } from '@kanaries/ml';
+
+const documents = ['cats chase mice', 'dogs chase balls', 'cats and dogs'];
+const counts = new FeatureExtraction.CountVectorizer().fitTransform(documents);
+const topics = new Decomposition.LatentDirichletAllocation({ nComponents: 5, randomState: 0 }).fitTransform(counts);
+console.log(topics);
+```
+
+## Detailed API reference
+
+Options include topic priors, `maxIter`, `maxDocUpdateIter`, and `meanChangeTol`. `components` contains unnormalized topic-word parameters.
 
 ---
 
@@ -1403,6 +1633,7 @@ import { Decomposition } from '@kanaries/ml';
 const nmf = new Decomposition.NMF({ nComponents: 2, init: 'nndsvda', randomState: 0 });
 const W = nmf.fitTransform([[1, 2, 0], [0, 1, 3], [1, 3, 3]]);
 const approximation = nmf.inverseTransform(W);
+console.log({ W, approximation });
 ```
 
 ## Detailed API reference
@@ -3005,6 +3236,40 @@ Because JavaScript has one numeric type, `maxDf: 1` follows the proportional/def
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries -->
+
+---
+title: "Feature Hashing and Dictionary Vectorization in JavaScript"
+description: "Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction."
+canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries"
+markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries.md"
+---
+# Feature hashing in JavaScript
+
+## Algorithm overview
+
+Hashing maps features into a fixed-width sparse matrix without storing a vocabulary. Dictionary vectorization instead learns explicit names, which is preferable when interpretability matters.
+
+## JavaScript implementation
+
+`HashingVectorizer` tokenizes text, `FeatureHasher` accepts dictionaries, pairs, or strings, and `DictVectorizer` expands numeric and categorical dictionary values.
+
+## Quick start
+
+```ts
+import { FeatureExtraction } from '@kanaries/ml';
+
+const documents = ['red fox', 'blue fox'];
+const X = new FeatureExtraction.HashingVectorizer({ nFeatures: 4096 }).fitTransform(documents);
+console.log(X.shape);
+```
+
+## Detailed API reference
+
+Both hashers use sklearn-compatible MurmurHash3 indices and signed collisions. `DictVectorizer` exposes `vocabulary`, `getFeatureNamesOut()`, `inverseTransform()`, and `restrict()`, and can return CSR or dense output.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction -->
 
 ---
@@ -3042,6 +3307,7 @@ model.predict(['sweet apple']);
 - [CountVectorizer](/docs/apis/feature_extraction/countVectorizer.md): sparse token and n-gram counts.
 - [TfidfTransformer](/docs/apis/feature_extraction/tfidfTransformer.md): TF-IDF weighting for an existing count matrix.
 - [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer.md): one-step text-to-TF-IDF conversion.
+- [Hashing and Dictionary Features](/docs/apis/feature_extraction/hashingAndDictionaries.md): bounded-memory hashing and explicit dictionary expansion.
 
 ---
 
@@ -3226,6 +3492,7 @@ const X = [[0, 1], [1, 0], [5, 1], [6, 0]];
 const y = [0, 0, 1, 1];
 const [fScores, pValues] = FeatureSelection.fClassif(X, y);
 const information = FeatureSelection.mutualInfoClassif(X, y, { randomState: 42 });
+console.log({ fScores, pValues, information });
 ```
 
 ## Detailed API reference
@@ -3278,6 +3545,7 @@ import { Impute } from '@kanaries/ml';
 const imputer = new Impute.IterativeImputer({ maxIter: 10, tol: 1e-3 });
 const complete = imputer.fitTransform([[0, 1], [1, 3], [2, NaN], [3, 7]]);
 const future = imputer.transform([[4, NaN]]);
+console.log({ complete, future });
 ```
 
 ## Detailed API reference
@@ -3318,14 +3586,18 @@ This is especially useful when someone searches for "machine learning in JavaScr
 
 ## Quick navigation
 
-- **[Clusters](/docs/apis/clusters/index.html.md)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
+- **[Clusters](/docs/apis/clusters/index.html.md)**: segment unlabeled data with K-Means, Birch, Affinity Propagation, HDBSCAN, and related methods.
 - **[Decomposition](/docs/apis/decomposition/index.html.md)**: reduce dimensions or separate latent structure with PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD.
 - **[Ensemble](/docs/apis/ensemble/index.html.md)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
-- **[Covariance](/docs/apis/covariance/index.html.md)**: estimate robust covariance and detect elliptical multivariate outliers.
+- **[Covariance](/docs/apis/covariance/index.html.md)**: estimate empirical, shrunk, robust, or sparse inverse covariance.
 - **[Feature Selection](/docs/apis/feature_selection/index.html.md)**: select columns with model importance, recursive elimination, or univariate scores.
 - **[Feature Extraction](/docs/apis/feature_extraction/index.html.md)**: turn raw text into sparse count and TF-IDF features.
 - **[Imputation](/docs/apis/impute/index.html.md)**: estimate correlated numeric values missing from feature matrices.
-- **[Linear](/docs/apis/linear/index.html.md)**: start with linear regression, logistic regression, regularized regression, and linear classification baselines.
+- **[Linear](/docs/apis/linear/index.html.md)**: use classical, robust, Bayesian, quantile, and generalized linear models.
+- **[Kernel Methods](/docs/apis/kernel/index.html.md)**: fit kernel ridge regression or kernel density estimates.
+- **[Cross Decomposition](/docs/apis/cross_decomposition/index.html.md)**: model paired blocks with PLS Regression and CCA.
+- **[Random Projection](/docs/apis/random_projection/index.html.md)**: reduce dimensions with Gaussian or sparse Johnson-Lindenstrauss maps.
+- **[Compose](/docs/apis/compose/index.html.md)**: wrap regression targets in invertible preprocessing transformations.
 - **[Metrics](/docs/apis/metrics/index.html.md)**: evaluate classification, regression, clustering, curves, and distance functions.
 - **[Manifold](/docs/apis/manifold/index.html.md)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
 - **[Neighbors](/docs/apis/neighbors/index.html.md)**: run k-nearest neighbors and fast nearest-neighbor search structures.
@@ -3367,6 +3639,43 @@ Canonical sklearn spellings are available alongside the legacy names so existing
 | `LLE`                  | `LocallyLinearEmbedding`        | `Manifold`             |
 
 Both names reference the same constructor; aliases do not duplicate estimator coverage or change serialized model names.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/kernel -->
+
+---
+title: "Kernel Ridge Regression and Kernel Density in JavaScript"
+description: "Use nonlinear KernelRidge prediction and KernelDensity estimation in JavaScript or TypeScript with @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/kernel"
+markdown_url: "https://ml.kanaries.net/docs/apis/kernel/index.html.md"
+---
+# Kernel methods in JavaScript
+
+## Algorithm overview
+
+Kernel methods compare samples through a similarity function instead of explicitly expanding nonlinear features. `KernelRidge` solves regularized regression in the dual; `KernelDensity` estimates a probability density from nearby observations.
+
+## JavaScript implementation
+
+`@kanaries/ml` keeps both estimators in the JavaScript runtime: fit nonlinear regression in a Node.js service, or score small density models directly in an interactive browser workflow without a Python inference endpoint. Choose this implementation when model state and product code need to share the same typed API; benchmark larger training sets because kernel matrices and pairwise scoring grow with the number of samples.
+
+## Quick start
+
+```ts
+import { Kernel } from '@kanaries/ml';
+
+const X = [[0], [1], [2]];
+const regressor = new Kernel.KernelRidge({ kernel: 'rbf', gamma: 0.5 });
+regressor.fit(X, [0, 1, 4]);
+const density = new Kernel.KernelDensity({ bandwidth: 0.8 });
+density.fit(X);
+console.log({ prediction: regressor.predict([[1.5]]), logDensity: density.scoreSamples([[1.5]]) });
+```
+
+## Detailed API reference
+
+KernelRidge supports linear, polynomial, RBF, sigmoid, and cosine kernels. KernelDensity supports Gaussian, tophat, Epanechnikov, exponential, linear, and cosine radial kernels and exposes `scoreSamples` and `score`.
 
 ---
 
@@ -3413,6 +3722,44 @@ KMath.SDPopulation(nums: number[]): number
 ```
 
 `covariance` requires arrays with the same length.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/linear/bayesianRegressors -->
+
+---
+title: "Bayesian Ridge and ARD Regression in JavaScript"
+description: "Run BayesianRidge and sparse ARDRegression in JavaScript or TypeScript with posterior uncertainty and sklearn-style APIs."
+canonical_url: "https://ml.kanaries.net/docs/apis/linear/bayesianRegressors"
+markdown_url: "https://ml.kanaries.net/docs/apis/linear/bayesianRegressors.md"
+---
+# Bayesian linear regression in JavaScript
+
+## Algorithm overview
+
+Bayesian linear models place probability distributions over coefficients. They are useful when you want regularized predictions plus uncertainty, or automatic relevance determination that prunes weak features.
+
+## JavaScript implementation
+
+`BayesianRidge` learns a shared coefficient precision and supports `predictStd`. `ARDRegression` learns one precision per feature and zeros coefficients whose precision crosses `thresholdLambda`.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 3, 5, 7];
+const model = new Linear.BayesianRidge();
+model.fit(X, y);
+const mean = model.predict([[4]]);
+const standardDeviation = model.predictStd([[4]]);
+console.log({ mean, standardDeviation });
+```
+
+## Detailed API reference
+
+Both estimators accept `maxIter`, `tol`, Gamma-prior hyperparameters, and `fitIntercept`, and expose `coef`, `intercept`, `alpha`, `lambda`, `sigma`, and `nIter`.
 
 ---
 
@@ -3477,6 +3824,40 @@ When `l1Ratio` is `0`, the implementation delegates to Ridge regression. When `l
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels -->
+
+---
+title: "Poisson, Gamma, and Tweedie Regression in JavaScript"
+description: "Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels"
+markdown_url: "https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels.md"
+---
+# Generalized linear models in JavaScript
+
+## Algorithm overview
+
+Generalized linear models connect a linear predictor to non-Gaussian targets. Poisson regression is suited to counts, Gamma regression to positive continuous values, and Tweedie regression spans several variance relationships through its `power` parameter.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementations use regularized Newton updates and a guarded line search, with log links for positive-mean families.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.PoissonRegressor({ alpha: 0.1 });
+model.fit([[0], [1], [2]], [1, 2, 4]);
+console.log(model.predict([[3]]));
+```
+
+## Detailed API reference
+
+All three accept `alpha`, `fitIntercept`, `maxIter`, and `tol`. Poisson and Gamma regression use their canonical log link. `TweedieRegressor` additionally accepts `power` (values in `(0, 1)` are undefined) and `link: 'auto' | 'identity' | 'log'`. Fitted models expose `coef`, `intercept`, and `nIter`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/linear -->
 
 ---
@@ -3514,6 +3895,9 @@ If someone searches for "linear regression in JavaScript" or "logistic regressio
 - [ElasticNet](/docs/apis/linear/elasticNet.md): combined L1 and L2 regularized regression
 - [RidgeClassifier](/docs/apis/linear/ridgeClassifier.md): one-vs-rest L2-regularized linear classification
 - [Logistic Regression](/docs/apis/linear/logisticRegression.md): binary classification with probability-oriented outputs
+- [Robust Regression](/docs/apis/linear/robustRegressors.md): Huber, RANSAC, Theil-Sen, and conditional quantiles
+- [Bayesian Regressors](/docs/apis/linear/bayesianRegressors.md): posterior uncertainty and automatic relevance determination
+- [Generalized Linear Models](/docs/apis/linear/generalizedLinearModels.md): Poisson, Gamma, and Tweedie targets
 
 ## Detailed module guide
 
@@ -4001,6 +4385,41 @@ const pred = model.predict([[4]]);
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/linear/robustRegressors -->
+
+---
+title: "Robust Regression in JavaScript and TypeScript"
+description: "Fit Huber, RANSAC, Theil-Sen, and quantile regression models in browser or Node.js applications with @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/linear/robustRegressors"
+markdown_url: "https://ml.kanaries.net/docs/apis/linear/robustRegressors.md"
+---
+# Robust regression in JavaScript
+
+Ordinary least squares can move sharply when targets contain outliers. `HuberRegressor` softens large residuals, `RANSACRegressor` fits a consensus set, `TheilSenRegressor` aggregates many subsample fits, and `QuantileRegressor` estimates a conditional quantile instead of a mean.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes sklearn-style constructors and `fit`/`predict` methods that run in browser or Node.js. Use Huber for moderate contamination, RANSAC for clear gross outliers, Theil-Sen for small robust datasets, and quantile regression for medians or prediction bands.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.RANSACRegressor({ randomState: 42 });
+model.fit([[0], [1], [2], [3]], [0, 1, 20, 3]);
+console.log(model.predict([[4]]));
+```
+
+## Detailed API reference
+
+- `HuberRegressor({ epsilon=1.35, alpha=0.0001, maxIter=100, tol=1e-5, fitIntercept=true })` exposes `coef`, `intercept`, `scale`, and `outliers`.
+- `RANSACRegressor({ estimator, minSamples, residualThreshold, maxTrials=100, stopProbability=.99, randomState })` exposes `estimatorFitted`, `inlierMask`, and `nTrials`.
+- `TheilSenRegressor({ nSubsamples, maxSubpopulation=10000, maxIter=300, tol=1e-3, randomState })` exposes `coef`, `intercept`, and `nIter`.
+- `QuantileRegressor({ quantile=.5, alpha=1, fitIntercept=true, maxIter=5000, tol=1e-7 })` solves the pinball-loss problem with an ADMM optimizer.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/manifold -->
 
 ---
@@ -4079,6 +4498,7 @@ const X = [[0, 0], [1, 0], [2, 1], [3, 1], [4, 2]];
 const model = new Manifold.Isomap({ nNeighbors: 2, nComponents: 2 });
 const embedding = model.fitTransform(X);
 const newPoints = model.transform([[2.5, 1]]);
+console.log({ embedding, newPoints });
 ```
 
 ## Detailed API reference
@@ -4672,11 +5092,14 @@ Pass any registered single-output classifier to `MultiOutput.ClassifierChain`. A
 ```ts
 import { Bayes, MultiOutput } from '@kanaries/ml';
 
+const X = [[0], [1], [2]];
+const testX = [[1.5]];
 const chain = new MultiOutput.ClassifierChain({
   estimator: new Bayes.GaussianNB(), order: [0, 1],
 });
 chain.fit(X, [[0, 0], [0, 1], [1, 1]]);
 const labels = chain.predict(testX);
+console.log(labels);
 ```
 
 ## Detailed API reference
@@ -4727,11 +5150,15 @@ A regressor chain fits one model per target and appends earlier target values or
 ```ts
 import { Linear, MultiOutput } from '@kanaries/ml';
 
+const X = [[0], [1], [2], [3]];
+const targets = [[0, 1], [1, 3], [2, 5], [3, 7]];
+const testX = [[4]];
 const chain = new MultiOutput.RegressorChain({
   estimator: new Linear.RidgeRegression({ alpha: 1 }), order: [1, 0],
 });
 chain.fit(X, targets);
 const predictions = chain.predict(testX);
+console.log(predictions);
 ```
 
 ## Detailed API reference
@@ -4889,6 +5316,7 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 - [Ball Tree](/docs/apis/neighbors/ballTree.md): faster repeated nearest-neighbor search in metric spaces
 - [KD Tree](/docs/apis/neighbors/kdTree.md): efficient spatial indexing for repeated lookup on suitable data
 - [Local Outlier Factor](/docs/apis/neighbors/localOutlierFactor.md): density-based local anomaly detection and novelty scoring
+- [NearestNeighbors](/docs/apis/neighbors/nearestNeighbors.md): unlabeled k-neighbor and radius lookup through brute force, KD Tree, or Ball Tree
 
 ## Detailed module guide
 
@@ -5271,6 +5699,45 @@ Class labels are numeric. Ties are resolved by the smaller class label.
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors -->
+
+---
+title: "NearestNeighbors Search in JavaScript and TypeScript"
+description: "Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors"
+markdown_url: "https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors.md"
+---
+# NearestNeighbors Search in JavaScript
+
+## Algorithm overview
+
+Nearest-neighbor search finds the closest reference samples without requiring labels. It supports similarity lookup, retrieval, deduplication, local analysis, and the search layer behind many non-parametric models.
+
+## JavaScript implementation
+
+`Neighbors.NearestNeighbors` provides the familiar sklearn-style `fit`, `kneighbors`, and `radiusNeighbors` workflow in browser and Node.js. Choose brute force explicitly or reuse the library's KD Tree and Ball Tree search structures. Only the training matrix is serialized; indexes are rebuilt safely for each query.
+
+## Quick start
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const search = new Neighbors.NearestNeighbors({
+  nNeighbors: 2,
+  algorithm: 'kdTree',
+});
+search.fit([[0], [2], [5]]);
+
+console.log(search.kneighbors([[1]]));
+// { distances: [[1, 1]], indices: [[0, 1]] }
+```
+
+## Detailed API reference
+
+Constructor options are `nNeighbors`, `radius`, `algorithm` (`auto`, `brute`, `kdTree`, or `ballTree`), `leafSize`, `metric`, and Minkowski `p`. `kneighbors(X?, nNeighbors?, returnDistance?)` returns sorted distances and indices; omitting `X` queries the fitted samples while excluding each sample itself. `radiusNeighbors` follows the same pattern for a distance threshold.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsClassifier -->
 
 ---
@@ -5519,6 +5986,41 @@ If someone searches for "Bernoulli RBM in JavaScript" or "feature learning in Ty
 - Keep datasets moderate in size when running iterative representation learning in the browser.
 - Use this module mainly for preprocessing, feature learning, and experimentation rather than as a complete neural stack.
 - Pair learned features with simpler downstream estimators when you want the rest of the pipeline to remain easy to operate.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/random_projection -->
+
+---
+title: "Gaussian and Sparse Random Projection in JavaScript"
+description: "Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript."
+canonical_url: "https://ml.kanaries.net/docs/apis/random_projection"
+markdown_url: "https://ml.kanaries.net/docs/apis/random_projection/index.html.md"
+---
+# Random projection in JavaScript
+
+## Algorithm overview
+
+Random projection reduces dimensionality with a data-independent matrix while approximately preserving pairwise distances. It is useful when deterministic decomposition is too expensive.
+
+## JavaScript implementation
+
+`@kanaries/ml` generates seeded Gaussian or sparse projection matrices in browser and Node.js and exposes the fitted components for serialization. Random projection is a lightweight choice when PCA-style fitting is too expensive or data arrives only at inference time; the sparse variant reduces multiply cost for high-dimensional frontend features.
+
+## Quick start
+
+```ts
+import { RandomProjection } from '@kanaries/ml';
+
+const X = [[1, 0, 2], [0, 1, 3], [2, 1, 0]];
+const model = new RandomProjection.SparseRandomProjection({ nComponents: 128, randomState: 42 });
+const reduced = model.fitTransform(X);
+console.log(reduced[0].length);
+```
+
+## Detailed API reference
+
+Set `nComponents: 'auto'` with `eps` to use the sklearn Johnson-Lindenstrauss bound. Both estimators expose `components`; `computeInverseComponents` enables approximate `inverseTransform`.
 
 ---
 
@@ -6826,6 +7328,53 @@ If someone searches for "decision tree in JavaScript" or "extra tree classifier 
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing -->
+
+---
+title: "Spline, Target, and Multi-Label Preprocessing in JavaScript"
+description: "Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing"
+markdown_url: "https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing.md"
+---
+# Advanced Preprocessing in JavaScript
+
+## Algorithm overview
+
+Spline features capture smooth nonlinear relationships, target encoding converts high-cardinality categories into compact numeric features, and multi-label binarization turns sets of labels into indicator matrices. These transformations are useful when ordinary scaling or one-hot encoding does not fit the data shape.
+
+## JavaScript implementation
+
+`@kanaries/ml` runs all three transformations locally in browser or Node.js. `SplineTransformer` creates a B-spline basis per numeric feature. `TargetEncoder.fitTransform` uses cross-fitting to keep a row's own target out of its encoding. `MultiLabelBinarizer` can return a dense matrix or the library's serializable CSR representation.
+
+## Quick start
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const spline = new utils.SplineTransformer({ nKnots: 4, degree: 3 });
+const curved = spline.fitTransform([[0], [1], [2], [3]]);
+
+const encoder = new utils.TargetEncoder({ smooth: 2, cv: 3 });
+const encoded = encoder.fitTransform(
+  [['free'], ['pro'], ['free'], ['team'], ['pro'], ['team']],
+  [2, 12, 4, 20, 10, 22],
+);
+
+const labels = new utils.MultiLabelBinarizer();
+const indicators = labels.fitTransform([['search', 'ml'], ['charts'], []]);
+console.log({ curved, encoded, indicators });
+```
+
+## Detailed API reference
+
+`SplineTransformer` accepts `nKnots`, `degree`, `knots` (`uniform`, `quantile`, or explicit per-feature knots), `extrapolation`, and `includeBias`.
+
+`TargetEncoder` accepts `categories`, `targetType` (`auto`, `continuous`, or `binary`), `smooth`, `cv`, `shuffle`, and `randomState`. Unknown categories map to the global target mean.
+
+`MultiLabelBinarizer` accepts optional ordered `classes` and `sparseOutput`. It exposes `fit`, `transform`, `fitTransform`, `inverseTransform`, and fitted `classes`.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/utils/asyncMode -->
 
 ---
@@ -6909,9 +7458,13 @@ Random sample splits leak information when multiple rows belong to the same user
 ```ts
 import { utils } from '@kanaries/ml';
 
+const X = [[0], [1], [2], [3], [4], [5]];
+const y = [0, 0, 1, 1, 0, 1];
+const patientIds = ['a', 'a', 'b', 'b', 'c', 'c'];
 const folds = new utils.ModelSelection.StratifiedGroupKFold({
   nSplits: 3, shuffle: true, randomState: 42,
 }).split(X, y, patientIds);
+console.log(folds);
 ```
 
 ## Detailed API reference
@@ -6960,6 +7513,8 @@ If someone searches for "machine learning utilities in JavaScript", "preprocessi
 ## Quick navigation
 
 - [Preprocessing](/docs/apis/utils/preprocessing.md): scale, normalize, encode, impute, and select features
+- [Advanced preprocessing](/docs/apis/utils/advancedPreprocessing.md): spline bases, target encoding, and multi-label indicators
+- [Model inspection](/docs/apis/utils/inspection.md): permutation importance and partial dependence
 - [Sampling](/docs/apis/utils/sampling.md): sample arrays and create train/test splits
 - [ModelSelection](/docs/apis/utils/modelSelection.md): run K-fold splits, cross-validation, grid search, and randomized search
 - [Stat](/docs/apis/utils/stat.md): compute lightweight statistics used in ML workflows
@@ -6979,6 +7534,52 @@ If someone searches for "machine learning utilities in JavaScript", "preprocessi
 - Utilities matter most when ML code runs inside interactive or latency-sensitive product surfaces.
 - Use them to keep heavy work off the main thread when responsiveness is part of the user experience.
 - Combine them with the rest of the API catalog to build production-friendly JS ML workflows.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/utils/inspection -->
+
+---
+title: "Permutation Importance and Partial Dependence in JavaScript"
+description: "Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/utils/inspection"
+markdown_url: "https://ml.kanaries.net/docs/apis/utils/inspection.md"
+---
+# Model Inspection in JavaScript
+
+## Algorithm overview
+
+Permutation importance measures how much a fitted model's score degrades when one feature is shuffled. Partial dependence averages predictions while forcing one or two features across a grid. Together they help identify influential inputs and visualize broad model response patterns.
+
+## JavaScript implementation
+
+`@kanaries/ml` exposes model-agnostic inspection functions that work with fitted estimators in browser and Node.js. They do not depend on tree internals or linear coefficients, so the same workflow works across compatible models.
+
+## Quick start
+
+```ts
+import { Linear, utils } from '@kanaries/ml';
+
+const X = [[0, 0], [1, 0], [2, 1], [3, 1]];
+const y = [0, 2, 4, 6];
+const model = new Linear.LinearRegression();
+model.fit(X, y);
+
+const importance = utils.permutationImportance(model, X, y, {
+  nRepeats: 10,
+  randomState: 42,
+});
+const dependence = utils.partialDependence(model, X, [0], {
+  gridResolution: 50,
+});
+console.log({ importance, dependence });
+```
+
+## Detailed API reference
+
+`permutationImportance(estimator, X, y, { nRepeats?, randomState?, scoring? })` returns `importances`, `importancesMean`, and `importancesStd` by feature.
+
+`partialDependence(estimator, X, features, { gridResolution?, percentiles? })` supports one or two numeric feature indices and returns `gridValues` plus averaged predictions shaped by the requested grid.
 
 ---
 

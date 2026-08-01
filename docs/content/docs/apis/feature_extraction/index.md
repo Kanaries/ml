@@ -32,3 +32,4 @@ model.predict(['sweet apple']);
 - [CountVectorizer](countVectorizer): sparse token and n-gram counts.
 - [TfidfTransformer](tfidfTransformer): TF-IDF weighting for an existing count matrix.
 - [TfidfVectorizer](tfidfVectorizer): one-step text-to-TF-IDF conversion.
+- [Hashing and Dictionary Features](hashingAndDictionaries): bounded-memory hashing and explicit dictionary expansion.

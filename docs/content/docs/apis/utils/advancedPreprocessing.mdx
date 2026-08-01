@@ -1,0 +1,41 @@
+---
+title: Spline, Target, and Multi-Label Preprocessing in JavaScript
+description: Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml.
+---
+
+# Advanced Preprocessing in JavaScript
+
+## Algorithm overview
+
+Spline features capture smooth nonlinear relationships, target encoding converts high-cardinality categories into compact numeric features, and multi-label binarization turns sets of labels into indicator matrices. These transformations are useful when ordinary scaling or one-hot encoding does not fit the data shape.
+
+## JavaScript implementation
+
+`@kanaries/ml` runs all three transformations locally in browser or Node.js. `SplineTransformer` creates a B-spline basis per numeric feature. `TargetEncoder.fitTransform` uses cross-fitting to keep a row's own target out of its encoding. `MultiLabelBinarizer` can return a dense matrix or the library's serializable CSR representation.
+
+## Quick start
+
+```ts
+import { utils } from '@kanaries/ml';
+
+const spline = new utils.SplineTransformer({ nKnots: 4, degree: 3 });
+const curved = spline.fitTransform([[0], [1], [2], [3]]);
+
+const encoder = new utils.TargetEncoder({ smooth: 2, cv: 3 });
+const encoded = encoder.fitTransform(
+  [['free'], ['pro'], ['free'], ['team'], ['pro'], ['team']],
+  [2, 12, 4, 20, 10, 22],
+);
+
+const labels = new utils.MultiLabelBinarizer();
+const indicators = labels.fitTransform([['search', 'ml'], ['charts'], []]);
+console.log({ curved, encoded, indicators });
+```
+
+## Detailed API reference
+
+`SplineTransformer` accepts `nKnots`, `degree`, `knots` (`uniform`, `quantile`, or explicit per-feature knots), `extrapolation`, and `includeBias`.
+
+`TargetEncoder` accepts `categories`, `targetType` (`auto`, `continuous`, or `binary`), `smooth`, `cv`, `shuffle`, and `randomState`. Unknown categories map to the global target mean.
+
+`MultiLabelBinarizer` accepts optional ordered `classes` and `sparseOutput`. It exposes `fit`, `transform`, `fitTransform`, `inverseTransform`, and fitted `classes`.

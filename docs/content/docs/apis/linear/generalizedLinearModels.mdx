@@ -1,0 +1,28 @@
+---
+title: Poisson, Gamma, and Tweedie Regression in JavaScript
+description: Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js.
+---
+
+# Generalized linear models in JavaScript
+
+## Algorithm overview
+
+Generalized linear models connect a linear predictor to non-Gaussian targets. Poisson regression is suited to counts, Gamma regression to positive continuous values, and Tweedie regression spans several variance relationships through its `power` parameter.
+
+## JavaScript implementation
+
+The `@kanaries/ml` implementations use regularized Newton updates and a guarded line search, with log links for positive-mean families.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const model = new Linear.PoissonRegressor({ alpha: 0.1 });
+model.fit([[0], [1], [2]], [1, 2, 4]);
+console.log(model.predict([[3]]));
+```
+
+## Detailed API reference
+
+All three accept `alpha`, `fitIntercept`, `maxIter`, and `tol`. Poisson and Gamma regression use their canonical log link. `TweedieRegressor` additionally accepts `power` (values in `(0, 1)` are undefined) and `link: 'auto' | 'identity' | 'log'`. Fitted models expose `coef`, `intercept`, and `nIter`.

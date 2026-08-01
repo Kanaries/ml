@@ -10,5 +10,6 @@
     "ballTree",
     "kdTree",
     "localOutlierFactor"
+    ,"nearestNeighbors"
   ]
 }

@@ -1,0 +1,35 @@
+---
+title: Transformed Target Regression in JavaScript and TypeScript
+description: Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor.
+---
+
+# Transformed Target Regression in JavaScript
+
+## Algorithm overview
+
+Regression targets are often skewed, strictly positive, or easier to model after a monotonic transformation. `TransformedTargetRegressor` applies that transformation during training and automatically maps predictions back to the original units.
+
+## JavaScript implementation
+
+`@kanaries/ml` composes any serializable regressor with a transformer that implements `fit`, `transform`, and `inverseTransform`. Both components are cloned before fitting, work in browser or Node.js, and survive model serialization.
+
+## Quick start
+
+```ts
+import { Compose, Linear, utils } from '@kanaries/ml';
+
+const model = new Compose.TransformedTargetRegressor({
+  regressor: new Linear.LinearRegression(),
+  transformer: new utils.Preprocessing.FunctionTransformer({
+    func: 'log1p',
+    inverseFunc: 'expm1',
+  }),
+});
+
+model.fit([[0], [1], [2]], [1, 3, 7]);
+model.predict([[3]]); // approximately [15]
+```
+
+## Detailed API reference
+
+`new TransformedTargetRegressor({ regressor?, transformer?, func?, inverseFunc? })` defaults to linear regression and an identity transform. Pass either a transformer or a `func`/`inverseFunc` pair; the two forms are mutually exclusive. `fit(X, y)` trains cloned components, `predict(X)` returns inverse-transformed values, and `score(X, y)` reports R² in the original target space. Nested parameters use `regressor__param` and `transformer__param` in `setParams`.

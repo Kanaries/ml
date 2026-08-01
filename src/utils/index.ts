@@ -23,6 +23,12 @@ export function assert(condition: any, message: string) {
 }
 
 export { createRandomGenerator } from './random';
+export { MultiLabelBinarizer } from './multiLabelBinarizer';
+export type { MultiLabel, MultiLabelBinarizerProps } from './multiLabelBinarizer';
+export { permutationImportance, partialDependence } from './inspection';
+export type { PermutationImportanceProps, PermutationImportanceResult, PartialDependenceProps, PartialDependenceResult } from './inspection';
+export { SplineTransformer, TargetEncoder } from './preprocessingAdvanced';
+export type { SplineTransformerProps, SplineKnots, SplineExtrapolation, TargetEncoderProps, Category, TargetLabel } from './preprocessingAdvanced';
 
 export {
     Stat,

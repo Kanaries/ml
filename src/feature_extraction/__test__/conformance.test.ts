@@ -2,12 +2,15 @@ import { getRegisteredEstimators, loadModel } from '../../base';
 import { CountVectorizer } from '../countVectorizer';
 import { TfidfTransformer } from '../tfidfTransformer';
 import { TfidfVectorizer } from '../tfidfVectorizer';
+import { DictVectorizer } from '../dictVectorizer';
+import { FeatureHasher } from '../featureHasher';
+import { HashingVectorizer } from '../hashingVectorizer';
 
 const documents = ['red apple sweet', 'green apple sweet', 'blue ocean deep', 'blue sea deep'];
 
 describe('text transformer conformance', () => {
     test('all vectorizers are registered', () => {
-        for (const name of ['CountVectorizer', 'TfidfTransformer', 'TfidfVectorizer']) {
+        for (const name of ['CountVectorizer', 'TfidfTransformer', 'TfidfVectorizer', 'HashingVectorizer', 'DictVectorizer', 'FeatureHasher']) {
             expect(getRegisteredEstimators().has(name)).toBe(true);
         }
     });
@@ -54,5 +57,14 @@ describe('text transformer conformance', () => {
         const combinedExpected = combined.fitTransform(documents).toDense();
         const combinedRevived = loadModel(JSON.stringify(combined)) as TfidfVectorizer;
         expect(combinedRevived.transform(documents).toDense()).toEqual(combinedExpected);
+    });
+
+    test('stateless hashing and dictionary transformers clone and serialize', () => {
+        const hashing = new HashingVectorizer({ nFeatures: 32, norm: null }), hashed = hashing.fitTransform(documents).toDense();
+        expect((loadModel(JSON.stringify(hashing)) as HashingVectorizer).transform(documents).toDense()).toEqual(hashed);
+        const dictionaries = [{ color: 'red', value: 1 }, { color: 'blue', value: 2 }], dict = new DictVectorizer(); dict.fit(dictionaries); const dictExpected = (dict.transform(dictionaries) as any).toDense();
+        expect(((loadModel(JSON.stringify(dict)) as DictVectorizer).transform(dictionaries) as any).toDense()).toEqual(dictExpected);
+        const hasher = new FeatureHasher({ nFeatures: 32 }), hashExpected = hasher.fitTransform(dictionaries).toDense();
+        expect((loadModel(JSON.stringify(hasher)) as FeatureHasher).transform(dictionaries).toDense()).toEqual(hashExpected);
     });
 });

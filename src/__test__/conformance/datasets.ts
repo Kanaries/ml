@@ -75,6 +75,12 @@ export function regressionDataset(): Dataset {
     return { X, y };
 }
 
+/** Strictly positive smooth target for Gamma/Tweedie/Poisson-style regressors. */
+export function positiveRegressionDataset(): Dataset {
+    const base = regressionDataset();
+    return { X: base.X, y: base.y.map(value => Math.exp(value / 5)) };
+}
+
 /** Non-negative small-integer count features (for Multinomial/Complement NB). */
 export function countsDataset(): Dataset {
     const rand = lcg(31);

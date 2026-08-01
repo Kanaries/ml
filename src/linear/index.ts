@@ -10,3 +10,6 @@ export { RidgeClassifier } from './ridgeClassifier';
 export { SGDClassifier } from './sgdClassifier';
 export { SGDRegressor } from './sgdRegressor';
 export { Perceptron } from './perceptron';
+export { BayesianRidge, ARDRegression } from './bayesianRidge';
+export { PoissonRegressor, GammaRegressor, TweedieRegressor } from './glm';
+export { HuberRegressor, RANSACRegressor, TheilSenRegressor, QuantileRegressor } from './robustRegressors';

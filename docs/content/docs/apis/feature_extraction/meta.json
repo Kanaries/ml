@@ -1,4 +1,4 @@
 {
   "title": "Feature Extraction",
-  "pages": ["index", "countVectorizer", "tfidfTransformer", "tfidfVectorizer"]
+  "pages": ["index", "countVectorizer", "tfidfTransformer", "tfidfVectorizer", "hashingAndDictionaries"]
 }

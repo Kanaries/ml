@@ -8,6 +8,9 @@
     "ridgeRegression",
     "lassoRegression",
     "elasticNet",
-    "ridgeClassifier"
+    "ridgeClassifier",
+    "robustRegressors",
+    "bayesianRegressors",
+    "generalizedLinearModels"
   ]
 }

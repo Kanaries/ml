@@ -8,3 +8,5 @@ export { RadiusNeighborsRegressor } from './radiusNeighborsRegressor';
 export { NearestCentroid } from './nearestCentroid';
 export { LocalOutlierFactor } from './localOutlierFactor';
 export type { LocalOutlierFactorProps } from './localOutlierFactor';
+export { NearestNeighbors } from './nearestNeighbors';
+export type { NearestNeighborsProps, NeighborsAlgorithm } from './nearestNeighbors';

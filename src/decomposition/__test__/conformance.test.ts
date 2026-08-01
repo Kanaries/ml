@@ -6,6 +6,8 @@ import { KernelPCA } from '../kernelPCA';
 import { FastICA } from '../fastICA';
 import { NMF } from '../nmf';
 import { IncrementalPCA } from '../incrementalPCA';
+import { FactorAnalysis } from '../factorAnalysis';
+import { LatentDirichletAllocation } from '../latentDirichletAllocation';
 
 runEstimatorConformance([
     {
@@ -31,4 +33,6 @@ runEstimatorConformance([
     { name: 'FastICA', kind: 'transformer', dataset: 'blobs', create: () => new FastICA({ nComponents: 2, randomState: 42, maxIter: 500 }) },
     { name: 'NMF', kind: 'transformer', dataset: 'counts', create: () => new NMF({ nComponents: 2, randomState: 42, maxIter: 100 }) },
     { name: 'IncrementalPCA', kind: 'transformer', dataset: 'blobs', create: () => new IncrementalPCA({ nComponents: 2, batchSize: 10 }) },
+    { name: 'FactorAnalysis', kind: 'transformer', dataset: 'blobs', create: () => new FactorAnalysis({ nComponents: 2, maxIter: 100 }) },
+    { name: 'LatentDirichletAllocation', kind: 'transformer', dataset: 'counts', create: () => new LatentDirichletAllocation({ nComponents: 2, maxIter: 5, randomState: 42 }) },
 ]);

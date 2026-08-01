@@ -1,0 +1,33 @@
+---
+title: NearestNeighbors Search in JavaScript and TypeScript
+description: Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml.
+---
+
+# NearestNeighbors Search in JavaScript
+
+## Algorithm overview
+
+Nearest-neighbor search finds the closest reference samples without requiring labels. It supports similarity lookup, retrieval, deduplication, local analysis, and the search layer behind many non-parametric models.
+
+## JavaScript implementation
+
+`Neighbors.NearestNeighbors` provides the familiar sklearn-style `fit`, `kneighbors`, and `radiusNeighbors` workflow in browser and Node.js. Choose brute force explicitly or reuse the library's KD Tree and Ball Tree search structures. Only the training matrix is serialized; indexes are rebuilt safely for each query.
+
+## Quick start
+
+```ts
+import { Neighbors } from '@kanaries/ml';
+
+const search = new Neighbors.NearestNeighbors({
+  nNeighbors: 2,
+  algorithm: 'kdTree',
+});
+search.fit([[0], [2], [5]]);
+
+console.log(search.kneighbors([[1]]));
+// { distances: [[1, 1]], indices: [[0, 1]] }
+```
+
+## Detailed API reference
+
+Constructor options are `nNeighbors`, `radius`, `algorithm` (`auto`, `brute`, `kdTree`, or `ballTree`), `leafSize`, `metric`, and Minkowski `p`. `kneighbors(X?, nNeighbors?, returnDistance?)` returns sorted distances and indices; omitting `X` queries the fitted samples while excluding each sample itself. `radiusNeighbors` follows the same pattern for a distance threshold.

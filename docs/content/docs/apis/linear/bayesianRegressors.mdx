@@ -1,0 +1,32 @@
+---
+title: Bayesian Ridge and ARD Regression in JavaScript
+description: Run BayesianRidge and sparse ARDRegression in JavaScript or TypeScript with posterior uncertainty and sklearn-style APIs.
+---
+
+# Bayesian linear regression in JavaScript
+
+## Algorithm overview
+
+Bayesian linear models place probability distributions over coefficients. They are useful when you want regularized predictions plus uncertainty, or automatic relevance determination that prunes weak features.
+
+## JavaScript implementation
+
+`BayesianRidge` learns a shared coefficient precision and supports `predictStd`. `ARDRegression` learns one precision per feature and zeros coefficients whose precision crosses `thresholdLambda`.
+
+## Quick start
+
+```ts
+import { Linear } from '@kanaries/ml';
+
+const X = [[0], [1], [2], [3]];
+const y = [1, 3, 5, 7];
+const model = new Linear.BayesianRidge();
+model.fit(X, y);
+const mean = model.predict([[4]]);
+const standardDeviation = model.predictStd([[4]]);
+console.log({ mean, standardDeviation });
+```
+
+## Detailed API reference
+
+Both estimators accept `maxIter`, `tol`, Gamma-prior hyperparameters, and `fitIntercept`, and expose `coef`, `intercept`, `alpha`, `lambda`, `sigma`, and `nIter`.

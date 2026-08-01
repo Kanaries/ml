@@ -39,10 +39,8 @@ test('every frozen scenario has an explicit dataset, workflow, inclusion set, an
     });
 });
 
-test('future-wave dependencies remain explicit instead of being reported green', () => {
+test('implemented roadmap waves leave no scenario blocked on a missing estimator', () => {
     const blocked = scenarios.filter(scenario => scenario.parity.blockedBy.length > 0);
-    expect(blocked.map(scenario => scenario.id)).toEqual([
-        'clustering-comparison', 'robust-regression',
-    ]);
+    expect(blocked.map(scenario => scenario.id)).toEqual([]);
     blocked.forEach(scenario => expect(scenario.parity.state).toBe('pending'));
 });

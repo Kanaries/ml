@@ -3,6 +3,8 @@
   "pages": [
     "index",
     "preprocessing",
+    "advancedPreprocessing",
+    "inspection",
     "sampling",
     "modelSelection",
     "groupSplitters",

@@ -10,3 +10,5 @@ Robust covariance estimators describe the center and spread of multivariate data
 `@kanaries/ml` provides browser- and Node.js-ready TypeScript implementations of FAST-MCD through [MinCovDet](minCovDet) and its anomaly-detection wrapper [EllipticEnvelope](ellipticEnvelope).
 
 Choose `MinCovDet` when you need robust location, covariance, support masks, or Mahalanobis distances. Choose `EllipticEnvelope` when you need `predict`, `scoreSamples`, and `decisionFunction` with a contamination threshold.
+
+For classical, shrinkage, and sparse inverse covariance, see [Covariance Estimators](covarianceEstimators).

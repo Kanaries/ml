@@ -18,9 +18,13 @@ Incremental PCA updates a low-rank SVD one batch at a time. It is useful when a 
 ```ts
 import { Decomposition } from '@kanaries/ml';
 
+const batchOne = [[0, 1, 2], [1, 2, 3], [2, 1, 4]];
+const batchTwo = [[3, 4, 2], [4, 3, 1], [5, 5, 0]];
+const nextBatch = [[2, 3, 2]];
 const pca = new Decomposition.IncrementalPCA({ nComponents: 2 });
 pca.partialFit(batchOne).partialFit(batchTwo);
 const embedding = pca.transform(nextBatch);
+console.log(embedding);
 ```
 
 ## Detailed API reference

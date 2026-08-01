@@ -25,14 +25,18 @@ This is especially useful when someone searches for "machine learning in JavaScr
 
 ## Quick navigation
 
-- **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, HDBSCAN, Mean Shift, OPTICS, and initialization helpers.
+- **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, Birch, Affinity Propagation, HDBSCAN, and related methods.
 - **[Decomposition](/docs/apis/decomposition)**: reduce dimensions or separate latent structure with PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD.
 - **[Ensemble](/docs/apis/ensemble)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
-- **[Covariance](/docs/apis/covariance)**: estimate robust covariance and detect elliptical multivariate outliers.
+- **[Covariance](/docs/apis/covariance)**: estimate empirical, shrunk, robust, or sparse inverse covariance.
 - **[Feature Selection](/docs/apis/feature_selection)**: select columns with model importance, recursive elimination, or univariate scores.
 - **[Feature Extraction](/docs/apis/feature_extraction)**: turn raw text into sparse count and TF-IDF features.
 - **[Imputation](/docs/apis/impute)**: estimate correlated numeric values missing from feature matrices.
-- **[Linear](/docs/apis/linear)**: start with linear regression, logistic regression, regularized regression, and linear classification baselines.
+- **[Linear](/docs/apis/linear)**: use classical, robust, Bayesian, quantile, and generalized linear models.
+- **[Kernel Methods](/docs/apis/kernel)**: fit kernel ridge regression or kernel density estimates.
+- **[Cross Decomposition](/docs/apis/cross_decomposition)**: model paired blocks with PLS Regression and CCA.
+- **[Random Projection](/docs/apis/random_projection)**: reduce dimensions with Gaussian or sparse Johnson-Lindenstrauss maps.
+- **[Compose](/docs/apis/compose)**: wrap regression targets in invertible preprocessing transformations.
 - **[Metrics](/docs/apis/metrics)**: evaluate classification, regression, clustering, curves, and distance functions.
 - **[Manifold](/docs/apis/manifold)**: build lower-dimensional embeddings for visualization and neighborhood analysis.
 - **[Neighbors](/docs/apis/neighbors)**: run k-nearest neighbors and fast nearest-neighbor search structures.

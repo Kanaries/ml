@@ -22,6 +22,7 @@ const X = [[0, 1], [1, 0], [5, 1], [6, 0]];
 const y = [0, 0, 1, 1];
 const [fScores, pValues] = FeatureSelection.fClassif(X, y);
 const information = FeatureSelection.mutualInfoClassif(X, y, { randomState: 42 });
+console.log({ fScores, pValues, information });
 ```
 
 ## Detailed API reference

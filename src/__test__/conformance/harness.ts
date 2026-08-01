@@ -20,6 +20,7 @@ import {
     countsDataset,
     multiclassDataset,
     regressionDataset,
+    positiveRegressionDataset,
 } from './datasets';
 
 export type EstimatorKind =
@@ -37,7 +38,7 @@ export type EstimatorKind =
     /** fit(X) + mahalanobis(X) */
     | 'covariance';
 
-export type DatasetName = 'binary' | 'multiclass' | 'regression' | 'blobs' | 'counts' | 'binaryFeatures';
+export type DatasetName = 'binary' | 'multiclass' | 'regression' | 'positiveRegression' | 'blobs' | 'counts' | 'binaryFeatures';
 
 export interface EstimatorSpec {
     /** Name used in registerEstimator(); also the describe-block label. */
@@ -58,6 +59,7 @@ const DATASETS: Record<DatasetName, () => Dataset> = {
     binary: binaryDataset,
     multiclass: multiclassDataset,
     regression: regressionDataset,
+    positiveRegression: positiveRegressionDataset,
     blobs: blobsDataset,
     counts: countsDataset,
     binaryFeatures: binaryFeaturesDataset,

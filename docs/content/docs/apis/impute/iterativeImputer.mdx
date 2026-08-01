@@ -21,6 +21,7 @@ import { Impute } from '@kanaries/ml';
 const imputer = new Impute.IterativeImputer({ maxIter: 10, tol: 1e-3 });
 const complete = imputer.fitTransform([[0, 1], [1, 3], [2, NaN], [3, 7]]);
 const future = imputer.transform([[4, NaN]]);
+console.log({ complete, future });
 ```
 
 ## Detailed API reference

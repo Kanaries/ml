@@ -25,6 +25,8 @@ If someone searches for "machine learning utilities in JavaScript", "preprocessi
 ## Quick navigation
 
 - [Preprocessing](preprocessing): scale, normalize, encode, impute, and select features
+- [Advanced preprocessing](advancedPreprocessing): spline bases, target encoding, and multi-label indicators
+- [Model inspection](inspection): permutation importance and partial dependence
 - [Sampling](sampling): sample arrays and create train/test splits
 - [ModelSelection](modelSelection): run K-fold splits, cross-validation, grid search, and randomized search
 - [Stat](stat): compute lightweight statistics used in ML workflows

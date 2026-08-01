@@ -11,6 +11,9 @@ import { RidgeClassifier } from '../ridgeClassifier';
 import { SGDClassifier } from '../sgdClassifier';
 import { SGDRegressor } from '../sgdRegressor';
 import { Perceptron } from '../perceptron';
+import { ARDRegression, BayesianRidge } from '../bayesianRidge';
+import { HuberRegressor, QuantileRegressor, RANSACRegressor, TheilSenRegressor } from '../robustRegressors';
+import { GammaRegressor, PoissonRegressor, TweedieRegressor } from '../glm';
 
 runEstimatorConformance([
     {
@@ -85,4 +88,13 @@ runEstimatorConformance([
         dataset: 'binary',
         create: () => new Perceptron({ maxIter: 200, randomState: 42 }),
     },
+    { name: 'BayesianRidge', kind: 'regressor', dataset: 'regression', create: () => new BayesianRidge() },
+    { name: 'ARDRegression', kind: 'regressor', dataset: 'regression', create: () => new ARDRegression() },
+    { name: 'HuberRegressor', kind: 'regressor', dataset: 'regression', create: () => new HuberRegressor() },
+    { name: 'RANSACRegressor', kind: 'regressor', dataset: 'regression', create: () => new RANSACRegressor({ randomState: 42 }) },
+    { name: 'TheilSenRegressor', kind: 'regressor', dataset: 'regression', create: () => new TheilSenRegressor({ randomState: 42, maxSubpopulation: 200 }) },
+    { name: 'QuantileRegressor', kind: 'regressor', dataset: 'regression', create: () => new QuantileRegressor({ alpha: .01, maxIter: 1000 }) },
+    { name: 'PoissonRegressor', kind: 'regressor', dataset: 'positiveRegression', create: () => new PoissonRegressor({ maxIter: 200 }) },
+    { name: 'GammaRegressor', kind: 'regressor', dataset: 'positiveRegression', create: () => new GammaRegressor({ maxIter: 200 }) },
+    { name: 'TweedieRegressor', kind: 'regressor', dataset: 'positiveRegression', create: () => new TweedieRegressor({ power: 1.5, maxIter: 200 }) },
 ]);

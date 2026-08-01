@@ -7,6 +7,9 @@ import { HDBScan } from '../hdbscan';
 import { AgglomerativeClustering } from '../agglomerativeClustering';
 import { SpectralClustering } from '../spectralClustering';
 import { MiniBatchKMeans } from '../miniBatchKMeans';
+import { Birch } from '../birch';
+import { AffinityPropagation } from '../affinityPropagation';
+import { BisectingKMeans } from '../bisectingKMeans';
 
 runEstimatorConformance([
     {
@@ -61,6 +64,9 @@ runEstimatorConformance([
         dataset: 'blobs',
         create: () => new MiniBatchKMeans({ nClusters: 3, randomState: 42, batchSize: 16 }),
     },
+    { name: 'Birch', kind: 'cluster', dataset: 'blobs', create: () => new Birch({ nClusters: 3 }) },
+    { name: 'AffinityPropagation', kind: 'cluster', dataset: 'blobs', create: () => new AffinityPropagation({ preference: -20 }) },
+    { name: 'BisectingKMeans', kind: 'cluster', dataset: 'blobs', create: () => new BisectingKMeans({ nClusters: 3, randomState: 42 }) },
 ]);
 
 // Regression tests for CodeX Phase 0 review finding #4: getParams must return

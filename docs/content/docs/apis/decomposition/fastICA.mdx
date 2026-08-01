@@ -18,6 +18,7 @@ FastICA recovers statistically independent sources from observed mixtures by max
 ```ts
 import { Decomposition } from '@kanaries/ml';
 
+const observedSignals = [[0, 1], [1, 0], [2, 1], [1, 2], [-1, 0]];
 const ica = new Decomposition.FastICA({
   nComponents: 2,
   whiten: 'unit-variance',
@@ -25,6 +26,7 @@ const ica = new Decomposition.FastICA({
 });
 const sources = ica.fitTransform(observedSignals);
 const reconstructed = ica.inverseTransform(sources);
+console.log({ sources, reconstructed });
 ```
 
 ## Detailed API reference

@@ -18,9 +18,13 @@ Random sample splits leak information when multiple rows belong to the same user
 ```ts
 import { utils } from '@kanaries/ml';
 
+const X = [[0], [1], [2], [3], [4], [5]];
+const y = [0, 0, 1, 1, 0, 1];
+const patientIds = ['a', 'a', 'b', 'b', 'c', 'c'];
 const folds = new utils.ModelSelection.StratifiedGroupKFold({
   nSplits: 3, shuffle: true, randomState: 42,
 }).split(X, y, patientIds);
+console.log(folds);
 ```
 
 ## Detailed API reference

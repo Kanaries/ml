@@ -23,6 +23,8 @@ import {
     SimpleImputer,
     StandardScaler,
     VarianceThreshold,
+    SplineTransformer,
+    TargetEncoder,
 } from '../preprocessing';
 import { GridSearchCV, KFold, RandomizedSearchCV } from '../modelSelection';
 
@@ -134,6 +136,18 @@ runEstimatorConformance([
         kind: 'transformer',
         dataset: 'blobs',
         create: () => new FunctionTransformer({ func: 'expm1', inverseFunc: 'log1p' }),
+    },
+    {
+        name: 'SplineTransformer',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new SplineTransformer({ nKnots: 4, degree: 2 }),
+    },
+    {
+        name: 'TargetEncoder',
+        kind: 'transformer',
+        dataset: 'blobs',
+        create: () => new TargetEncoder({ smooth: 2, targetType: 'continuous' }) as any,
     },
 ]);
 

@@ -30,6 +30,8 @@ If someone searches for "PCA in JavaScript" or "Truncated SVD in TypeScript", th
 - [FastICA](fastICA): independent signal separation
 - [NMF](nmf): non-negative, parts-based latent factors
 - [Incremental PCA](incrementalPCA): batch-wise, memory-aware PCA
+- [Factor Analysis](factorAnalysis): latent Gaussian factors with per-feature noise
+- [Latent Dirichlet Allocation](latentDirichletAllocation): topic mixtures from word counts
 
 ## Detailed module guide
 

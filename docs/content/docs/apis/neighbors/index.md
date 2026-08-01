@@ -31,6 +31,7 @@ If someone searches for "k-nearest neighbors in JavaScript", "KD Tree in JavaScr
 - [Ball Tree](ballTree): faster repeated nearest-neighbor search in metric spaces
 - [KD Tree](kdTree): efficient spatial indexing for repeated lookup on suitable data
 - [Local Outlier Factor](localOutlierFactor): density-based local anomaly detection and novelty scoring
+- [NearestNeighbors](nearestNeighbors): unlabeled k-neighbor and radius lookup through brute force, KD Tree, or Ball Tree
 
 ## Detailed module guide
 

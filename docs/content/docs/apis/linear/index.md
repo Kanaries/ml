@@ -32,6 +32,9 @@ If someone searches for "linear regression in JavaScript" or "logistic regressio
 - [ElasticNet](elasticNet): combined L1 and L2 regularized regression
 - [RidgeClassifier](ridgeClassifier): one-vs-rest L2-regularized linear classification
 - [Logistic Regression](logisticRegression): binary classification with probability-oriented outputs
+- [Robust Regression](robustRegressors): Huber, RANSAC, Theil-Sen, and conditional quantiles
+- [Bayesian Regressors](bayesianRegressors): posterior uncertainty and automatic relevance determination
+- [Generalized Linear Models](generalizedLinearModels): Poisson, Gamma, and Tweedie targets
 
 ## Detailed module guide
 

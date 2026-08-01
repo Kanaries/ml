@@ -25,6 +25,10 @@ import * as FeatureSelection from './feature_selection';
 import * as Covariance from './covariance';
 import * as FeatureExtraction from './feature_extraction';
 import * as Impute from './impute';
+import * as Kernel from './kernel';
+import * as RandomProjection from './random_projection';
+import * as CrossDecomposition from './cross_decomposition';
+import * as Compose from './compose';
 import { CSRMatrix } from './data';
 import * as utils from './utils';
 import * as Base from './base';
@@ -67,6 +71,10 @@ export {
     Covariance,
     FeatureExtraction,
     Impute,
+    Kernel,
+    RandomProjection,
+    CrossDecomposition,
+    Compose,
     CSRMatrix,
     utils
 }

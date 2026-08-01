@@ -1,0 +1,31 @@
+---
+title: Kernel Ridge Regression and Kernel Density in JavaScript
+description: Use nonlinear KernelRidge prediction and KernelDensity estimation in JavaScript or TypeScript with @kanaries/ml.
+---
+
+# Kernel methods in JavaScript
+
+## Algorithm overview
+
+Kernel methods compare samples through a similarity function instead of explicitly expanding nonlinear features. `KernelRidge` solves regularized regression in the dual; `KernelDensity` estimates a probability density from nearby observations.
+
+## JavaScript implementation
+
+`@kanaries/ml` keeps both estimators in the JavaScript runtime: fit nonlinear regression in a Node.js service, or score small density models directly in an interactive browser workflow without a Python inference endpoint. Choose this implementation when model state and product code need to share the same typed API; benchmark larger training sets because kernel matrices and pairwise scoring grow with the number of samples.
+
+## Quick start
+
+```ts
+import { Kernel } from '@kanaries/ml';
+
+const X = [[0], [1], [2]];
+const regressor = new Kernel.KernelRidge({ kernel: 'rbf', gamma: 0.5 });
+regressor.fit(X, [0, 1, 4]);
+const density = new Kernel.KernelDensity({ bandwidth: 0.8 });
+density.fit(X);
+console.log({ prediction: regressor.predict([[1.5]]), logDensity: density.scoreSamples([[1.5]]) });
+```
+
+## Detailed API reference
+
+KernelRidge supports linear, polynomial, RBF, sigmoid, and cosine kernels. KernelDensity supports Gaussian, tophat, Epanechnikov, exponential, linear, and cosine radial kernels and exposes `scoreSamples` and `score`.

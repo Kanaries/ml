@@ -18,11 +18,14 @@ Pass any registered single-output classifier to `MultiOutput.ClassifierChain`. A
 ```ts
 import { Bayes, MultiOutput } from '@kanaries/ml';
 
+const X = [[0], [1], [2]];
+const testX = [[1.5]];
 const chain = new MultiOutput.ClassifierChain({
   estimator: new Bayes.GaussianNB(), order: [0, 1],
 });
 chain.fit(X, [[0, 0], [0, 1], [1, 1]]);
 const labels = chain.predict(testX);
+console.log(labels);
 ```
 
 ## Detailed API reference

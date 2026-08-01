@@ -1,0 +1,29 @@
+---
+title: Gaussian and Sparse Random Projection in JavaScript
+description: Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript.
+---
+
+# Random projection in JavaScript
+
+## Algorithm overview
+
+Random projection reduces dimensionality with a data-independent matrix while approximately preserving pairwise distances. It is useful when deterministic decomposition is too expensive.
+
+## JavaScript implementation
+
+`@kanaries/ml` generates seeded Gaussian or sparse projection matrices in browser and Node.js and exposes the fitted components for serialization. Random projection is a lightweight choice when PCA-style fitting is too expensive or data arrives only at inference time; the sparse variant reduces multiply cost for high-dimensional frontend features.
+
+## Quick start
+
+```ts
+import { RandomProjection } from '@kanaries/ml';
+
+const X = [[1, 0, 2], [0, 1, 3], [2, 1, 0]];
+const model = new RandomProjection.SparseRandomProjection({ nComponents: 128, randomState: 42 });
+const reduced = model.fitTransform(X);
+console.log(reduced[0].length);
+```
+
+## Detailed API reference
+
+Set `nComponents: 'auto'` with `eps` to use the sklearn Johnson-Lindenstrauss bound. Both estimators expose `components`; `computeInverseComponents` enables approximate `inverseTransform`.
