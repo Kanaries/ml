@@ -1,71 +1,135 @@
-# TODO
+# TODO — Phase 3 Check Items
 
-> **Authoritative roadmap**: [docs/ML_ROADMAP_NEXT.md](docs/ML_ROADMAP_NEXT.md).
-> This file is the short-form working checklist. Last synced with the codebase: 2026-07-31
-> (114 exported public classes across 20+ modules; Phases 0–2 of the roadmap shipped 2026-07-11/12).
+> Working checklist, one checkbox per check item. Progress is reported as check-item counts
+> (e.g. "Wave A: 9/16") — no time estimates. Last synced with the codebase: 2026-07-31.
+> Historical roadmap: [docs/ML_ROADMAP_NEXT.md](docs/ML_ROADMAP_NEXT.md) (its §1–2 are a
+> pre-Phase-0 snapshot; Phases 0–2 shipped 2026-07-11/12 — estimator contract & serialization,
+> Pipeline/ColumnTransformer/FeatureUnion, metrics/preprocessing/model-selection fill-out,
+> GMM, MLP, SVR family, LDA/QDA, SGD family, Voting/Stacking, calibration, and more).
 
-## Done (shipped, previously mistracked here)
+Acceptance per item — estimator: implementation + sklearn parity fixture + conformance
+suite + docs entry. Utility: implementation + numeric parity test + docs. Architecture:
+stated DoD + all existing tests green.
 
-Estimator contract (`getParams`/`setParams`/`clone`, `toJSON`/`fromJSON`, conformance suite) ·
-Pipeline / ColumnTransformer / FeatureUnion · full metrics & preprocessing fill-out ·
-model selection (KFold family, Grid/RandomizedSearchCV, crossValidate, learning/validation curves) ·
-RandomForest · Bagging (clf) · AdaBoost · GradientBoosting · XGBoost · Voting · Stacking ·
-SVC/SVR/NuSVC/NuSVR/LinearSVC/LinearSVR/OneClassSVM · full Naive Bayes family ·
-KMeans/MiniBatchKMeans/DBSCAN/HDBSCAN/OPTICS/MeanShift/Agglomerative/Spectral ·
-GaussianMixture (+Bayesian) · LDA/QDA · MLP C/R · BernoulliRBM · t-SNE/LLE/MDS/SpectralEmbedding ·
-PCA/SparsePCA/TruncatedSVD · SGD family · Perceptron · LabelPropagation/Spreading ·
-OvR/OvO · MultiOutput C/R · CalibratedClassifierCV · IsotonicRegression · Dummy baselines ·
-`datasets.make*` generators · Web Worker `asyncMode`.
+## Wave 0 — Architecture prerequisites (4 items)
 
-## Active — Phase 3 backlog (roughly priority-ordered)
+- [ ] 0-1 `featureImportances`/`coef` as an **optional capability** protocol — implemented only by estimators with the semantics (linear → `coef`, trees/forests/boosting → `featureImportances`; kernel SVMs etc. explicitly opt out); conformance checks only declared capabilities; SelectFromModel/RFE gate on capability detection
+- [ ] 0-2 Forest skeleton generalization: RandomForest takes a parameterized base estimator, behavior unchanged (prereq for ExtraTrees)
+- [ ] 0-3 Data-abstraction upgrade: string-feature input path + minimal CSR sparse representation; Pipeline/TransformerBase unpinned from `number[][]`; NB family accepts sparse (prereq for text route; memory benchmark: 20k docs × 30k vocab in-browser)
+- [ ] 0-4 `scripts/coverage-vs-sklearn` script (sklearn 1.5 `all_estimators()` denominator, alias-deduped; coverage numbers come only from this)
 
-### Anomaly detection (completes an advertised feature area)
-- [ ] LocalOutlierFactor (reuse KDTree/BallTree)
-- [ ] EllipticEnvelope (needs MinCovDet, see covariance below)
+## Wave A — Promise gaps + symmetry (16 items)
 
-### Symmetry gaps (small, high value)
-- [ ] BaggingRegressor (classifier exists)
-- [ ] ExtraTreesClassifier / ExtraTreesRegressor (forest of existing ExtraTree)
-- [ ] Isomap (manifold family four-of-five done; reuse neighbors + MDS infra)
+Estimators (10):
+- [ ] LocalOutlierFactor
+- [ ] EllipticEnvelope
+- [ ] MinCovDet (FAST-MCD, high complexity)
+- [ ] Isomap (neighbor graph + shortest paths + spectral embedding; not assembled from MDS)
+- [ ] BaggingRegressor
+- [ ] ExtraTreesClassifier (needs 0-2)
+- [ ] ExtraTreesRegressor (needs 0-2)
+- [ ] SelectFromModel (meta-transformer — estimator acceptance; needs 0-1)
+- [ ] RFE (meta-transformer — estimator acceptance; needs 0-1)
+- [ ] RFECV (meta-transformer — estimator acceptance; needs 0-1)
+
+Utilities (6):
 - [ ] crossValPredict
+- [ ] chi2
+- [ ] fClassif
+- [ ] mutualInfoClassif (k-NN entropy estimator)
+- [ ] mutualInfoRegression
+- [ ] sklearn naming aliases (DBSCAN, HDBSCAN, KNeighborsClassifier, …; old names kept)
 
-### Feature selection
-- [ ] chi2, fClassif, mutual information scores
-- [ ] SelectFromModel
-- [ ] RFE / RFECV
-- [ ] SequentialFeatureSelector
+## Wave B — Text route + high-demand decomposition (13 items)
 
-### Robust & probabilistic linear models
-- [ ] HuberRegressor, RANSACRegressor, TheilSenRegressor
-- [ ] BayesianRidge, ARDRegression
-- [ ] PoissonRegressor / GammaRegressor / TweedieRegressor (GLMs)
-- [ ] QuantileRegressor
-
-### Decomposition
+- [ ] CountVectorizer (needs 0-3)
+- [ ] TfidfTransformer (needs 0-3)
+- [ ] TfidfVectorizer (needs 0-3)
 - [ ] KernelPCA
 - [ ] FastICA
 - [ ] NMF
 - [ ] IncrementalPCA
+- [ ] SelfTrainingClassifier
+- [ ] ClassifierChain
+- [ ] RegressorChain
+- [ ] IterativeImputer (iterative refitting, medium cost)
+- [ ] GroupShuffleSplit
+- [ ] StratifiedGroupKFold
+
+## Wave C — Statistical & kernel long tail (35 items)
+
+Robust/probabilistic linear (6):
+- [ ] HuberRegressor
+- [ ] RANSACRegressor
+- [ ] TheilSenRegressor (subsample combinatorics, medium cost)
+- [ ] QuantileRegressor (needs LP solver, highest cost in this wave)
+- [ ] BayesianRidge
+- [ ] ARDRegression
+
+GLMs (3) — per-item solver/link/regularization alignment, no shared-IRLS shortcut:
+- [ ] PoissonRegressor
+- [ ] GammaRegressor
+- [ ] TweedieRegressor
+
+Kernel methods (2):
+- [ ] KernelRidge (Cholesky solve on kernel matrix; reuses kernel fns, not SMO)
+- [ ] KernelDensity
+
+Clustering (3):
+- [ ] Birch
+- [ ] AffinityPropagation (O(n²) memory — document sample-size ceiling)
+- [ ] BisectingKMeans
+
+Decomposition (2):
 - [ ] FactorAnalysis
 - [ ] LatentDirichletAllocation
 
-### Text feature extraction (unlocks browser NLP with existing MultinomialNB/ComplementNB)
-- [ ] CountVectorizer
-- [ ] TfidfVectorizer
+Covariance (5):
+- [ ] EmpiricalCovariance
+- [ ] ShrunkCovariance
+- [ ] LedoitWolf
+- [ ] OAS
+- [ ] GraphicalLasso
 
-### Remaining estimator families
-- [ ] KernelRidge · KernelDensity
-- [ ] GaussianProcessRegressor / GaussianProcessClassifier (+ kernels)
-- [ ] covariance module: EmpiricalCovariance, LedoitWolf, MinCovDet, GraphicalLasso
-- [ ] cross_decomposition: PLSRegression, CCA
-- [ ] random_projection: Gaussian / Sparse
-- [ ] Birch, AffinityPropagation, BisectingKMeans
-- [ ] SelfTrainingClassifier · ClassifierChain / RegressorChain
-- [ ] IterativeImputer · SplineTransformer · TargetEncoder
-- [ ] inspection: permutationImportance, partialDependence
-- [ ] HistGradientBoosting C/R (pairs with Phase 4 typed-array work)
+Cross-decomposition (2):
+- [ ] PLSRegression
+- [ ] CCA
 
-## Phase 4 — JS differentiation (after Phase 3 core)
+Random projection (2):
+- [ ] GaussianRandomProjection
+- [ ] SparseRandomProjection
+
+Text extras (3):
+- [ ] HashingVectorizer
+- [ ] DictVectorizer
+- [ ] FeatureHasher
+
+Other (7):
+- [ ] TransformedTargetRegressor
+- [ ] NearestNeighbors (unsupervised query wrapper over KDTree/BallTree)
+- [ ] permutationImportance
+- [ ] partialDependence
+- [ ] SplineTransformer
+- [ ] TargetEncoder
+- [ ] MultiLabelBinarizer
+
+## Wave D — Heavy projects (4 items; excluded from the Phase 3 exit gate)
+
+- [ ] GaussianProcessRegressor (kernel system accepted as part of this item)
+- [ ] GaussianProcessClassifier
+- [ ] HistGradientBoostingClassifier (pair with Phase 4 typed-array work)
+- [ ] HistGradientBoostingRegressor (pair with Phase 4 typed-array work)
+
+## Phase 3 exit gate
+
+`src/__test__/e2e/` scenario corpus: 10 frozen named scenarios, each a spec of an explicit
+algorithm subset + dataset + workflow (frozen at Wave A start; specs exclude algorithms that
+are Deferred — e.g. faces decomposition runs PCA/NMF/FastICA only, manifold comparison runs
+standard LLE only). Parity is 1:1 against the frozen spec, not against full official example
+pages. Exit = 10/10 e2e green + Wave 0/A/B at 100% + Wave C ≥ 80% (trimmed Wave C items move
+to Deferred with a decision note; specs referencing them get revised in the same commit).
+
+## Phase 4 — JS differentiation (after Phase 3)
 
 - [ ] Typed-array internals for hot paths + benchmark suite
 - [ ] `partialFit` (SGD, MiniBatchKMeans, NB family)
@@ -73,9 +137,19 @@ OvR/OvO · MultiOutput C/R · CalibratedClassifierCV · IsotonicRegression · Du
 - [ ] Bundle-size budget + subpath exports
 - [ ] Optional WASM kernels
 
+## Deferred (enumerated, not scheduled; promoting one requires a decision note)
+
+PLSCanonical · PLSSVD · OutputCodeClassifier · NCA · KNeighborsTransformer ·
+RandomTreesEmbedding · FeatureAgglomeration · DictionaryLearning · Lars · LassoLars ·
+OrthogonalMatchingPursuit · PassiveAggressive C/R · HalvingGridSearchCV ·
+HalvingRandomSearchCV · LeavePOut · LeaveOneGroupOut · permutationTestScore ·
+GraphicalLassoCV
+
 ## Explicitly out of scope (decided, do not re-add)
 
 - CNN / RNN / LSTM — deep learning is TensorFlow.js territory per the README positioning; MLP is the boundary.
-- ARIMA / exponential smoothing / seasonal decomposition — sklearn deliberately excludes time series (statsmodels territory); would dilute the sklearn-parity promise. Revisit only as a separate package.
+- ARIMA / exponential smoothing / seasonal decomposition — sklearn deliberately excludes time series; would dilute the sklearn-parity promise. Revisit only as a separate package.
 - Apriori / association rules — mlxtend territory, not sklearn.
 - Genetic algorithms / particle swarm optimization, image preprocessing — outside the sklearn surface.
+- `*CV` estimator variants (RidgeCV, LassoCV, …) — not strictly equivalent to GridSearchCV composition (efficient LOOCV/GCV paths, `alphaPerTarget` semantics), but at this library's target data scale the composition is an acceptable approximation; docs show the equivalent. Reopen on real user demand.
+- UMAP — not sklearn (umap-learn), high cost. Watch-listed.
