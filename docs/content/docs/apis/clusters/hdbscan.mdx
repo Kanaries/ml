@@ -4,6 +4,7 @@ description: Learn what HDBSCAN does, when to use it, and how to run HDBScan in 
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
 
 # HDBSCAN in JavaScript
 
@@ -21,6 +22,12 @@ The `HDBScan` class in @kanaries/ml is a full implementation aligned with scikit
 2. **Mutual reachability** — pairwise distances `max(core_a, core_b, d(a, b))`.
 3. **Minimum spanning tree** — Prim's algorithm on the mutual reachability graph.
 4. **Condensed tree and stability extraction** — the single linkage hierarchy is condensed by `min_cluster_size`, and flat clusters are selected with the Excess of Mass (EOM) stability criterion.
+
+## Interactive HDBSCAN playground
+
+Change the minimum cluster size, neighborhood size, dataset, and noise level. This browser-side `Clusters.HDBScan` fit uses point opacity to show membership strength and gray to show observations left as noise.
+
+<ClusteringPlayground algorithm="hdbscan" />
 
 ## Quick start
 

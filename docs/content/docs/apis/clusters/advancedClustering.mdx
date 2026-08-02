@@ -3,6 +3,8 @@ title: Birch, Affinity Propagation, and Bisecting K-Means in JavaScript
 description: Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans.
 ---
 
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
+
 # Advanced clustering in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ description: Cluster streamed, exemplar-based, or hierarchical data in JavaScrip
 ## JavaScript implementation
 
 These estimators run locally in browser or Node.js and follow the library's `fitPredict` convention. Affinity propagation stores several O(n²) matrices; as a practical browser ceiling, keep it below roughly 2,000 samples unless you have benchmarked the target device's memory budget.
+
+## Interactive advanced clustering playground
+
+Switch among Birch, Affinity Propagation, and Bisecting K-Means, then change each estimator's most important controls. Every view is fitted live with the corresponding `@kanaries/ml` class, including its reported centers, exemplars, or inertia.
+
+<ClusteringPlayground algorithm="advanced" />
 
 ## Quick start
 

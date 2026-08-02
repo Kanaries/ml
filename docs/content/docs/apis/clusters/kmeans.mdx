@@ -4,6 +4,7 @@ description: Learn what K-Means clustering does, when to use it, and how to run 
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { KMeansPlayground } from '@/components/playground/KMeansPlayground';
 
 # K-Means in JavaScript
 
@@ -24,6 +25,12 @@ It is usually one of the first clustering algorithms to try because it is simple
 @kanaries/ml lets you run K-Means directly in JavaScript, which is useful for dashboards, segmentation tools, and in-product analytics where clustering needs to happen close to the user interaction. You can cluster points in the browser for exploratory work or in Node.js for server-side batch processing without leaving the JS stack.
 
 This is especially valuable when frontend engineers want scikit-learn-like clustering behavior but need the implementation to live alongside React, Next.js, or other TypeScript-based application code.
+
+## Interactive K-Means playground
+
+Choose a dataset and cluster count, then play or step through the assignment and centroid-update loop. Click the plot to add observations; the transparent animation is checked against a real `Clusters.KMeans` fit in your browser.
+
+<KMeansPlayground />
 
 ## Quick start
 

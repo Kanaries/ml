@@ -4,6 +4,7 @@ description: Learn what Mean Shift does, when to use it, and how to run MeanShif
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
 
 # Mean Shift in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml gives JavaScript applications access to Mean Shift for cases where clusters form around dense modes rather than around a fixed, user-specified cluster count. That can be useful in browser-based exploratory tools where users want clustering without deciding `k` up front.
 
 Because the implementation is available in JS, you can experiment with bandwidth-driven clustering directly inside Node.js services or interactive frontend tools.
+
+## Interactive Mean Shift playground
+
+Move the bandwidth control to change how local density peaks merge. The chart is recomputed with `Clusters.MeanShift` in your browser, and the diamonds show the modes found by the fitted model.
+
+<ClusteringPlayground algorithm="meanShift" />
 
 ## Quick start
 

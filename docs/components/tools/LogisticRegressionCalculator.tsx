@@ -92,12 +92,15 @@ export function LogisticRegressionCalculator() {
       const maxIter = X.length * featureNames.length <= 500 ? 30000 : 5000;
       const classifier = new Linear.LogisticRegression({ learningRate: 0.2, maxIter });
       classifier.fit(scaledX, y);
-      const internals = classifier as unknown as { weights: number[]; bias: number };
-      if (!Array.isArray(internals.weights) || !Number.isFinite(internals.bias)) {
-        throw new Error('This @kanaries/ml build does not expose the fitted coefficient state required by the calculator.');
+      const fittedCoefficients = classifier.coef;
+      if (!Array.isArray(fittedCoefficients) || Array.isArray(fittedCoefficients[0])) {
+        throw new Error('The logistic regression calculator requires a binary fitted model.');
       }
-      const coefficients = internals.weights.map((weight, column) => weight / scales[column]);
-      const intercept = internals.bias - internals.weights.reduce((sum, weight, column) => sum + (weight * means[column]) / scales[column], 0);
+      const scaledCoefficients = fittedCoefficients as number[];
+      const zeroDecision = classifier.decisionFunction([new Array(featureNames.length).fill(0)]);
+      const scaledIntercept = (zeroDecision as number[])[0];
+      const coefficients = scaledCoefficients.map((weight, column) => weight / scales[column]);
+      const intercept = scaledIntercept - scaledCoefficients.reduce((sum, weight, column) => sum + (weight * means[column]) / scales[column], 0);
       const probabilities = X.map((row) => sigmoid(intercept + coefficients.reduce((sum, coefficient, column) => sum + coefficient * row[column], 0)));
       const predictions = classifier.predict(scaledX);
       const matrix = Metrics.confusionMatrix(predictions, y, labels);

@@ -4,6 +4,7 @@ description: Learn what k-means++ Initialization does, when to use it, and how t
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
 
 # k-means++ Initialization in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml exposes k-means++ initialization in JavaScript so you can build your own clustering pipelines while still getting better centroid seeding than uniform random starts. This is useful in advanced JS workflows where you want explicit control over initialization before handing centers into K-Means.
 
 Because it runs in the same runtime as the rest of your app, you can generate centers during browser-side experimentation or Node.js preprocessing without crossing language boundaries.
+
+## Interactive k-means++ seeding playground
+
+Choose the number of seeds and reroll the weighted selection. Numbered observations are the centers returned by `Clusters.kmeansPlusPlus`; the colors show their nearest-point regions before K-Means begins iterating.
+
+<ClusteringPlayground algorithm="kmeansPlusPlus" />
 
 ## Quick start
 

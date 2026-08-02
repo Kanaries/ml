@@ -505,6 +505,12 @@ markdown_url: "https://ml.kanaries.net/docs/apis/clusters/advancedClustering.md"
 
 These estimators run locally in browser or Node.js and follow the library's `fitPredict` convention. Affinity propagation stores several O(n²) matrices; as a practical browser ceiling, keep it below roughly 2,000 samples unless you have benchmarked the target device's memory budget.
 
+## Interactive advanced clustering playground
+
+Switch among Birch, Affinity Propagation, and Bisecting K-Means, then change each estimator's most important controls. Every view is fitted live with the corresponding `@kanaries/ml` class, including its reported centers, exemplars, or inertia.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/advancedClustering).
+
 ## Quick start
 
 ```ts
@@ -540,6 +546,12 @@ DBSCAN groups points that are densely connected and marks sparse points as noise
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Clusters.DBScan` for JavaScript and TypeScript workflows. It accepts an epsilon radius, a minimum sample count, and a distance metric name.
+
+## Interactive DBSCAN playground
+
+Tune the neighborhood radius and minimum sample count below. The cluster map is fitted live with `Clusters.DBScan`; click the chart to test whether a new point connects dense regions or remains noise.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/dbscan).
 
 ## Quick start example
 
@@ -595,6 +607,12 @@ The `HDBScan` class in @kanaries/ml is a full implementation aligned with scikit
 2. **Mutual reachability** — pairwise distances `max(core_a, core_b, d(a, b))`.
 3. **Minimum spanning tree** — Prim's algorithm on the mutual reachability graph.
 4. **Condensed tree and stability extraction** — the single linkage hierarchy is condensed by `min_cluster_size`, and flat clusters are selected with the Excess of Mass (EOM) stability criterion.
+
+## Interactive HDBSCAN playground
+
+Change the minimum cluster size, neighborhood size, dataset, and noise level. This browser-side `Clusters.HDBScan` fit uses point opacity to show membership strength and gray to show observations left as noise.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/hdbscan).
 
 ## Quick start
 
@@ -763,6 +781,12 @@ It is usually one of the first clustering algorithms to try because it is simple
 
 This is especially valuable when frontend engineers want scikit-learn-like clustering behavior but need the implementation to live alongside React, Next.js, or other TypeScript-based application code.
 
+## Interactive K-Means playground
+
+Choose a dataset and cluster count, then play or step through the assignment and centroid-update loop. Click the plot to add observations; the transparent animation is checked against a real `Clusters.KMeans` fit in your browser.
+
+> The HTML version includes an interactive K-Means playground. You can step through Lloyd iterations, change the data and cluster count, add observations, and compare the animation with a live @kanaries/ml fit. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/kmeans).
+
 ## Quick start
 
 ### K-Means Clustering (KMeans): Python and JavaScript / TypeScript
@@ -862,6 +886,12 @@ This algorithm is especially useful when:
 
 Because it runs in the same runtime as the rest of your app, you can generate centers during browser-side experimentation or Node.js preprocessing without crossing language boundaries.
 
+## Interactive k-means++ seeding playground
+
+Choose the number of seeds and reroll the weighted selection. Numbered observations are the centers returned by `Clusters.kmeansPlusPlus`; the colors show their nearest-point regions before K-Means begins iterating.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/kmeansPlusPlus).
+
 ## Quick start
 
 ### kmeansPlusPlus: Python and JavaScript / TypeScript
@@ -955,6 +985,12 @@ This algorithm is especially useful when:
 @kanaries/ml gives JavaScript applications access to Mean Shift for cases where clusters form around dense modes rather than around a fixed, user-specified cluster count. That can be useful in browser-based exploratory tools where users want clustering without deciding `k` up front.
 
 Because the implementation is available in JS, you can experiment with bandwidth-driven clustering directly inside Node.js services or interactive frontend tools.
+
+## Interactive Mean Shift playground
+
+Move the bandwidth control to change how local density peaks merge. The chart is recomputed with `Clusters.MeanShift` in your browser, and the diamonds show the modes found by the fitted model.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/meanShift).
 
 ## Quick start
 
@@ -1056,6 +1092,12 @@ This algorithm is especially useful when:
 @kanaries/ml makes OPTICS available in JavaScript for density-based clustering workflows where cluster shapes are irregular and noise handling matters. This is useful for web-based data exploration products that need to surface structure without assuming spherical clusters.
 
 Running OPTICS in the JS stack means engineering teams can keep clustering logic close to interactive visualizations, upload flows, or Node.js processing jobs instead of depending on a separate Python layer.
+
+## Interactive OPTICS playground
+
+Tune the reachability extraction radius and minimum neighborhood size. The labels below come from a live `Clusters.OPTICS` fit; click the plot to see whether a new observation joins a density-connected region.
+
+> The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/optics).
 
 ## Quick start
 
@@ -7310,6 +7352,12 @@ This module is a strong fit when:
 `@kanaries/ml` provides tree models in JavaScript and TypeScript so teams can keep interpretable prediction logic close to product code, browser demos, and Node.js APIs. This is especially useful when engineers or stakeholders need to inspect why a model made a decision, not just what it predicted.
 
 If someone searches for "decision tree in JavaScript" or "extra tree classifier in TypeScript", this module is the right entry point.
+
+## Interactive tree model playground
+
+Change the dataset, depth, split constraint, and impurity criterion to see how a JavaScript decision tree partitions feature space. Click the chart to add an observation and refit `Tree.DecisionTreeClassifier` immediately.
+
+> The HTML version includes an interactive Decision Tree Classifier playground. You can tune the tree depth, split constraints, dataset noise, and criterion; add observations; and inspect the fitted predictions and tree structure. The guide, runnable example, and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/tree).
 
 ## Quick navigation
 

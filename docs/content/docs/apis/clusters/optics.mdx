@@ -4,6 +4,7 @@ description: Learn what OPTICS does, when to use it, and how to run OPTICS in Ja
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
 
 # OPTICS in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml makes OPTICS available in JavaScript for density-based clustering workflows where cluster shapes are irregular and noise handling matters. This is useful for web-based data exploration products that need to surface structure without assuming spherical clusters.
 
 Running OPTICS in the JS stack means engineering teams can keep clustering logic close to interactive visualizations, upload flows, or Node.js processing jobs instead of depending on a separate Python layer.
+
+## Interactive OPTICS playground
+
+Tune the reachability extraction radius and minimum neighborhood size. The labels below come from a live `Clusters.OPTICS` fit; click the plot to see whether a new observation joins a density-connected region.
+
+<ClusteringPlayground algorithm="optics" />
 
 ## Quick start
 

@@ -3,6 +3,8 @@ title: DBScan in JavaScript with @kanaries/ml
 description: Discover density-based clusters and noise with the DBScan JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
 ---
 
+import { ClusteringPlayground } from '@/components/clusteringPlayground';
+
 # DBScan in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ DBSCAN groups points that are densely connected and marks sparse points as noise
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Clusters.DBScan` for JavaScript and TypeScript workflows. It accepts an epsilon radius, a minimum sample count, and a distance metric name.
+
+## Interactive DBSCAN playground
+
+Tune the neighborhood radius and minimum sample count below. The cluster map is fitted live with `Clusters.DBScan`; click the chart to test whether a new point connects dense regions or remains noise.
+
+<ClusteringPlayground algorithm="dbscan" />
 
 ## Quick start example
 

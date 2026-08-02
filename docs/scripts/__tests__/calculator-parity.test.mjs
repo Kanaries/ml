@@ -49,7 +49,8 @@ test('logistic calculator coefficients match unregularized sklearn within 1e-6',
 
   const model = new Linear.LogisticRegression({ learningRate: 0.2, maxIter: 30000 });
   model.fit(scaledX, y);
-  const { weights, bias } = model;
+  const weights = model.coef;
+  const bias = model.decisionFunction([[0]])[0];
   const coefficient = weights[0] / scale;
   const intercept = bias - (weights[0] * mean) / scale;
 

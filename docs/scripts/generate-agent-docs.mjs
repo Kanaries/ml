@@ -161,6 +161,8 @@ function componentToMarkdown(node, record, siteUrl) {
 
   const interactiveDescriptions = {
     ClusteringComparison: 'The HTML version includes an interactive comparison of clustering algorithms. The agent-readable algorithm links and selection guidance continue below.',
+    ClusteringPlayground: 'The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below.',
+    KMeansPlayground: 'The HTML version includes an interactive K-Means playground. You can step through Lloyd iterations, change the data and cluster count, add observations, and compare the animation with a live @kanaries/ml fit. The runnable guide and API reference continue below.',
     LogisticRegressionDemo: 'The HTML version includes an interactive logistic regression visualization. The complete runnable example and API details are included in this Markdown page.',
     IsolationForestDemo: 'The HTML version includes an interactive Isolation Forest anomaly scoring demo. The complete runnable example and evaluation guidance continue below.',
   };

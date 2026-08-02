@@ -3,6 +3,8 @@ title: Tree Models in JavaScript with @kanaries/ml
 description: Explore decision trees and extra trees in JavaScript and TypeScript with @kanaries/ml for interpretable tabular classification and regression.
 ---
 
+import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
+
 # Tree Models in JavaScript
 
 ## Module overview
@@ -20,6 +22,12 @@ This module is a strong fit when:
 `@kanaries/ml` provides tree models in JavaScript and TypeScript so teams can keep interpretable prediction logic close to product code, browser demos, and Node.js APIs. This is especially useful when engineers or stakeholders need to inspect why a model made a decision, not just what it predicted.
 
 If someone searches for "decision tree in JavaScript" or "extra tree classifier in TypeScript", this module is the right entry point.
+
+## Interactive tree model playground
+
+Change the dataset, depth, split constraint, and impurity criterion to see how a JavaScript decision tree partitions feature space. Click the chart to add an observation and refit `Tree.DecisionTreeClassifier` immediately.
+
+<DecisionTreePlayground task="classification" variant="decision" />
 
 ## Quick navigation
 
