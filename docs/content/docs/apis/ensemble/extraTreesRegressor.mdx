@@ -3,6 +3,8 @@ title: ExtraTreesRegressor in JavaScript with @kanaries/ml
 description: Train extremely randomized regression trees in JavaScript or TypeScript with ExtraTreesRegressor from @kanaries/ml for browser and Node.js.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # ExtraTreesRegressor in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ ExtraTreesRegressor averages many highly randomized regression trees. Random thr
 ## JavaScript implementation
 
 `Ensemble.ExtraTreesRegressor` uses the shared forest runtime in `@kanaries/ml`, works in browsers and Node.js, supports seeded training, and exposes averaged feature importances.
+
+## Interactive Extra Trees regression playground
+
+Adjust the number of randomized trees, reroll the sample, or add a point. The displayed prediction is fitted live with `Ensemble.ExtraTreesRegressor` in your browser.
+
+<RegressionPlayground algorithm="extraTrees" />
 
 ## Quick start example
 

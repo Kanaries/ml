@@ -4,6 +4,7 @@ description: Learn what Gradient Boosting Regressor does, when to use it, and ho
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { RegressionPlayground } from '@/components/regressionPlayground';
 
 # Gradient Boosting Regressor in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides squared-error gradient boosting in JavaScript following sklearn's semantics: the model starts from `F_0 = mean(y)`, and each round fits a regression tree to the residuals `y - F` and updates `F += learningRate * tree(x)`. It supports stochastic gradient boosting through `subsample < 1` (rows are drawn without replacement per round), feature subsampling via `maxFeatures`, and a seedable `randomState` for reproducible fits.
 
 Because the estimator is available in JS, boosted regression can live in the same application layer that owns data fetching, feature building, and API responses.
+
+## Interactive gradient boosting regression playground
+
+Tune the number of boosting stages, change the noise, and add observations directly to the chart. The prediction is fitted live with `Ensemble.GradientBoostingRegressor`.
+
+<RegressionPlayground algorithm="gradientBoosting" />
 
 ## Quick start
 

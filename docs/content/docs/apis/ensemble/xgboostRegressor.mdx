@@ -4,6 +4,7 @@ description: Learn what XGBoost Regressor does, when to use it, and how to run X
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { RegressionPlayground } from '@/components/regressionPlayground';
 
 # XGBoost Regressor in JavaScript
 
@@ -28,6 +29,12 @@ This algorithm is especially useful when:
 and leaf weights `-G/(H+lambda)`, with `minChildWeight` enforced on the hessian sum. The defaults match the `xgboost` library (`eta=0.3`, `maxDepth=6`, `lambda=1`, `gamma=0`, `minChildWeight=1`, `baseScore=0.5`), plus `subsample` and `colsampleByTree` sampling and a seedable `randomState`.
 
 Missing values are not supported: there is no sparsity-aware default direction, so `NaN`/non-finite inputs are rejected with an explicit error rather than silently misrouted.
+
+## Interactive XGBoost regression playground
+
+Change the boosting rounds, data shape, and noise below. `Ensemble.XGBoostRegressor` trains in the browser and immediately refits when you add a numeric observation.
+
+<RegressionPlayground algorithm="xgboost" />
 
 ## Quick start
 

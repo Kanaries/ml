@@ -84,6 +84,16 @@ test('preserves code comparisons and provides text fallbacks for interactive com
       'utf8',
     );
     assert.match(extraTreeRegressor, /interactive Extra Tree Regressor playground/);
+
+    const robustRegression = await fs.readFile(
+      path.join(publicRoot, 'docs', 'apis', 'linear', 'robustRegressors.md'),
+      'utf8',
+    );
+    assert.match(robustRegression, /interactive Robust Regression playground powered by @kanaries\/ml/);
+    assert.match(
+      robustRegression,
+      /\[Open the HTML page\]\(https:\/\/ml\.kanaries\.net\/docs\/apis\/linear\/robustRegressors\)/,
+    );
   });
 });
 

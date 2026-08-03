@@ -4,6 +4,7 @@ description: Learn what Linear SVR does, when to use it, and how to run LinearSV
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { RegressionPlayground } from '@/components/regressionPlayground';
 
 # Linear SVR in JavaScript
 
@@ -24,6 +25,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides Linear SVR in JavaScript for regression tasks where a linear support-vector objective is preferable to plain least squares. This can be useful in Node.js services and TypeScript applications that need linear-style regression with a margin-based loss and straightforward inference.
 
 It is especially attractive when the rest of the product pipeline is already in JS and you want to keep feature generation and prediction together.
+
+## Interactive Linear SVR playground
+
+Tune `C`, change the data noise, and add observations to test the epsilon-insensitive fit. The prediction line is trained live with `SVM.LinearSVR` in your browser.
+
+<RegressionPlayground algorithm="linearSvr" />
 
 ## Quick start
 

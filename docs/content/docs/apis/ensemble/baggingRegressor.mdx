@@ -3,6 +3,8 @@ title: BaggingRegressor in JavaScript with @kanaries/ml
 description: Reduce regression variance with bootstrap aggregation using the BaggingRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # BaggingRegressor in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ BaggingRegressor fits cloned regressors on random sample subsets and averages th
 ## JavaScript implementation
 
 `Ensemble.BaggingRegressor` defaults to decision trees and can clone any registered regressor that implements `fit` and `predict`. Seedable sampling makes browser and Node.js runs reproducible.
+
+## Interactive bagging regression playground
+
+Vary the ensemble size and sample noise to see bootstrap averaging at work. The curve is fitted live with `Ensemble.BaggingRegressor` and responds to observations you add.
+
+<RegressionPlayground algorithm="bagging" />
 
 ## Quick start example
 

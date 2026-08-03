@@ -1191,6 +1191,12 @@ Regression targets are often skewed, strictly positive, or easier to model after
 
 `@kanaries/ml` composes any serializable regressor with a transformer that implements `fit`, `transform`, and `inverseTransform`. Both components are cloned before fitting, work in browser or Node.js, and survive model serialization.
 
+## Interactive transformed-target regression playground
+
+Compare identity and log-transformed targets on positive data, then add observations directly to the chart. `Compose.TransformedTargetRegressor` handles transformation, fitting, and inverse prediction live.
+
+> The HTML version includes an interactive Transformed-Target Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/compose).
+
 ## Quick start
 
 ```ts
@@ -1369,6 +1375,12 @@ Partial least squares finds latent directions that predict a target block, while
 ## JavaScript implementation
 
 `PLSRegression` uses mode-A NIPALS with regression deflation. `CCA` uses mode-B weights with canonical deflation.
+
+## Interactive PLS regression playground
+
+Change the latent-component count and data distribution below. The visible first target and holdout metrics come from a live multi-output `CrossDecomposition.PLSRegression` fit.
+
+> The HTML version includes an interactive PLS Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/cross_decomposition).
 
 ## Quick start
 
@@ -2153,6 +2165,12 @@ This algorithm is especially useful when:
 
 Because the estimator is available in JS, boosted regression can live in the same application layer that owns data fetching, feature building, and API responses.
 
+## Interactive AdaBoost regression playground
+
+Change the boosting rounds and data distribution to see how successive weak learners reshape the prediction. The curve is trained live with `Ensemble.AdaBoostRegressor`.
+
+> The HTML version includes an interactive AdaBoost Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor).
+
 ## Quick start
 
 ### AdaBoostRegressor: Python and JavaScript / TypeScript
@@ -2316,6 +2334,12 @@ BaggingRegressor fits cloned regressors on random sample subsets and averages th
 
 `Ensemble.BaggingRegressor` defaults to decision trees and can clone any registered regressor that implements `fit` and `predict`. Seedable sampling makes browser and Node.js runs reproducible.
 
+## Interactive bagging regression playground
+
+Vary the ensemble size and sample noise to see bootstrap averaging at work. The curve is fitted live with `Ensemble.BaggingRegressor` and responds to observations you add.
+
+> The HTML version includes an interactive Bagging Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/baggingRegressor).
+
 ## Quick start example
 
 ```ts
@@ -2383,6 +2407,12 @@ ExtraTreesRegressor averages many highly randomized regression trees. Random thr
 ## JavaScript implementation
 
 `Ensemble.ExtraTreesRegressor` uses the shared forest runtime in `@kanaries/ml`, works in browsers and Node.js, supports seeded training, and exposes averaged feature importances.
+
+## Interactive Extra Trees regression playground
+
+Adjust the number of randomized trees, reroll the sample, or add a point. The displayed prediction is fitted live with `Ensemble.ExtraTreesRegressor` in your browser.
+
+> The HTML version includes an interactive Extra Trees Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/extraTreesRegressor).
 
 ## Quick start example
 
@@ -2558,6 +2588,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides squared-error gradient boosting in JavaScript following sklearn's semantics: the model starts from `F_0 = mean(y)`, and each round fits a regression tree to the residuals `y - F` and updates `F += learningRate * tree(x)`. It supports stochastic gradient boosting through `subsample < 1` (rows are drawn without replacement per round), feature subsampling via `maxFeatures`, and a seedable `randomState` for reproducible fits.
 
 Because the estimator is available in JS, boosted regression can live in the same application layer that owns data fetching, feature building, and API responses.
+
+## Interactive gradient boosting regression playground
+
+Tune the number of boosting stages, change the noise, and add observations directly to the chart. The prediction is fitted live with `Ensemble.GradientBoostingRegressor`.
+
+> The HTML version includes an interactive Gradient Boosting Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor).
 
 ## Quick start
 
@@ -2903,6 +2939,12 @@ RandomForestRegressor averages predictions from many decision trees. It is usefu
 
 `@kanaries/ml` exposes `Ensemble.RandomForestRegressor` for JavaScript and TypeScript projects. It supports bootstrap sampling, feature subsampling, and seeded randomness.
 
+## Interactive random forest regression playground
+
+Change the number of trees, dataset, and noise below. The prediction line is produced by a live `Ensemble.RandomForestRegressor`; click the chart to add another training point.
+
+> The HTML version includes an interactive Random Forest Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/randomForestRegressor).
+
 ## Quick start example
 
 ```ts
@@ -3112,6 +3154,12 @@ This algorithm is especially useful when:
 and leaf weights `-G/(H+lambda)`, with `minChildWeight` enforced on the hessian sum. The defaults match the `xgboost` library (`eta=0.3`, `maxDepth=6`, `lambda=1`, `gamma=0`, `minChildWeight=1`, `baseScore=0.5`), plus `subsample` and `colsampleByTree` sampling and a seedable `randomState`.
 
 Missing values are not supported: there is no sparsity-aware default direction, so `NaN`/non-finite inputs are rejected with an explicit error rather than silently misrouted.
+
+## Interactive XGBoost regression playground
+
+Change the boosting rounds, data shape, and noise below. `Ensemble.XGBoostRegressor` trains in the browser and immediately refits when you add a numeric observation.
+
+> The HTML version includes an interactive XGBoost Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor).
 
 ## Quick start
 
@@ -3702,6 +3750,12 @@ Kernel methods compare samples through a similarity function instead of explicit
 
 `@kanaries/ml` keeps both estimators in the JavaScript runtime: fit nonlinear regression in a Node.js service, or score small density models directly in an interactive browser workflow without a Python inference endpoint. Choose this implementation when model state and product code need to share the same typed API; benchmark larger training sets because kernel matrices and pairwise scoring grow with the number of samples.
 
+## Interactive Kernel Ridge regression playground
+
+Tune the RBF bandwidth through `gamma`, switch datasets, and add your own observations. The nonlinear curve is fitted live with `Kernel.KernelRidge`.
+
+> The HTML version includes an interactive Kernel Ridge Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/kernel).
+
 ## Quick start
 
 ```ts
@@ -3785,6 +3839,12 @@ Bayesian linear models place probability distributions over coefficients. They a
 
 `BayesianRidge` learns a shared coefficient precision and supports `predictStd`. `ARDRegression` learns one precision per feature and zeros coefficients whose precision crosses `thresholdLambda`.
 
+## Interactive Bayesian regression playground
+
+Compare Bayesian Ridge and ARD Regression while changing the data and iteration budget. The live curve and holdout metrics come from the selected `@kanaries/ml` model running in your browser.
+
+> The HTML version includes an interactive Bayesian Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/bayesianRegressors).
+
 ## Quick start
 
 ```ts
@@ -3822,6 +3882,12 @@ ElasticNet combines L1 and L2 penalties. It is useful when you want sparse-ish l
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Linear.ElasticNet` for browser and Node.js regression workflows. `l1Ratio` controls the balance between Ridge-like and Lasso-like behavior.
+
+## Interactive ElasticNet playground
+
+Tune the regularization strength and experiment with noisy or contaminated data. The displayed prediction is fitted live with `Linear.ElasticNet` and updates when you add a point.
+
+> The HTML version includes an interactive ElasticNet playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/elasticNet).
 
 ## Quick start example
 
@@ -3883,6 +3949,12 @@ Generalized linear models connect a linear predictor to non-Gaussian targets. Po
 ## JavaScript implementation
 
 The `@kanaries/ml` implementations use regularized Newton updates and a guarded line search, with log links for positive-mean families.
+
+## Interactive generalized linear model playground
+
+Switch between Poisson, Gamma, and Tweedie regression, tune regularization, and add positive-valued observations. The prediction is refitted live with the chosen `Linear` estimator.
+
+> The HTML version includes an interactive Generalized Linear Models playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels).
 
 ## Quick start
 
@@ -3976,6 +4048,12 @@ Lasso regression uses L1 regularization, which can shrink some coefficients to z
 
 `@kanaries/ml` implements `Linear.LassoRegression` with coordinate-descent style optimization and a JavaScript API for browser or Node.js applications.
 
+## Interactive Lasso regression playground
+
+Change the L1 penalty, dataset, and noise to see how regularization changes the fitted trend. The model is trained live with `Linear.LassoRegression` in your browser.
+
+> The HTML version includes an interactive Lasso Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/lassoRegression).
+
 ## Quick start example
 
 ```ts
@@ -4052,6 +4130,12 @@ This algorithm is especially useful when:
 @kanaries/ml gives JavaScript teams a straightforward linear regression implementation for numeric prediction tasks that need to stay in the application layer. This is useful for browser-side demos, pricing calculators, forecasting helpers, and Node.js APIs that want transparent coefficients instead of opaque black-box behavior.
 
 Because the model is simple and explainable, it fits especially well in product contexts where engineers and stakeholders need to reason about why a prediction changed.
+
+## Interactive linear regression playground
+
+Change the dataset and noise, then click the chart to add your own observation. The fitted line and holdout metrics update immediately using `Linear.LinearRegression` in your browser.
+
+> The HTML version includes an interactive Linear Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/linearRegression).
 
 ## Quick start
 
@@ -4283,6 +4367,12 @@ Use it for small numeric regression problems where the degree of curvature is kn
 
 `@kanaries/ml` provides `Linear.PolynomialRegression` as a JavaScript estimator with `fit` and `predict`. It runs in browser or Node.js and keeps polynomial feature expansion inside the model.
 
+## Interactive polynomial regression playground
+
+Adjust the polynomial degree, data shape, and noise below. The curve is fitted live with `Linear.PolynomialRegression`; click the chart to test how an added observation changes the fit.
+
+> The HTML version includes an interactive Polynomial Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/polynomialRegression).
+
 ## Quick start example
 
 ```ts
@@ -4384,6 +4474,12 @@ Ridge regression is linear regression with L2 regularization. It is useful when 
 
 `@kanaries/ml` exposes `Linear.RidgeRegression` for JavaScript and TypeScript projects. It follows the familiar `fit` and `predict` estimator shape and works with numeric arrays in browser or Node.js.
 
+## Interactive Ridge regression playground
+
+Tune the L2 penalty and data noise below. `Linear.RidgeRegression` refits in the browser after every change, including observations you add directly to the chart.
+
+> The HTML version includes an interactive Ridge Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/ridgeRegression).
+
 ## Quick start example
 
 ```ts
@@ -4448,6 +4544,12 @@ Ordinary least squares can move sharply when targets contain outliers. `HuberReg
 ## JavaScript implementation
 
 `@kanaries/ml` exposes sklearn-style constructors and `fit`/`predict` methods that run in browser or Node.js. Use Huber for moderate contamination, RANSAC for clear gross outliers, Theil-Sen for small robust datasets, and quantile regression for medians or prediction bands.
+
+## Interactive robust regression playground
+
+Switch between Huber, RANSAC, Theil–Sen, and quantile regression, then try the outlier dataset or add extreme points yourself. Each curve is trained live by the selected `@kanaries/ml` estimator.
+
+> The HTML version includes an interactive Robust Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/linear/robustRegressors).
 
 ## Quick start
 
@@ -5193,6 +5295,12 @@ A regressor chain fits one model per target and appends earlier target values or
 
 `@kanaries/ml` accepts a registered single-output regressor and supports explicit or seeded random chain order. Set `cv` to use out-of-fold predictions while building training extensions.
 
+## Interactive regressor chain playground
+
+Tune the Ridge base estimator and modify the dataset below. A two-output `MultiOutput.RegressorChain` is fitted live; the chart displays its first target while both outputs participate in the chain.
+
+> The HTML version includes an interactive Regressor Chain playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/multioutput/regressorChain).
+
 ## Quick start example
 
 ```ts
@@ -5512,6 +5620,12 @@ KNeighborsRegressor predicts a continuous value by finding nearby training sampl
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Neighbors.KNeighborsRegressor` for browser and Node.js workflows. It supports uniform or distance weighting and the distance metrics exposed by `Metrics.Distance`.
+
+## Interactive K-neighbors regression playground
+
+Tune `k`, change the sample density, and add observations to see the local average move. Every prediction comes from a live distance-weighted `Neighbors.KNeighborsRegressor`.
+
+> The HTML version includes an interactive K-Neighbors Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/neighbors/kneighborsRegressor).
 
 ## Quick start example
 
@@ -5858,6 +5972,12 @@ RadiusNeighborsRegressor predicts continuous values from all training samples wi
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Neighbors.RadiusNeighborsRegressor` for JavaScript applications with uniform or distance-weighted averaging.
+
+## Interactive radius-neighbors regression playground
+
+Change the radius to control which observations contribute at each x value. The live curve uses `Neighbors.RadiusNeighborsRegressor`; gaps show locations where the chosen radius finds no neighbors.
+
+> The HTML version includes an interactive Radius-Neighbors Regression playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsRegressor).
 
 ## Quick start example
 
@@ -6562,6 +6682,12 @@ This algorithm is especially useful when:
 @kanaries/ml provides Linear SVR in JavaScript for regression tasks where a linear support-vector objective is preferable to plain least squares. This can be useful in Node.js services and TypeScript applications that need linear-style regression with a margin-based loss and straightforward inference.
 
 It is especially attractive when the rest of the product pipeline is already in JS and you want to keep feature generation and prediction together.
+
+## Interactive Linear SVR playground
+
+Tune `C`, change the data noise, and add observations to test the epsilon-insensitive fit. The prediction line is trained live with `SVM.LinearSVR` in your browser.
+
+> The HTML version includes an interactive Linear SVR playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/svm/LinearSVR).
 
 ## Quick start
 

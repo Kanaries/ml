@@ -3,6 +3,8 @@ title: RegressorChain in JavaScript and TypeScript
 description: Predict related numeric targets with the @kanaries/ml JavaScript RegressorChain implementation in browser or Node.js.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # RegressorChain in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ A regressor chain fits one model per target and appends earlier target values or
 ## JavaScript implementation
 
 `@kanaries/ml` accepts a registered single-output regressor and supports explicit or seeded random chain order. Set `cv` to use out-of-fold predictions while building training extensions.
+
+## Interactive regressor chain playground
+
+Tune the Ridge base estimator and modify the dataset below. A two-output `MultiOutput.RegressorChain` is fitted live; the chart displays its first target while both outputs participate in the chain.
+
+<RegressionPlayground algorithm="regressorChain" />
 
 ## Quick start example
 

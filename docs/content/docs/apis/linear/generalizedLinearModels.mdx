@@ -3,6 +3,8 @@ title: Poisson, Gamma, and Tweedie Regression in JavaScript
 description: Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # Generalized linear models in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ Generalized linear models connect a linear predictor to non-Gaussian targets. Po
 ## JavaScript implementation
 
 The `@kanaries/ml` implementations use regularized Newton updates and a guarded line search, with log links for positive-mean families.
+
+## Interactive generalized linear model playground
+
+Switch between Poisson, Gamma, and Tweedie regression, tune regularization, and add positive-valued observations. The prediction is refitted live with the chosen `Linear` estimator.
+
+<RegressionPlayground algorithm="glm" />
 
 ## Quick start
 

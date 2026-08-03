@@ -3,6 +3,8 @@ title: Transformed Target Regression in JavaScript and TypeScript
 description: Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # Transformed Target Regression in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ Regression targets are often skewed, strictly positive, or easier to model after
 ## JavaScript implementation
 
 `@kanaries/ml` composes any serializable regressor with a transformer that implements `fit`, `transform`, and `inverseTransform`. Both components are cloned before fitting, work in browser or Node.js, and survive model serialization.
+
+## Interactive transformed-target regression playground
+
+Compare identity and log-transformed targets on positive data, then add observations directly to the chart. `Compose.TransformedTargetRegressor` handles transformation, fitting, and inverse prediction live.
+
+<RegressionPlayground algorithm="transformedTarget" />
 
 ## Quick start
 

@@ -3,6 +3,8 @@ title: PLS Regression and CCA in JavaScript
 description: Model two related data blocks with PLSRegression and canonical correlation analysis in JavaScript or TypeScript.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # PLS and CCA in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ Partial least squares finds latent directions that predict a target block, while
 ## JavaScript implementation
 
 `PLSRegression` uses mode-A NIPALS with regression deflation. `CCA` uses mode-B weights with canonical deflation.
+
+## Interactive PLS regression playground
+
+Change the latent-component count and data distribution below. The visible first target and holdout metrics come from a live multi-output `CrossDecomposition.PLSRegression` fit.
+
+<RegressionPlayground algorithm="pls" />
 
 ## Quick start
 

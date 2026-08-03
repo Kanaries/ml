@@ -159,6 +159,46 @@ function componentToMarkdown(node, record, siteUrl) {
     );
   }
 
+  if (node.name === 'RegressionPlayground') {
+    const algorithm = getAttribute(node, 'algorithm', record.sourceRelative);
+    const modelNames = {
+      linear: 'Linear Regression',
+      polynomial: 'Polynomial Regression',
+      ridge: 'Ridge Regression',
+      lasso: 'Lasso Regression',
+      elasticNet: 'ElasticNet',
+      robust: 'Robust Regression',
+      bayesian: 'Bayesian Regression',
+      glm: 'Generalized Linear Models',
+      randomForest: 'Random Forest Regression',
+      bagging: 'Bagging Regression',
+      extraTrees: 'Extra Trees Regression',
+      adaBoost: 'AdaBoost Regression',
+      gradientBoosting: 'Gradient Boosting Regression',
+      xgboost: 'XGBoost Regression',
+      knn: 'K-Neighbors Regression',
+      radiusNeighbors: 'Radius-Neighbors Regression',
+      linearSvr: 'Linear SVR',
+      kernelRidge: 'Kernel Ridge Regression',
+      pls: 'PLS Regression',
+      transformedTarget: 'Transformed-Target Regression',
+      regressorChain: 'Regressor Chain',
+    };
+    const modelName = modelNames[algorithm];
+
+    if (!modelName) {
+      throw new Error(
+        `${record.sourceRelative}: <RegressionPlayground> has unsupported algorithm="${algorithm}".`,
+      );
+    }
+
+    return interactiveNotice(
+      `The HTML version includes an interactive ${modelName} playground powered by @kanaries/ml. You can change the dataset, noise, and model controls; add observations; and inspect live predictions plus train and holdout metrics. The runnable guide and API reference continue below.`,
+      record,
+      siteUrl,
+    );
+  }
+
   const interactiveDescriptions = {
     ClusteringComparison: 'The HTML version includes an interactive comparison of clustering algorithms. The agent-readable algorithm links and selection guidance continue below.',
     ClusteringPlayground: 'The HTML version includes a live clustering playground powered by @kanaries/ml. You can change the dataset and algorithm parameters, add observations, and inspect fitted clusters, noise labels, centers, or exemplars. The runnable guide and API reference continue below.',

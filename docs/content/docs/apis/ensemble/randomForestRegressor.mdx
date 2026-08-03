@@ -3,6 +3,8 @@ title: RandomForestRegressor in JavaScript with @kanaries/ml
 description: Predict continuous targets with tree ensembles using the RandomForestRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # RandomForestRegressor in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ RandomForestRegressor averages predictions from many decision trees. It is usefu
 ## JavaScript implementation
 
 `@kanaries/ml` exposes `Ensemble.RandomForestRegressor` for JavaScript and TypeScript projects. It supports bootstrap sampling, feature subsampling, and seeded randomness.
+
+## Interactive random forest regression playground
+
+Change the number of trees, dataset, and noise below. The prediction line is produced by a live `Ensemble.RandomForestRegressor`; click the chart to add another training point.
+
+<RegressionPlayground algorithm="randomForest" />
 
 ## Quick start example
 

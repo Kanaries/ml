@@ -3,6 +3,8 @@ title: Ridge Regression in JavaScript with @kanaries/ml
 description: Use the RidgeRegression JavaScript and TypeScript implementation in @kanaries/ml for regularized linear regression in browser and Node.js applications.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # Ridge Regression in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ Ridge regression is linear regression with L2 regularization. It is useful when 
 ## JavaScript implementation
 
 `@kanaries/ml` exposes `Linear.RidgeRegression` for JavaScript and TypeScript projects. It follows the familiar `fit` and `predict` estimator shape and works with numeric arrays in browser or Node.js.
+
+## Interactive Ridge regression playground
+
+Tune the L2 penalty and data noise below. `Linear.RidgeRegression` refits in the browser after every change, including observations you add directly to the chart.
+
+<RegressionPlayground algorithm="ridge" />
 
 ## Quick start example
 

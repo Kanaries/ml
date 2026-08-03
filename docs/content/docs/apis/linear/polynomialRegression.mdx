@@ -3,6 +3,8 @@ title: Polynomial Regression in JavaScript with @kanaries/ml
 description: Fit nonlinear numeric trends with the PolynomialRegression JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js regression workflows.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # Polynomial Regression in JavaScript
 
 ## Algorithm overview
@@ -14,6 +16,12 @@ Use it for small numeric regression problems where the degree of curvature is kn
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Linear.PolynomialRegression` as a JavaScript estimator with `fit` and `predict`. It runs in browser or Node.js and keeps polynomial feature expansion inside the model.
+
+## Interactive polynomial regression playground
+
+Adjust the polynomial degree, data shape, and noise below. The curve is fitted live with `Linear.PolynomialRegression`; click the chart to test how an added observation changes the fit.
+
+<RegressionPlayground algorithm="polynomial" />
 
 ## Quick start example
 

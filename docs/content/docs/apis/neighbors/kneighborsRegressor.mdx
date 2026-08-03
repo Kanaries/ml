@@ -3,6 +3,8 @@ title: KNeighborsRegressor in JavaScript with @kanaries/ml
 description: Predict numeric targets from nearby examples with the KNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # KNeighborsRegressor in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ KNeighborsRegressor predicts a continuous value by finding nearby training sampl
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Neighbors.KNeighborsRegressor` for browser and Node.js workflows. It supports uniform or distance weighting and the distance metrics exposed by `Metrics.Distance`.
+
+## Interactive K-neighbors regression playground
+
+Tune `k`, change the sample density, and add observations to see the local average move. Every prediction comes from a live distance-weighted `Neighbors.KNeighborsRegressor`.
+
+<RegressionPlayground algorithm="knn" />
 
 ## Quick start example
 

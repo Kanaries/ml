@@ -3,6 +3,8 @@ title: Robust Regression in JavaScript and TypeScript
 description: Fit Huber, RANSAC, Theil-Sen, and quantile regression models in browser or Node.js applications with @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # Robust regression in JavaScript
 
 Ordinary least squares can move sharply when targets contain outliers. `HuberRegressor` softens large residuals, `RANSACRegressor` fits a consensus set, `TheilSenRegressor` aggregates many subsample fits, and `QuantileRegressor` estimates a conditional quantile instead of a mean.
@@ -10,6 +12,12 @@ Ordinary least squares can move sharply when targets contain outliers. `HuberReg
 ## JavaScript implementation
 
 `@kanaries/ml` exposes sklearn-style constructors and `fit`/`predict` methods that run in browser or Node.js. Use Huber for moderate contamination, RANSAC for clear gross outliers, Theil-Sen for small robust datasets, and quantile regression for medians or prediction bands.
+
+## Interactive robust regression playground
+
+Switch between Huber, RANSAC, Theil–Sen, and quantile regression, then try the outlier dataset or add extreme points yourself. Each curve is trained live by the selected `@kanaries/ml` estimator.
+
+<RegressionPlayground algorithm="robust" />
 
 ## Quick start
 

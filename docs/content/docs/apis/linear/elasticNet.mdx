@@ -3,6 +3,8 @@ title: ElasticNet in JavaScript with @kanaries/ml
 description: Fit linear regression with combined L1 and L2 regularization using the ElasticNet JavaScript and TypeScript implementation in @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # ElasticNet in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ ElasticNet combines L1 and L2 penalties. It is useful when you want sparse-ish l
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Linear.ElasticNet` for browser and Node.js regression workflows. `l1Ratio` controls the balance between Ridge-like and Lasso-like behavior.
+
+## Interactive ElasticNet playground
+
+Tune the regularization strength and experiment with noisy or contaminated data. The displayed prediction is fitted live with `Linear.ElasticNet` and updates when you add a point.
+
+<RegressionPlayground algorithm="elasticNet" />
 
 ## Quick start example
 

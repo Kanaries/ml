@@ -3,6 +3,8 @@ title: RadiusNeighborsRegressor in JavaScript with @kanaries/ml
 description: Predict numeric targets from all neighbors inside a radius using the RadiusNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 ---
 
+import { RegressionPlayground } from '@/components/regressionPlayground';
+
 # RadiusNeighborsRegressor in JavaScript
 
 ## Algorithm overview
@@ -12,6 +14,12 @@ RadiusNeighborsRegressor predicts continuous values from all training samples wi
 ## JavaScript implementation
 
 `@kanaries/ml` provides `Neighbors.RadiusNeighborsRegressor` for JavaScript applications with uniform or distance-weighted averaging.
+
+## Interactive radius-neighbors regression playground
+
+Change the radius to control which observations contribute at each x value. The live curve uses `Neighbors.RadiusNeighborsRegressor`; gaps show locations where the chosen radius finds no neighbors.
+
+<RegressionPlayground algorithm="radiusNeighbors" />
 
 ## Quick start example
 

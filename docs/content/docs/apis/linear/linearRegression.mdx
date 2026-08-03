@@ -4,6 +4,7 @@ description: Learn what Linear Regression does, when to use it, and how to run L
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
+import { RegressionPlayground } from '@/components/regressionPlayground';
 
 # Linear Regression in JavaScript
 
@@ -22,6 +23,12 @@ This algorithm is especially useful when:
 @kanaries/ml gives JavaScript teams a straightforward linear regression implementation for numeric prediction tasks that need to stay in the application layer. This is useful for browser-side demos, pricing calculators, forecasting helpers, and Node.js APIs that want transparent coefficients instead of opaque black-box behavior.
 
 Because the model is simple and explainable, it fits especially well in product contexts where engineers and stakeholders need to reason about why a prediction changed.
+
+## Interactive linear regression playground
+
+Change the dataset and noise, then click the chart to add your own observation. The fitted line and holdout metrics update immediately using `Linear.LinearRegression` in your browser.
+
+<RegressionPlayground algorithm="linear" />
 
 ## Quick start
 
