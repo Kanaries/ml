@@ -11,6 +11,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const landingPages: MetadataRoute.Sitemap = [
+    { url: `${siteUrl}/tools/outlier-calculator`, changeFrequency: 'monthly', priority: 1 },
+    { url: `${siteUrl}/tools/polynomial-regression-calculator`, changeFrequency: 'monthly', priority: 1 },
+    { url: `${siteUrl}/tools/customer-segmentation`, changeFrequency: 'monthly', priority: 1 },
+
     { url: `${siteUrl}/tools`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${siteUrl}/tools/confusion-matrix-calculator`, changeFrequency: 'monthly', priority: 1 },
     { url: `${siteUrl}/tools/logistic-regression-calculator`, changeFrequency: 'monthly', priority: 1 },

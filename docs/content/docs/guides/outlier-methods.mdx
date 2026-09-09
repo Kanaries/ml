@@ -1,0 +1,51 @@
+---
+title: "IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset"
+description: "See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example."
+---
+
+Different anomaly rules answer different questions. IQR measures distance beyond the middle half of a single column. Z-scores measure distance from its mean in standard-deviation units. Isolation Forest asks how easily a record can be separated from other records across the supplied features.
+
+## Run two rules on the same observations
+
+Load the example in the [outlier calculator](/tools/outlier-calculator). Its values are 10, 11, 12, 12, 13, 14, 15, 16, 17 and 80. IQR flags 80: the upper fence is 21.375. Switch to Z-score and calculate again. With the population standard deviation and a strict absolute threshold above 3, it flags no rows. The largest Z-score is about 2.98.
+
+That disagreement is expected. The value 80 pulls the mean upward and inflates the standard deviation used to judge itself. In a sample of ten observations, the maximum possible population Z-score is at most the square root of nine, or 3. A strict threshold above 3 cannot flag an observation in this sample. More data or a different rule is required; repeatedly adjusting a threshold until one preferred row is flagged is a weak validation procedure.
+
+## Compare assumptions before counts
+
+| Method | Input and rule | Useful starting point | Main limitation |
+| --- | --- | --- | --- |
+| IQR | One column; outside Q1/Q3 by 1.5 times IQR | Skewed numeric data and quick review | Cannot detect unusual feature combinations |
+| Z-score | One column; absolute population Z above 3 | Roughly symmetric data with meaningful mean and spread | Extreme values alter both mean and spread |
+| Modified Z-score | One column; median/MAD score above 3.5 | A robust alternative to the mean | Undefined when MAD is zero |
+| Isolation Forest | One or more features; fitted anomaly scores | Unusual combinations of numeric features | Depends on sampling, seed, features and threshold |
+
+## Fit Isolation Forest to those same ten values
+
+The following JavaScript uses the identical observations, 100 trees, a subsample of ten, seed 42 and contamination 0.1. Run it with `@kanaries/ml` in Node.js or a browser bundler.
+
+```javascript
+import { Ensemble } from '@kanaries/ml';
+
+const values = [10, 11, 12, 12, 13, 14, 15, 16, 17, 80];
+const X = values.map(value => [value]);
+const model = new Ensemble.IsolationForest(10, 100, 0.1, 42);
+model.fit(X);
+console.log(model.predict(X));
+// [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+console.log(X.map(row => model.anomalyScore(row)));
+```
+
+With the published version used by this site, 80 has the highest anomaly score, approximately 0.807, and is the only flagged value. IQR and this forest agree here; the strict 3σ rule flags none. Contamination 0.1 is an explicit threshold choice for this demonstration, not evidence that ten percent of future records will be anomalous. This small example checks behavior; it does not establish which detector is best on real data.
+
+## Add a second feature when the question requires it
+
+An order of 80 units may be ordinary for an account that usually buys 100 units and unusual for an account that buys one. A univariate quantity fence has no access to that context. Include a relevant historical feature, then compare the joint pattern with an Isolation Forest model.
+
+The [JavaScript Isolation Forest guide](/docs/guides/isolation-forest) provides a separate interactive model, explains contamination, and includes implementation examples. The CSV calculator implements the three statistical rules above; it does not silently substitute Isolation Forest. Use the guide's implementation for a controlled model comparison on your own matrix. Fix the seed, list the features and record the threshold alongside flagged row IDs.
+
+## Validate labels and outcomes
+
+The `@kanaries/ml` Isolation Forest API labels anomalies as 1 and normal records as 0. Scikit-learn's `predict` labels outliers as -1 and inliers as 1. Translate these conventions before comparing model outputs. Otherwise identical detections can look completely different.
+
+Prefer a reviewed set of incidents to a target anomaly percentage. If you have no labels, inspect examples from several score ranges, repeat the fit with different seeds, and ask whether the findings support a useful action. A method that flags fewer rows is not automatically more accurate. See the [CSV review workflow](/docs/guides/find-outliers-csv) for retaining and investigating original records.

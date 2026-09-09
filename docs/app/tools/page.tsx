@@ -17,6 +17,10 @@ export const metadata: Metadata = {
 };
 
 const tools = [
+  {"href": "/tools/outlier-calculator", "title": "Outlier Calculator", "description": "Flag unusual CSV values with IQR and Z-score rules, then export a review queue."},
+  {"href": "/tools/polynomial-regression-calculator", "title": "Polynomial Regression Calculator", "description": "Fit a curve, compare held-out error, and inspect residuals."},
+  {"href": "/tools/customer-segmentation", "title": "Customer Segmentation Tool", "description": "Turn customer features or transactions into explainable group profiles."},
+
   {
     href: '/tools/confusion-matrix-calculator',
     title: 'Confusion Matrix & F1 Calculator',

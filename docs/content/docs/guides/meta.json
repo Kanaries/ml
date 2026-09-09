@@ -1,4 +1,12 @@
 {
   "title": "Guides",
-  "pages": ["isolation-forest"]
+  "pages": [
+    "find-outliers-csv",
+    "outlier-methods",
+    "choose-polynomial-degree",
+    "outliers-regression",
+    "customer-segmentation-csv",
+    "rfm-vs-kmeans",
+    "isolation-forest"
+  ]
 }

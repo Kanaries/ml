@@ -202,5 +202,11 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Optional
 
+- [How to Choose a Polynomial Degree Without Overfitting](https://ml.kanaries.net/docs/guides/choose-polynomial-degree.md): Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R².
+- [Customer Segmentation from a CSV: An RFM Walkthrough](https://ml.kanaries.net/docs/guides/customer-segmentation-csv.md): Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser.
+- [How to Find Outliers in a CSV File Without Python](https://ml.kanaries.net/docs/guides/find-outliers-csv.md): Review unusual CSV values with IQR, Z-score and modified Z-score, preserve original records, and export flags without uploading your data.
 - [Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo](https://ml.kanaries.net/docs/guides/isolation-forest.md): Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and implement outlier scoring with @kanaries/ml in JavaScript or TypeScript.
+- [IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset](https://ml.kanaries.net/docs/guides/outlier-methods.md): See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example.
+- [How Outliers Change a Regression Line](https://ml.kanaries.net/docs/guides/outliers-regression.md): Inspect leverage and residuals with paired fits before deciding whether an unusual observation should be corrected or retained.
+- [RFM Scoring vs K-Means: Which Customer Groups Can You Explain?](https://ml.kanaries.net/docs/guides/rfm-vs-kmeans.md): Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment.
 - [scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/sklearn-equivalents.md): Translate scikit-learn estimators and workflows to JavaScript or TypeScript with a searchable sklearn-to-@kanaries/ml API mapping, runnable examples, and compatibility notes.

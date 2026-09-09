@@ -1,0 +1,32 @@
+---
+title: "Customer Segmentation from a CSV: An RFM Walkthrough"
+description: "Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser."
+---
+
+A useful customer segment should describe a difference you can act on. Before clustering, decide what one row means and which observation window you want to summarize. Mixing line items, orders and customer summaries produces misleading frequency counts.
+
+## Prepare transaction records
+
+Open the [customer segmentation tool](/tools/customer-segmentation) and choose **Load transaction example**. The required fields are a text customer ID, a date in YYYY-MM-DD format, and a nonnegative amount in one currency. Use an explicit reference date; the example uses 2026-09-01 UTC.
+
+The tool counts each transaction row once. If your export has one row per line item, aggregate it to one row per order first when you want order frequency. Deduplicate repeated transactions before importing. Refunds need an explicit accounting policy; this version rejects negative amounts rather than guessing how to net them.
+
+## Check the RFM transformation
+
+Recency is the number of UTC calendar days from the customer's most recent transaction to the reference date. Smaller recency means more recent activity. Frequency is the number of transaction rows. Monetary value is their total amount.
+
+In the example, customer `001` has transactions on August 28 and August 30 for 120 and 80. At the September 1 reference date, its features are recency 2, frequency 2 and monetary 200. Customer `003` has one transaction on June 1 for 20, producing recency 92, frequency 1 and monetary 20. IDs keep their leading zeros throughout aggregation and export.
+
+Future transactions, invalid calendar dates and missing amounts cause visible errors. Set the observation window before exporting your source data, and use the same window for every customer. Otherwise a customer observed for years has an unfair advantage over a newly acquired customer on frequency and spending.
+
+## Fit and inspect groups
+
+The tool standardizes each numeric feature using its population mean and standard deviation, then fits K-Means with a fixed seed and five initializations. Standardization prevents the currency column from dominating solely because its raw scale is larger. It does not remove skew or make correlated features independent.
+
+Choose a small number of groups, calculate, and inspect group counts and mean features in original units. Group 0 is merely an identifier. It is not automatically the best group. A cluster with recent purchases and high spending might support a retention experiment; another with infrequent small purchases might require a different message. Those are hypotheses to test against business outcomes.
+
+## Export a reusable customer table
+
+The output contains one row per customer, prepared numeric features and a cluster label. The code panel begins with those prepared features so you can reproduce the clustering in JavaScript. Python uses equivalent standardization and K-Means settings, although implementation differences can produce different partitions and label numbering.
+
+For existing customer-level exports, use feature mode with a unique ID and only numeric feature columns. Remove free-text labels before fitting. The first version supports up to 500 customers and 12 features. Compare this workflow with [RFM scoring vs K-Means](/docs/guides/rfm-vs-kmeans) before selecting a segmentation policy.

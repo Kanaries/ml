@@ -1,0 +1,30 @@
+---
+title: "How to Find Outliers in a CSV File Without Python"
+description: "Review unusual CSV values with IQR, Z-score and modified Z-score, preserve original records, and export flags without uploading your data."
+---
+
+An unusually large value can be a typo, a unit mismatch, or the most useful observation in your file. Start by flagging rows and checking their context. Deleting everything beyond a threshold can erase real events.
+
+## Try a complete CSV example
+
+Open the [outlier calculator](/tools/outlier-calculator), load the sample, select `value`, and calculate with IQR. You can also [download the sample CSV](/samples/outlier.csv). The ten values are 10, 11, 12, 12, 13, 14, 15, 16, 17 and 80. The record IDs are text; `001` should remain `001` when you export.
+
+The calculator uses linear interpolation between sorted observations, matching NumPy's `quantile(method="linear")`. Q1 is 12, Q3 is 15.75, and the interquartile range is 3.75. Multiplying that range by 1.5 gives fences of 6.375 and 21.375. Only the value 80 falls outside. Values exactly on either fence are retained as unflagged.
+
+## Prepare your own file
+
+Use a header row and one observation per following row. A numeric column should contain plain numbers, with decimal points where needed. Remove currency symbols and thousands separators from numeric fields. Quoted commas are supported in text fields such as descriptions. Blank numeric cells produce an error instead of becoming zero. Select one numeric column; the other columns remain attached to the exported flags.
+
+Files are parsed in the browser. The current limit is 2,000 data rows and 30 columns, with a 1 MB file limit. This makes the tool useful for a small audit or an exploratory sample. For a larger dataset, copy the JavaScript or Python calculation and run it in your own environment.
+
+## Decide what each flag means
+
+Check whether flagged rows use a different unit, represent duplicate transactions, or belong to another population. A large wholesale order may be ordinary for wholesale customers and unusual for retail customers. In that case, calculate thresholds within each population rather than across both.
+
+Use Z-scores when a mean and standard deviation describe the distribution sensibly. Use IQR for a robust first review of a single column. Modified Z-scores use the median absolute deviation; when that deviation is zero, the score is undefined. The calculator reports this case rather than fabricating a score.
+
+## Export a review queue
+
+Download the results CSV. It retains every input row and adds an outlier flag. Keep a separate decision column in your working spreadsheet: investigate, correct, retain, or exclude with a reason. Exporting a chart gives a quick visual overview, but the row-level file is the audit trail.
+
+When the suspicious pattern depends on several columns together, read [IQR vs Z-score vs Isolation Forest](/docs/guides/outlier-methods). For the effect on fitting, continue with [how outliers change a regression line](/docs/guides/outliers-regression).

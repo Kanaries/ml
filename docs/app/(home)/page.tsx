@@ -305,6 +305,9 @@ export default function HomePage() {
                 <Link className="acad-btn acad-btn--ghost" href="/docs">
                   Read the docs
                 </Link>
+                <Link className="acad-btn acad-btn--ghost" href="/tools">
+                  Analyze a CSV
+                </Link>
               </div>
 
               <div className="acad-meta acad-rise" style={{ animationDelay: '420ms' }}>

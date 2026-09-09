@@ -291,3 +291,10 @@
     padding-inline: 0.75rem;
   }
 }
+
+.compact .shell { padding-top: 1.5rem; }
+.compact .hero { margin: 1.25rem auto; }
+.compact .title { font-size: clamp(2rem, 4vw, 3rem); }
+.compact .description { margin-top: .75rem; font-size: 1.08rem; }
+.compact .trustRow { margin-top: .75rem; }
+@media (max-width: 600px) { .compact .breadcrumb { flex-wrap: wrap; } }

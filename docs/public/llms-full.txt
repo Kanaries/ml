@@ -8089,6 +8089,124 @@ utils.Stat.gini(data: number[]): number
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/guides/choose-polynomial-degree -->
+
+---
+title: "How to Choose a Polynomial Degree Without Overfitting"
+description: "Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R²."
+canonical_url: "https://ml.kanaries.net/docs/guides/choose-polynomial-degree"
+markdown_url: "https://ml.kanaries.net/docs/guides/choose-polynomial-degree.md"
+---
+# How to Choose a Polynomial Degree Without Overfitting
+
+A polynomial curve can fit a pattern or memorize noise. Increasing the degree usually gives the model more freedom, so a higher training R² alone is not evidence that it predicts better. Compare the errors on observations excluded from fitting.
+
+## Start with a known curve
+
+Open the [polynomial regression calculator](/tools/polynomial-regression-calculator) and load its [sample CSV](/samples/polynomial.csv). The sample follows y = 2 + 2x² for x from 0 through 14. Fit degree 1, then degree 2. The second-degree fit should reproduce the data to numerical precision, with R² close to 1 and both fitting and holdout RMSE close to zero.
+
+This is a check of the implementation, not a realistic claim about forecast accuracy. Add modest measurement noise to several Y values and repeat the comparison. The errors should then remain nonzero even when the general curve is correct.
+
+## Read the two error measurements
+
+The displayed curve and equation use every input row. Full-data RMSE describes that fitted curve. The holdout metric comes from a separate model trained on rows other than 1, 6, 11 and so on. Those regularly spaced rows form the fixed test set. Scaling parameters are calculated on training data alone for this validation model.
+
+Keeping the split fixed makes changes of degree comparable. It does not make the split appropriate for every dataset. For time-ordered observations, train on earlier records and test on later ones in a separate workflow. For repeated measurements from the same customer, split by customer to avoid putting closely related records on both sides.
+
+## Compare a small set of degrees
+
+Record degree, fitting RMSE and holdout RMSE for degrees 1 through 4. Continue higher only if the shape and sample size justify it. The calculator allows degrees up to 6 and requires more distinct training X values than the chosen degree. Repeated X values can contain useful measurements, but they do not provide additional independent polynomial terms.
+
+Choose a simpler degree when holdout performance is similar. Treat a single split as an exploratory signal. If you use the holdout repeatedly to choose features and degrees, it has become a validation set. Reserve another untouched dataset for a final performance estimate.
+
+## Check residuals and the equation
+
+Residuals are observed Y minus predicted Y. A curved residual pattern suggests the model missed structure. Increasing residual spread may indicate changing measurement variance. One very large residual deserves investigation before it drives the degree choice.
+
+The equation is expressed in a normalized variable z = (x − center) / scale. This reduces numerical problems caused by raising large raw X values to high powers. Keep that transformation with the coefficients when reproducing predictions. The code panel uses the same transformation and data split.
+
+Avoid extrapolating a high-degree polynomial far outside the observed X range. The chart intentionally draws the curve only between the smallest and largest observed X. Read [how outliers change a regression line](/docs/guides/outliers-regression.md) before using degree as a response to one unusual point.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/guides/customer-segmentation-csv -->
+
+---
+title: "Customer Segmentation from a CSV: An RFM Walkthrough"
+description: "Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser."
+canonical_url: "https://ml.kanaries.net/docs/guides/customer-segmentation-csv"
+markdown_url: "https://ml.kanaries.net/docs/guides/customer-segmentation-csv.md"
+---
+# Customer Segmentation from a CSV: An RFM Walkthrough
+
+A useful customer segment should describe a difference you can act on. Before clustering, decide what one row means and which observation window you want to summarize. Mixing line items, orders and customer summaries produces misleading frequency counts.
+
+## Prepare transaction records
+
+Open the [customer segmentation tool](/tools/customer-segmentation) and choose **Load transaction example**. The required fields are a text customer ID, a date in YYYY-MM-DD format, and a nonnegative amount in one currency. Use an explicit reference date; the example uses 2026-09-01 UTC.
+
+The tool counts each transaction row once. If your export has one row per line item, aggregate it to one row per order first when you want order frequency. Deduplicate repeated transactions before importing. Refunds need an explicit accounting policy; this version rejects negative amounts rather than guessing how to net them.
+
+## Check the RFM transformation
+
+Recency is the number of UTC calendar days from the customer's most recent transaction to the reference date. Smaller recency means more recent activity. Frequency is the number of transaction rows. Monetary value is their total amount.
+
+In the example, customer `001` has transactions on August 28 and August 30 for 120 and 80. At the September 1 reference date, its features are recency 2, frequency 2 and monetary 200. Customer `003` has one transaction on June 1 for 20, producing recency 92, frequency 1 and monetary 20. IDs keep their leading zeros throughout aggregation and export.
+
+Future transactions, invalid calendar dates and missing amounts cause visible errors. Set the observation window before exporting your source data, and use the same window for every customer. Otherwise a customer observed for years has an unfair advantage over a newly acquired customer on frequency and spending.
+
+## Fit and inspect groups
+
+The tool standardizes each numeric feature using its population mean and standard deviation, then fits K-Means with a fixed seed and five initializations. Standardization prevents the currency column from dominating solely because its raw scale is larger. It does not remove skew or make correlated features independent.
+
+Choose a small number of groups, calculate, and inspect group counts and mean features in original units. Group 0 is merely an identifier. It is not automatically the best group. A cluster with recent purchases and high spending might support a retention experiment; another with infrequent small purchases might require a different message. Those are hypotheses to test against business outcomes.
+
+## Export a reusable customer table
+
+The output contains one row per customer, prepared numeric features and a cluster label. The code panel begins with those prepared features so you can reproduce the clustering in JavaScript. Python uses equivalent standardization and K-Means settings, although implementation differences can produce different partitions and label numbering.
+
+For existing customer-level exports, use feature mode with a unique ID and only numeric feature columns. Remove free-text labels before fitting. The first version supports up to 500 customers and 12 features. Compare this workflow with [RFM scoring vs K-Means](/docs/guides/rfm-vs-kmeans.md) before selecting a segmentation policy.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/guides/find-outliers-csv -->
+
+---
+title: "How to Find Outliers in a CSV File Without Python"
+description: "Review unusual CSV values with IQR, Z-score and modified Z-score, preserve original records, and export flags without uploading your data."
+canonical_url: "https://ml.kanaries.net/docs/guides/find-outliers-csv"
+markdown_url: "https://ml.kanaries.net/docs/guides/find-outliers-csv.md"
+---
+# How to Find Outliers in a CSV File Without Python
+
+An unusually large value can be a typo, a unit mismatch, or the most useful observation in your file. Start by flagging rows and checking their context. Deleting everything beyond a threshold can erase real events.
+
+## Try a complete CSV example
+
+Open the [outlier calculator](/tools/outlier-calculator), load the sample, select `value`, and calculate with IQR. You can also [download the sample CSV](/samples/outlier.csv). The ten values are 10, 11, 12, 12, 13, 14, 15, 16, 17 and 80. The record IDs are text; `001` should remain `001` when you export.
+
+The calculator uses linear interpolation between sorted observations, matching NumPy's `quantile(method="linear")`. Q1 is 12, Q3 is 15.75, and the interquartile range is 3.75. Multiplying that range by 1.5 gives fences of 6.375 and 21.375. Only the value 80 falls outside. Values exactly on either fence are retained as unflagged.
+
+## Prepare your own file
+
+Use a header row and one observation per following row. A numeric column should contain plain numbers, with decimal points where needed. Remove currency symbols and thousands separators from numeric fields. Quoted commas are supported in text fields such as descriptions. Blank numeric cells produce an error instead of becoming zero. Select one numeric column; the other columns remain attached to the exported flags.
+
+Files are parsed in the browser. The current limit is 2,000 data rows and 30 columns, with a 1 MB file limit. This makes the tool useful for a small audit or an exploratory sample. For a larger dataset, copy the JavaScript or Python calculation and run it in your own environment.
+
+## Decide what each flag means
+
+Check whether flagged rows use a different unit, represent duplicate transactions, or belong to another population. A large wholesale order may be ordinary for wholesale customers and unusual for retail customers. In that case, calculate thresholds within each population rather than across both.
+
+Use Z-scores when a mean and standard deviation describe the distribution sensibly. Use IQR for a robust first review of a single column. Modified Z-scores use the median absolute deviation; when that deviation is zero, the score is undefined. The calculator reports this case rather than fabricating a score.
+
+## Export a review queue
+
+Download the results CSV. It retains every input row and adds an outlier flag. Keep a separate decision column in your working spreadsheet: investigate, correct, retain, or exclude with a reason. Exporting a chart gives a quick visual overview, but the row-level file is the audit trail.
+
+When the suspicious pattern depends on several columns together, read [IQR vs Z-score vs Isolation Forest](/docs/guides/outlier-methods.md). For the effect on fitting, continue with [how outliers change a regression line](/docs/guides/outliers-regression.md).
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/guides/isolation-forest -->
 
 ---
@@ -8211,6 +8329,145 @@ A fitted forest can score rows quickly and independently. Retraining and feature
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/guides/outlier-methods -->
+
+---
+title: "IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset"
+description: "See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example."
+canonical_url: "https://ml.kanaries.net/docs/guides/outlier-methods"
+markdown_url: "https://ml.kanaries.net/docs/guides/outlier-methods.md"
+---
+# IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset
+
+Different anomaly rules answer different questions. IQR measures distance beyond the middle half of a single column. Z-scores measure distance from its mean in standard-deviation units. Isolation Forest asks how easily a record can be separated from other records across the supplied features.
+
+## Run two rules on the same observations
+
+Load the example in the [outlier calculator](/tools/outlier-calculator). Its values are 10, 11, 12, 12, 13, 14, 15, 16, 17 and 80. IQR flags 80: the upper fence is 21.375. Switch to Z-score and calculate again. With the population standard deviation and a strict absolute threshold above 3, it flags no rows. The largest Z-score is about 2.98.
+
+That disagreement is expected. The value 80 pulls the mean upward and inflates the standard deviation used to judge itself. In a sample of ten observations, the maximum possible population Z-score is at most the square root of nine, or 3. A strict threshold above 3 cannot flag an observation in this sample. More data or a different rule is required; repeatedly adjusting a threshold until one preferred row is flagged is a weak validation procedure.
+
+## Compare assumptions before counts
+
+| Method           | Input and rule                              | Useful starting point                                  | Main limitation                                   |
+| ---------------- | ------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------- |
+| IQR              | One column; outside Q1/Q3 by 1.5 times IQR  | Skewed numeric data and quick review                   | Cannot detect unusual feature combinations        |
+| Z-score          | One column; absolute population Z above 3   | Roughly symmetric data with meaningful mean and spread | Extreme values alter both mean and spread         |
+| Modified Z-score | One column; median/MAD score above 3.5      | A robust alternative to the mean                       | Undefined when MAD is zero                        |
+| Isolation Forest | One or more features; fitted anomaly scores | Unusual combinations of numeric features               | Depends on sampling, seed, features and threshold |
+
+## Fit Isolation Forest to those same ten values
+
+The following JavaScript uses the identical observations, 100 trees, a subsample of ten, seed 42 and contamination 0.1. Run it with `@kanaries/ml` in Node.js or a browser bundler.
+
+```javascript
+import { Ensemble } from '@kanaries/ml';
+
+const values = [10, 11, 12, 12, 13, 14, 15, 16, 17, 80];
+const X = values.map(value => [value]);
+const model = new Ensemble.IsolationForest(10, 100, 0.1, 42);
+model.fit(X);
+console.log(model.predict(X));
+// [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+console.log(X.map(row => model.anomalyScore(row)));
+```
+
+With the published version used by this site, 80 has the highest anomaly score, approximately 0.807, and is the only flagged value. IQR and this forest agree here; the strict 3σ rule flags none. Contamination 0.1 is an explicit threshold choice for this demonstration, not evidence that ten percent of future records will be anomalous. This small example checks behavior; it does not establish which detector is best on real data.
+
+## Add a second feature when the question requires it
+
+An order of 80 units may be ordinary for an account that usually buys 100 units and unusual for an account that buys one. A univariate quantity fence has no access to that context. Include a relevant historical feature, then compare the joint pattern with an Isolation Forest model.
+
+The [JavaScript Isolation Forest guide](/docs/guides/isolation-forest.md) provides a separate interactive model, explains contamination, and includes implementation examples. The CSV calculator implements the three statistical rules above; it does not silently substitute Isolation Forest. Use the guide's implementation for a controlled model comparison on your own matrix. Fix the seed, list the features and record the threshold alongside flagged row IDs.
+
+## Validate labels and outcomes
+
+The `@kanaries/ml` Isolation Forest API labels anomalies as 1 and normal records as 0. Scikit-learn's `predict` labels outliers as -1 and inliers as 1. Translate these conventions before comparing model outputs. Otherwise identical detections can look completely different.
+
+Prefer a reviewed set of incidents to a target anomaly percentage. If you have no labels, inspect examples from several score ranges, repeat the fit with different seeds, and ask whether the findings support a useful action. A method that flags fewer rows is not automatically more accurate. See the [CSV review workflow](/docs/guides/find-outliers-csv.md) for retaining and investigating original records.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/guides/outliers-regression -->
+
+---
+title: "How Outliers Change a Regression Line"
+description: "Inspect leverage and residuals with paired fits before deciding whether an unusual observation should be corrected or retained."
+canonical_url: "https://ml.kanaries.net/docs/guides/outliers-regression"
+markdown_url: "https://ml.kanaries.net/docs/guides/outliers-regression.md"
+---
+# How Outliers Change a Regression Line
+
+Ordinary least squares minimizes squared residuals, so a large error can strongly affect its fit. The location of an observation on the X axis also matters. A point far from the other X values can pull the slope substantially, even if the fitted model leaves it a modest residual.
+
+## Run a controlled comparison
+
+In the [polynomial regression calculator](/tools/polynomial-regression-calculator), paste a CSV with X values 0 through 14 and Y = 2 + 2X. Use degree 1. The fitted slope is 2 and the intercept is 2, apart from rounding. Now change only the final Y value, at X = 14, from 30 to 80 and calculate again.
+
+The full-data least-squares slope becomes 3.25 and the intercept becomes approximately -3.41667. A single changed observation has moved predictions across the entire range. Export both result files so you can compare the effect row by row. The holdout result is a separate calculation; it need not change by the same amount as the full-data fit.
+
+## Separate unusual values from influential observations
+
+An extreme Y value is a univariate outlier. A point with an unusual X position has high leverage. An influential observation is one that changes the fitted model substantially. These categories overlap, but none is a substitute for the others.
+
+Use the [outlier calculator](/tools/outlier-calculator) to review a numeric column. Use the regression residual chart to inspect deviations from the fitted relationship. Neither display by itself is a full influence diagnostic such as Cook's distance. For a formal analysis, examine leverage and influence with an appropriate statistical package and retain the same row identifiers.
+
+## Investigate before excluding
+
+Check the source record, unit, timestamp and population. If the observation is a confirmed transcription error, correct it and document the correction. If it represents a valid rare event, a model that suppresses it may fail exactly where you need it most.
+
+Compare fits with and without the point as a sensitivity analysis. Report both results when the decision remains uncertain. Do not describe a better-looking R² after deletion as proof that deletion was justified. Removing hard cases changes the evaluation population.
+
+## Choose the model after understanding the data
+
+Adding polynomial terms may bend a curve toward an unusual observation without improving the underlying relationship. A transformation, a separate model for a distinct population, or a robust estimator can be more appropriate, but each changes assumptions and interpretation.
+
+The browser calculator uses ordinary least squares through `@kanaries/ml`; it is not a robust regression estimator. Its degree control is useful for checking shape, and the held-out error helps expose some overfitting. Follow the [polynomial degree guide](/docs/guides/choose-polynomial-degree.md) to compare complexity while keeping the validation procedure fixed.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/guides/rfm-vs-kmeans -->
+
+---
+title: "RFM Scoring vs K-Means: Which Customer Groups Can You Explain?"
+description: "Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment."
+canonical_url: "https://ml.kanaries.net/docs/guides/rfm-vs-kmeans"
+markdown_url: "https://ml.kanaries.net/docs/guides/rfm-vs-kmeans.md"
+---
+# RFM Scoring vs K-Means: Which Customer Groups Can You Explain?
+
+RFM scoring and K-Means can start from the same recency, frequency and monetary table but create groups for different reasons. Scoring uses explicit cutoffs. K-Means learns groups that reduce within-group squared distance in the supplied feature space.
+
+## What an RFM score means
+
+A common scoring system assigns each feature a score from 1 to 5 using quantile boundaries. Recent activity receives a high recency score, while frequent purchases and high spending receive high frequency and monetary scores. A customer labeled 555 therefore meets three favorable score rules; it does not belong to a model-discovered cluster.
+
+Define how boundary ties are handled. If many customers have exactly one order, forcing them into equally sized buckets assigns different frequency scores to identical behavior. Prefer consistent cutoffs, accept unequal bucket sizes, and record the observation window. For recurring reports, decide whether cutoffs remain fixed or are recalculated each period.
+
+## What a K-Means group means
+
+K-Means partitions standardized numeric profiles according to distance from fitted centroids. Two customers can be close even if they fall on opposite sides of a score cutoff. Conversely, a very large spender can form a small cluster because extreme distances dominate the objective.
+
+Try the [customer segmentation tool](/tools/customer-segmentation), which computes RFM features and K-Means groups. It does not output five-level RFM scores. Use the exported feature table to apply your own score policy, then cross-tabulate those scores against cluster labels. That comparison separates a business rule from a fitted grouping.
+
+## Choose based on the decision
+
+| Decision                                            | Useful starting approach                | What to document                                       |
+| --------------------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| Repeat a transparent lifecycle rule every month     | Fixed RFM score thresholds              | Cutoffs, tie behavior, window and reference date       |
+| Explore different combinations of customer behavior | K-Means on prepared features            | Scaling, feature selection, K, seed and group profiles |
+| Monitor whether a campaign helps a segment          | Either, with a stable assignment policy | Eligibility, comparison group and outcome window       |
+
+Neither method proves that a campaign will work. Compare outcomes with a suitable experiment rather than inferring effectiveness from attractive group names.
+
+## Check stability before operational use
+
+Repeat clustering after small changes to the input window and number of groups. Compare membership overlap after matching groups by their profiles; integer group IDs can be permuted between runs. Inspect tiny clusters and the influence of unusually high spending. Consider a documented transformation such as log1p for nonnegative, highly skewed spending, then evaluate whether the resulting groups are easier to explain.
+
+Inertia normally falls as you add groups, so the smallest inertia is not an automatic choice of K. The tool reports it in standardized feature space and exposes group counts and original-unit averages. Choose a grouping that remains interpretable and useful under reasonable data changes. The [RFM CSV walkthrough](/docs/guides/customer-segmentation-csv.md) gives exact aggregation rules and a small checkable example.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs -->
 
 ---
@@ -8240,6 +8497,8 @@ markdown_url: "https://ml.kanaries.net/docs/index.html.md"
 3. **Integrate with your stack** – Pair @kanaries/ml with modern frameworks, dashboards, and serverless runtimes to deliver on-device intelligence without round-trips to Python services.
 
 Prefer to begin with a live example? Open the [interactive machine learning tools](/tools), explore the [algorithm playgrounds](/playground), calculate [confusion-matrix metrics](/tools/confusion-matrix-calculator), or fit a [logistic regression model](/tools/logistic-regression-calculator) directly in your browser. The playground collection includes interactive [PCA](/playground/pca), [KNN](/playground/knn), [gradient descent](/playground/gradient-descent), and [K-Means](/playground/kmeans) visualizations.
+
+Analyze your own CSV: [find outliers](/tools/outlier-calculator), [fit a polynomial curve](/tools/polynomial-regression-calculator), or [group customers from features and RFM](/tools/customer-segmentation). Each tool runs in your browser and exports results and reproducible code.
 
 ## Why teams choose @kanaries/ml
 

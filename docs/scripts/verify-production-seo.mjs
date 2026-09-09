@@ -6,6 +6,10 @@ const baseUrl = (process.env.SEO_BASE_URL ?? 'https://ml.kanaries.net').replace(
 const canonicalBaseUrl = (process.env.SEO_CANONICAL_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 const landingPages = [
+  { path: '/tools/outlier-calculator', title: 'Outlier Calculator — Free CSV Tool' },
+  { path: '/tools/polynomial-regression-calculator', title: 'Polynomial Regression Calculator — Free CSV Tool' },
+  { path: '/tools/customer-segmentation', title: 'Customer Segmentation Tool — Free CSV Tool' },
+
   {
     path: '/tools/confusion-matrix-calculator',
     title: 'Confusion Matrix Calculator — F1, Precision, Recall (2-class & Multiclass)',
@@ -22,7 +26,7 @@ const landingPages = [
   { path: '/playground/random-forest' },
 ];
 
-const contentPages = ['/docs/guides/isolation-forest', '/docs/sklearn-equivalents'];
+const contentPages = ['/docs/guides/find-outliers-csv', '/docs/guides/outlier-methods', '/docs/guides/choose-polynomial-degree', '/docs/guides/outliers-regression', '/docs/guides/customer-segmentation-csv', '/docs/guides/rfm-vs-kmeans', '/docs/guides/isolation-forest', '/docs/sklearn-equivalents'];
 const discoveryFiles = ['/robots.txt', '/sitemap.xml', '/llms.txt', '/llms-full.txt'];
 const expectedRoutes = [...landingPages.map((page) => page.path), ...contentPages];
 

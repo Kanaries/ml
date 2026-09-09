@@ -25,6 +25,7 @@ type ToolPageLayoutProps = {
   sectionPath?: string;
   eyebrow?: string;
   activityLabel?: string;
+  compact?: boolean;
 };
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
@@ -45,6 +46,7 @@ export function ToolPageLayout({
   sectionPath = '/tools',
   eyebrow = 'Free browser-based ML tool',
   activityLabel = 'Live calculation',
+  compact = false,
 }: ToolPageLayoutProps) {
   const url = `${siteUrl}${pathname}`;
   const jsonLd = {
@@ -89,7 +91,7 @@ export function ToolPageLayout({
   };
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${compact ? styles.compact : ''}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <div className={styles.shell}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">

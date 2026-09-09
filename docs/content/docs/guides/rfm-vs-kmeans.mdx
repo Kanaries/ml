@@ -1,0 +1,34 @@
+---
+title: "RFM Scoring vs K-Means: Which Customer Groups Can You Explain?"
+description: "Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment."
+---
+
+RFM scoring and K-Means can start from the same recency, frequency and monetary table but create groups for different reasons. Scoring uses explicit cutoffs. K-Means learns groups that reduce within-group squared distance in the supplied feature space.
+
+## What an RFM score means
+
+A common scoring system assigns each feature a score from 1 to 5 using quantile boundaries. Recent activity receives a high recency score, while frequent purchases and high spending receive high frequency and monetary scores. A customer labeled 555 therefore meets three favorable score rules; it does not belong to a model-discovered cluster.
+
+Define how boundary ties are handled. If many customers have exactly one order, forcing them into equally sized buckets assigns different frequency scores to identical behavior. Prefer consistent cutoffs, accept unequal bucket sizes, and record the observation window. For recurring reports, decide whether cutoffs remain fixed or are recalculated each period.
+
+## What a K-Means group means
+
+K-Means partitions standardized numeric profiles according to distance from fitted centroids. Two customers can be close even if they fall on opposite sides of a score cutoff. Conversely, a very large spender can form a small cluster because extreme distances dominate the objective.
+
+Try the [customer segmentation tool](/tools/customer-segmentation), which computes RFM features and K-Means groups. It does not output five-level RFM scores. Use the exported feature table to apply your own score policy, then cross-tabulate those scores against cluster labels. That comparison separates a business rule from a fitted grouping.
+
+## Choose based on the decision
+
+| Decision | Useful starting approach | What to document |
+| --- | --- | --- |
+| Repeat a transparent lifecycle rule every month | Fixed RFM score thresholds | Cutoffs, tie behavior, window and reference date |
+| Explore different combinations of customer behavior | K-Means on prepared features | Scaling, feature selection, K, seed and group profiles |
+| Monitor whether a campaign helps a segment | Either, with a stable assignment policy | Eligibility, comparison group and outcome window |
+
+Neither method proves that a campaign will work. Compare outcomes with a suitable experiment rather than inferring effectiveness from attractive group names.
+
+## Check stability before operational use
+
+Repeat clustering after small changes to the input window and number of groups. Compare membership overlap after matching groups by their profiles; integer group IDs can be permuted between runs. Inspect tiny clusters and the influence of unusually high spending. Consider a documented transformation such as log1p for nonnegative, highly skewed spending, then evaluate whether the resulting groups are easier to explain.
+
+Inertia normally falls as you add groups, so the smallest inertia is not an automatic choice of K. The tool reports it in standardized feature space and exposes group counts and original-unit averages. Choose a grouping that remains interpretable and useful under reasonable data changes. The [RFM CSV walkthrough](/docs/guides/customer-segmentation-csv) gives exact aggregation rules and a small checkable example.

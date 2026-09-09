@@ -23,6 +23,8 @@
 
 Try the library without installing anything: use the free browser-based [confusion matrix and F1 calculator](https://ml.kanaries.net/tools/confusion-matrix-calculator), [logistic regression calculator](https://ml.kanaries.net/tools/logistic-regression-calculator), or [interactive algorithm playgrounds](https://ml.kanaries.net/playground). Explore [PCA](https://ml.kanaries.net/playground/pca), [KNN](https://ml.kanaries.net/playground/knn), [gradient descent](https://ml.kanaries.net/playground/gradient-descent), [K-Means](https://ml.kanaries.net/playground/kmeans), [decision trees](https://ml.kanaries.net/playground/decision-tree), and [Random Forest](https://ml.kanaries.net/playground/random-forest) locally with JavaScript/Python comparison code.
 
+Analyze your own CSV: [find outliers](https://ml.kanaries.net/tools/outlier-calculator), [fit a polynomial curve](https://ml.kanaries.net/tools/polynomial-regression-calculator), or [group customers from features and RFM](https://ml.kanaries.net/tools/customer-segmentation). Each tool runs in your browser and exports results and reproducible code.
+
 ## How it compares
 
 @kanaries/ml focuses on **classical machine learning** — the scikit-learn side of ML — rather than deep learning:

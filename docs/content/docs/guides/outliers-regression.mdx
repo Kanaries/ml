@@ -1,0 +1,30 @@
+---
+title: "How Outliers Change a Regression Line"
+description: "Inspect leverage and residuals with paired fits before deciding whether an unusual observation should be corrected or retained."
+---
+
+Ordinary least squares minimizes squared residuals, so a large error can strongly affect its fit. The location of an observation on the X axis also matters. A point far from the other X values can pull the slope substantially, even if the fitted model leaves it a modest residual.
+
+## Run a controlled comparison
+
+In the [polynomial regression calculator](/tools/polynomial-regression-calculator), paste a CSV with X values 0 through 14 and Y = 2 + 2X. Use degree 1. The fitted slope is 2 and the intercept is 2, apart from rounding. Now change only the final Y value, at X = 14, from 30 to 80 and calculate again.
+
+The full-data least-squares slope becomes 3.25 and the intercept becomes approximately -3.41667. A single changed observation has moved predictions across the entire range. Export both result files so you can compare the effect row by row. The holdout result is a separate calculation; it need not change by the same amount as the full-data fit.
+
+## Separate unusual values from influential observations
+
+An extreme Y value is a univariate outlier. A point with an unusual X position has high leverage. An influential observation is one that changes the fitted model substantially. These categories overlap, but none is a substitute for the others.
+
+Use the [outlier calculator](/tools/outlier-calculator) to review a numeric column. Use the regression residual chart to inspect deviations from the fitted relationship. Neither display by itself is a full influence diagnostic such as Cook's distance. For a formal analysis, examine leverage and influence with an appropriate statistical package and retain the same row identifiers.
+
+## Investigate before excluding
+
+Check the source record, unit, timestamp and population. If the observation is a confirmed transcription error, correct it and document the correction. If it represents a valid rare event, a model that suppresses it may fail exactly where you need it most.
+
+Compare fits with and without the point as a sensitivity analysis. Report both results when the decision remains uncertain. Do not describe a better-looking R² after deletion as proof that deletion was justified. Removing hard cases changes the evaluation population.
+
+## Choose the model after understanding the data
+
+Adding polynomial terms may bend a curve toward an unusual observation without improving the underlying relationship. A transformation, a separate model for a distinct population, or a robust estimator can be more appropriate, but each changes assumptions and interpretation.
+
+The browser calculator uses ordinary least squares through `@kanaries/ml`; it is not a robust regression estimator. Its degree control is useful for checking shape, and the held-out error helps expose some overfitting. Follow the [polynomial degree guide](/docs/guides/choose-polynomial-degree) to compare complexity while keeping the validation procedure fixed.

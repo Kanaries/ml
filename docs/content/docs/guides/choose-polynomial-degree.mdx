@@ -1,0 +1,32 @@
+---
+title: "How to Choose a Polynomial Degree Without Overfitting"
+description: "Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R\u00b2."
+---
+
+A polynomial curve can fit a pattern or memorize noise. Increasing the degree usually gives the model more freedom, so a higher training R² alone is not evidence that it predicts better. Compare the errors on observations excluded from fitting.
+
+## Start with a known curve
+
+Open the [polynomial regression calculator](/tools/polynomial-regression-calculator) and load its [sample CSV](/samples/polynomial.csv). The sample follows y = 2 + 2x² for x from 0 through 14. Fit degree 1, then degree 2. The second-degree fit should reproduce the data to numerical precision, with R² close to 1 and both fitting and holdout RMSE close to zero.
+
+This is a check of the implementation, not a realistic claim about forecast accuracy. Add modest measurement noise to several Y values and repeat the comparison. The errors should then remain nonzero even when the general curve is correct.
+
+## Read the two error measurements
+
+The displayed curve and equation use every input row. Full-data RMSE describes that fitted curve. The holdout metric comes from a separate model trained on rows other than 1, 6, 11 and so on. Those regularly spaced rows form the fixed test set. Scaling parameters are calculated on training data alone for this validation model.
+
+Keeping the split fixed makes changes of degree comparable. It does not make the split appropriate for every dataset. For time-ordered observations, train on earlier records and test on later ones in a separate workflow. For repeated measurements from the same customer, split by customer to avoid putting closely related records on both sides.
+
+## Compare a small set of degrees
+
+Record degree, fitting RMSE and holdout RMSE for degrees 1 through 4. Continue higher only if the shape and sample size justify it. The calculator allows degrees up to 6 and requires more distinct training X values than the chosen degree. Repeated X values can contain useful measurements, but they do not provide additional independent polynomial terms.
+
+Choose a simpler degree when holdout performance is similar. Treat a single split as an exploratory signal. If you use the holdout repeatedly to choose features and degrees, it has become a validation set. Reserve another untouched dataset for a final performance estimate.
+
+## Check residuals and the equation
+
+Residuals are observed Y minus predicted Y. A curved residual pattern suggests the model missed structure. Increasing residual spread may indicate changing measurement variance. One very large residual deserves investigation before it drives the degree choice.
+
+The equation is expressed in a normalized variable z = (x − center) / scale. This reduces numerical problems caused by raising large raw X values to high powers. Keep that transformation with the coefficients when reproducing predictions. The code panel uses the same transformation and data split.
+
+Avoid extrapolating a high-degree polynomial far outside the observed X range. The chart intentionally draws the curve only between the smallest and largest observed X. Read [how outliers change a regression line](/docs/guides/outliers-regression) before using degree as a response to one unusual point.
