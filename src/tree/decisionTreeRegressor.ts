@@ -45,14 +45,14 @@ export class DecisionTreeRegressor extends RegressorBase {
             randomState: this.randomState,
         };
     }
-    private selectedFeatureIndices(): number[] {
+    private selectedFeatureIndices(includeFallback = false): number[] {
         const size = resolveSubsetSize(this.max_features, this.feature_number);
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
-        return indices.slice(0, size);
+        return includeFallback ? indices : indices.slice(0, size);
     }
     /**
      * Minimizes total SSE = n_left * var_left + n_right * var_right over
@@ -63,8 +63,12 @@ export class DecisionTreeRegressor extends RegressorBase {
         let minErr = Infinity;
         let minErrFeaIndex = -1; // bad case none
         let minErrValue = 0;
-        const featureIndices = this.selectedFeatureIndices();
-        for (let feaIndex of featureIndices) {
+        const featureIndices = this.selectedFeatureIndices(true);
+        const budget = resolveSubsetSize(this.max_features, this.feature_number);
+        // Extend the random search only when the budget yielded no valid split.
+        for (let visited = 0; visited < featureIndices.length; visited++) {
+            if (visited >= budget && minErrFeaIndex !== -1) break;
+            const feaIndex = featureIndices[visited];
             const order = Array.from({ length: n }, (_, i) => i).sort(
                 (a, b) => sampleX[a][feaIndex] - sampleX[b][feaIndex]
             );

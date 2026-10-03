@@ -50,14 +50,14 @@ export class ExtraTreeRegressor extends RegressorBase {
         };
     }
 
-    private getFeatureSubset(): number[] {
+    private getFeatureSubset(includeFallback = false): number[] {
         const size = resolveSubsetSize(this.max_features, this.feature_number);
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
-        return indices.slice(0, size);
+        return includeFallback ? indices : indices.slice(0, size);
     }
 
     private calErr(values: number[]): number {
@@ -73,8 +73,12 @@ export class ExtraTreeRegressor extends RegressorBase {
         let minErr = Infinity;
         let minErrFeaIndex = -1;
         let minErrValue = 0;
-        const featureSubset = this.getFeatureSubset();
-        for (let feaIndex of featureSubset) {
+        const featureSubset = this.getFeatureSubset(true);
+        const budget = resolveSubsetSize(this.max_features, this.feature_number);
+        // Extend the random search only when the budget yielded no valid split.
+        for (let visited = 0; visited < featureSubset.length; visited++) {
+            if (visited >= budget && minErrFeaIndex !== -1) break;
+            const feaIndex = featureSubset[visited];
             const values: number[] = sampleX.map(x => x[feaIndex]);
             const min = Math.min(...values);
             const max = Math.max(...values);
@@ -82,6 +86,7 @@ export class ExtraTreeRegressor extends RegressorBase {
             const feaValue = this.random() * (max - min) + min;
             const leftChild = filterWithIndices(values, x => x < feaValue);
             const rightChild = filterWithIndices(values, x => x >= feaValue);
+            if (leftChild.indices.length === 0 || rightChild.indices.length === 0) continue;
             const leftY = leftChild.indices.map(i => sampleY[i]);
             const rightY = rightChild.indices.map(i => sampleY[i]);
             const err = this.calErr(leftY) + this.calErr(rightY);

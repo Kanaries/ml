@@ -66,13 +66,13 @@ export class ExtraTreeClassifier extends ClassifierBase {
         return this.impurity(freqs);
     }
 
-    private selectFeatures(): number[] {
+    private selectFeatures(includeFallback = false): number[] {
         const indices = Array.from({ length: this.feature_number }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(this.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
         }
-        return indices.slice(0, this.max_features_);
+        return includeFallback ? indices : indices.slice(0, this.max_features_);
     }
 
     private attributeSelection(sampleX: number[][], sampleY: number[]) {
@@ -86,8 +86,12 @@ export class ExtraTreeClassifier extends ClassifierBase {
         };
         let maxGain = -Infinity;
         let maxGainAttIndex = -1;
-        const featureIndices = this.selectFeatures();
-        for (const i of featureIndices) {
+        const featureIndices = this.selectFeatures(true);
+        const budget = this.max_features_;
+        // Extend the random search only when the budget yielded no valid split.
+        for (let visited = 0; visited < featureIndices.length; visited++) {
+            if (visited >= budget && maxGainAttIndex !== -1) break;
+            const i = featureIndices[visited];
             const values = sampleX.map(r => r[i]);
             let lo = Infinity;
             let hi = -Infinity;
