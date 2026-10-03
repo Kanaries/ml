@@ -1,5 +1,6 @@
 import { BaseEstimator, registerEstimator, Params } from '../base/estimator';
-import { createRandomGenerator } from '../utils/random';
+import { symmetricEigDecomposition } from '../discriminant_analysis/linalg';
+import { validateMatrix } from '../utils/numerics';
 
 export interface SpectralEmbeddingProps {
     nComponents?: number;
@@ -17,6 +18,7 @@ export class SpectralEmbedding extends BaseEstimator {
     constructor(props: SpectralEmbeddingProps = {}) {
         super();
         const { nComponents = 2, nNeighbors = 10, randomState } = props;
+        if (!Number.isInteger(nComponents) || nComponents < 1 || !Number.isInteger(nNeighbors) || nNeighbors < 1) throw new Error('nComponents and nNeighbors must be positive integers');
         this.nComponents = nComponents;
         this.nNeighbors = nNeighbors;
         this.randomState = randomState;
@@ -31,46 +33,6 @@ export class SpectralEmbedding extends BaseEstimator {
         };
     }
 
-    private static dot(a: number[], b: number[]): number {
-        let s = 0;
-        for (let i = 0; i < a.length; i++) {
-            s += a[i] * b[i];
-        }
-        return s;
-    }
-
-    private static matVecMul(A: number[][], v: number[]): number[] {
-        return A.map(row => SpectralEmbedding.dot(row, v));
-    }
-
-    private static outer(v1: number[], v2: number[]): number[][] {
-        const res: number[][] = [];
-        for (let i = 0; i < v1.length; i++) {
-            res.push([]);
-            for (let j = 0; j < v2.length; j++) {
-                res[i].push(v1[i] * v2[j]);
-            }
-        }
-        return res;
-    }
-
-    private static normalize(v: number[]): number[] {
-        const norm = Math.sqrt(SpectralEmbedding.dot(v, v));
-        return v.map(x => x / norm);
-    }
-
-    private static powerIteration(A: number[][], rng: () => number, iter: number = 500): {value: number, vector: number[]} {
-        let v: number[] = Array(A.length).fill(1).map(() => rng());
-        v = SpectralEmbedding.normalize(v);
-        for (let i = 0; i < iter; i++) {
-            const Av = SpectralEmbedding.matVecMul(A, v);
-            v = SpectralEmbedding.normalize(Av);
-        }
-        const Av = SpectralEmbedding.matVecMul(A, v);
-        const value = SpectralEmbedding.dot(v, Av);
-        return { value, vector: v };
-    }
-
     private static signFlip(v: number[]): number[] {
         let idx = 0;
         for (let i = 1; i < v.length; i++) {
@@ -78,10 +40,6 @@ export class SpectralEmbedding extends BaseEstimator {
         }
         if (v[idx] < 0) return v.map(x => -x);
         return v;
-    }
-
-    private static cloneMatrix(A: number[][]): number[][] {
-        return A.map(r => r.slice());
     }
 
     private euclidean(a: number[], b: number[]): number {
@@ -109,6 +67,8 @@ export class SpectralEmbedding extends BaseEstimator {
     }
 
     public fit(X: number[][]): void {
+        validateMatrix(X, 2);
+        if (this.nComponents >= X.length) throw new Error('nComponents must be less than the number of samples');
         const W = this.constructAffinity(X);
         const n = W.length;
         const D = new Array(n).fill(0);
@@ -123,26 +83,11 @@ export class SpectralEmbedding extends BaseEstimator {
                 A[i][j] = W[i][j] * Dn[i] * Dn[j];
             }
         }
-        const k = this.nComponents + 1;
-        let B = SpectralEmbedding.cloneMatrix(A);
-        const rng = createRandomGenerator(this.randomState);
-        const comps: number[][] = [];
-        for (let c = 0; c < k; c++) {
-            let { value, vector } = SpectralEmbedding.powerIteration(B, rng, 1000);
-            for (let v of comps) {
-                const proj = SpectralEmbedding.dot(vector, v);
-                for (let i = 0; i < vector.length; i++) vector[i] -= proj * v[i];
-            }
-            vector = SpectralEmbedding.normalize(vector);
-            comps.push(SpectralEmbedding.signFlip(vector.slice()));
-            const outer = SpectralEmbedding.outer(vector, vector);
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    B[i][j] -= value * outer[i][j];
-                }
-            }
-        }
-        const selected = comps.slice(1, k);
+        // Smallest normalized-Laplacian modes correspond to the largest
+        // algebraic eigenvalues of A. Negative eigenvalues must not outrank
+        // positive ones merely because their absolute values are larger.
+        const eigen = symmetricEigDecomposition(A);
+        const selected = eigen.vectors.slice(1, this.nComponents + 1).map(SpectralEmbedding.signFlip);
         this.embedding = Array.from({ length: n }, () => new Array(this.nComponents).fill(0));
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < selected.length; j++) {

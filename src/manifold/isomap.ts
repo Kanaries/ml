@@ -1,6 +1,6 @@
 import { TransformerBase } from '../base';
 import { Params, registerEstimator } from '../base/estimator';
-import { symmetricEigen } from '../algebra/eigen';
+import { symmetricEigDecomposition } from '../discriminant_analysis/linalg';
 
 export interface IsomapProps {
     nNeighbors?: number;
@@ -104,9 +104,12 @@ export class Isomap extends TransformerBase<number[][], number[][]> {
         this.squaredColumnMeans = Array.from({ length: n }, (_, j) => squared.reduce((sum, row) => sum + row[j], 0) / n);
         this.squaredTotalMean = rowMeans.reduce((a, b) => a + b, 0) / n;
         const kernel = squared.map((row, i) => row.map((value, j) => -0.5 * (value - rowMeans[i] - this.squaredColumnMeans[j] + this.squaredTotalMean)));
-        const eigen = symmetricEigen(kernel, this.nComponents, { seed: 0, maxIter: 2000 });
-        this.eigenvalues = eigen.values.map(value => Math.max(0, value));
-        this.eigenvectors = eigen.vectors;
+        // Geodesic kernels can be indefinite: select by algebraic value,
+        // not the absolute-value ordering produced by power iteration.
+        const eigen = symmetricEigDecomposition(kernel);
+        const cutoff = Math.max(0, eigen.values[0]) * 1e-12;
+        this.eigenvalues = eigen.values.slice(0, this.nComponents).map(value => value > cutoff ? value : 0);
+        this.eigenvectors = eigen.vectors.slice(0, this.nComponents);
         this.embeddingState = Array.from({ length: n }, (_, i) => this.eigenvectors.map((vector, c) => vector[i] * Math.sqrt(this.eigenvalues[c])));
     }
 
