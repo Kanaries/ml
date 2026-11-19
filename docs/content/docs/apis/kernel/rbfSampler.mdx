@@ -1,0 +1,46 @@
+---
+title: Random Fourier Features with RBFSampler in JavaScript
+description: Approximate the RBF kernel with random Fourier features in JavaScript or TypeScript. Use @kanaries/ml to train a linear classifier on dense or sparse features in the browser or Node.js.
+---
+
+# Random Fourier features in JavaScript
+
+A linear classifier can learn a curved boundary if its input features already encode nonlinear relationships. `RBFSampler` creates such features by projecting each sample onto random directions and applying a cosine. The dot product of two transformed samples approximates their Gaussian radial basis function (RBF) kernel value. Samples close together in the original feature space tend to get a larger value.
+
+## Using RBFSampler in JavaScript
+
+Use `Kernel.RBFSampler` in a browser or Node.js pipeline when you need a nonlinear decision boundary and want to choose the feature width before fitting. With a fixed width, adding more training rows leaves the size of the fitted random feature map unchanged. Fit the sampler once and reuse it for new observations so every row is represented in the same coordinates.
+
+## Quick start
+
+The two classes below occupy opposite corners of a square. The sampler gives logistic regression nonlinear features to work with.
+
+```ts
+import { Kernel, Linear, Pipeline } from '@kanaries/ml';
+
+const model = new Pipeline({
+    steps: [
+        ['features', new Kernel.RBFSampler({ gamma: 1, nComponents: 128, randomState: 42 })],
+        ['classifier', new Linear.LogisticRegression()],
+    ],
+});
+model.fit([[-1, -1], [-1, 1], [1, -1], [1, 1]], [0, 1, 1, 0]);
+const labels = model.predict([[0.9, 1], [-1, 0.9]]);
+```
+
+## API reference
+
+| Constructor option | Default | Meaning |
+| --- | --- | --- |
+| `gamma` | `1` | Nonnegative RBF coefficient. Larger values make similarity decay faster with distance. Set `'scale'` to use `1 / (nFeatures × variance)`, using the variance of all training entries including zeros. Constant training data uses a coefficient of 1 in this mode. |
+| `nComponents` | `100` | Positive integer giving the output width. Increasing it typically improves the kernel approximation and increases computation and storage. |
+| `randomState` | Unset | Unsigned 32-bit integer seed for repeatable draws of the random weights and offsets. |
+
+- `fit(X)` learns a feature map for the input width. Both a dense numeric matrix and a `CSRMatrix` are supported.
+- `transform(X)` returns a dense `number[][]` with one row per input sample and `nComponents` columns. The input must have the same number of columns used for fitting.
+- `fitTransform(X)` fits the map and returns the transformed training rows.
+- `randomWeights` contains one row per input feature and one column per output component. `randomOffset` contains the offsets used inside the cosines.
+
+For text classification, a `FeatureExtraction.TfidfVectorizer` can feed its sparse output directly into the sampler. The fitted weights still occupy `nFeatures × nComponents` numbers, and the transformed batch occupies `nRows × nComponents` numbers. These two sizes help you choose a feature width for a browser memory budget.
+
+[scikit-learn RBFSampler reference](https://scikit-learn.org/stable/modules/generated/sklearn.kernel_approximation.RBFSampler.html)

@@ -1,1 +1,8 @@
-{"title":"Kernel Methods","pages":["index"]}
+{
+  "title": "Kernel Methods",
+  "pages": [
+    "index",
+    "rbfSampler",
+    "nystroem"
+  ]
+}

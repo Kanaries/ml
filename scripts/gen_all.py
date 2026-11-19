@@ -60,6 +60,7 @@ scripts = [
     'gen_label_spreading.py',
     'gen_wave_b.py',
     'gen_wave_c.py',
+    'gen_kernel_approximation.py',
     'gen_phase3_e2e.py'
 ]
 
