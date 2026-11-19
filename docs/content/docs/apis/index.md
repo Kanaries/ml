@@ -34,6 +34,7 @@ This is especially useful when someone searches for "machine learning in JavaScr
 - **[Imputation](/docs/apis/impute)**: estimate correlated numeric values missing from feature matrices.
 - **[Linear](/docs/apis/linear)**: use classical, robust, Bayesian, quantile, and generalized linear models.
 - **[Kernel Methods](/docs/apis/kernel)**: fit kernel ridge regression or density estimates, or approximate a kernel with random Fourier features and Nyström landmarks.
+- **[Gaussian Processes](/docs/apis/gaussian_process)** estimate a continuous target with uncertainty or predict class probabilities on small datasets.
 - **[Cross Decomposition](/docs/apis/cross_decomposition)**: model paired blocks with PLS Regression and CCA.
 - **[Random Projection](/docs/apis/random_projection)**: reduce dimensions with Gaussian or sparse Johnson-Lindenstrauss maps.
 - **[Compose](/docs/apis/compose)**: wrap regression targets in invertible preprocessing transformations.

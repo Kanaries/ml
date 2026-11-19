@@ -1,0 +1,4 @@
+{
+  "title": "Gaussian Processes",
+  "pages": ["index", "regressor", "classifier"]
+}

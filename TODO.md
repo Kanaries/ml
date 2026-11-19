@@ -115,8 +115,8 @@ Other (7):
 
 ## Wave D — Heavy projects (4 items; excluded from the Phase 3 exit gate)
 
-- [ ] GaussianProcessRegressor (kernel system accepted as part of this item)
-- [ ] GaussianProcessClassifier
+- [x] GaussianProcessRegressor (scaled RBF kernel, posterior uncertainty and optional kernel fitting)
+- [x] GaussianProcessClassifier (RBF kernel, binary Laplace approximation and one-vs-rest multiclass)
 - [x] HistGradientBoostingClassifier (typed histogram bins, numeric features and missing values)
 - [x] HistGradientBoostingRegressor (squared error, shared histogram tree)
 

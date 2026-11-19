@@ -1,0 +1,61 @@
+---
+title: Gaussian Process Regression in JavaScript and TypeScript
+description: Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js.
+---
+
+# Gaussian process regression in JavaScript
+
+A Gaussian process uses the similarity between measurements to estimate a continuous target. Suppose you measure the temperature at a handful of points along a pipe. You can estimate the temperature between sensors and see where another measurement would reduce uncertainty. Nearby sensors with consistent readings usually narrow the uncertainty band.
+
+## JavaScript implementation
+
+`GaussianProcess.GaussianProcessRegressor` in `@kanaries/ml` fits one numeric target using a scaled RBF kernel. Run it in a browser to update a fitted curve as users add observations, or in Node.js to serve predictions with standard deviations. Exact training takes cubic time and quadratic memory in the number of training observations, making this estimator a good fit for small datasets.
+
+## Quick start
+
+```ts
+import { GaussianProcess } from '@kanaries/ml';
+
+const gp = new GaussianProcess.GaussianProcessRegressor({
+    lengthScale: 1.5,
+    alpha: 0.04,
+    normalizeY: true,
+});
+gp.fit([[0], [1], [2], [4]], [20.2, 21.5, 22.4, 20.7]);
+
+const positions = [[0.5], [3], [7]];
+const { mean, std } = gp.predict(positions, { returnStd: true });
+const intervals = mean.map((m, i) => [m - 1.96 * std[i], m + 1.96 * std[i]]);
+```
+
+Each interval is a pointwise 95% posterior interval for the underlying function, given the fitted kernel and noise variance. A future sensor reading also contains measurement noise.
+
+## Constructor options
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `lengthScale` | `1` | Positive RBF length scale. A larger value smooths changes over a greater distance. Supply an array with one positive scale per input feature when they have different units. |
+| `signalVariance` | `1` | Positive variance of the latent function. It multiplies the RBF kernel. |
+| `alpha` | `1e-10` | Nonnegative observation noise **variance** added to the training diagonal. Pass one number for all observations or an array with one variance per training sample. A positive value can stabilize repeated measurements at the same position. |
+| `normalizeY` | `false` | Center targets and scale by their training population standard deviation. Predictions return to the original target units. With normalization enabled, specify `alpha` and `signalVariance` in normalized variance units. |
+| `optimizer` | `null` | By default, training keeps the supplied kernel parameters fixed. Pass an options object to search for better values. |
+
+### Optional kernel optimization
+
+`optimizer: {}` enables deterministic coordinate search over log signal variance and log length scales, maximizing the training log marginal likelihood. Each candidate requires another matrix factorization. With many input features, a scalar length scale reduces the number of parameters to search.
+
+`lengthScaleBounds` and `signalVarianceBounds` each accept two positive, ordered numbers and default to `[1e-5, 1e5]`. The starting parameters must lie within those bounds. One pair of length scale bounds applies to every dimension. Equal endpoints fix the corresponding parameter. `maxIter` sets the maximum number of coordinate sweeps and defaults to 50. The search starts at the supplied kernel, can reach a local optimum, and keeps `alpha` fixed throughout.
+
+## Methods and outputs
+
+| Method | Result |
+| --- | --- |
+| `fit(X, y)` | Fits the model on a nonempty, finite, rectangular `number[][]` and one finite target per row. A subsequent fit replaces the previous posterior. |
+| `predict(X)` | An array of posterior means, one per query. |
+| `predict(X, { returnStd: true })` | `{ mean, std }` with one latent-function standard deviation per query. Use this for error bars. |
+| `predict(X, { returnCov: true })` | `{ mean, cov }` where `cov[i][j]` is the posterior covariance between query points. This output requires quadratic memory in the number of queries. Request one uncertainty format per call. |
+| `logMarginalLikelihood()` | The fitted model's scalar training log marginal likelihood. |
+| `fittedKernel` | A read-only getter returning a copy of the fitted signal variance and length scale. |
+| `score(X, y)` | The coefficient of determination (R²) on labeled data. |
+
+Calling `predict` before training returns the zero-mean prior, with the configured kernel supplying its standard deviations or covariance. After fitting, query rows must have the same number of features as the training rows.

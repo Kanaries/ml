@@ -29,6 +29,7 @@ scripts = [
     'gen_bernoulli_nb.py',
     'gen_categorical_nb.py',
     'gen_gaussian_nb.py',
+    'gen_gaussian_process.py',
     'gen_multinomial_nb.py',
     'gen_complement_nb.py',
     'gen_svc.py',

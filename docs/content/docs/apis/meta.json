@@ -15,6 +15,7 @@
     "bayes",
     "decomposition",
     "kernel",
+    "gaussian_process",
     "cross_decomposition",
     "random_projection",
     "compose",

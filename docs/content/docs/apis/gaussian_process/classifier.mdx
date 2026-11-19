@@ -1,0 +1,42 @@
+---
+title: Gaussian Process Classification in JavaScript and TypeScript
+description: Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications.
+---
+
+# Gaussian process classification in JavaScript
+
+A Gaussian process classifier uses a kernel to express how class membership varies between nearby observations. For example, if measurements on either side of a sensor threshold are noisy, the model can return the probability of each operating state at a new measurement. With an RBF kernel, points far from all training observations approach equal class probabilities.
+
+`GaussianProcess.GaussianProcessClassifier` trains on finite numeric features and labels. It approximates a binary logistic posterior using Laplace's method and supports multiple classes through one binary model per class. Each Newton update factors a dense matrix with one row and column per training sample. This makes the implementation practical for small datasets in the browser or Node.js.
+
+## Quick start
+
+```ts
+import { GaussianProcess } from '@kanaries/ml';
+
+const state = new GaussianProcess.GaussianProcessClassifier({ lengthScale: 0.8 });
+state.fit([[-2], [-1], [1], [2]], [10, 10, 20, 20]);
+
+const classes = state.getClasses(); // [10, 20]
+const [probabilities] = state.predictProba([[1.5]]);
+const [label] = state.predict([[1.5]]); // 20
+
+console.log(classes.map((value, i) => [value, probabilities[i]]));
+```
+
+## Constructor options
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `lengthScale` | `1` | Positive RBF length scale. Supply a number for all features or an array containing one scale per feature. A larger scale makes distant training observations more similar. |
+| `signalVariance` | `1` | Positive prior variance of the latent function. The kernel equals this value when comparing a sample with itself. |
+| `maxIterPredict` | `100` | Maximum Newton updates during fitting for each binary posterior. |
+| `tol` | `1e-8` | Positive relative tolerance for convergence of latent function values. |
+
+The supplied kernel parameters stay fixed during training. `fit(X, y)` requires at least two distinct class labels and throws if a binary posterior fails to converge.
+
+## Predictions
+
+- `predict(X)` returns one numeric class label per sample.
+- `predictProba(X)` returns one row per sample. Columns follow the ascending numeric order from `getClasses()`. For multiple classes, each one-vs-rest probability is divided by the sum across classes.
+- `score(X, y)` returns the fraction of correctly classified samples.
