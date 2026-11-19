@@ -1,0 +1,49 @@
+---
+title: Nyström Kernel Approximation in JavaScript with Nystroem
+description: Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models.
+---
+
+# Nyström kernel approximation in JavaScript
+
+A kernel matrix stores the similarity of every training sample to every other sample. The Nyström method chooses a smaller set of training rows as landmarks. Each new row becomes a vector of similarities to those landmarks, normalized so feature dot products approximate the original kernel.
+
+## Using Nystroem in JavaScript
+
+`Kernel.Nystroem` lets you train with landmarks in Node.js or in a browser and reuse the same feature map at prediction time. Choose the kernel to express how your samples should be compared. The landmark count controls both the output width and the size of the square matrix that must be decomposed during fitting.
+
+## Quick start
+
+Fit an RBF feature map and a ridge regressor together. Keeping both steps in a pipeline lets you apply the fitted map when predicting new values.
+
+```ts
+import { Kernel, Linear, Pipeline } from '@kanaries/ml';
+
+const model = new Pipeline({
+    steps: [
+        ['features', new Kernel.Nystroem({ kernel: 'rbf', gamma: 0.5, nComponents: 3, randomState: 17 })],
+        ['regressor', new Linear.Ridge({ alpha: 0.1 })],
+    ],
+});
+model.fit([[-2], [-1], [0], [1], [2]], [4, 1, 0, 1, 4]);
+const predictions = model.predict([[-1.5], [0.5]]);
+```
+
+## API reference
+
+| Constructor option | Default | Meaning |
+| --- | --- | --- |
+| `kernel` | `'rbf'` | Similarity function. Supported values are `'rbf'`, `'linear'`, `'poly'`, and `'cosine'`. |
+| `nComponents` | `100` | Requested number of distinct training row indices to sample as landmarks. The fitted width is the smaller of this positive integer and the number of training rows. |
+| `gamma` | `null` | Nonnegative RBF or polynomial kernel coefficient. The default uses the reciprocal of the input feature count. |
+| `degree` | `3` | Positive integer polynomial kernel degree. |
+| `coef0` | `1` | Constant added before raising the polynomial kernel to its specified degree. |
+| `randomState` | Unset | Unsigned 32-bit integer seed for reproducible landmark selection. |
+
+- `fit(X)` selects landmarks from a dense numeric matrix and computes the normalization from their kernel matrix.
+- `transform(X)` returns one dense row per sample and one column per fitted landmark. Input rows must have the same feature count as the training data.
+- `fitTransform(X)` fits and returns the transformed training data.
+- `components` holds the landmark rows, and `componentIndices` gives their indices in the training matrix. `normalization` holds the square normalization matrix for the selected landmarks.
+
+For an initial experiment, try a small landmark count, then increase it while measuring held-out prediction quality and fit time. Doubling the count quadruples the number of entries in the landmark kernel matrix.
+
+[scikit-learn Nystroem reference](https://scikit-learn.org/stable/modules/generated/sklearn.kernel_approximation.Nystroem.html)

@@ -6,12 +6,12 @@
 | Kind | Covered | Denominator | Coverage |
 |---|---:|---:|---:|
 | estimator | 91 | 118 | 77.1% |
-| transformer | 63 | 88 | 71.6% |
+| transformer | 65 | 88 | 73.9% |
 
 ## Missing estimators (27)
 
 ElasticNetCV · FixedThresholdClassifier · GaussianProcessClassifier · GaussianProcessRegressor · GraphicalLassoCV · Lars · LarsCV · LassoCV · LassoLars · LassoLarsCV · LassoLarsIC · LogisticRegressionCV · MultiTaskElasticNet · MultiTaskElasticNetCV · MultiTaskLasso · MultiTaskLassoCV · OrthogonalMatchingPursuit · OrthogonalMatchingPursuitCV · OutputCodeClassifier · PassiveAggressiveClassifier · PassiveAggressiveRegressor · RidgeCV · RidgeClassifierCV · SGDOneClassSVM · SpectralBiclustering · SpectralCoclustering · TunedThresholdClassifierCV
 
-## Missing transformers (25)
+## Missing transformers (23)
 
-AdditiveChi2Sampler · DictionaryLearning · FeatureAgglomeration · GenericUnivariateSelect · KNeighborsTransformer · KernelCenterer · MiniBatchDictionaryLearning · MiniBatchNMF · MiniBatchSparsePCA · NeighborhoodComponentsAnalysis · Nystroem · PLSCanonical · PLSSVD · PatchExtractor · PolynomialCountSketch · RBFSampler · RadiusNeighborsTransformer · RandomTreesEmbedding · SelectFdr · SelectFpr · SelectFwe · SelectPercentile · SequentialFeatureSelector · SkewedChi2Sampler · SparseCoder
+AdditiveChi2Sampler · DictionaryLearning · FeatureAgglomeration · GenericUnivariateSelect · KNeighborsTransformer · KernelCenterer · MiniBatchDictionaryLearning · MiniBatchNMF · MiniBatchSparsePCA · NeighborhoodComponentsAnalysis · PLSCanonical · PLSSVD · PatchExtractor · PolynomialCountSketch · RadiusNeighborsTransformer · RandomTreesEmbedding · SelectFdr · SelectFpr · SelectFwe · SelectPercentile · SequentialFeatureSelector · SkewedChi2Sampler · SparseCoder

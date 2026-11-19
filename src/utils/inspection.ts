@@ -1,21 +1,9 @@
 import { BaseEstimator } from '../base';
+import { mt19937 } from './mt19937';
 
 interface PredictiveEstimator extends BaseEstimator { predict(X: number[][]): number[]; score?(X: number[][], y: number[]): number; }
 export interface PermutationImportanceProps { nRepeats?: number; randomState?: number; scoring?: (estimator: PredictiveEstimator, X: number[][], y: number[]) => number; }
 export interface PermutationImportanceResult { importancesMean: number[]; importancesStd: number[]; importances: number[][]; }
-
-/** NumPy RandomState-compatible MT19937 stream for sklearn seeded permutation parity. */
-function mt19937(seed?: number): { uint32: () => number; interval: (max: number) => number } {
-    if (seed === undefined) return { uint32: () => Math.floor(Math.random() * 0x100000000), interval(max) { return Math.floor(Math.random() * (max + 1)); } };
-    const state = new Uint32Array(624); state[0] = seed >>> 0;
-    for (let i = 1; i < 624; i++) { const previous = state[i - 1] ^ (state[i - 1] >>> 30); state[i] = (Math.imul(1812433253, previous) + i) >>> 0; }
-    let index = 624;
-    const uint32 = () => {
-        if (index >= 624) { for (let i = 0; i < 624; i++) { const y = (state[i] & 0x80000000) | (state[(i + 1) % 624] & 0x7fffffff); state[i] = state[(i + 397) % 624] ^ (y >>> 1) ^ (y & 1 ? 0x9908b0df : 0); } index = 0; }
-        let y = state[index++]; y ^= y >>> 11; y ^= (y << 7) & 0x9d2c5680; y ^= (y << 15) & 0xefc60000; y ^= y >>> 18; return y >>> 0;
-    };
-    return { uint32, interval(max: number) { let mask = max; mask |= mask >>> 1; mask |= mask >>> 2; mask |= mask >>> 4; mask |= mask >>> 8; mask |= mask >>> 16; let value: number; do value = uint32() & mask; while (value > max); return value; } };
-}
 
 /** Model-agnostic feature importance measured by repeated score degradation after shuffling. */
 export function permutationImportance(estimator: PredictiveEstimator, X: number[][], y: number[], props: PermutationImportanceProps = {}): PermutationImportanceResult {

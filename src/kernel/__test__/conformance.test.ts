@@ -1,9 +1,14 @@
 import { getRegisteredEstimators, loadModel } from '../../base';
 import { KernelDensity } from '../kernelDensity';
 import { KernelRidge } from '../kernelRidge';
+import { RBFSampler, Nystroem } from '../index';
 import { runEstimatorConformance } from '../../__test__/conformance/harness';
 
-runEstimatorConformance([{ name: 'KernelRidge', kind: 'regressor', dataset: 'regression', create: () => new KernelRidge({ alpha: .5, kernel: 'rbf' }) }]);
+runEstimatorConformance([
+    { name: 'KernelRidge', kind: 'regressor', dataset: 'regression', create: () => new KernelRidge({ alpha: .5, kernel: 'rbf' }) },
+    { name: 'RBFSampler', kind: 'transformer', create: () => new RBFSampler({ nComponents: 4, randomState: 8 }) },
+    { name: 'Nystroem', kind: 'transformer', create: () => new Nystroem({ nComponents: 4, randomState: 8 }) },
+]);
 
 test('KernelDensity registration, cloning, refit, and serialization conformance', () => {
     const X = [[-1], [0], [1]], model = new KernelDensity({ bandwidth: .5 }); expect(getRegisteredEstimators().has('KernelDensity')).toBe(true);
