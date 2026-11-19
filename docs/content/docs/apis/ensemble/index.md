@@ -34,6 +34,7 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 - [AdaBoost Classifier](adaboostClassifier): boosted classification for harder decision boundaries
 - [GradientBoostingRegressor](gradientBoostingRegressor): squared-error gradient boosting for tabular regression
 - [GradientBoostingClassifier](gradientBoostingClassifier): log-loss gradient boosting for binary and multiclass classification
+- [Histogram gradient boosting](histGradientBoosting) trains classifiers and regressors on numeric tables with missing values.
 - [XGBoostRegressor](xgboostRegressor): exact-greedy, regularized XGBoost regression
 - [XGBoostClassifier](xgboostClassifier): exact-greedy, regularized XGBoost classification (binary and multiclass)
 

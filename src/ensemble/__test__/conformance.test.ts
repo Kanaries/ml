@@ -7,6 +7,7 @@ import { ExtraTreesClassifier } from '../extraTreesClassifier';
 import { ExtraTreesRegressor } from '../extraTreesRegressor';
 import { GradientBoostingClassifier } from '../gradientBoostingClassifier';
 import { GradientBoostingRegressor } from '../gradientBoostingRegressor';
+import { HistGradientBoostingClassifier, HistGradientBoostingRegressor } from '../histGradientBoosting';
 import { IsolationForest } from '../isolationForest';
 import { RandomForestClassifier } from '../randomForestClassifier';
 import { RandomForestRegressor } from '../randomForestRegressor';
@@ -75,6 +76,14 @@ runEstimatorConformance([
         kind: 'regressor',
         dataset: 'regression',
         create: () => new GradientBoostingRegressor({ nEstimators: 5, maxDepth: 3, randomState: 42 }),
+    },
+    {
+        name: 'HistGradientBoostingClassifier', kind: 'classifier', dataset: 'multiclass',
+        create: () => new HistGradientBoostingClassifier({ maxIter: 5, minSamplesLeaf: 2 }),
+    },
+    {
+        name: 'HistGradientBoostingRegressor', kind: 'regressor', dataset: 'regression',
+        create: () => new HistGradientBoostingRegressor({ maxIter: 5, minSamplesLeaf: 2 }),
     },
     {
         name: 'IsolationForest',

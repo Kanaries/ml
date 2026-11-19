@@ -21,3 +21,5 @@ export type { StackingClassifierProps, StackingRegressorProps, StackMethod } fro
 export type { BaggingRegressorProps } from './baggingRegressor';
 export type { ExtraTreesClassifierProps } from './extraTreesClassifier';
 export type { ExtraTreesRegressorProps } from './extraTreesRegressor';
+export { HistGradientBoostingClassifier, HistGradientBoostingRegressor } from './histGradientBoosting';
+export type { HistGradientBoostingClassifierProps, HistGradientBoostingRegressorProps } from './histGradientBoosting';
