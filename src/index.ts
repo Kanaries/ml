@@ -26,6 +26,7 @@ import * as Covariance from './covariance';
 import * as FeatureExtraction from './feature_extraction';
 import * as Impute from './impute';
 import * as Kernel from './kernel';
+import * as GaussianProcess from './gaussian_process';
 import * as RandomProjection from './random_projection';
 import * as CrossDecomposition from './cross_decomposition';
 import * as Compose from './compose';
@@ -72,6 +73,7 @@ export {
     FeatureExtraction,
     Impute,
     Kernel,
+    GaussianProcess,
     RandomProjection,
     CrossDecomposition,
     Compose,
