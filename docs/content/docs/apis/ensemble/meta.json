@@ -13,6 +13,7 @@
     "adaboostRegressor",
     "gradientBoostingClassifier",
     "gradientBoostingRegressor",
+    "histGradientBoosting",
     "xgboostClassifier",
     "xgboostRegressor"
   ]

@@ -117,8 +117,8 @@ Other (7):
 
 - [ ] GaussianProcessRegressor (kernel system accepted as part of this item)
 - [ ] GaussianProcessClassifier
-- [ ] HistGradientBoostingClassifier (pair with Phase 4 typed-array work)
-- [ ] HistGradientBoostingRegressor (pair with Phase 4 typed-array work)
+- [x] HistGradientBoostingClassifier (typed histogram bins, numeric features and missing values)
+- [x] HistGradientBoostingRegressor (squared error, shared histogram tree)
 
 ## Phase 3 exit gate
 

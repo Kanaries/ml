@@ -5,12 +5,12 @@
 
 | Kind | Covered | Denominator | Coverage |
 |---|---:|---:|---:|
-| estimator | 89 | 118 | 75.4% |
+| estimator | 91 | 118 | 77.1% |
 | transformer | 63 | 88 | 71.6% |
 
-## Missing estimators (29)
+## Missing estimators (27)
 
-ElasticNetCV · FixedThresholdClassifier · GaussianProcessClassifier · GaussianProcessRegressor · GraphicalLassoCV · HistGradientBoostingClassifier · HistGradientBoostingRegressor · Lars · LarsCV · LassoCV · LassoLars · LassoLarsCV · LassoLarsIC · LogisticRegressionCV · MultiTaskElasticNet · MultiTaskElasticNetCV · MultiTaskLasso · MultiTaskLassoCV · OrthogonalMatchingPursuit · OrthogonalMatchingPursuitCV · OutputCodeClassifier · PassiveAggressiveClassifier · PassiveAggressiveRegressor · RidgeCV · RidgeClassifierCV · SGDOneClassSVM · SpectralBiclustering · SpectralCoclustering · TunedThresholdClassifierCV
+ElasticNetCV · FixedThresholdClassifier · GaussianProcessClassifier · GaussianProcessRegressor · GraphicalLassoCV · Lars · LarsCV · LassoCV · LassoLars · LassoLarsCV · LassoLarsIC · LogisticRegressionCV · MultiTaskElasticNet · MultiTaskElasticNetCV · MultiTaskLasso · MultiTaskLassoCV · OrthogonalMatchingPursuit · OrthogonalMatchingPursuitCV · OutputCodeClassifier · PassiveAggressiveClassifier · PassiveAggressiveRegressor · RidgeCV · RidgeClassifierCV · SGDOneClassSVM · SpectralBiclustering · SpectralCoclustering · TunedThresholdClassifierCV
 
 ## Missing transformers (25)
 

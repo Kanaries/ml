@@ -42,6 +42,7 @@ scripts = [
     'gen_random_forest_regressor.py',
     'gen_gradient_boosting_regressor.py',
     'gen_gradient_boosting_classifier.py',
+    'gen_hist_gradient_boosting.py',
     'gen_xgboost_regressor.py',
     'gen_xgboost_classifier.py',
     'gen_gradient_boosting_classifier_multi.py',

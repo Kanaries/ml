@@ -1,0 +1,82 @@
+---
+title: Histogram Gradient Boosting in JavaScript for Classification and Regression
+description: Train histogram gradient boosting trees on numeric tables with missing values. Use @kanaries/ml in a browser or Node.js to predict classes, probabilities, and continuous targets.
+---
+
+# Histogram gradient boosting in JavaScript
+
+Histogram gradient boosting fits a sequence of decision trees to a table. Each round corrects the previous rounds' predictions. The learner groups each numeric feature into bins once, then compares potential splits using the gradient and curvature accumulated in each bin. This limits the number of split candidates even when most feature values are distinct.
+
+This works well for nonlinear relationships in numeric tables, such as estimating machine output from sensor readings or predicting whether a machine will fail. An absent reading can carry information of its own. Represent it as `NaN` and the tree can learn which child should receive it at each split.
+
+## JavaScript implementation
+
+Use `Ensemble.HistGradientBoostingClassifier` for numeric class labels and `Ensemble.HistGradientBoostingRegressor` for a continuous target. Both run in JavaScript in a browser or Node.js. They share the same binner and best-first tree grower. Regression and binary classification fit one tree per round. Multiclass classification fits one tree per class per round.
+
+## Quick start
+
+### Classify a machine from a sensor reading
+
+Suppose an unavailable reading often precedes a fault. In this small training set, readings of 8 or 9 and missing readings all have the fault label `1`.
+
+```js
+import { Ensemble } from '@kanaries/ml';
+
+const classifier = new Ensemble.HistGradientBoostingClassifier({
+  maxIter: 30,
+  minSamplesLeaf: 2,
+});
+const readings = [[1], [2], [3], [4], [8], [9], [NaN], [NaN]];
+classifier.fit(readings, [0, 0, 0, 0, 1, 1, 1, 1]);
+
+console.log(classifier.predict([[2], [NaN]])); // [0, 1]
+console.log(classifier.getClasses());         // [0, 1]
+console.log(classifier.predictProba([[NaN]])); // one row of [P(0), P(1)]
+```
+
+### Estimate output with an unavailable reading
+
+The measured outputs below cluster around 12–14 units for low readings, 36–38 for high readings, and 23–25 for absent readings. The smaller leaf size lets the example learn from pairs of measurements.
+
+```js
+import { Ensemble } from '@kanaries/ml';
+
+const regressor = new Ensemble.HistGradientBoostingRegressor({
+  maxIter: 60,
+  minSamplesLeaf: 2,
+});
+const readings = [[1], [2], [8], [9], [NaN], [NaN]];
+regressor.fit(readings, [12, 14, 36, 38, 23, 25]);
+
+console.log(regressor.predict([[2], [8], [NaN]]).map(Math.round)); // [14, 36, 24]
+```
+
+## API reference
+
+### Constructor options
+
+| Option | Default | Behavior |
+| --- | --- | --- |
+| `loss` | `'log_loss'` for classification, `'squared_error'` for regression. | Each estimator supports the loss shown for its task. |
+| `learningRate` | `0.1` | Positive multiplier applied to each tree's update. |
+| `maxIter` | `100` | Positive integer. Training runs exactly this many boosting rounds. Choose it using held-out data if you need validation-based stopping. |
+| `maxLeafNodes` | `31` | Cap on leaves per tree. Accepts an integer of at least 2, or `null` to remove the cap. |
+| `maxDepth` | `null` | Maximum depth per tree, with the root at depth 0. Set a positive integer to impose a limit. |
+| `minSamplesLeaf` | `20` | Minimum row count per leaf. A split needs at least this many rows in each child. |
+| `l2Regularization` | `0` | Nonnegative L2 penalty on leaf values. Larger values shrink Newton updates. |
+| `maxBins` | `255` | Maximum number of bins for observed values per feature, from 2 through 255. Each feature has a separate missing-value bin. |
+
+### Fitting and prediction
+
+- `fit(X, y, sampleWeight?)` trains a fresh model and returns `void`. Supply a nonempty rectangular `number[][]` with one row per sample and a finite numeric target for each row. Each feature value must be finite or `NaN`. Encode categorical inputs before fitting. The classifier needs at least two distinct numeric labels.
+- `sampleWeight` is an optional array of finite, nonnegative numbers with one weight per training row and a positive finite total. It affects the initial prediction, binning and tree updates.
+- `predict(X)` returns a `number[]` with one class label or estimated target per row. Use the training feature count and column order at prediction time. At a split on a feature that had no missing values in training, a new `NaN` follows the child containing more training samples. Ties go to the right child.
+- `score(X, y)` reports accuracy for the classifier and R² for the regressor. `nIter` is the number of fitted boosting rounds and is zero before fitting.
+
+### Classifier outputs
+
+| Method | Return value |
+| --- | --- |
+| `getClasses()` | Sorted numeric class labels, in the same order as probability columns. |
+| `predictProba(X)` | One row per sample, with a probability for each class. |
+| `decisionFunction(X)` | For two classes, a `number[]` of log-odds for the higher label. For three or more classes, a `number[][]` of raw scores in class order. |
