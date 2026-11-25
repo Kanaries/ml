@@ -56,8 +56,6 @@ export default defineConfig({
       },
     },
   },
-  // Example development configuration
-  root: process.env.NODE_ENV === 'development' ? 'examples' : undefined,
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
