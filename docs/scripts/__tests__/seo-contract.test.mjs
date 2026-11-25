@@ -78,3 +78,68 @@ test('structured data, discovery, backlinks, and static OG coverage stay wired',
     fs.access(path.join(DOCS_ROOT, 'app/tools/logistic-regression-calculator/opengraph-image.tsx')),
   ]);
 });
+
+async function walkDocs(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...(await walkDocs(full)));
+    else if (/\.(md|mdx)$/.test(entry.name)) files.push(full);
+  }
+  return files;
+}
+
+test('Phase 1 technical SEO invariants hold across layout, home, sitemap, headers, and docs metadata', async () => {
+  const [rootLayout, homePage, docsPage, sitemap, toolLayout, nextConfig] = await Promise.all([
+    fs.readFile(path.join(DOCS_ROOT, 'app/layout.tsx'), 'utf8'),
+    fs.readFile(path.join(DOCS_ROOT, 'app/(home)/page.tsx'), 'utf8'),
+    fs.readFile(path.join(DOCS_ROOT, 'app/docs/[[...slug]]/page.tsx'), 'utf8'),
+    fs.readFile(path.join(DOCS_ROOT, 'app/sitemap.ts'), 'utf8'),
+    fs.readFile(path.join(DOCS_ROOT, 'components/tools/ToolPageLayout.tsx'), 'utf8'),
+    fs.readFile(path.join(DOCS_ROOT, 'next.config.mjs'), 'utf8'),
+  ]);
+
+  assert.match(rootLayout, /template:\s*'%s \| @kanaries\/ml'/);
+  assert.match(rootLayout, /images:\s*\[DEFAULT_OG_IMAGE\]/);
+
+  assert.doesNotMatch(homePage, /strategy=["']afterInteractive["']/, 'Homepage JSON-LD must render in SSR HTML');
+  assert.match(homePage, /<script[\s\S]*?application\/ld\+json/);
+  assert.match(homePage, /title:\s*\{\s*absolute:/);
+  assert.match(homePage, /href:\s*'\/tools\/outlier-calculator'/);
+  assert.match(homePage, /href:\s*'\/playground\/pca'/);
+  assert.match(homePage, /href:\s*'\/docs\/guides\/isolation-forest'/);
+  assert.doesNotMatch(homePage, /There is no built-in serialization yet/);
+
+  assert.match(docsPage, /buildBreadcrumbLd/);
+  assert.match(docsPage, /images:\s*\[DEFAULT_OG_IMAGE\]/);
+  assert.match(toolLayout, /buildBreadcrumbLd/);
+  assert.match(sitemap, /lastModified:/);
+  assert.match(nextConfig, /\/llms-full\.txt/);
+  assert.match(nextConfig, /source:\s*'\/llm\.txt'[\s\S]*?destination:\s*'\/llms\.txt'/);
+
+  const docFiles = await walkDocs(path.join(DOCS_ROOT, 'content/docs'));
+  for (const file of docFiles) {
+    const raw = await fs.readFile(file, 'utf8');
+    const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? '';
+    const rel = path.relative(path.join(DOCS_ROOT, 'content/docs'), file);
+    const title = (fm.match(/^title:\s*(.+)$/m)?.[1] ?? '').trim().replace(/^["']|["']$/g, '');
+    const desc = (fm.match(/^description:\s*(.+)$/m)?.[1] ?? '').trim().replace(/^["']|["']$/g, '');
+    assert.ok(title.length > 0, `${rel} is missing frontmatter title`);
+    assert.ok(desc.length > 0 && desc.length <= 160, `${rel} description length (${desc.length}) must be 1..160`);
+
+    const cleanedTitle = title
+      .replace(/\s+(?:with|in)\s+@kanaries\/ml(?:\s+Docs)?\s*$/i, '')
+      .replace(/\s*[—–|-]\s*@kanaries\/ml(?:\s+Docs)?\s*$/i, '')
+      .trim();
+    const rendered = `${cleanedTitle} | @kanaries/ml`;
+    assert.ok(
+      (rendered.match(/@kanaries\/ml/gi) ?? []).length === 1,
+      `${rel} duplicates brand in rendered title: "${rendered}"`,
+    );
+    assert.ok(
+      rendered.length <= 65,
+      `${rel} rendered title exceeds 65 chars (${rendered.length}): "${rendered}"`,
+    );
+  }
+});
