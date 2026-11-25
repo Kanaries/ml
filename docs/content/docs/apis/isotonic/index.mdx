@@ -1,0 +1,81 @@
+---
+title: Isotonic Regression in JavaScript
+description: Fit monotonic non-decreasing or non-increasing 1D curves in JavaScript and TypeScript with IsotonicRegression and PAVA from @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+**Isotonic Regression** fits a free-form, piecewise-linear **monotonic** (strictly non-decreasing or non-increasing) function to one-dimensional data by solving weighted least squares under order constraints. Unlike polynomial or linear regression, isotonic regression makes no parametric assumption about the curve's shape—whether it is S-shaped, logarithmic, or flat in stretches—while guaranteeing that predicted values never move in the wrong direction as `x` increases.
+
+Common applications include:
+
+- **Non-parametric probability calibration**: powers `method: 'isotonic'` inside [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration).
+- **Dose-response, pricing, and ranking curves**: enforcing domain constraints where higher input scores must never lower predicted risk, conversion, or utility.
+- **Monotonic smoothing**: denoising 1D sensor or score trajectories in browser charts without parametric bias.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Isotonic.IsotonicRegression` and the `O(n)` active-set Pool-Adjacent-Violators helper `Isotonic.pavaNonDecreasing(y, w)` (a direct TypeScript port of scikit-learn's Best & Chakravarti algorithm).
+
+Because isotonic regression is inherently 1D, `fit()`, `predict()`, and `transform()` accept either a flat `number[]` or a single-column `number[][]` matrix so it composes effortlessly with [`Pipeline`](/docs/apis/pipeline) and [`ColumnTransformer`](/docs/apis/pipeline/column-transformer). Tied `x` values are merged via weighted averages, and fitted models serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+<AlgorithmComparison
+  title="IsotonicRegression"
+  pythonCode={String.raw`from sklearn.isotonic import IsotonicRegression
+
+iso = IsotonicRegression(increasing=True, y_min=0, y_max=1, out_of_bounds="clip")
+iso.fit(x_train, y_train)
+y_pred = iso.predict(x_test)`}
+  tsCode={String.raw`import { Isotonic } from '@kanaries/ml';
+
+const iso = new Isotonic.IsotonicRegression({
+  increasing: true,
+  yMin: 0,
+  yMax: 1,
+  outOfBounds: 'clip',
+});
+
+iso.fit([0.1, 0.2, 0.4, 0.6, 0.9], [0.05, 0.3, 0.25, 0.7, 0.95]);
+const yPred = iso.predict([0.0, 0.3, 0.5, 1.0]);`}
+/>
+
+### Auto-detecting monotonic direction
+
+Set `increasing: 'auto'` to infer the sign from the Spearman rank correlation between `x` and `y`, then inspect `iso.increasingFitted`:
+
+```ts
+import { Isotonic } from '@kanaries/ml';
+
+const iso = new Isotonic.IsotonicRegression({ increasing: 'auto' });
+iso.fit([1, 2, 3, 4], [10, 8, 9, 3]);
+console.log(iso.increasingFitted); // false
+```
+
+## Detailed API reference
+
+### `new Isotonic.IsotonicRegression(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `yMin` | `number` | `undefined` | Optional lower clip bound applied to fitted thresholds after PAVA. |
+| `yMax` | `number` | `undefined` | Optional upper clip bound applied to fitted thresholds after PAVA (must satisfy `yMin <= yMax`). |
+| `increasing` | `boolean \| 'auto'` | `true` | `true` for non-decreasing, `false` for non-increasing, or `'auto'` to determine direction via Spearman rank correlation (`rho >= 0` → increasing). |
+| `outOfBounds` | `'clip' \| 'nan' \| 'raise'` | `'clip'` | Behavior when `predict()` receives `x` outside `[min(xTrain), max(xTrain)]`: `'clip'` clamps to boundary values, `'nan'` returns `NaN`, `'raise'` throws an error. |
+
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][] \| number[], y: number[], sampleWeight?: number[]) => void` | Merges duplicate `x` points by weighted mean, runs `O(n)` PAVA, and clips to `[yMin, yMax]`. |
+| `predict` / `transform` | `(X: number[][] \| number[]) => number[]` | Evaluates the fitted step-linear curve by binary search and linear interpolation between adjacent thresholds. |
+| `increasingFitted` | `boolean \| null` | Public property holding the resolved monotonicity direction after `fit()`. |
+| `Isotonic.pavaNonDecreasing` | `(y: number[], w: number[]) => number[]` | Low-level `O(n)` weighted Pool-Adjacent-Violators function on pre-sorted values. |
+
+### Practical guidance
+
+- Because isotonic regression is non-parametric, it can create flat staircases on small noisy datasets (`n < 100`). For small calibration sets, consider [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration) with `method: 'sigmoid'`.
+- **Related pages**: [Probability Calibration](/docs/apis/calibration), [Linear & Ridge Regression](/docs/apis/linear), [ML Pipelines](/docs/apis/pipeline).

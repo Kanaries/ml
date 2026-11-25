@@ -1,0 +1,86 @@
+---
+title: Multiclass Wrappers (OvR & OvO) in JS
+description: Turn any binary classifier into a multiclass model in JavaScript and TypeScript with OneVsRestClassifier and OneVsOneClassifier from @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Many linear and margin-based classifiers are formulated naturally for binary classification (`0` vs `1`), or benefit from explicit decomposition when class boundaries differ sharply across pairs. **Multiclass meta-estimators** wrap any binary classifier and decompose a `K`-class problem into binary subproblems:
+
+- **One-vs-Rest (`OneVsRestClassifier`)**: fits `K` binary classifiers—one per class against all remaining classes combined. At prediction time, picks the class with the highest continuous score (`predictProba` positive column, `decisionFunction`, or raw vote). Scales linearly (`K` models) and supports normalized `predictProba()`.
+- **One-vs-One (`OneVsOneClassifier`)**: fits `K * (K - 1) / 2` binary classifiers—one for every unordered pair of classes `(i, j)` using only samples belonging to those two classes. Prediction counts pairwise votes and uses squashed confidence sums (`ovrDecisionFunction`) strictly as tie-breakers. Often trains faster than OvR for super-linear estimators like kernel SVMs when `K` is modest.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Multiclass.OneVsRestClassifier`, `Multiclass.OneVsOneClassifier`, and the tie-breaking helper `Multiclass.ovrDecisionFunction` in pure TypeScript for browsers and Node.js.
+
+Both wrappers extend `ClassifierBase`, clone the prototype estimator per subproblem without mutating it, support nested `estimator__param` addressing in `setParams()` (making them tunable inside `GridSearchCV` and [`Pipeline`](/docs/apis/pipeline)), and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+<AlgorithmComparison
+  title="OneVsRestClassifier & OneVsOneClassifier"
+  pythonCode={String.raw`from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier
+from sklearn.svm import LinearSVC
+
+ovr = OneVsRestClassifier(LinearSVC(C=1.0))
+ovr.fit(X_train, y_train)
+ovr_preds = ovr.predict(X_test)
+
+ovo = OneVsOneClassifier(LinearSVC(C=1.0))
+ovo.fit(X_train, y_train)
+ovo_preds = ovo.predict(X_test)`}
+  tsCode={String.raw`import { Multiclass, SVM } from '@kanaries/ml';
+
+const ovr = new Multiclass.OneVsRestClassifier({
+  estimator: new SVM.LinearSVC({ C: 1.0 }),
+});
+ovr.fit(XTrain, yTrain);
+const ovrPreds = ovr.predict(XTest);
+
+const ovo = new Multiclass.OneVsOneClassifier({
+  estimator: new SVM.LinearSVC({ C: 1.0 }),
+});
+ovo.fit(XTrain, yTrain);
+const ovoPreds = ovo.predict(XTest);
+
+// Tune wrapped estimator hyperparameters via estimator__param
+ovr.setParams({ estimator__C: 5.0 });`}
+/>
+
+## Detailed API reference
+
+### `new Multiclass.OneVsRestClassifier(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `BaseEstimator` | *required* | Prototype classifier implementing `fit()` and `predict()`. One unfitted clone is fitted per unique class in sorted order. |
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y: number[], sampleWeight?: number[]) => void` | Fits `K` binary clones (`y === cls ? 1 : 0`). Requires at least 2 classes. |
+| `predict` | `(X: number[][]) => number[]` | Returns the class with the highest member score (`predictProba` > `decisionFunction` > `predict`). |
+| `predictProba` | `(X: number[][]) => number[][]` | Normalizes each member's positive-class probability so rows sum to `1` (falls back to uniform `1/K` instead of `NaN` if a row sums to `0`). Requires wrapped members to implement `predictProba()`. |
+| `decisionFunction` | `(X: number[][]) => number[][]` | Returns `[nSamples][nClasses]` matrix of member scores. |
+| `classes` / `estimators` | `number[]` / `ClassifierLike[]` | Read-only getters returning sorted labels and fitted member clones. |
+
+### `new Multiclass.OneVsOneClassifier(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `BaseEstimator` | *required* | Prototype classifier cloned and fitted on every class pair `(cI, cJ)` with `cI < cJ`. |
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y: number[], sampleWeight?: number[]) => void` | Fits `K * (K - 1) / 2` pairwise clones on subsets belonging to each pair. |
+| `predict` | `(X: number[][]) => number[]` | Counts pairwise votes with confidence tie-breaking (`ovrDecisionFunction`) that maps confidence sums into `(-1/3, 1/3)` so confidences never overturn a vote majority. |
+| `decisionFunction` | `(X: number[][]) => number[] \| number[][]` | Returns pairwise decision scores (`number[]` for 2 classes, `[nSamples][nClasses]` aggregated vote+confidence matrix for `K > 2`). |
+| `classes` / `estimators` | `number[]` / `ClassifierLike[]` | Sorted class labels and fitted pairwise members in `(i, j)` order. |
+
+### OvR vs OvO decision guide
+
+- Prefer **`OneVsRestClassifier`** when `K` is large (say `K > 10`), when you need `predictProba()`, or when training linear models that scale linearly in `nSamples`.
+- Prefer **`OneVsOneClassifier`** for kernel SVMs (`SVC`) on datasets with many samples and a small-to-moderate number of classes, because each pairwise fit uses only a fraction of the rows.
+- **Related pages**: [SVM Classifiers](/docs/apis/svm), [Probability Calibration](/docs/apis/calibration), [Multi-Output Chains](/docs/apis/multioutput), [ML Pipelines](/docs/apis/pipeline).

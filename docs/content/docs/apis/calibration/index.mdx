@@ -1,0 +1,96 @@
+---
+title: Probability Calibration in JavaScript
+description: Calibrate classifier probabilities with Platt scaling and isotonic regression in JavaScript and TypeScript using CalibratedClassifierCV from @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Many high-performing classifiers—such as Support Vector Machines (`SVC`, `LinearSVC`), Naive Bayes, and boosted trees—rank predictions accurately yet produce uncalibrated or overconfident probability estimates (or raw margin scores via `decisionFunction` without probabilities at all). When downstream systems make cost-sensitive decisions, set risk thresholds, or display confidence percentages in a UI, a predicted probability of `0.80` should mean roughly 80% of those cases truly belong to the positive class.
+
+**Probability calibration** fits a monotonic mapping from raw classifier scores to well-calibrated probabilities using out-of-fold cross-validation so the calibrator never overfits the base model's training errors:
+
+- **Sigmoid (Platt scaling)**: fits a 2-parameter logistic curve `1 / (1 + exp(a * s + b))` via damped Newton optimization. Works well with small datasets and sigmoid-shaped calibration distortions (common in SVMs and boosted trees).
+- **Isotonic regression**: fits a non-parametric monotonic step-linear function via [`IsotonicRegression`](/docs/apis/isotonic). More flexible than Platt scaling when calibration curves are non-sigmoidal, provided you have enough samples (typically several hundred or more per class) to avoid overfitting.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports `Calibration.CalibratedClassifierCV` and the standalone `Calibration.SigmoidCalibration` helper in pure TypeScript for browser and Node.js runtimes.
+
+`CalibratedClassifierCV` mirrors `sklearn.calibration.CalibratedClassifierCV`: it splits `(X, y)` with deterministic `StratifiedKFold(cv)`, clones the base estimator per fold (never mutating the prototype), scores held-out folds via `predictProba` or `decisionFunction`, and fits one-vs-rest calibrators. It works inside [`Pipeline`](/docs/apis/pipeline) and serializes cleanly with `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+<AlgorithmComparison
+  title="CalibratedClassifierCV"
+  pythonCode={String.raw`from sklearn.calibration import CalibratedClassifierCV
+from sklearn.svm import LinearSVC
+
+base = LinearSVC(C=1.0)
+calibrated = CalibratedClassifierCV(
+    estimator=base,
+    method="sigmoid",
+    cv=5,
+    ensemble=True,
+)
+calibrated.fit(X_train, y_train)
+proba = calibrated.predict_proba(X_test)
+preds = calibrated.predict(X_test)`}
+  tsCode={String.raw`import { Calibration, SVM } from '@kanaries/ml';
+
+const base = new SVM.LinearSVC({ C: 1.0 });
+const calibrated = new Calibration.CalibratedClassifierCV({
+  estimator: base,
+  method: 'sigmoid',
+  cv: 5,
+  ensemble: true,
+});
+
+calibrated.fit(XTrain, yTrain);
+const proba = calibrated.predictProba(XTest);
+const preds = calibrated.predict(XTest);`}
+/>
+
+### Standalone Platt scaling (`SigmoidCalibration`)
+
+If you already have held-out scores from a custom model or external API, you can calibrate them directly:
+
+```ts
+import { Calibration } from '@kanaries/ml';
+
+const platt = new Calibration.SigmoidCalibration();
+platt.fit(validationScores, validationBinaryTargets);
+const calibratedProbs = platt.predict(testScores);
+```
+
+## Detailed API reference
+
+### `new Calibration.CalibratedClassifierCV(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `CalibratableClassifier` | *required* | A `BaseEstimator` implementing `fit()`, `predict()`, and at least one of `predictProba()` or `decisionFunction()`. Cloned internally, never mutated. |
+| `method` | `'sigmoid' \| 'isotonic'` | `'sigmoid'` | Calibration family: `'sigmoid'` (Platt scaling) or `'isotonic'` ([`IsotonicRegression`](/docs/apis/isotonic)). |
+| `cv` | `number` | `5` | Integer `≥ 2` controlling the number of `StratifiedKFold` splits. Every class must contain at least `cv` samples. |
+| `ensemble` | `boolean` | `true` | When `true`, keeps one `(classifier, calibrators)` pair per fold and averages their calibrated probabilities at inference. When `false`, pools out-of-fold scores to fit one calibrator and refits the base estimator on all training data. |
+
+### Methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y: number[], sampleWeight?: number[]) => void` | Runs stratified out-of-fold calibration and prepares inference pairs. |
+| `predictProba` | `(X: number[][]) => number[][]` | Returns calibrated per-class probabilities normalized to sum to `1` per row (`[1 - p, p]` for binary problems). |
+| `predict` | `(X: number[][]) => number[]` | Returns the class with maximum calibrated probability. |
+| `getParams` / `setParams` / `clone` / `toJSON` | Inherited from `BaseEstimator` | Full estimator contract support. |
+
+### `SigmoidCalibration`
+
+- `fit(scores: number[], targets: number[], sampleWeight?: number[]): void` — minimizes cross-entropy against Bayesian-prior-smoothed targets (Platt 1999; Lin, Lin & Weng 2007). Exposes fitted `a` and `b` coefficients.
+- `predict(scores: number[]): number[]` — maps raw scores to calibrated probabilities in `(0, 1)`.
+
+### Practical tips
+
+- Evaluate probability quality using [`Metrics.logLoss`](/docs/apis/metrics) or Brier score before and after calibration.
+- Use `method: 'sigmoid'` when `nSamples < 1,000` to avoid the step-function overfitting that isotonic regression can exhibit on small datasets.
+- **Related pages**: [Isotonic Regression](/docs/apis/isotonic), [SVM Classifiers](/docs/apis/svm), [Naive Bayes](/docs/apis/bayes), [ML Pipelines](/docs/apis/pipeline).

@@ -25,16 +25,24 @@ This is especially useful when someone searches for "machine learning in JavaScr
 
 ## Quick navigation
 
-- **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, Birch, Affinity Propagation, HDBSCAN, and related methods.
+- **[Pipeline](/docs/apis/pipeline)**: chain preprocessing, `ColumnTransformer`, `FeatureUnion`, and estimators without train/test leakage.
+- **[Model Serialization](/docs/apis/serialization)**: save and load fitted models and pipelines with `toJSON()`, `loadModel()`, and `fromJSON()`.
+- **[Clusters](/docs/apis/clusters)**: segment unlabeled data with K-Means, E-Means, Birch, Affinity Propagation, HDBSCAN, and related methods.
+- **[Mixture Models](/docs/apis/mixture)**: fit soft probabilistic clusters and densities with `GaussianMixture` and `BayesianGaussianMixture`.
 - **[Decomposition](/docs/apis/decomposition)**: reduce dimensions or separate latent structure with PCA, Kernel PCA, FastICA, NMF, Incremental PCA, Sparse PCA, and Truncated SVD.
-- **[Ensemble](/docs/apis/ensemble)**: use Isolation Forest, AdaBoost, random forest, and bagging models for anomaly detection, classification, and regression.
+- **[Discriminant Analysis](/docs/apis/discriminant-analysis)**: classify and project data with closed-form `LDA` and `QDA`.
+- **[Ensemble](/docs/apis/ensemble)**: use Isolation Forest, AdaBoost, random forest, gradient boosting, XGBoost, and bagging models for anomaly detection, classification, and regression.
+- **[Calibration](/docs/apis/calibration)**: calibrate classifier probabilities with Platt scaling (`sigmoid`) or isotonic regression via `CalibratedClassifierCV`.
+- **[Multiclass](/docs/apis/multiclass)**: extend binary classifiers to multiclass tasks with `OneVsRestClassifier` and `OneVsOneClassifier`.
+- **[Isotonic Regression](/docs/apis/isotonic)**: fit non-parametric monotonic 1D curves via Pool-Adjacent-Violators (`IsotonicRegression`).
+- **[Dummy Baselines](/docs/apis/dummy)**: sanity-check classifiers and regressors with `DummyClassifier` and `DummyRegressor`.
 - **[Covariance](/docs/apis/covariance)**: estimate empirical, shrunk, robust, or sparse inverse covariance.
 - **[Feature Selection](/docs/apis/feature_selection)**: select columns with model importance, recursive elimination, or univariate scores.
 - **[Feature Extraction](/docs/apis/feature_extraction)**: turn raw text into sparse count and TF-IDF features.
 - **[Imputation](/docs/apis/impute)**: estimate correlated numeric values missing from feature matrices.
 - **[Linear](/docs/apis/linear)**: use classical, robust, Bayesian, quantile, and generalized linear models.
 - **[Kernel Methods](/docs/apis/kernel)**: fit kernel ridge regression or density estimates, or approximate a kernel with random Fourier features and Nyström landmarks.
-- **[Gaussian Processes](/docs/apis/gaussian_process)** estimate a continuous target with uncertainty or predict class probabilities on small datasets.
+- **[Gaussian Processes](/docs/apis/gaussian_process)**: estimate a continuous target with uncertainty or predict class probabilities on small datasets.
 - **[Cross Decomposition](/docs/apis/cross_decomposition)**: model paired blocks with PLS Regression and CCA.
 - **[Random Projection](/docs/apis/random_projection)**: reduce dimensions with Gaussian or sparse Johnson-Lindenstrauss maps.
 - **[Compose](/docs/apis/compose)**: wrap regression targets in invertible preprocessing transformations.
@@ -47,6 +55,8 @@ This is especially useful when someone searches for "machine learning in JavaScr
 - **[Neural Network](/docs/apis/neural_network)**: learn compact representations with Bernoulli RBM.
 - **[Semi-Supervised](/docs/apis/semi_supervised)**: spread labels through partially labeled datasets.
 - **[Multi-Output](/docs/apis/multioutput)**: predict related label or regression targets with estimator chains.
+- **[Datasets](/docs/apis/datasets)**: generate seeded synthetic datasets (`makeBlobs`, `makeMoons`, `makeCircles`, `makeClassification`, `makeRegression`).
+- **[Sparse Data (`CSRMatrix`)](/docs/apis/data)**: store and slice high-dimensional sparse feature matrices efficiently.
 - **[Utils](/docs/apis/utils)**: use preprocessing, sampling, model selection, statistics, and async workflow helpers.
 - **[Algebra](/docs/apis/algebra)**: use lightweight matrix helpers such as transpose, determinants, and inverse.
 - **[KMath](/docs/apis/KMath)**: compute lightweight descriptive statistics.

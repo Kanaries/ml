@@ -1,0 +1,92 @@
+---
+title: CSRMatrix Sparse Matrices in JS
+description: Represent high-dimensional sparse text and tabular features efficiently in JavaScript and TypeScript with CSRMatrix from @kanaries/ml for browser and Node.js.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Text vectorizers ([`CountVectorizer`](/docs/apis/feature_extraction/countVectorizer), [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer), [`HashingVectorizer`](/docs/apis/feature_extraction/hashingAndDictionaries)) and one-hot encoded categorical tables frequently contain 95%–99.9% zeros. Storing a 10,000-document × 20,000-term matrix as a dense JavaScript `number[][]` wastes gigabytes of heap memory and triggers heavy garbage collection in browsers and Node.js.
+
+A **Compressed Sparse Row matrix (`CSRMatrix`)** stores only non-zero entries across three compact flat arrays:
+
+- `data`: the non-zero numeric values, grouped row by row.
+- `indices`: the strictly increasing column index for each value in `data`.
+- `indptr`: length `nRows + 1` row-pointer array where row `r` occupies slice `[indptr[r], indptr[r + 1])`.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports `CSRMatrix` at both the top level (`import { CSRMatrix } from '@kanaries/ml'`) and under `Data` (`import { Data } from '@kanaries/ml'`), along with matrix helper utilities (`isCSRMatrix`, `matrixShape`, `matrixRow`, `forEachNonZeroInRow`).
+
+`CSRMatrix` validates structural invariants at construction (non-negative dimensions, strictly increasing column indices per row, no explicit zeros), returns defensive copies on array getters to prevent accidental corruption, flows directly between sparse-aware steps inside [`Pipeline`](/docs/apis/pipeline), and is registered with the serialization engine so models storing sparse state work seamlessly with `toJSON()` and [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+<AlgorithmComparison
+  title="CSRMatrix vs scipy.sparse.csr_matrix"
+  pythonCode={String.raw`from scipy.sparse import csr_matrix
+import numpy as np
+
+dense = np.array([
+    [0, 2, 0],
+    [3, 0, 1],
+    [0, 0, 0],
+])
+csr = csr_matrix(dense)
+print(csr.shape, csr.nnz, csr[1, 2])
+back_to_dense = csr.toarray()`}
+  tsCode={String.raw`import { CSRMatrix, Data } from '@kanaries/ml';
+
+const csr = CSRMatrix.fromDense([
+  [0, 2, 0],
+  [3, 0, 1],
+  [0, 0, 0],
+]);
+
+console.log(csr.shape); // [3, 3]
+console.log(csr.nnz);   // 3
+console.log(csr.get(1, 2)); // 1
+
+// Iterate non-zeros in row 1 without allocating a dense row
+csr.forEachNonZeroInRow(1, (col, val) => {
+  console.log({ col, val });
+});
+
+const subset = csr.selectRows([1, 0]);
+const dense = Data.isCSRMatrix(subset) ? subset.toDense() : subset;`}
+/>
+
+## Detailed API reference
+
+### `new CSRMatrix(data, indices, indptr, shape)`
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `data` | `number[]` | Non-zero values (explicit `0` entries throw an error). |
+| `indices` | `number[]` | Column index for each entry in `data`, strictly increasing within every row and bounded in `[0, nCols)`. |
+| `indptr` | `number[]` | Non-decreasing integer offsets of length `nRows + 1` with `indptr[0] === 0` and `indptr[nRows] === data.length`. |
+| `shape` | `[number, number]` | `[nRows, nCols]` non-negative integer dimensions. |
+
+### Static constructors, properties & methods
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `CSRMatrix.fromDense` | `(matrix: number[][]) => CSRMatrix` | Builds a `CSRMatrix` from a rectangular dense 2D array, skipping all zeros. |
+| `shape` / `nRows` / `nCols` / `nnz` | `[number, number]` / `number` | Dimensions and count of stored non-zero entries. |
+| `data` / `indices` / `indptr` | `readonly number[]` | Defensive copies of the three CSR backing arrays. |
+| `get` | `(row: number, column: number) => number` | Binary-searches row `row` in `O(log nnz_row)` time; returns `0` if absent. |
+| `row` | `(row: number) => number[]` | Materializes a single row as a dense `number[]` of length `nCols`. |
+| `forEachNonZeroInRow` | `(row: number, cb: (col: number, val: number) => void) => void` | Zero-allocation iteration over non-zero entries in `row`. |
+| `selectRows` | `(rows: number[]) => CSRMatrix` | Slices arbitrary row indices into a new `CSRMatrix` (ideal for train/test splits and k-fold CV). |
+| `toDense` | `() => number[][]` | Converts the entire sparse matrix to a dense 2D array (use cautiously on high-dimensional vocabularies). |
+
+### Polymorphic `Data` helpers
+
+For code that accepts `NumericMatrix = number[][] | CSRMatrix`:
+
+- `Data.isCSRMatrix(value)` — TypeScript type guard checking `value instanceof CSRMatrix`.
+- `Data.matrixShape(X)` — returns `[nRows, nCols]` for either dense or CSR input.
+- `Data.matrixRow(X, row)` — returns row `row` as a dense `number[]`.
+- `Data.forEachNonZeroInRow(X, row, cb)` — iterates non-zero `(column, value)` pairs uniformly across dense and CSR matrices.
+- **Related pages**: [Feature Extraction (TF-IDF & CountVectorizer)](/docs/apis/feature_extraction), [ML Pipelines](/docs/apis/pipeline), [Model Serialization](/docs/apis/serialization).

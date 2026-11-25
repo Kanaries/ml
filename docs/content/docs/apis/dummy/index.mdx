@@ -1,0 +1,70 @@
+---
+title: Dummy Baselines in JavaScript
+description: Benchmark classifiers and regressors against simple baseline strategies in JavaScript and TypeScript using DummyClassifier and DummyRegressor from @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Before celebrating 95% accuracy on an imbalanced fraud dataset—or tuning hyperparameters on a noisy regression problem—you need a **sanity-check baseline**. **Dummy estimators** ignore all input features `X` and generate predictions strictly from simple rules over the training target `y` (such as the majority class, empirical class priors, target mean, median, or a chosen quantile).
+
+Comparing real models against a dummy baseline immediately answers two critical questions:
+
+1. **Is my model learning real signal?** If a tuned classifier barely beats `DummyClassifier({ strategy: 'prior' })`, the problem needs better features or different framing rather than heavier models.
+2. **Is my evaluation metric misleading?** On a 98/2 imbalanced dataset, `DummyClassifier` achieves 98% accuracy while scoring `0.0` on positive-class F1—exposing why precision, recall, F1, or ROC-AUC should drive model selection.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `Dummy.DummyClassifier` and `Dummy.DummyRegressor` matching `sklearn.dummy`. Both extend `ClassifierBase` / `RegressorBase`, integrate cleanly with cross-validation utilities in [`utils.ModelSelection`](/docs/apis/utils/modelSelection) and [`Pipeline`](/docs/apis/pipeline), and serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+Note one deliberate improvement over scikit-learn: for stochastic strategies (`'stratified'`, `'uniform'`), `DummyClassifier` stores `randomState` and derives a fresh seeded generator on every `predict()` / `predictProba()` call, making repeated predictions deterministic and serialization-safe.
+
+## Quick start example
+
+<AlgorithmComparison
+  title="DummyClassifier & DummyRegressor"
+  pythonCode={String.raw`from sklearn.dummy import DummyClassifier, DummyRegressor
+
+clf = DummyClassifier(strategy="most_frequent")
+clf.fit(X_train, y_train)
+baseline_acc = clf.score(X_test, y_test)
+
+reg = DummyRegressor(strategy="median")
+reg.fit(X_train, y_train_num)
+baseline_preds = reg.predict(X_test)`}
+  tsCode={String.raw`import { Dummy, Metrics } from '@kanaries/ml';
+
+const clf = new Dummy.DummyClassifier({ strategy: 'mostFrequent' });
+clf.fit(XTrain, yTrain);
+const baselineAcc = Metrics.accuracyScore(yTest, clf.predict(XTest));
+
+const reg = new Dummy.DummyRegressor({ strategy: 'median' });
+reg.fit(XTrain, yTrainNum);
+const baselineRmse = Math.sqrt(Metrics.meanSquaredError(yTestNum, reg.predict(XTest)));`}
+/>
+
+## Detailed API reference
+
+### `new Dummy.DummyClassifier(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strategy` | `'prior' \| 'mostFrequent' \| 'stratified' \| 'uniform' \| 'constant'` | `'prior'` | `'prior'` predicts majority class and returns empirical priors from `predictProba`; `'mostFrequent'` returns one-hot mode in `predictProba`; `'stratified'` draws from empirical class frequencies; `'uniform'` samples classes equally; `'constant'` always predicts `constant`. |
+| `constant` | `number` | `undefined` | Required when `strategy: 'constant'`; must appear in training `y`. |
+| `randomState` | `number` | `undefined` | Seed for `'stratified'` and `'uniform'` strategies. |
+
+**Methods**: `fit(X, y, sampleWeight?)`, `predict(X)`, `predictProba(X)`, `score(X, y)`, `getParams()`, `setParams()`, `clone()`, `toJSON()`.
+
+### `new Dummy.DummyRegressor(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `strategy` | `'mean' \| 'median' \| 'quantile' \| 'constant'` | `'mean'` | `'mean'` predicts the (optionally weighted) target mean; `'median'` predicts the exact median; `'quantile'` predicts linear-interpolated `quantile`; `'constant'` always predicts `constant`. |
+| `quantile` | `number` | `undefined` | Required in `[0, 1]` when `strategy: 'quantile'` (`0.5` equals median). |
+| `constant` | `number` | `undefined` | Required when `strategy: 'constant'`. |
+
+**Methods**: `fit(X, y, sampleWeight?)`, `predict(X)`, `score(X, y)`, `getParams()`, `setParams()`, `clone()`, `toJSON()`.
+
+- **Compatibility note**: `sampleWeight` in `DummyRegressor` is supported for `strategy: 'mean'` (passing weights with `'median'` or `'quantile'` throws a clear error).
+- **Related pages**: [Evaluation Metrics](/docs/apis/metrics), [Model Selection & Cross-Validation](/docs/apis/utils/modelSelection), [Confusion Matrix Calculator](/tools/confusion-matrix-calculator).

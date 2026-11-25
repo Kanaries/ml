@@ -1,0 +1,78 @@
+---
+title: Synthetic ML Datasets in JavaScript
+description: Generate reproducible synthetic datasets (makeBlobs, makeMoons, makeCircles, makeClassification, makeRegression) in JavaScript and TypeScript with @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Module overview
+
+Testing machine learning pipelines, benchmarking clustering speed in browsers, building interactive visualizations, and writing deterministic unit tests all require controlled data with known ground-truth structure.
+
+The **`Datasets`** module provides pure-JavaScript ports of scikit-learn's synthetic dataset generators—allowing you to create isotropic Gaussian clusters, interleaving moons, concentric circles, multi-class tabular benchmarks with informative/redundant/noise features, and linear or low-rank regression problems with exact seeded reproducibility (`randomState`).
+
+## JavaScript implementation
+
+Import synthetic generators from `import { Datasets } from '@kanaries/ml'`. Every generator uses a deterministic PRNG and Box-Muller Gaussian sampling, producing plain `number[][]` feature matrices and `number[]` label/target vectors directly usable by every `@kanaries/ml` estimator in browser and Node.js environments—with zero external data downloads.
+
+| Generator | sklearn equivalent | Primary use case |
+| --- | --- | --- |
+| `Datasets.makeBlobs` | `make_blobs` | Isotropic Gaussian clusters for K-Means, GMM, HDBSCAN |
+| `Datasets.makeMoons` | `make_moons` | Two non-linear interleaving half-circles for DBSCAN, kernel SVM, kNN |
+| `Datasets.makeCircles` | `make_circles` | Concentric circles for radial/kernel classifiers and spectral clustering |
+| `Datasets.makeClassification` | `make_classification` | Configurable multi-class tabular problems with noise, redundancy, and class imbalance |
+| `Datasets.makeRegression` | `make_regression` | Controlled linear or low-rank regression with optional ground-truth `coef` |
+| `Datasets.makeLowRankMatrix` | `make_low_rank_matrix` | Matrices with bell-shaped singular value profiles for PCA/SVD benchmarks |
+
+## Quick start example
+
+<AlgorithmComparison
+  title="Synthetic Dataset Generators"
+  pythonCode={String.raw`from sklearn.datasets import make_blobs, make_moons, make_classification, make_regression
+
+X_blobs, y_blobs = make_blobs(n_samples=200, centers=3, cluster_std=0.8, random_state=42)
+X_moons, y_moons = make_moons(n_samples=200, noise=0.08, random_state=42)
+X_cls, y_cls = make_classification(n_samples=300, n_features=10, n_informative=4, random_state=42)
+X_reg, y_reg, coef = make_regression(n_samples=200, n_features=8, noise=5.0, coef=True, random_state=42)`}
+  tsCode={String.raw`import { Datasets } from '@kanaries/ml';
+
+const blobs = Datasets.makeBlobs({ nSamples: 200, centers: 3, clusterStd: 0.8, randomState: 42 });
+const moons = Datasets.makeMoons({ nSamples: 200, noise: 0.08, randomState: 42 });
+const cls = Datasets.makeClassification({ nSamples: 300, nFeatures: 10, nInformative: 4, randomState: 42 });
+const reg = Datasets.makeRegression({ nSamples: 200, nFeatures: 8, noise: 5.0, coef: true, randomState: 42 });
+
+// Access { X, y } (plus reg.coef when coef: true)
+console.log(blobs.X.length, moons.y.length, reg.coef);`}
+/>
+
+## Detailed API reference
+
+### `Datasets.makeBlobs(props?)` → `{ X: number[][], y: number[] }`
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nSamples` | `number \| number[]` | `100` | Total sample count or explicit per-cluster counts. |
+| `nFeatures` | `number` | `2` | Feature width (inferred if explicit `centers` coordinates are passed). |
+| `centers` | `number \| number[][]` | `3` | Number of random centers inside `centerBox`, or explicit `[nCenters][nFeatures]` coordinates. |
+| `clusterStd` | `number \| number[]` | `1` | Cluster standard deviation (single number or per-cluster array). |
+| `centerBox` | `[number, number]` | `[-10, 10]` | Coordinate bounds for randomly placed centers. |
+| `shuffle` / `randomState` | `boolean` / `number` | `true` / `undefined` | Shuffle rows and control reproducibility. |
+
+### `Datasets.makeMoons(props?)` & `Datasets.makeCircles(props?)` → `{ X, y }`
+
+- `nSamples`: total count or `[nOuter, nInner]` (default `100`).
+- `noise`: Gaussian standard deviation added to coordinates.
+- `factor` (`makeCircles` only): inner-to-outer radius scale in `[0, 1)` (default `0.8`).
+- `shuffle` (default `true`) and `randomState`.
+
+### `Datasets.makeClassification(props?)` → `{ X, y }`
+
+Supports `nSamples` (`100`), `nFeatures` (`20`), `nInformative` (`2`), `nRedundant` (`2`), `nRepeated` (`0`), `nClasses` (`2`), `nClustersPerClass` (`2`), `weights` (class proportions), `flipY` (`0.01` label noise), `classSep` (`1`), `hypercube` (`true`), `shift` (`0` or `null` for random), `scale` (`1` or `null` for random), `shuffle` (`true`), and `randomState`.
+
+### `Datasets.makeRegression(props?)` → `{ X, y, coef? }`
+
+Supports `nSamples` (`100`), `nFeatures` (`100`), `nInformative` (`min(nFeatures, 10)`), `nTargets` (`1`), `bias` (`0`), `effectiveRank` (switches to low-rank singular-value matrix via `makeLowRankMatrix`), `tailStrength` (`0.5`), `noise` (`0`), `shuffle` (`true`), `coef` (`false` — set `true` to return ground-truth coefficients), and `randomState`.
+
+### Related pages
+
+- [Clustering Playgrounds](/playground/kmeans), [Model Selection & Cross-Validation](/docs/apis/utils/modelSelection), [Dummy Baselines](/docs/apis/dummy).

@@ -92,6 +92,21 @@ const predictions = model.predict(testX);
 | `sklearn.semi_supervised.LabelPropagation` | [`SemiSupervised.LabelPropagation`](/docs/apis/semi_supervised/labelPropagation) | Graph-based propagation |
 | `sklearn.semi_supervised.LabelSpreading` | [`SemiSupervised.LabelSpreading`](/docs/apis/semi_supervised/labelSpreading) | Regularized label spreading |
 | `sklearn.neural_network.BernoulliRBM` | [`NeuralNetwork.BernoulliRBM`](/docs/apis/neural_network/bernoulliRBM) | Bernoulli restricted Boltzmann machine |
+| `sklearn.pipeline.Pipeline` / `make_pipeline` | [`Pipeline` / `makePipeline`](/docs/apis/pipeline) | Sequential steps with `step__param` tuning & `toJSON()` |
+| `sklearn.compose.ColumnTransformer` | [`ColumnTransformer`](/docs/apis/pipeline/column-transformer) | Per-column transformers using numeric column indices |
+| `sklearn.pipeline.FeatureUnion` | [`FeatureUnion`](/docs/apis/pipeline/feature-union) | Parallel horizontal feature concatenation |
+| `joblib.dump` / `joblib.load` | [`model.toJSON()` / `loadModel()`](/docs/apis/serialization) | Portable JSON model persistence in browser & Node.js |
+| `sklearn.mixture.GaussianMixture` | [`Mixture.GaussianMixture`](/docs/apis/mixture/gaussian-mixture) | EM soft clustering with AIC, BIC, and 4 covariance types |
+| `sklearn.mixture.BayesianGaussianMixture` | [`Mixture.BayesianGaussianMixture`](/docs/apis/mixture/bayesian-gaussian-mixture) | Variational Bayesian GMM with Dirichlet Process prior |
+| `sklearn.discriminant_analysis.LinearDiscriminantAnalysis` | [`DiscriminantAnalysis.LDA`](/docs/apis/discriminant-analysis/lda) | SVD/eigen solvers, shrinkage, and supervised `transform()` |
+| `sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis` | [`DiscriminantAnalysis.QDA`](/docs/apis/discriminant-analysis/qda) | Per-class quadratic decision boundaries with `regParam` |
+| `sklearn.calibration.CalibratedClassifierCV` | [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration) | Out-of-fold sigmoid (Platt) or isotonic calibration |
+| `sklearn.multiclass.OneVsRestClassifier` | [`Multiclass.OneVsRestClassifier`](/docs/apis/multiclass) | One binary classifier per class with `estimator__param` |
+| `sklearn.multiclass.OneVsOneClassifier` | [`Multiclass.OneVsOneClassifier`](/docs/apis/multiclass) | Pairwise voting with confidence tie-breaking |
+| `sklearn.isotonic.IsotonicRegression` | [`Isotonic.IsotonicRegression`](/docs/apis/isotonic) | Monotonic 1D PAVA regression with `'clip'`/`'nan'`/`'raise'` |
+| `sklearn.dummy.DummyClassifier` / `DummyRegressor` | [`Dummy.DummyClassifier` / `DummyRegressor`](/docs/apis/dummy) | Baseline benchmarks (`prior`, `mostFrequent`, `mean`, `median`) |
+| `sklearn.datasets.make_blobs` / `make_moons` / `make_classification` | [`Datasets`](/docs/apis/datasets) | Seeded synthetic data generators for tests & demos |
+| `scipy.sparse.csr_matrix` | [`CSRMatrix` / `Data`](/docs/apis/data) | Compressed Sparse Row matrix for text & wide features |
 
 ## Metrics and preprocessing equivalents
 
