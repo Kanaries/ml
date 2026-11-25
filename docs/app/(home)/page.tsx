@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description:
     'Train and deploy ML models in JavaScript with a scikit-learn-style API. Works in browser and Node.js. Fast examples, tiny bundles, docs for every algorithm.',
   alternates: {
-    canonical: `${siteUrl}/`,
+    canonical: siteUrl,
   },
   openGraph: {
     type: 'website',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
     description:
       'Train and deploy ML models in JavaScript with a scikit-learn-style API for browser and Node.js.',
-    url: `${siteUrl}/`,
+    url: siteUrl,
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
@@ -99,19 +99,23 @@ const FEATURES = [
 ];
 
 const ALGORITHMS: Record<string, { label: string; href: string }[]> = {
-  'Linear & SVM': [
+  'Linear, SVM & Kernel': [
     { label: 'Linear module', href: '/docs/apis/linear' },
     { label: 'LinearRegression', href: '/docs/apis/linear/linearRegression' },
     { label: 'LogisticRegression', href: '/docs/apis/linear/logisticRegression' },
-    { label: 'SVM module', href: '/docs/apis/svm' },
-    { label: 'SVC / NuSVC / LinearSVC', href: '/docs/apis/svm/SVC' },
+    { label: 'Robust & Bayesian GLMs', href: '/docs/apis/linear/generalizedLinearModels' },
+    { label: 'SVM (SVC / NuSVC / LinearSVC)', href: '/docs/apis/svm/SVC' },
+    { label: 'Kernel & RBFSampler / Nystroem', href: '/docs/apis/kernel' },
+    { label: 'Gaussian Process', href: '/docs/apis/gaussian_process' },
   ],
   'Tree & Ensemble': [
     { label: 'Tree module', href: '/docs/apis/tree' },
     { label: 'DecisionTreeClassifier', href: '/docs/apis/tree/decisionTreeClassifier' },
     { label: 'ExtraTreeClassifier', href: '/docs/apis/tree/extraTreeClassifier' },
     { label: 'Ensemble module', href: '/docs/apis/ensemble' },
-    { label: 'IsolationForest / AdaBoost', href: '/docs/apis/ensemble/iforest' },
+    { label: 'RandomForest', href: '/docs/apis/ensemble/randomForestClassifier' },
+    { label: 'HistGradientBoosting', href: '/docs/apis/ensemble/histGradientBoosting' },
+    { label: 'IsolationForest', href: '/docs/apis/ensemble/iforest' },
   ],
   'Neighbors & Clustering': [
     { label: 'Neighbors module', href: '/docs/apis/neighbors' },
@@ -119,25 +123,71 @@ const ALGORITHMS: Record<string, { label: string; href: string }[]> = {
     { label: 'BallTree / KDTree', href: '/docs/apis/neighbors/ballTree' },
     { label: 'Clusters module', href: '/docs/apis/clusters' },
     { label: 'KMeans', href: '/docs/apis/clusters/kmeans' },
-    { label: 'DBSCAN', href: '/docs/apis/clusters/dbscan' },
-    { label: 'OPTICS', href: '/docs/apis/clusters/optics' },
-    { label: 'HDBSCAN', href: '/docs/apis/clusters/hdbscan' },
-    { label: 'MeanShift', href: '/docs/apis/clusters/meanShift' },
+    { label: 'E-Means', href: '/docs/apis/clusters/eMeans' },
+    { label: 'DBSCAN / OPTICS / HDBSCAN', href: '/docs/apis/clusters/dbscan' },
+    { label: 'Birch / Affinity / Bisecting K-Means', href: '/docs/apis/clusters/advancedClustering' },
   ],
-  'Decomposition & Manifold': [
-    { label: 'Decomposition module', href: '/docs/apis/decomposition' },
-    { label: 'PCA / SparsePCA / TruncatedSVD', href: '/docs/apis/decomposition/pca' },
-    { label: 'Manifold module', href: '/docs/apis/manifold' },
-    { label: 'MDS / LLE / TSNE / SpectralEmbedding', href: '/docs/apis/manifold/MDS' },
+  'Decomposition, Manifold & Covariance': [
+    { label: 'Decomposition (PCA / NMF / FastICA / LDA)', href: '/docs/apis/decomposition' },
+    { label: 'PCA', href: '/docs/apis/decomposition/pca' },
+    { label: 'Manifold (t-SNE / MDS / LLE)', href: '/docs/apis/manifold' },
+    { label: 'Cross Decomposition (PLS / CCA)', href: '/docs/apis/cross_decomposition' },
+    { label: 'Random Projection', href: '/docs/apis/random_projection' },
+    { label: 'Covariance & EllipticEnvelope', href: '/docs/apis/covariance' },
   ],
-  'Bayes, Semi-Supervised & Utils': [
-    { label: 'Bayes module', href: '/docs/apis/bayes' },
-    { label: 'BernoulliNB / CategoricalNB', href: '/docs/apis/bayes/bernoulliNB' },
-    { label: 'SemiSupervised module', href: '/docs/apis/semi_supervised' },
-    { label: 'LabelPropagation / LabelSpreading', href: '/docs/apis/semi_supervised/labelPropagation' },
-    { label: 'Utils module (asyncMode, trainTestSplit, preprocessing, model selection)', href: '/docs/apis/utils' },
+  'Features, Bayes & Workflow': [
+    { label: 'Feature Extraction (TF-IDF / Count)', href: '/docs/apis/feature_extraction' },
+    { label: 'Feature Selection (RFE / Univariate)', href: '/docs/apis/feature_selection' },
+    { label: 'Imputation & Compose', href: '/docs/apis/impute' },
+    { label: 'Metrics', href: '/docs/apis/metrics' },
+    { label: 'Bayes & Semi-Supervised', href: '/docs/apis/bayes' },
+    { label: 'Multi-Output & Neural Network', href: '/docs/apis/multioutput' },
+    { label: 'Utils (preprocessing, splits, asyncMode)', href: '/docs/apis/utils' },
   ],
 };
+
+const INTERACTIVE_RESOURCES = [
+  {
+    category: 'CSV Calculators',
+    title: 'Browser-native ML calculators',
+    description: 'Paste CSV data and compute results locally with zero server uploads and exportable JS/Python code.',
+    href: '/tools',
+    links: [
+      { label: 'Outlier Calculator', href: '/tools/outlier-calculator' },
+      { label: 'Confusion Matrix & F1', href: '/tools/confusion-matrix-calculator' },
+      { label: 'Logistic Regression', href: '/tools/logistic-regression-calculator' },
+      { label: 'Polynomial Regression', href: '/tools/polynomial-regression-calculator' },
+      { label: 'Customer Segmentation', href: '/tools/customer-segmentation' },
+    ],
+  },
+  {
+    category: 'Visual Playgrounds',
+    title: 'Interactive algorithm sandboxes',
+    description: 'Drag points, tune hyperparameters, and watch live decision surfaces and optimization paths update.',
+    href: '/playground',
+    links: [
+      { label: 'PCA Biplot', href: '/playground/pca' },
+      { label: 'KNN Boundaries', href: '/playground/knn' },
+      { label: 'K-Means Steps', href: '/playground/kmeans' },
+      { label: 'Gradient Descent', href: '/playground/gradient-descent' },
+      { label: 'Decision Tree', href: '/playground/decision-tree' },
+      { label: 'Random Forest', href: '/playground/random-forest' },
+    ],
+  },
+  {
+    category: 'Practical Guides',
+    title: 'Walkthroughs & sklearn mapping',
+    description: 'Task-first guides and side-by-side Python scikit-learn translations for production JS/TS teams.',
+    href: '/docs/sklearn-equivalents',
+    links: [
+      { label: 'scikit-learn Equivalents', href: '/docs/sklearn-equivalents' },
+      { label: 'Isolation Forest Guide', href: '/docs/guides/isolation-forest' },
+      { label: 'Find Outliers in CSV', href: '/docs/guides/find-outliers-csv' },
+      { label: 'IQR vs Z-Score vs IForest', href: '/docs/guides/outlier-methods' },
+      { label: 'RFM vs K-Means', href: '/docs/guides/rfm-vs-kmeans' },
+    ],
+  },
+];
 
 const HOW_IT_WORKS = [
   {
@@ -171,12 +221,12 @@ const FAQ_ITEMS = [
   {
     question: 'Can I save and load models?',
     answer:
-      'There is no built-in serialization yet. For now you can re-fit from stored training data, or read a fitted estimator’s parameters and reconstruct it manually.',
+      'Yes. Fitted estimators support a versioned JSON serialization envelope via model.toJSON() (or JSON.stringify(model)) and can be restored anywhere with the root loadModel() helper.',
   },
   {
     question: 'How close is the API to scikit-learn?',
     answer:
-      'We follow scikit-learn naming and options wherever practical. Note that some estimators take positional constructor arguments rather than keyword options, so check each algorithm page for the exact signature.',
+      'We mirror scikit-learn naming, fit/predict/transform contracts, Pipelines, and options-object constructors wherever practical, while preserving legacy positional overloads for backwards compatibility. See the scikit-learn equivalents table for exact mappings.',
   },
   {
     question: 'How big is the bundle?',
@@ -338,7 +388,7 @@ export default function HomePage() {
                 </span>
                 <span>Tree-shakable ESM</span>
                 <span>
-                  <b>11</b> algorithm families
+                  <b>25+</b> ML modules
                 </span>
               </div>
             </div>
@@ -505,10 +555,43 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* §04 Capabilities */}
-          <section className="acad-section" id="features">
+          {/* §04 Interactive tools, playgrounds & guides */}
+          <section className="acad-section" id="interactive">
             <header className="acad-sec-head">
               <span className="acad-sec-num">§ 04</span>
+              <span className="acad-sec-kicker">Hands-on</span>
+              <h2 className="acad-sec-title">Try calculators, playgrounds &amp; guides</h2>
+              <hr className="acad-rule acad-rule--thin" />
+            </header>
+            <div className="acad-grid acad-grid--3">
+              {INTERACTIVE_RESOURCES.map((group) => (
+                <article className="acad-cell" key={group.category}>
+                  <span className="acad-cell-idx">{group.category}</span>
+                  <h3>
+                    <Link className="acad-inline-link" href={group.href}>
+                      {group.title}
+                    </Link>
+                  </h3>
+                  <p>{group.description}</p>
+                  <p style={{ marginTop: '0.75rem' }}>
+                    {group.links.map((item, idx) => (
+                      <span key={item.href}>
+                        {idx > 0 && <span className="chip"> · </span>}
+                        <Link className="acad-inline-link" href={item.href}>
+                          {item.label}
+                        </Link>
+                      </span>
+                    ))}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          {/* §05 Capabilities */}
+          <section className="acad-section" id="features">
+            <header className="acad-sec-head">
+              <span className="acad-sec-num">§ 05</span>
               <span className="acad-sec-kicker">Capabilities</span>
               <h2 className="acad-sec-title">Key features</h2>
               <hr className="acad-rule acad-rule--thin" />
@@ -524,10 +607,10 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* §05 Module index */}
+          {/* §06 Module index */}
           <section className="acad-section" id="modules">
             <header className="acad-sec-head">
-              <span className="acad-sec-num">§ 05</span>
+              <span className="acad-sec-num">§ 06</span>
               <span className="acad-sec-kicker">Reference</span>
               <h2 className="acad-sec-title">Index of modules</h2>
               <hr className="acad-rule acad-rule--thin" />
@@ -565,10 +648,10 @@ export default function HomePage() {
             </table>
           </section>
 
-          {/* §06 How it works */}
+          {/* §07 How it works */}
           <section className="acad-section" id="how-it-works">
             <header className="acad-sec-head">
-              <span className="acad-sec-num">§ 06</span>
+              <span className="acad-sec-num">§ 07</span>
               <span className="acad-sec-kicker">Workflow</span>
               <h2 className="acad-sec-title">From data to deployment</h2>
               <hr className="acad-rule acad-rule--thin" />
@@ -587,10 +670,10 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* §07 FAQ */}
+          {/* §08 FAQ */}
           <section className="acad-section" id="faq">
             <header className="acad-sec-head">
-              <span className="acad-sec-num">§ 07</span>
+              <span className="acad-sec-num">§ 08</span>
               <span className="acad-sec-kicker">Notes</span>
               <h2 className="acad-sec-title">Frequently asked</h2>
               <hr className="acad-rule acad-rule--thin" />
@@ -612,7 +695,7 @@ export default function HomePage() {
           {/* Community */}
           <section className="acad-section" id="community" style={{ paddingBottom: '1rem' }}>
             <header className="acad-sec-head">
-              <span className="acad-sec-num">§ 08</span>
+              <span className="acad-sec-num">§ 09</span>
               <span className="acad-sec-kicker">Community</span>
               <h2 className="acad-sec-title">Join the project</h2>
               <hr className="acad-rule acad-rule--thin" />

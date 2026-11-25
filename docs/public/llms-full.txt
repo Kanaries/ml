@@ -171,7 +171,7 @@ constructor(props: BernoulliNBProps = {})
 
 ---
 title: "Categorical Naive Bayes in JavaScript with @kanaries/ml"
-description: "Learn what Categorical Naive Bayes does, when to use it, and how to run CategoricalNB in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Classify categorical features with CategoricalNB in JavaScript and TypeScript using @kanaries/ml. Includes smoothing options, examples, and API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/bayes/categoricalNB"
 markdown_url: "https://ml.kanaries.net/docs/apis/bayes/categoricalNB.md"
 ---
@@ -490,7 +490,7 @@ Feature values must be non-negative.
 <!-- Source: https://ml.kanaries.net/docs/apis/clusters/advancedClustering -->
 
 ---
-title: "Birch, Affinity Propagation, and Bisecting K-Means in JavaScript"
+title: "Birch, Affinity & Bisecting K-Means in JavaScript"
 description: "Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans."
 canonical_url: "https://ml.kanaries.net/docs/apis/clusters/advancedClustering"
 markdown_url: "https://ml.kanaries.net/docs/apis/clusters/advancedClustering.md"
@@ -587,7 +587,7 @@ Labels are numeric cluster ids starting at `0`. Noise points are labeled `-1`.
 
 ---
 title: "E-Means Clustering in JavaScript"
-description: "Cluster dense vectors in the browser or Node.js using the TypeScript E-Means estimator in @kanaries/ml. Explore the moving-average update, rare clusters, and measured JavaScript performance."
+description: "Cluster dense vectors in browser or Node.js with TypeScript E-Means in @kanaries/ml. Covers moving-average updates, rare clusters, and measured benchmarks."
 canonical_url: "https://ml.kanaries.net/docs/apis/clusters/eMeans"
 markdown_url: "https://ml.kanaries.net/docs/apis/clusters/eMeans.md"
 ---
@@ -940,10 +940,10 @@ constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: num
 
 | props name  | type         | default value |
 | ----------- | ------------ | ------------- |
-| n\_clusters | number       | 2             |
-| opt\_ratio  | number       | 0.05          |
+| n_clusters  | number       | 2             |
+| opt_ratio   | number       | 0.05          |
 | initCenters | number\[]\[] | undefined     |
-| max\_iter   | number       | 30            |
+| max_iter    | number       | 30            |
 
 ### Methods
 
@@ -961,7 +961,7 @@ constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: num
 
 ---
 title: "k-means++ Initialization in JavaScript with @kanaries/ml"
-description: "Learn what k-means++ Initialization does, when to use it, and how to run kmeansPlusPlus in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Initialize cluster centroids reliably with k-means++ in JavaScript and TypeScript using @kanaries/ml. Includes quick start code and browser/Node.js API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/clusters/kmeansPlusPlus"
 markdown_url: "https://ml.kanaries.net/docs/apis/clusters/kmeansPlusPlus.md"
 ---
@@ -1273,7 +1273,7 @@ const labels = optics.fitPredict(X);
 <!-- Source: https://ml.kanaries.net/docs/apis/compose -->
 
 ---
-title: "Transformed Target Regression in JavaScript and TypeScript"
+title: "Transformed Target Regression in JavaScript"
 description: "Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor."
 canonical_url: "https://ml.kanaries.net/docs/apis/compose"
 markdown_url: "https://ml.kanaries.net/docs/apis/compose/index.html.md"
@@ -1320,7 +1320,7 @@ model.predict([[3]]); // approximately [15]
 <!-- Source: https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators -->
 
 ---
-title: "Covariance Estimation and Graphical Lasso in JavaScript"
+title: "Covariance & Graphical Lasso in JavaScript"
 description: "Estimate empirical, shrunk, Ledoit-Wolf, OAS, and sparse inverse covariance matrices in JavaScript or TypeScript."
 canonical_url: "https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators"
 markdown_url: "https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators.md"
@@ -1411,7 +1411,7 @@ For classical, shrinkage, and sparse inverse covariance, see [Covariance Estimat
 
 ---
 title: "MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml"
-description: "Compute robust multivariate location, covariance, support masks, and Mahalanobis distances with the MinCovDet JavaScript and TypeScript implementation in @kanaries/ml."
+description: "Compute robust multivariate location, covariance, and Mahalanobis distances with MinCovDet in JavaScript and TypeScript using @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/covariance/minCovDet"
 markdown_url: "https://ml.kanaries.net/docs/apis/covariance/minCovDet.md"
 ---
@@ -1726,7 +1726,7 @@ Methods: `fit`, `transform`, `fitTransform`, and `inverseTransform`. Learned `ei
 <!-- Source: https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation -->
 
 ---
-title: "Latent Dirichlet Allocation Topic Modeling in JavaScript"
+title: "Latent Dirichlet Allocation (LDA) in JavaScript"
 description: "Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation"
 markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation.md"
@@ -1761,7 +1761,7 @@ Options include topic priors, `maxIter`, `maxDocUpdateIter`, and `meanChangeTol`
 <!-- Source: https://ml.kanaries.net/docs/apis/decomposition/nmf -->
 
 ---
-title: "Non-negative Matrix Factorization (NMF) in JavaScript"
+title: "Non-negative Matrix Factorization (NMF) in JS"
 description: "Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/decomposition/nmf"
 markdown_url: "https://ml.kanaries.net/docs/apis/decomposition/nmf.md"
@@ -2119,7 +2119,7 @@ constructor(nComponents: number = 2)
 
 ---
 title: "AdaBoost Classifier in JavaScript with @kanaries/ml"
-description: "Learn what AdaBoost Classifier does, when to use it, and how to run AdaBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train boosted ensemble classifiers in JavaScript and TypeScript with AdaBoostClassifier in @kanaries/ml. Includes runnable browser/Node.js code and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier.md"
 ---
@@ -2240,7 +2240,7 @@ AdaBoostClassifier trains decision stumps sequentially and reweights samples so 
 
 ---
 title: "AdaBoost Regressor in JavaScript with @kanaries/ml"
-description: "Learn what AdaBoost Regressor does, when to use it, and how to run AdaBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Build boosted regression ensembles in JavaScript and TypeScript with AdaBoostRegressor in @kanaries/ml. Includes quick start examples and full API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor.md"
 ---
@@ -2324,12 +2324,12 @@ Both `n_estimators`/`nEstimators`, `learning_rate`/`learningRate`, and `randomSt
 
 ### Parameters
 
-| name           | type                  | default      | description                                                     |
-| -------------- | --------------------- | ------------ | --------------------------------------------------------------- |
-| estimator      | DecisionTreeRegressor | depth 3 tree | Base learner used in boosting                                   |
-| n\_estimators  | number                | 50           | Number of boosting rounds                                       |
-| learning\_rate | number                | 1.0          | Shrinks the contribution of each regressor in the weight update |
-| randomState    | number                | undefined    | Seed for the weighted resampling, for reproducible fits         |
+| name          | type                  | default      | description                                                     |
+| ------------- | --------------------- | ------------ | --------------------------------------------------------------- |
+| estimator     | DecisionTreeRegressor | depth 3 tree | Base learner used in boosting                                   |
+| n_estimators  | number                | 50           | Number of boosting rounds                                       |
+| learning_rate | number                | 1.0          | Shrinks the contribution of each regressor in the weight update |
+| randomState   | number                | undefined    | Seed for the weighted resampling, for reproducible fits         |
 
 ### Algorithm
 
@@ -2530,7 +2530,7 @@ Options include `nEstimators?`, `bootstrap?`, `randomState?`, `max_features?`, a
 
 ---
 title: "Gradient Boosting Classifier in JavaScript with @kanaries/ml"
-description: "Learn what Gradient Boosting Classifier does, when to use it, and how to run GradientBoostingClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train gradient boosted classification trees in JavaScript and TypeScript with @kanaries/ml. Includes Python comparison, interactive options, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier.md"
 ---
@@ -2620,7 +2620,7 @@ interface GradientBoostingClassifierProps {
 constructor(props: GradientBoostingClassifierProps = {})
 ```
 
-Every parameter also accepts its snake\_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
+Every parameter also accepts its snake_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
 
 ### Parameters
 
@@ -2664,7 +2664,7 @@ For binary problems the model boosts a single decision function with log loss an
 
 ---
 title: "Gradient Boosting Regressor in JavaScript with @kanaries/ml"
-description: "Learn what Gradient Boosting Regressor does, when to use it, and how to run GradientBoostingRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Fit gradient boosted regression trees in JavaScript and TypeScript with @kanaries/ml. Includes interactive demo, sklearn comparison, and full API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor.md"
 ---
@@ -2754,7 +2754,7 @@ interface GradientBoostingRegressorProps {
 constructor(props: GradientBoostingRegressorProps = {})
 ```
 
-Every parameter also accepts its snake\_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
+Every parameter also accepts its snake_case alias (`n_estimators`, `learning_rate`, `max_depth`, `min_samples_split`, `max_features`, `random_state`).
 
 ### Parameters
 
@@ -2796,8 +2796,8 @@ The model initializes with the mean of the targets. Each round computes the resi
 <!-- Source: https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting -->
 
 ---
-title: "Histogram Gradient Boosting in JavaScript for Classification and Regression"
-description: "Train histogram gradient boosting trees on numeric tables with missing values. Use @kanaries/ml in a browser or Node.js to predict classes, probabilities, and continuous targets."
+title: "Histogram Gradient Boosting in JavaScript"
+description: "Train histogram gradient boosting trees on numeric tables with missing values in JavaScript and TypeScript using @kanaries/ml for browser and Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting.md"
 ---
@@ -2885,7 +2885,7 @@ console.log(regressor.predict([[2], [8], [NaN]]).map(Math.round)); // [14, 36, 2
 
 ---
 title: "Isolation Forest in JavaScript with @kanaries/ml"
-description: "Learn what Isolation Forest does, when to use it, and how to run IsolationForest in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Detect anomalies in JavaScript and TypeScript with IsolationForest in @kanaries/ml. Includes contamination tuning, anomaly scoring, and sklearn comparison."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/iforest"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/iforest.md"
 ---
@@ -2958,11 +2958,11 @@ constructor(subsampling_size: number = 256, tree_num: number = 100, contaminatio
 
 ### Parameters
 
-| name              | type             | default | description                               |
-| ----------------- | ---------------- | ------- | ----------------------------------------- |
-| subsampling\_size | number           | 256     | Number of samples used to build each tree |
-| tree\_num         | number           | 100     | Number of isolation trees in the forest   |
-| contamination     | 'auto' \| number | 'auto'  | Expected proportion of outliers           |
+| name             | type             | default | description                               |
+| ---------------- | ---------------- | ------- | ----------------------------------------- |
+| subsampling_size | number           | 256     | Number of samples used to build each tree |
+| tree_num         | number           | 100     | Number of isolation trees in the forest   |
+| contamination    | 'auto' \| number | 'auto'  | Expected proportion of outliers           |
 
 ### Algorithm
 
@@ -3173,7 +3173,7 @@ Defaults are `nEstimators: 100`, `bootstrap: true`, and `maxFeatures: 1.0`.
 
 ---
 title: "XGBoost Classifier in JavaScript with @kanaries/ml"
-description: "Learn what XGBoost Classifier does, when to use it, and how to run XGBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train XGBoost-style gradient boosted classifiers in JavaScript and TypeScript with @kanaries/ml. Includes runnable examples, options, and API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier.md"
 ---
@@ -3266,7 +3266,7 @@ interface XGBoostProps {
 constructor(props: XGBoostProps = {})
 ```
 
-Every parameter also accepts its snake\_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
+Every parameter also accepts its snake_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
 
 ### Parameters
 
@@ -3313,7 +3313,7 @@ For two classes the model boosts a single logistic decision function; for K > 2 
 
 ---
 title: "XGBoost Regressor in JavaScript with @kanaries/ml"
-description: "Learn what XGBoost Regressor does, when to use it, and how to run XGBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Fit XGBoost-style gradient boosted regressors in JavaScript and TypeScript with @kanaries/ml. Includes live demo, Python comparison, and full API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor.md"
 ---
@@ -3412,7 +3412,7 @@ interface XGBoostProps {
 constructor(props: XGBoostProps = {})
 ```
 
-Every parameter also accepts its snake\_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
+Every parameter also accepts its snake_case / xgboost alias (`n_estimators`, `learning_rate` also as `eta`, `max_depth`, `reg_lambda`, `min_child_weight`, `colsample_bytree`, `base_score`, `random_state`).
 
 ### Parameters
 
@@ -3515,7 +3515,7 @@ Because JavaScript has one numeric type, `maxDf: 1` follows the proportional/def
 <!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries -->
 
 ---
-title: "Feature Hashing and Dictionary Vectorization in JavaScript"
+title: "Feature Hashing & Dict Vectorizer in JavaScript"
 description: "Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction."
 canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries"
 markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries.md"
@@ -3638,7 +3638,7 @@ Inputs must contain non-negative term counts and use the fitted feature count.
 <!-- Source: https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer -->
 
 ---
-title: "TfidfVectorizer JavaScript Implementation for Browser and Node.js"
+title: "TfidfVectorizer in JavaScript (Browser & Node)"
 description: "Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer"
 markdown_url: "https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer.md"
@@ -3687,7 +3687,7 @@ Serialize a fitted instance with `JSON.stringify(vectorizer)` and restore it wit
 
 ---
 title: "Feature Selection in JavaScript with @kanaries/ml"
-description: "Select informative columns in browser or Node.js machine-learning workflows with model-based, recursive, and univariate JavaScript feature selection in @kanaries/ml."
+description: "Select informative features in JavaScript and TypeScript with model-based, recursive (RFE/RFECV), and univariate selectors in @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/feature_selection"
 markdown_url: "https://ml.kanaries.net/docs/apis/feature_selection/index.html.md"
 ---
@@ -3744,7 +3744,7 @@ console.log(selector.getSupport(true), selector.transform(X));
 <!-- Source: https://ml.kanaries.net/docs/apis/feature_selection/univariate -->
 
 ---
-title: "Univariate Feature Scores in JavaScript and TypeScript"
+title: "Univariate Feature Selection in JavaScript"
 description: "Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/feature_selection/univariate"
 markdown_url: "https://ml.kanaries.net/docs/apis/feature_selection/univariate.md"
@@ -3782,7 +3782,7 @@ console.log({ fScores, pValues, information });
 <!-- Source: https://ml.kanaries.net/docs/apis/gaussian_process/classifier -->
 
 ---
-title: "Gaussian Process Classification in JavaScript and TypeScript"
+title: "Gaussian Process Classification in JavaScript"
 description: "Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications."
 canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process/classifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/classifier.md"
@@ -3831,7 +3831,7 @@ The supplied kernel parameters stay fixed during training. `fit(X, y)` requires 
 
 ---
 title: "Gaussian Processes in JavaScript and TypeScript"
-description: "Use Gaussian process regression for predictions with uncertainty and Gaussian process classification for class probabilities in the browser or Node.js with @kanaries/ml."
+description: "Run Gaussian process regression with uncertainty estimates and Laplace GP classification in JavaScript and TypeScript using @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process"
 markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/index.html.md"
 ---
@@ -3853,7 +3853,7 @@ Both estimators factor dense matrices with one row per training observation. Tra
 <!-- Source: https://ml.kanaries.net/docs/apis/gaussian_process/regressor -->
 
 ---
-title: "Gaussian Process Regression in JavaScript and TypeScript"
+title: "Gaussian Process Regression in JavaScript"
 description: "Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process/regressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/regressor.md"
@@ -3975,7 +3975,7 @@ Methods: `fit`, `fitTransform`, and `transform`. Learned `imputationSequence` an
 
 ---
 title: "JavaScript Machine Learning APIs with @kanaries/ml"
-description: "Explore machine learning APIs in JavaScript and TypeScript with @kanaries/ml, including clustering, classification, anomaly detection, dimensionality reduction, and workflow utilities."
+description: "Browse @kanaries/ml JavaScript and TypeScript ML APIs: clustering, linear models, trees, ensembles, SVM, decomposition, metrics, and preprocessing utilities."
 canonical_url: "https://ml.kanaries.net/docs/apis"
 markdown_url: "https://ml.kanaries.net/docs/apis/index.html.md"
 ---
@@ -4061,7 +4061,7 @@ Both names reference the same constructor; aliases do not duplicate estimator co
 <!-- Source: https://ml.kanaries.net/docs/apis/kernel -->
 
 ---
-title: "Kernel Ridge Regression, Density and Approximation in JavaScript"
+title: "Kernel Ridge, Density & Approximation in JS"
 description: "Use @kanaries/ml for kernel regression, density estimation and approximate nonlinear feature maps in JavaScript or TypeScript in the browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/kernel"
 markdown_url: "https://ml.kanaries.net/docs/apis/kernel/index.html.md"
@@ -4111,7 +4111,7 @@ KernelRidge supports linear, polynomial, RBF, sigmoid, and cosine kernels. Kerne
 <!-- Source: https://ml.kanaries.net/docs/apis/kernel/nystroem -->
 
 ---
-title: "Nyström Kernel Approximation in JavaScript with Nystroem"
+title: "Nyström Kernel Approximation in JavaScript"
 description: "Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models."
 canonical_url: "https://ml.kanaries.net/docs/apis/kernel/nystroem"
 markdown_url: "https://ml.kanaries.net/docs/apis/kernel/nystroem.md"
@@ -4167,8 +4167,8 @@ For an initial experiment, try a small landmark count, then increase it while me
 <!-- Source: https://ml.kanaries.net/docs/apis/kernel/rbfSampler -->
 
 ---
-title: "Random Fourier Features with RBFSampler in JavaScript"
-description: "Approximate the RBF kernel with random Fourier features in JavaScript or TypeScript. Use @kanaries/ml to train a linear classifier on dense or sparse features in the browser or Node.js."
+title: "RBFSampler Random Fourier Features in JavaScript"
+description: "Approximate RBF kernels with random Fourier features in JavaScript and TypeScript using RBFSampler in @kanaries/ml for dense or sparse linear models."
 canonical_url: "https://ml.kanaries.net/docs/apis/kernel/rbfSampler"
 markdown_url: "https://ml.kanaries.net/docs/apis/kernel/rbfSampler.md"
 ---
@@ -4377,7 +4377,7 @@ When `l1Ratio` is `0`, the implementation delegates to Ridge regression. When `l
 <!-- Source: https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels -->
 
 ---
-title: "Poisson, Gamma, and Tweedie Regression in JavaScript"
+title: "Poisson, Gamma & Tweedie Regression in JS"
 description: "Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels"
 markdown_url: "https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels.md"
@@ -4551,7 +4551,7 @@ const pred = model.predict([[3, 0]]);
 
 ---
 title: "Linear Regression in JavaScript with @kanaries/ml"
-description: "Learn what Linear Regression does, when to use it, and how to run LinearRegression in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Fit ordinary least squares linear regression in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, sklearn comparison, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/linear/linearRegression"
 markdown_url: "https://ml.kanaries.net/docs/apis/linear/linearRegression.md"
 ---
@@ -4793,7 +4793,7 @@ constructor(props: LogisticRegressionProps = {})
 
 ---
 title: "Polynomial Regression in JavaScript with @kanaries/ml"
-description: "Fit nonlinear numeric trends with the PolynomialRegression JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js regression workflows."
+description: "Fit nonlinear curves with PolynomialRegression in JavaScript and TypeScript using @kanaries/ml. Includes interactive playground, degree tuning, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/linear/polynomialRegression"
 markdown_url: "https://ml.kanaries.net/docs/apis/linear/polynomialRegression.md"
 ---
@@ -5103,7 +5103,7 @@ console.log({ embedding, newPoints });
 
 ---
 title: "Locally Linear Embedding in JavaScript with @kanaries/ml"
-description: "Learn what Locally Linear Embedding does, when to use it, and how to run LocallyLinearEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Preserve local neighborhood geometry with Locally Linear Embedding (LLE) in JavaScript and TypeScript using @kanaries/ml for browser and Node.js apps."
 canonical_url: "https://ml.kanaries.net/docs/apis/manifold/lle"
 markdown_url: "https://ml.kanaries.net/docs/apis/manifold/lle.md"
 ---
@@ -5211,7 +5211,7 @@ constructor(
 
 ---
 title: "Multidimensional Scaling (MDS) in JavaScript with @kanaries/ml"
-description: "Learn what Multidimensional Scaling (MDS) does, when to use it, and how to run MDS in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Project pairwise distances into low-dimensional coordinates with Multidimensional Scaling (MDS) in JavaScript and TypeScript using @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/manifold/MDS"
 markdown_url: "https://ml.kanaries.net/docs/apis/manifold/MDS.md"
 ---
@@ -5317,7 +5317,7 @@ constructor(options: MDSOptions = {})
 
 ---
 title: "Spectral Embedding in JavaScript with @kanaries/ml"
-description: "Learn what Spectral Embedding does, when to use it, and how to run SpectralEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Build graph-based nonlinear embeddings with SpectralEmbedding in JavaScript and TypeScript using @kanaries/ml. Includes quick start and full API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/manifold/spectralEmbedding"
 markdown_url: "https://ml.kanaries.net/docs/apis/manifold/spectralEmbedding.md"
 ---
@@ -5530,7 +5530,7 @@ constructor(options: TSNEOptions = {})
 
 ---
 title: "Metrics in JavaScript and TypeScript with @kanaries/ml"
-description: "Evaluate classification, regression, clustering, ranking curves, and distance calculations with the @kanaries/ml Metrics JavaScript implementation for browser and Node.js workflows."
+description: "Compute classification, regression, clustering, ROC/PR curve, and pairwise distance metrics in JavaScript and TypeScript with @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/metrics"
 markdown_url: "https://ml.kanaries.net/docs/apis/metrics/index.html.md"
 ---
@@ -6106,7 +6106,7 @@ Methods:
 
 ---
 title: "k-Nearest Neighbors in JavaScript with @kanaries/ml"
-description: "Learn what k-Nearest Neighbors does, when to use it, and how to run KNearestNeighbors in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Classify data with k-Nearest Neighbors (KNN) in JavaScript and TypeScript using @kanaries/ml. Includes distance metrics, sklearn comparison, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/neighbors/knn"
 markdown_url: "https://ml.kanaries.net/docs/apis/neighbors/knn.md"
 ---
@@ -6306,7 +6306,7 @@ Class labels are numeric. Ties are resolved by the smaller class label.
 <!-- Source: https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors -->
 
 ---
-title: "NearestNeighbors Search in JavaScript and TypeScript"
+title: "NearestNeighbors Search in JavaScript"
 description: "Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors"
 markdown_url: "https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors.md"
@@ -6602,7 +6602,7 @@ If someone searches for "Bernoulli RBM in JavaScript" or "feature learning in Ty
 <!-- Source: https://ml.kanaries.net/docs/apis/random_projection -->
 
 ---
-title: "Gaussian and Sparse Random Projection in JavaScript"
+title: "Gaussian & Sparse Random Projection in JS"
 description: "Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript."
 canonical_url: "https://ml.kanaries.net/docs/apis/random_projection"
 markdown_url: "https://ml.kanaries.net/docs/apis/random_projection/index.html.md"
@@ -6687,7 +6687,7 @@ If someone searches for "semi-supervised learning in JavaScript" or "Label Propa
 
 ---
 title: "Label Propagation in JavaScript with @kanaries/ml"
-description: "Learn what Label Propagation does, when to use it, and how to run LabelPropagation in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Propagate labels across partially labeled datasets in JavaScript and TypeScript with LabelPropagation in @kanaries/ml for browser and Node.js workflows."
 canonical_url: "https://ml.kanaries.net/docs/apis/semi_supervised/labelPropagation"
 markdown_url: "https://ml.kanaries.net/docs/apis/semi_supervised/labelPropagation.md"
 ---
@@ -6795,7 +6795,7 @@ information from labeled points across a graph defined by a kernel.
 
 ---
 title: "Label Spreading in JavaScript with @kanaries/ml"
-description: "Learn what Label Spreading does, when to use it, and how to run LabelSpreading in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Run regularized semi-supervised learning in JavaScript and TypeScript with LabelSpreading in @kanaries/ml. Includes quick start, options, and API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/semi_supervised/labelSpreading"
 markdown_url: "https://ml.kanaries.net/docs/apis/semi_supervised/labelSpreading.md"
 ---
@@ -6903,7 +6903,7 @@ and soft clamping controlled by `alpha`.
 <!-- Source: https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier -->
 
 ---
-title: "Self-Training Classifier in JavaScript and TypeScript"
+title: "Self-Training Classifier in JavaScript"
 description: "Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier.md"
@@ -7328,7 +7328,7 @@ There is no `C` parameter: `nu` replaces it, exactly as in scikit-learn. NuSVC o
 
 ---
 title: "Support Vector Classifier (SVC) in JavaScript with @kanaries/ml"
-description: "Learn what Support Vector Classifier (SVC) does, when to use it, and how to run SVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train support vector classifiers with linear, RBF, and polynomial kernels in JavaScript and TypeScript using SVC in @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/svm/SVC"
 markdown_url: "https://ml.kanaries.net/docs/apis/svm/SVC.md"
 ---
@@ -7417,7 +7417,7 @@ constructor(props: SVCProps = {})
 
 - `C` (number, default `1`): regularization strength, inversely proportional to the margin softness
 - `kernel` ('linear' | 'rbf' | 'poly' | 'sigmoid', default `'rbf'`): kernel type
-- `gamma` (number | 'scale' | 'auto', default `'scale'`): kernel coefficient for `rbf`, `poly`, and `sigmoid`; `'scale'` = 1 / (n\_features x Var(X)), `'auto'` = 1 / n\_features
+- `gamma` (number | 'scale' | 'auto', default `'scale'`): kernel coefficient for `rbf`, `poly`, and `sigmoid`; `'scale'` = 1 / (n_features x Var(X)), `'auto'` = 1 / n_features
 - `degree` (number, default `3`): degree of the polynomial kernel
 - `coef0` (number, default `0`): independent term of the `poly` and `sigmoid` kernels
 - `tol` (number, default `1e-3`): KKT-violation tolerance for SMO convergence
@@ -7449,7 +7449,7 @@ constructor(props: SVCProps = {})
 
 ---
 title: "Decision Tree Classifier in JavaScript with @kanaries/ml"
-description: "Learn what Decision Tree Classifier does, when to use it, and how to run DecisionTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train interpretable decision tree classifiers in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, sklearn comparison, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/tree/decisionTreeClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/tree/decisionTreeClassifier.md"
 ---
@@ -7543,7 +7543,7 @@ The classifier follows CART/sklearn split semantics:
 
 - **Criterion:** `gini` or `entropy` impurity, chosen via `criterion`.
 - **Thresholds:** candidate thresholds are the midpoints of adjacent unique feature values, and the convention is `x <= threshold` goes left (sklearn's convention).
-- **max\_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
+- **max_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
 - **Non-separable samples:** when no feature separates the samples in a node (for example duplicate rows with conflicting labels), the node becomes a leaf that predicts the majority class rather than creating empty children.
 
 ### Methods
@@ -7569,7 +7569,7 @@ The classifier follows CART/sklearn split semantics:
 
 ---
 title: "Decision Tree Regressor in JavaScript with @kanaries/ml"
-description: "Learn what Decision Tree Regressor does, when to use it, and how to run DecisionTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Fit decision tree regression models in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, split criteria, and full API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/tree/decisionTreeRegressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/tree/decisionTreeRegressor.md"
 ---
@@ -7662,7 +7662,7 @@ The regressor follows CART/sklearn split semantics:
 
 - **Split criterion:** each candidate split minimizes the weighted sum of squared errors `n_l * var_l + n_r * var_r` (evaluated with a sorted prefix-sum scan), not the unweighted variance sum.
 - **Thresholds:** candidate thresholds are the midpoints of adjacent unique feature values (computed overflow-safe as `a/2 + b/2`), and the convention is `x <= threshold` goes left (sklearn's convention).
-- **max\_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
+- **max_depth:** enforced while building so leaves sit at depth `== max_depth` (sklearn semantics), instead of truncating the tree at predict time.
 
 ### Methods
 
@@ -7689,7 +7689,7 @@ The regressor follows CART/sklearn split semantics:
 
 ---
 title: "Extra Tree Classifier in JavaScript with @kanaries/ml"
-description: "Learn what Extra Tree Classifier does, when to use it, and how to run ExtraTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Train randomized ExtraTreeClassifier models in JavaScript and TypeScript with @kanaries/ml. Includes live tree playground, sklearn comparison, and API docs."
 canonical_url: "https://ml.kanaries.net/docs/apis/tree/extraTreeClassifier"
 markdown_url: "https://ml.kanaries.net/docs/apis/tree/extraTreeClassifier.md"
 ---
@@ -7794,7 +7794,7 @@ constructor(props: ExtraTreeProps = {})
 
 ---
 title: "Extra Tree Regressor in JavaScript with @kanaries/ml"
-description: "Learn what Extra Tree Regressor does, when to use it, and how to run ExtraTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications."
+description: "Fit randomized ExtraTreeRegressor models in JavaScript and TypeScript with @kanaries/ml. Includes live playground, quick start code, and API reference."
 canonical_url: "https://ml.kanaries.net/docs/apis/tree/extraTreeRegressor"
 markdown_url: "https://ml.kanaries.net/docs/apis/tree/extraTreeRegressor.md"
 ---
@@ -7953,7 +7953,7 @@ Change the dataset, depth, split constraint, and impurity criterion to see how a
 <!-- Source: https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing -->
 
 ---
-title: "Spline, Target, and Multi-Label Preprocessing in JavaScript"
+title: "Spline, Target & Multi-Label Encoders in JS"
 description: "Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing"
 markdown_url: "https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing.md"
@@ -8060,7 +8060,7 @@ asyncMode<P extends any[], R>(fn: (...args: P) => R): (...args: P) => Promise<R>
 <!-- Source: https://ml.kanaries.net/docs/apis/utils/groupSplitters -->
 
 ---
-title: "Group-Aware Cross-Validation Splitters in JavaScript"
+title: "Group Cross-Validation Splitters in JavaScript"
 description: "Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/utils/groupSplitters"
 markdown_url: "https://ml.kanaries.net/docs/apis/utils/groupSplitters.md"
@@ -8109,7 +8109,7 @@ Both expose `split(X, y?, groups): FoldIndices[]`. `GroupShuffleSplit` samples u
 
 ---
 title: "Machine Learning Utilities in JavaScript with @kanaries/ml"
-description: "Explore machine learning workflow utilities in JavaScript and TypeScript with @kanaries/ml, including preprocessing, sampling, model selection, statistics, and async execution helpers."
+description: "Use @kanaries/ml JavaScript ML utilities for preprocessing, train/test splitting, cross-validation, statistics, sampling, and Web Worker async execution."
 canonical_url: "https://ml.kanaries.net/docs/apis/utils"
 markdown_url: "https://ml.kanaries.net/docs/apis/utils/index.html.md"
 ---
@@ -8162,7 +8162,7 @@ If someone searches for "machine learning utilities in JavaScript", "preprocessi
 <!-- Source: https://ml.kanaries.net/docs/apis/utils/inspection -->
 
 ---
-title: "Permutation Importance and Partial Dependence in JavaScript"
+title: "Permutation Importance & PDP in JavaScript"
 description: "Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/apis/utils/inspection"
 markdown_url: "https://ml.kanaries.net/docs/apis/utils/inspection.md"
@@ -8339,7 +8339,7 @@ Both search classes expose:
 
 ---
 title: "Preprocessing Utilities in JavaScript with @kanaries/ml"
-description: "Prepare numeric and categorical features with the @kanaries/ml Preprocessing JavaScript and TypeScript utilities for browser and Node.js machine learning pipelines."
+description: "Scale numeric columns and encode categories in JavaScript and TypeScript with @kanaries/ml Preprocessing utilities for browser and Node.js pipelines."
 canonical_url: "https://ml.kanaries.net/docs/apis/utils/preprocessing"
 markdown_url: "https://ml.kanaries.net/docs/apis/utils/preprocessing.md"
 ---
@@ -8534,12 +8534,12 @@ utils.Stat.gini(data: number[]): number
 <!-- Source: https://ml.kanaries.net/docs/guides/choose-polynomial-degree -->
 
 ---
-title: "How to Choose a Polynomial Degree Without Overfitting"
+title: "How to Choose a Polynomial Degree Safely"
 description: "Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R²."
 canonical_url: "https://ml.kanaries.net/docs/guides/choose-polynomial-degree"
 markdown_url: "https://ml.kanaries.net/docs/guides/choose-polynomial-degree.md"
 ---
-# How to Choose a Polynomial Degree Without Overfitting
+# How to Choose a Polynomial Degree Safely
 
 A polynomial curve can fit a pattern or memorize noise. Increasing the degree usually gives the model more freedom, so a higher training R² alone is not evidence that it predicts better. Compare the errors on observations excluded from fitting.
 
@@ -8574,12 +8574,12 @@ Avoid extrapolating a high-degree polynomial far outside the observed X range. T
 <!-- Source: https://ml.kanaries.net/docs/guides/customer-segmentation-csv -->
 
 ---
-title: "Customer Segmentation from a CSV: An RFM Walkthrough"
+title: "Customer Segmentation from CSV: RFM Guide"
 description: "Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser."
 canonical_url: "https://ml.kanaries.net/docs/guides/customer-segmentation-csv"
 markdown_url: "https://ml.kanaries.net/docs/guides/customer-segmentation-csv.md"
 ---
-# Customer Segmentation from a CSV: An RFM Walkthrough
+# Customer Segmentation from CSV: RFM Guide
 
 A useful customer segment should describe a difference you can act on. Before clustering, decide what one row means and which observation window you want to summarize. Mixing line items, orders and customer summaries produces misleading frequency counts.
 
@@ -8652,12 +8652,12 @@ When the suspicious pattern depends on several columns together, read [IQR vs Z-
 <!-- Source: https://ml.kanaries.net/docs/guides/isolation-forest -->
 
 ---
-title: "Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo"
-description: "Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and implement outlier scoring with @kanaries/ml in JavaScript or TypeScript."
+title: "Isolation Forest in JavaScript: Guide & Demo"
+description: "Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and run it in JavaScript with @kanaries/ml."
 canonical_url: "https://ml.kanaries.net/docs/guides/isolation-forest"
 markdown_url: "https://ml.kanaries.net/docs/guides/isolation-forest.md"
 ---
-# Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo
+# Isolation Forest in JavaScript: Guide & Demo
 
 Isolation Forest is an unsupervised anomaly-detection algorithm that looks for observations that are easy to separate from the rest of a dataset. Instead of estimating the full density of normal data, it repeatedly chooses a random feature and a random split value. Rare, isolated observations tend to reach a leaf after fewer splits than points inside a dense, ordinary region.
 
@@ -8774,12 +8774,12 @@ A fitted forest can score rows quickly and independently. Retraining and feature
 <!-- Source: https://ml.kanaries.net/docs/guides/outlier-methods -->
 
 ---
-title: "IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset"
+title: "IQR vs Z-Score vs Isolation Forest Compared"
 description: "See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example."
 canonical_url: "https://ml.kanaries.net/docs/guides/outlier-methods"
 markdown_url: "https://ml.kanaries.net/docs/guides/outlier-methods.md"
 ---
-# IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset
+# IQR vs Z-Score vs Isolation Forest Compared
 
 Different anomaly rules answer different questions. IQR measures distance beyond the middle half of a single column. Z-scores measure distance from its mean in standard-deviation units. Isolation Forest asks how easily a record can be separated from other records across the supplied features.
 
@@ -8871,12 +8871,12 @@ The browser calculator uses ordinary least squares through `@kanaries/ml`; it is
 <!-- Source: https://ml.kanaries.net/docs/guides/rfm-vs-kmeans -->
 
 ---
-title: "RFM Scoring vs K-Means: Which Customer Groups Can You Explain?"
+title: "RFM Scoring vs K-Means Customer Segmentation"
 description: "Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment."
 canonical_url: "https://ml.kanaries.net/docs/guides/rfm-vs-kmeans"
 markdown_url: "https://ml.kanaries.net/docs/guides/rfm-vs-kmeans.md"
 ---
-# RFM Scoring vs K-Means: Which Customer Groups Can You Explain?
+# RFM Scoring vs K-Means Customer Segmentation
 
 RFM scoring and K-Means can start from the same recency, frequency and monetary table but create groups for different reasons. Scoring uses explicit cutoffs. K-Means learns groups that reduce within-group squared distance in the supplied feature space.
 
@@ -8914,7 +8914,7 @@ Inertia normally falls as you add groups, so the smallest inertia is not an auto
 
 ---
 title: "Build JavaScript Machine Learning with @kanaries/ml"
-description: "Discover how to train and deploy machine learning models in JavaScript and TypeScript using @kanaries/ml, including installation, core features, tutorials, and API references."
+description: "Train and deploy scikit-learn-style ML models in JavaScript and TypeScript with @kanaries/ml. Installation, quickstart examples, guides, and full API docs."
 canonical_url: "https://ml.kanaries.net/docs"
 markdown_url: "https://ml.kanaries.net/docs/index.html.md"
 ---
@@ -9004,12 +9004,12 @@ For a deeper treatment of outlier scoring, thresholds, and evaluation, use the [
 <!-- Source: https://ml.kanaries.net/docs/sklearn-equivalents -->
 
 ---
-title: "scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml"
-description: "Translate scikit-learn estimators and workflows to JavaScript or TypeScript with a searchable sklearn-to-@kanaries/ml API mapping, runnable examples, and compatibility notes."
+title: "scikit-learn Equivalents in JS & TypeScript"
+description: "Translate Python scikit-learn estimators and workflows to JavaScript and TypeScript with a searchable @kanaries/ml API mapping and compatibility notes."
 canonical_url: "https://ml.kanaries.net/docs/sklearn-equivalents"
 markdown_url: "https://ml.kanaries.net/docs/sklearn-equivalents.md"
 ---
-# scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml
+# scikit-learn Equivalents in JS & TypeScript
 
 Use this table when you know the scikit-learn class or function and need the closest `@kanaries/ml` equivalent for a browser or Node.js application. Both libraries use estimator-style `fit`, `predict`, `transform`, and `fitPredict` workflows where the algorithm permits it. Constructor syntax and label conventions can differ, so follow the linked JavaScript API before translating production code.
 

@@ -1,4 +1,4 @@
-import path from 'node:path';
+import nodePath from 'node:path';
 import { source } from '@/lib/source';
 import {
   DocsPage,
@@ -66,6 +66,7 @@ export default async function Page(props: {
   const canonicalUrl = new URL(path, siteUrl).toString();
   const displayTitle = getDisplayTitle(page.data.title);
   const displayToc = page.data.toc
+    .filter((item) => item.depth > 1)
     .map((item) => {
       const title = getDisplayTitleNode(item.title);
 
@@ -75,7 +76,7 @@ export default async function Page(props: {
       };
     })
     .filter((item) => item.title !== displayTitle);
-  const sourceFilePath = path.join(process.cwd(), 'content/docs', page.file.path);
+  const sourceFilePath = nodePath.join(process.cwd(), 'content/docs', page.file.path);
   const lastModified = getFileLastModified(sourceFilePath).toISOString();
   const isAlgorithmPage = slug[0] === 'apis' && slug.length >= 3;
   const headline = getMetadataTitle(page.data.title, isAlgorithmPage);
@@ -120,22 +121,30 @@ export default async function Page(props: {
           View as Markdown
         </a>
         <DocsBody>
-          <MDXContent
-            components={getMDXComponents({
-              // this allows you to link to other pages with relative file paths
-              a: createRelativeLink(source, page),
-              h1: (props) => {
-                const children = getDisplayTitleNode(props.children);
+          {(() => {
+            let skippedLeadH1 = false;
+            return (
+              <MDXContent
+                components={getMDXComponents({
+                  // this allows you to link to other pages with relative file paths
+                  a: createRelativeLink(source, page),
+                  h1: (props) => {
+                    const children = getDisplayTitleNode(props.children);
 
-                if (children === displayTitle) return null;
+                    if (!skippedLeadH1) {
+                      skippedLeadH1 = true;
+                      return null;
+                    }
 
-                return defaultMdxComponents.h1({
-                  ...props,
-                  children,
-                });
-              },
-            })}
-          />
+                    return defaultMdxComponents.h2({
+                      ...props,
+                      children,
+                    });
+                  },
+                })}
+              />
+            );
+          })()}
         </DocsBody>
       </DocsPage>
     </>

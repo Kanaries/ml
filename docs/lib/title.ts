@@ -18,7 +18,7 @@ export function getMetadataTitle(title: string | undefined, isAlgorithmPage = fa
     .replace(/\s{2,}/g, ' ')
     .trim();
 
-  if (isAlgorithmPage && !/javascript|typescript/i.test(cleaned)) {
+  if (isAlgorithmPage && !/javascript|typescript|\bjs\b|\bts\b/i.test(cleaned)) {
     return `${cleaned} in JavaScript`;
   }
 

@@ -191,7 +191,7 @@ export default function ClusteringComparison() {
     return (
         <div className="p-6 max-w-6xl mx-auto">
             <div className="mb-6">
-                <h1 className="text-3xl font-bold mb-4">Clustering Algorithms Comparison</h1>
+                <h3 className="text-2xl font-bold mb-4">Clustering Algorithms Comparison</h3>
                 <p className="text-gray-600 mb-4">
                     Compare different clustering algorithms on classic datasets. The datasets shown here are commonly
                     used to demonstrate the strengths and weaknesses of different clustering approaches.

@@ -11,81 +11,81 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Start here
 
-- [Build JavaScript Machine Learning with @kanaries/ml](https://ml.kanaries.net/docs/index.html.md): Discover how to train and deploy machine learning models in JavaScript and TypeScript using @kanaries/ml, including installation, core features, tutorials, and API references.
-- [JavaScript Machine Learning APIs with @kanaries/ml](https://ml.kanaries.net/docs/apis/index.html.md): Explore machine learning APIs in JavaScript and TypeScript with @kanaries/ml, including clustering, classification, anomaly detection, dimensionality reduction, and workflow utilities.
+- [Build JavaScript Machine Learning with @kanaries/ml](https://ml.kanaries.net/docs/index.html.md): Train and deploy scikit-learn-style ML models in JavaScript and TypeScript with @kanaries/ml. Installation, quickstart examples, guides, and full API docs.
+- [JavaScript Machine Learning APIs with @kanaries/ml](https://ml.kanaries.net/docs/apis/index.html.md): Browse @kanaries/ml JavaScript and TypeScript ML APIs: clustering, linear models, trees, ensembles, SVM, decomposition, metrics, and preprocessing utilities.
 
 ## Clustering
 
 - [Clustering in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/index.html.md): Explore clustering algorithms in JavaScript and TypeScript with @kanaries/ml, including K-Means, DBSCAN, HDBSCAN, Mean Shift, OPTICS, and clustering utilities.
 - [K-Means in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/kmeans.md): Learn what K-Means clustering does, when to use it, and how to run K-Means in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [E-Means Clustering in JavaScript](https://ml.kanaries.net/docs/apis/clusters/eMeans.md): Cluster dense vectors in the browser or Node.js using the TypeScript E-Means estimator in @kanaries/ml. Explore the moving-average update, rare clusters, and measured JavaScript performance.
+- [E-Means Clustering in JavaScript](https://ml.kanaries.net/docs/apis/clusters/eMeans.md): Cluster dense vectors in browser or Node.js with TypeScript E-Means in @kanaries/ml. Covers moving-average updates, rare clusters, and measured benchmarks.
 - [DBScan in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/dbscan.md): Discover density-based clusters and noise with the DBScan JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
 - [HDBSCAN in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/hdbscan.md): Learn what HDBSCAN does, when to use it, and how to run HDBScan in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Mean Shift in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/meanShift.md): Learn what Mean Shift does, when to use it, and how to run MeanShift in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [OPTICS in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/optics.md): Learn what OPTICS does, when to use it, and how to run OPTICS in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [k-means++ Initialization in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/kmeansPlusPlus.md): Learn what k-means++ Initialization does, when to use it, and how to run kmeansPlusPlus in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Birch, Affinity Propagation, and Bisecting K-Means in JavaScript](https://ml.kanaries.net/docs/apis/clusters/advancedClustering.md): Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans.
+- [k-means++ Initialization in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/kmeansPlusPlus.md): Initialize cluster centroids reliably with k-means++ in JavaScript and TypeScript using @kanaries/ml. Includes quick start code and browser/Node.js API docs.
+- [Birch, Affinity & Bisecting K-Means in JavaScript](https://ml.kanaries.net/docs/apis/clusters/advancedClustering.md): Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans.
 
 ## Linear Models
 
 - [Linear Models in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/index.html.md): Explore linear regression, logistic regression, regularized regression, and linear classification in JavaScript and TypeScript with @kanaries/ml.
-- [Linear Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/linearRegression.md): Learn what Linear Regression does, when to use it, and how to run LinearRegression in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Linear Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/linearRegression.md): Fit ordinary least squares linear regression in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, sklearn comparison, and API docs.
 - [Logistic Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/logisticRegression.md): Learn what logistic regression does, when to use it, and how to run logistic regression in JavaScript or TypeScript with @kanaries/ml in the browser or Node.js.
-- [Polynomial Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/polynomialRegression.md): Fit nonlinear numeric trends with the PolynomialRegression JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js regression workflows.
+- [Polynomial Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/polynomialRegression.md): Fit nonlinear curves with PolynomialRegression in JavaScript and TypeScript using @kanaries/ml. Includes interactive playground, degree tuning, and API docs.
 - [Ridge Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/ridgeRegression.md): Use the RidgeRegression JavaScript and TypeScript implementation in @kanaries/ml for regularized linear regression in browser and Node.js applications.
 - [Lasso Regression in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/lassoRegression.md): Use the LassoRegression JavaScript and TypeScript implementation in @kanaries/ml for sparse regularized linear regression in browser and Node.js workflows.
 - [ElasticNet in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/elasticNet.md): Fit linear regression with combined L1 and L2 regularization using the ElasticNet JavaScript and TypeScript implementation in @kanaries/ml.
 - [RidgeClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/linear/ridgeClassifier.md): Train L2-regularized linear classifiers with the RidgeClassifier JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
 - [Robust Regression in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/linear/robustRegressors.md): Fit Huber, RANSAC, Theil-Sen, and quantile regression models in browser or Node.js applications with @kanaries/ml.
 - [Bayesian Ridge and ARD Regression in JavaScript](https://ml.kanaries.net/docs/apis/linear/bayesianRegressors.md): Run BayesianRidge and sparse ARDRegression in JavaScript or TypeScript with posterior uncertainty and sklearn-style APIs.
-- [Poisson, Gamma, and Tweedie Regression in JavaScript](https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels.md): Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js.
+- [Poisson, Gamma & Tweedie Regression in JS](https://ml.kanaries.net/docs/apis/linear/generalizedLinearModels.md): Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js.
 
 ## Tree
 
 - [Tree Models in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/index.html.md): Explore decision trees and extra trees in JavaScript and TypeScript with @kanaries/ml for interpretable tabular classification and regression.
-- [Decision Tree Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/decisionTreeClassifier.md): Learn what Decision Tree Classifier does, when to use it, and how to run DecisionTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Decision Tree Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/decisionTreeRegressor.md): Learn what Decision Tree Regressor does, when to use it, and how to run DecisionTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Extra Tree Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/extraTreeClassifier.md): Learn what Extra Tree Classifier does, when to use it, and how to run ExtraTreeClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Extra Tree Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/extraTreeRegressor.md): Learn what Extra Tree Regressor does, when to use it, and how to run ExtraTreeRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Decision Tree Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/decisionTreeClassifier.md): Train interpretable decision tree classifiers in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, sklearn comparison, and API docs.
+- [Decision Tree Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/decisionTreeRegressor.md): Fit decision tree regression models in JavaScript and TypeScript with @kanaries/ml. Includes interactive playground, split criteria, and full API reference.
+- [Extra Tree Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/extraTreeClassifier.md): Train randomized ExtraTreeClassifier models in JavaScript and TypeScript with @kanaries/ml. Includes live tree playground, sklearn comparison, and API docs.
+- [Extra Tree Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/tree/extraTreeRegressor.md): Fit randomized ExtraTreeRegressor models in JavaScript and TypeScript with @kanaries/ml. Includes live playground, quick start code, and API reference.
 
 ## Ensemble
 
 - [Ensemble Learning in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/index.html.md): Explore ensemble learning algorithms in JavaScript and TypeScript with @kanaries/ml, including Isolation Forest, AdaBoost, random forests, and bagging models.
-- [Isolation Forest in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/iforest.md): Learn what Isolation Forest does, when to use it, and how to run IsolationForest in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Isolation Forest in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/iforest.md): Detect anomalies in JavaScript and TypeScript with IsolationForest in @kanaries/ml. Includes contamination tuning, anomaly scoring, and sklearn comparison.
 - [RandomForestClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/randomForestClassifier.md): Train bootstrap decision-tree ensembles with the RandomForestClassifier JavaScript and TypeScript implementation in @kanaries/ml.
 - [RandomForestRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/randomForestRegressor.md): Predict continuous targets with tree ensembles using the RandomForestRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 - [BaggingClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/baggingClassifier.md): Train bootstrap classifier ensembles with the BaggingClassifier JavaScript and TypeScript implementation in @kanaries/ml.
 - [BaggingRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/baggingRegressor.md): Reduce regression variance with bootstrap aggregation using the BaggingRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 - [ExtraTreesClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/extraTreesClassifier.md): Train extremely randomized classification trees in JavaScript or TypeScript with ExtraTreesClassifier from @kanaries/ml for browser and Node.js.
 - [ExtraTreesRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/extraTreesRegressor.md): Train extremely randomized regression trees in JavaScript or TypeScript with ExtraTreesRegressor from @kanaries/ml for browser and Node.js.
-- [AdaBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier.md): Learn what AdaBoost Classifier does, when to use it, and how to run AdaBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [AdaBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor.md): Learn what AdaBoost Regressor does, when to use it, and how to run AdaBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Gradient Boosting Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier.md): Learn what Gradient Boosting Classifier does, when to use it, and how to run GradientBoostingClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Gradient Boosting Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor.md): Learn what Gradient Boosting Regressor does, when to use it, and how to run GradientBoostingRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Histogram Gradient Boosting in JavaScript for Classification and Regression](https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting.md): Train histogram gradient boosting trees on numeric tables with missing values. Use @kanaries/ml in a browser or Node.js to predict classes, probabilities, and continuous targets.
-- [XGBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier.md): Learn what XGBoost Classifier does, when to use it, and how to run XGBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [XGBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor.md): Learn what XGBoost Regressor does, when to use it, and how to run XGBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [AdaBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostClassifier.md): Train boosted ensemble classifiers in JavaScript and TypeScript with AdaBoostClassifier in @kanaries/ml. Includes runnable browser/Node.js code and API docs.
+- [AdaBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor.md): Build boosted regression ensembles in JavaScript and TypeScript with AdaBoostRegressor in @kanaries/ml. Includes quick start examples and full API reference.
+- [Gradient Boosting Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier.md): Train gradient boosted classification trees in JavaScript and TypeScript with @kanaries/ml. Includes Python comparison, interactive options, and API docs.
+- [Gradient Boosting Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor.md): Fit gradient boosted regression trees in JavaScript and TypeScript with @kanaries/ml. Includes interactive demo, sklearn comparison, and full API reference.
+- [Histogram Gradient Boosting in JavaScript](https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting.md): Train histogram gradient boosting trees on numeric tables with missing values in JavaScript and TypeScript using @kanaries/ml for browser and Node.js.
+- [XGBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier.md): Train XGBoost-style gradient boosted classifiers in JavaScript and TypeScript with @kanaries/ml. Includes runnable examples, options, and API reference.
+- [XGBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor.md): Fit XGBoost-style gradient boosted regressors in JavaScript and TypeScript with @kanaries/ml. Includes live demo, Python comparison, and full API docs.
 
 ## Covariance
 
 - [Robust Covariance in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/index.html.md): Estimate robust covariance and detect multivariate outliers in JavaScript or TypeScript with MinCovDet and EllipticEnvelope from @kanaries/ml.
-- [MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/minCovDet.md): Compute robust multivariate location, covariance, support masks, and Mahalanobis distances with the MinCovDet JavaScript and TypeScript implementation in @kanaries/ml.
+- [MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/minCovDet.md): Compute robust multivariate location, covariance, and Mahalanobis distances with MinCovDet in JavaScript and TypeScript using @kanaries/ml.
 - [EllipticEnvelope Anomaly Detection in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/covariance/ellipticEnvelope.md): Detect multivariate outliers with robust covariance using the EllipticEnvelope JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js.
-- [Covariance Estimation and Graphical Lasso in JavaScript](https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators.md): Estimate empirical, shrunk, Ledoit-Wolf, OAS, and sparse inverse covariance matrices in JavaScript or TypeScript.
+- [Covariance & Graphical Lasso in JavaScript](https://ml.kanaries.net/docs/apis/covariance/covarianceEstimators.md): Estimate empirical, shrunk, Ledoit-Wolf, OAS, and sparse inverse covariance matrices in JavaScript or TypeScript.
 
 ## Feature Selection
 
-- [Feature Selection in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/feature_selection/index.html.md): Select informative columns in browser or Node.js machine-learning workflows with model-based, recursive, and univariate JavaScript feature selection in @kanaries/ml.
+- [Feature Selection in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/feature_selection/index.html.md): Select informative features in JavaScript and TypeScript with model-based, recursive (RFE/RFECV), and univariate selectors in @kanaries/ml.
 - [SelectFromModel, RFE, and RFECV in JavaScript](https://ml.kanaries.net/docs/apis/feature_selection/selectors.md): Run model-based and recursive feature selection in JavaScript or TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml.
-- [Univariate Feature Scores in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_selection/univariate.md): Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
+- [Univariate Feature Selection in JavaScript](https://ml.kanaries.net/docs/apis/feature_selection/univariate.md): Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
 
 ## Feature Extraction
 
 - [Text Feature Extraction in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/feature_extraction/index.html.md): Convert raw text into sparse count and TF-IDF matrices in JavaScript or TypeScript for browser and Node.js machine-learning pipelines.
 - [CountVectorizer in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_extraction/countVectorizer.md): Tokenize browser or Node.js text into a memory-efficient CSR count matrix with the @kanaries/ml JavaScript CountVectorizer implementation.
 - [TfidfTransformer in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/feature_extraction/tfidfTransformer.md): Weight dense or CSR term-count matrices with TF-IDF in browser or Node.js using the @kanaries/ml JavaScript implementation.
-- [TfidfVectorizer JavaScript Implementation for Browser and Node.js](https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer.md): Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js.
-- [Feature Hashing and Dictionary Vectorization in JavaScript](https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries.md): Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction.
+- [TfidfVectorizer in JavaScript (Browser & Node)](https://ml.kanaries.net/docs/apis/feature_extraction/tfidfVectorizer.md): Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js.
+- [Feature Hashing & Dict Vectorizer in JavaScript](https://ml.kanaries.net/docs/apis/feature_extraction/hashingAndDictionaries.md): Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction.
 
 ## Imputation
 
@@ -95,7 +95,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 ## Neighbors
 
 - [Nearest-Neighbor Algorithms in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/index.html.md): Explore k-nearest neighbors, radius neighbors, centroid classifiers, Ball Tree, and KD Tree in JavaScript and TypeScript with @kanaries/ml.
-- [k-Nearest Neighbors in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/knn.md): Learn what k-Nearest Neighbors does, when to use it, and how to run KNearestNeighbors in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [k-Nearest Neighbors in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/knn.md): Classify data with k-Nearest Neighbors (KNN) in JavaScript and TypeScript using @kanaries/ml. Includes distance metrics, sklearn comparison, and API docs.
 - [KNeighborsRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/kneighborsRegressor.md): Predict numeric targets from nearby examples with the KNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
 - [RadiusNeighborsClassifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsClassifier.md): Classify samples from all neighbors inside a radius using the RadiusNeighborsClassifier JavaScript and TypeScript implementation in @kanaries/ml.
 - [RadiusNeighborsRegressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/radiusNeighborsRegressor.md): Predict numeric targets from all neighbors inside a radius using the RadiusNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
@@ -103,12 +103,12 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [Ball Tree in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/ballTree.md): Learn what Ball Tree does, when to use it, and how to run BallTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [KD Tree in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/kdTree.md): Learn what KD Tree does, when to use it, and how to run KDTree in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Local Outlier Factor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/neighbors/localOutlierFactor.md): Detect density-based local anomalies in JavaScript or TypeScript with the LocalOutlierFactor implementation in @kanaries/ml for browser and Node.js.
-- [NearestNeighbors Search in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors.md): Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml.
+- [NearestNeighbors Search in JavaScript](https://ml.kanaries.net/docs/apis/neighbors/nearestNeighbors.md): Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml.
 
 ## SVM
 
 - [Support Vector Machines in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/index.html.md): Explore SVC, NuSVC, LinearSVC, and LinearSVR in JavaScript and TypeScript with @kanaries/ml for margin-based classification and regression.
-- [Support Vector Classifier (SVC) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/SVC.md): Learn what Support Vector Classifier (SVC) does, when to use it, and how to run SVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Support Vector Classifier (SVC) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/SVC.md): Train support vector classifiers with linear, RBF, and polynomial kernels in JavaScript and TypeScript using SVC in @kanaries/ml.
 - [NuSVC in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/NuSVC.md): Learn what NuSVC does, when to use it, and how to run NuSVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Linear SVC in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/LinearSVC.md): Learn what Linear SVC does, when to use it, and how to run LinearSVC in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Linear SVR in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/svm/LinearSVR.md): Learn what Linear SVR does, when to use it, and how to run LinearSVR in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
@@ -120,7 +120,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [MultinomialNB in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/bayes/multinomialNB.md): Classify non-negative count features with the MultinomialNB JavaScript and TypeScript implementation in @kanaries/ml.
 - [ComplementNB in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/bayes/complementNB.md): Classify imbalanced non-negative count features with the ComplementNB JavaScript and TypeScript implementation in @kanaries/ml.
 - [Bernoulli Naive Bayes in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/bayes/bernoulliNB.md): Learn what Bernoulli Naive Bayes does, when to use it, and how to run BernoulliNB in JavaScript or TypeScript with @kanaries/ml for browser and Node.js apps.
-- [Categorical Naive Bayes in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/bayes/categoricalNB.md): Learn what Categorical Naive Bayes does, when to use it, and how to run CategoricalNB in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Categorical Naive Bayes in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/bayes/categoricalNB.md): Classify categorical features with CategoricalNB in JavaScript and TypeScript using @kanaries/ml. Includes smoothing options, examples, and API reference.
 
 ## Decomposition
 
@@ -130,22 +130,22 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [Truncated SVD in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/decomposition/truncatedSVD.md): Learn what Truncated SVD does, when to use it, and how to run TruncatedSVD in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Kernel PCA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/kernelPCA.md): Learn nonlinear dimensionality reduction and run the @kanaries/ml KernelPCA JavaScript implementation in browser or Node.js applications.
 - [FastICA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/fastICA.md): Separate statistically independent signals with the @kanaries/ml FastICA JavaScript implementation in browser and Node.js environments.
-- [Non-negative Matrix Factorization (NMF) in JavaScript](https://ml.kanaries.net/docs/apis/decomposition/nmf.md): Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js.
+- [Non-negative Matrix Factorization (NMF) in JS](https://ml.kanaries.net/docs/apis/decomposition/nmf.md): Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js.
 - [Incremental PCA in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/incrementalPCA.md): Process numeric data in batches with the @kanaries/ml IncrementalPCA JavaScript implementation for memory-aware browser and Node.js workflows.
 - [Factor Analysis in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/decomposition/factorAnalysis.md): Fit a latent Gaussian factor model with per-feature noise in browser or Node.js using @kanaries/ml FactorAnalysis.
-- [Latent Dirichlet Allocation Topic Modeling in JavaScript](https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation.md): Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml.
+- [Latent Dirichlet Allocation (LDA) in JavaScript](https://ml.kanaries.net/docs/apis/decomposition/latentDirichletAllocation.md): Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml.
 
 ## Kernel Methods
 
-- [Kernel Ridge Regression, Density and Approximation in JavaScript](https://ml.kanaries.net/docs/apis/kernel/index.html.md): Use @kanaries/ml for kernel regression, density estimation and approximate nonlinear feature maps in JavaScript or TypeScript in the browser or Node.js.
-- [Random Fourier Features with RBFSampler in JavaScript](https://ml.kanaries.net/docs/apis/kernel/rbfSampler.md): Approximate the RBF kernel with random Fourier features in JavaScript or TypeScript. Use @kanaries/ml to train a linear classifier on dense or sparse features in the browser or Node.js.
-- [Nyström Kernel Approximation in JavaScript with Nystroem](https://ml.kanaries.net/docs/apis/kernel/nystroem.md): Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models.
+- [Kernel Ridge, Density & Approximation in JS](https://ml.kanaries.net/docs/apis/kernel/index.html.md): Use @kanaries/ml for kernel regression, density estimation and approximate nonlinear feature maps in JavaScript or TypeScript in the browser or Node.js.
+- [RBFSampler Random Fourier Features in JavaScript](https://ml.kanaries.net/docs/apis/kernel/rbfSampler.md): Approximate RBF kernels with random Fourier features in JavaScript and TypeScript using RBFSampler in @kanaries/ml for dense or sparse linear models.
+- [Nyström Kernel Approximation in JavaScript](https://ml.kanaries.net/docs/apis/kernel/nystroem.md): Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models.
 
 ## Gaussian Processes
 
-- [Gaussian Processes in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/index.html.md): Use Gaussian process regression for predictions with uncertainty and Gaussian process classification for class probabilities in the browser or Node.js with @kanaries/ml.
-- [Gaussian Process Regression in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/regressor.md): Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js.
-- [Gaussian Process Classification in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/classifier.md): Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications.
+- [Gaussian Processes in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/index.html.md): Run Gaussian process regression with uncertainty estimates and Laplace GP classification in JavaScript and TypeScript using @kanaries/ml.
+- [Gaussian Process Regression in JavaScript](https://ml.kanaries.net/docs/apis/gaussian_process/regressor.md): Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js.
+- [Gaussian Process Classification in JavaScript](https://ml.kanaries.net/docs/apis/gaussian_process/classifier.md): Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications.
 
 ## Cross Decomposition
 
@@ -153,19 +153,19 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Random Projection
 
-- [Gaussian and Sparse Random Projection in JavaScript](https://ml.kanaries.net/docs/apis/random_projection/index.html.md): Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript.
+- [Gaussian & Sparse Random Projection in JS](https://ml.kanaries.net/docs/apis/random_projection/index.html.md): Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript.
 
 ## Compose
 
-- [Transformed Target Regression in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/compose/index.html.md): Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor.
+- [Transformed Target Regression in JavaScript](https://ml.kanaries.net/docs/apis/compose/index.html.md): Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor.
 
 ## Manifold
 
 - [Manifold Learning in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/index.html.md): Explore t-SNE, MDS, Spectral Embedding, and Locally Linear Embedding in JavaScript and TypeScript with @kanaries/ml for visualization and neighborhood analysis.
-- [Multidimensional Scaling (MDS) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/MDS.md): Learn what Multidimensional Scaling (MDS) does, when to use it, and how to run MDS in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Locally Linear Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/lle.md): Learn what Locally Linear Embedding does, when to use it, and how to run LocallyLinearEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Multidimensional Scaling (MDS) in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/MDS.md): Project pairwise distances into low-dimensional coordinates with Multidimensional Scaling (MDS) in JavaScript and TypeScript using @kanaries/ml.
+- [Locally Linear Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/lle.md): Preserve local neighborhood geometry with Locally Linear Embedding (LLE) in JavaScript and TypeScript using @kanaries/ml for browser and Node.js apps.
 - [t-SNE in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/tsne.md): Learn what t-SNE does, when to use it, and how to run TSNE in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Spectral Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/spectralEmbedding.md): Learn what Spectral Embedding does, when to use it, and how to run SpectralEmbedding in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Spectral Embedding in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/spectralEmbedding.md): Build graph-based nonlinear embeddings with SpectralEmbedding in JavaScript and TypeScript using @kanaries/ml. Includes quick start and full API reference.
 - [Isomap in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/manifold/isomap.md): Preserve nonlinear geodesic distances with the Isomap JavaScript implementation in @kanaries/ml, including out-of-sample transforms for browser and Node.js.
 
 ## Neural Network
@@ -176,9 +176,9 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 ## Semi-Supervised
 
 - [Semi-Supervised Learning in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/index.html.md): Explore Label Propagation, Label Spreading, and self-training in JavaScript and TypeScript with @kanaries/ml for partially labeled datasets.
-- [Label Propagation in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelPropagation.md): Learn what Label Propagation does, when to use it, and how to run LabelPropagation in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Label Spreading in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelSpreading.md): Learn what Label Spreading does, when to use it, and how to run LabelSpreading in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
-- [Self-Training Classifier in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier.md): Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js.
+- [Label Propagation in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelPropagation.md): Propagate labels across partially labeled datasets in JavaScript and TypeScript with LabelPropagation in @kanaries/ml for browser and Node.js workflows.
+- [Label Spreading in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/semi_supervised/labelSpreading.md): Run regularized semi-supervised learning in JavaScript and TypeScript with LabelSpreading in @kanaries/ml. Includes quick start, options, and API reference.
+- [Self-Training Classifier in JavaScript](https://ml.kanaries.net/docs/apis/semi_supervised/selfTrainingClassifier.md): Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js.
 
 ## Multi-Output
 
@@ -188,17 +188,17 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Metrics
 
-- [Metrics in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/metrics/index.html.md): Evaluate classification, regression, clustering, ranking curves, and distance calculations with the @kanaries/ml Metrics JavaScript implementation for browser and Node.js workflows.
+- [Metrics in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/metrics/index.html.md): Compute classification, regression, clustering, ROC/PR curve, and pairwise distance metrics in JavaScript and TypeScript with @kanaries/ml.
 
 ## Utilities
 
-- [Machine Learning Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/index.html.md): Explore machine learning workflow utilities in JavaScript and TypeScript with @kanaries/ml, including preprocessing, sampling, model selection, statistics, and async execution helpers.
-- [Preprocessing Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/preprocessing.md): Prepare numeric and categorical features with the @kanaries/ml Preprocessing JavaScript and TypeScript utilities for browser and Node.js machine learning pipelines.
-- [Spline, Target, and Multi-Label Preprocessing in JavaScript](https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing.md): Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml.
-- [Permutation Importance and Partial Dependence in JavaScript](https://ml.kanaries.net/docs/apis/utils/inspection.md): Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml.
+- [Machine Learning Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/index.html.md): Use @kanaries/ml JavaScript ML utilities for preprocessing, train/test splitting, cross-validation, statistics, sampling, and Web Worker async execution.
+- [Preprocessing Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/preprocessing.md): Scale numeric columns and encode categories in JavaScript and TypeScript with @kanaries/ml Preprocessing utilities for browser and Node.js pipelines.
+- [Spline, Target & Multi-Label Encoders in JS](https://ml.kanaries.net/docs/apis/utils/advancedPreprocessing.md): Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml.
+- [Permutation Importance & PDP in JavaScript](https://ml.kanaries.net/docs/apis/utils/inspection.md): Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml.
 - [Sampling Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/sampling.md): Split and sample JavaScript arrays for machine learning workflows with the @kanaries/ml Sampling utilities in browser and Node.js applications.
 - [Model Selection Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/modelSelection.md): Run cross-validation, K-fold splits, grid search, and randomized search with the @kanaries/ml ModelSelection JavaScript implementation.
-- [Group-Aware Cross-Validation Splitters in JavaScript](https://ml.kanaries.net/docs/apis/utils/groupSplitters.md): Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js.
+- [Group Cross-Validation Splitters in JavaScript](https://ml.kanaries.net/docs/apis/utils/groupSplitters.md): Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js.
 - [Statistical Utilities in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/stat.md): Compute simple statistics with the @kanaries/ml Stat JavaScript and TypeScript utilities for browser and Node.js machine learning helpers.
 - [asyncMode in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/utils/asyncMode.md): Learn what asyncMode does, when to use it, and how to run synchronous machine learning work in JavaScript without blocking browser or Node.js execution.
 
@@ -212,11 +212,11 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Optional
 
-- [How to Choose a Polynomial Degree Without Overfitting](https://ml.kanaries.net/docs/guides/choose-polynomial-degree.md): Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R².
-- [Customer Segmentation from a CSV: An RFM Walkthrough](https://ml.kanaries.net/docs/guides/customer-segmentation-csv.md): Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser.
+- [How to Choose a Polynomial Degree Safely](https://ml.kanaries.net/docs/guides/choose-polynomial-degree.md): Compare polynomial fits using held-out errors and residuals instead of choosing the curve with the highest training R².
+- [Customer Segmentation from CSV: RFM Guide](https://ml.kanaries.net/docs/guides/customer-segmentation-csv.md): Turn dated transactions into recency, frequency and monetary features, then inspect reproducible K-Means customer groups in your browser.
 - [How to Find Outliers in a CSV File Without Python](https://ml.kanaries.net/docs/guides/find-outliers-csv.md): Review unusual CSV values with IQR, Z-score and modified Z-score, preserve original records, and export flags without uploading your data.
-- [Isolation Forest in JavaScript — Anomaly Detection Guide and Interactive Demo](https://ml.kanaries.net/docs/guides/isolation-forest.md): Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and implement outlier scoring with @kanaries/ml in JavaScript or TypeScript.
-- [IQR vs Z-Score vs Isolation Forest: Compare the Same Dataset](https://ml.kanaries.net/docs/guides/outlier-methods.md): See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example.
+- [Isolation Forest in JavaScript: Guide & Demo](https://ml.kanaries.net/docs/guides/isolation-forest.md): Learn how Isolation Forest detects anomalies, tune contamination and tree count in an interactive browser demo, and run it in JavaScript with @kanaries/ml.
+- [IQR vs Z-Score vs Isolation Forest Compared](https://ml.kanaries.net/docs/guides/outlier-methods.md): See why a robust fence, a mean-based score and a multivariate anomaly detector can disagree, with a reproducible CSV example.
 - [How Outliers Change a Regression Line](https://ml.kanaries.net/docs/guides/outliers-regression.md): Inspect leverage and residuals with paired fits before deciding whether an unusual observation should be corrected or retained.
-- [RFM Scoring vs K-Means: Which Customer Groups Can You Explain?](https://ml.kanaries.net/docs/guides/rfm-vs-kmeans.md): Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment.
-- [scikit-learn Equivalents in JavaScript and TypeScript with @kanaries/ml](https://ml.kanaries.net/docs/sklearn-equivalents.md): Translate scikit-learn estimators and workflows to JavaScript or TypeScript with a searchable sklearn-to-@kanaries/ml API mapping, runnable examples, and compatibility notes.
+- [RFM Scoring vs K-Means Customer Segmentation](https://ml.kanaries.net/docs/guides/rfm-vs-kmeans.md): Compare explicit RFM score rules with distance-based customer clusters, including ties, skew, stability and how to validate a segment.
+- [scikit-learn Equivalents in JS & TypeScript](https://ml.kanaries.net/docs/sklearn-equivalents.md): Translate Python scikit-learn estimators and workflows to JavaScript and TypeScript with a searchable @kanaries/ml API mapping and compatibility notes.
