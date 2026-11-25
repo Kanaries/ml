@@ -1,17 +1,19 @@
 ---
 title: Sampling Utilities in JavaScript with @kanaries/ml
-description: Split and sample JavaScript arrays for machine learning workflows with the @kanaries/ml Sampling utilities in browser and Node.js applications.
+description: Create reproducible train/test splits and random subsets of JavaScript arrays with utils.Sampling.trainTestSplit and std from @kanaries/ml.
 ---
 
-# Sampling Utilities in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Sampling utilities help create subsets and train/test splits from JavaScript arrays. They are useful for small ML experiments, examples, validation flows, and browser-side demos.
+Honest model evaluation always starts by holding out unseen test data before fitting scalers, selectors, or estimators. **Sampling utilities** let you partition paired feature matrices `X` and target vectors `y` into reproducible training and test splits (`trainTestSplit`) or draw random samples without replacement (`std`) directly from standard JavaScript arrays.
+
+Because `trainTestSplit` accepts a deterministic `randomState` seed, experiments across browser sessions, CI tests, and Node.js training jobs evaluate on the exact same holdout split every time.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exports sampling helpers under `utils.Sampling`. The functions work with generic arrays, so feature rows and labels can remain in normal JavaScript data structures.
+`@kanaries/ml` exports generic sampling helpers under `utils.Sampling`. Because both helpers operate on generic TypeScript arrays (`X[]`, `Y[]`), you can split raw `string[]` text corpora, structured objects, or numeric `number[][]` matrices with full type preservation.
 
 ## Quick start example
 
@@ -27,32 +29,42 @@ const split = utils.Sampling.trainTestSplit(X, y, {
 });
 
 const sample = utils.Sampling.std([1, 2, 3, 4, 5], 3);
-console.log(sample);
+console.log({ split, sample });
 ```
+
+<AlgorithmComparison
+  title="trainTestSplit"
+  pythonCode={String.raw`from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, shuffle=True, random_state=42
+)`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const { XTrain, XTest, yTrain, yTest } = utils.Sampling.trainTestSplit(X, y, {
+  testSize: 0.2,
+  shuffle: true,
+  randomState: 42,
+});`}
+/>
 
 ## Detailed API reference
 
-```ts
-utils.Sampling.std<T>(arr: T[], size: number): T[]
-```
+### `utils.Sampling.trainTestSplit(X, y?, options?)`
 
-Returns a sample without replacement. If `size` is greater than or equal to the array length, it returns a shallow copy.
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `testSize` | `number` | `0.25` | Fraction in `(0, 1)` or exact integer count of held-out rows. |
+| `shuffle` | `boolean` | `true` | Randomly permute indices before splitting (`false` keeps temporal order for time-series holdouts). |
+| `randomState` | `number` | `undefined` | Seed for deterministic shuffling. |
 
-```ts
-utils.Sampling.trainTestSplit<X, Y>(
-  X: X[],
-  y?: Y[],
-  options?: {
-    testSize?: number;
-    shuffle?: boolean;
-    randomState?: number;
-  },
-): {
-  XTrain: X[];
-  XTest: X[];
-  yTrain?: Y[];
-  yTest?: Y[];
-}
-```
+Returns `{ XTrain, XTest, yTrain?, yTest? }`.
 
-`testSize` can be a fraction less than `1` or an absolute count. `shuffle` defaults to `true`; set `randomState` for repeatable splits.
+### `utils.Sampling.std(arr, size)`
+
+Returns a uniform random sample of length `size` drawn **without replacement**. If `size >= arr.length`, returns a shallow copy.
+
+### When to use K-Fold or Group Splitters
+
+- For robust hyperparameter tuning or small datasets, prefer K-Fold / Stratified K-Fold in [`utils.ModelSelection`](/docs/apis/utils/modelSelection).
+- When multiple rows share a user, patient, or session ID, prevent entity leakage with [`GroupShuffleSplit` or `StratifiedGroupKFold`](/docs/apis/utils/groupSplitters).

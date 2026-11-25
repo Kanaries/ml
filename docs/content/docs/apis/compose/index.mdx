@@ -1,23 +1,24 @@
 ---
 title: Transformed Target Regression in JavaScript
-description: Train regressors on log-scaled or otherwise transformed targets in browser and Node.js applications with @kanaries/ml TransformedTargetRegressor.
+description: Wrap any regressor with invertible log or custom target transforms in JavaScript and TypeScript using Compose.TransformedTargetRegressor from @kanaries/ml.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# Transformed Target Regression in JavaScript
 
 ## Algorithm overview
 
-Regression targets are often skewed, strictly positive, or easier to model after a monotonic transformation. `TransformedTargetRegressor` applies that transformation during training and automatically maps predictions back to the original units.
+Regression targets in real applications—prices, session durations, order totals, exponential growth metrics—are often strictly positive and strongly right-skewed. Fitting ordinary least squares directly on raw skewed values lets a few extreme high targets dominate squared error and can even produce negative predictions.
+
+**TransformedTargetRegressor** wraps any base regressor with an **invertible target transformation**: it transforms `y` (for example with `log1p`) before fitting the inner regressor, and automatically applies the exact inverse (`expm1`) inside `predict()` so outputs return cleanly in original business units—eliminating manual back-transformation bugs across training, cross-validation, and production serving.
 
 ## JavaScript implementation
 
-`@kanaries/ml` composes any serializable regressor with a transformer that implements `fit`, `transform`, and `inverseTransform`. Both components are cloned before fitting, work in browser or Node.js, and survive model serialization.
+`Compose.TransformedTargetRegressor` runs in pure TypeScript across browsers and Node.js. It clones both the base `regressor` and `transformer` before fitting, supports nested `regressor__param` and `transformer__param` addressing in `setParams()` (making it tunable inside `GridSearchCV`), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization) when using named `FunctionTransformer` transforms (`'log1p'` / `'expm1'`, `'sqrt'` / `'square'`, scalers, etc.).
 
 ## Interactive transformed-target regression playground
 
-Compare identity and log-transformed targets on positive data, then add observations directly to the chart. `Compose.TransformedTargetRegressor` handles transformation, fitting, and inverse prediction live.
+Compare raw vs log-transformed targets on positive skewed data, or click to add observations directly to the chart. `Compose.TransformedTargetRegressor` handles forward transformation, fitting, and inverse prediction live in your browser.
 
 <RegressionPlayground algorithm="transformedTarget" />
 
@@ -35,9 +36,37 @@ const model = new Compose.TransformedTargetRegressor({
 });
 
 model.fit([[0], [1], [2]], [1, 3, 7]);
-model.predict([[3]]); // approximately [15]
+console.log(model.predict([[3]])); // approximately [15]
 ```
+
+<AlgorithmComparison
+  title="TransformedTargetRegressor"
+  pythonCode={String.raw`import numpy as np
+from sklearn.compose import TransformedTargetRegressor
+from sklearn.linear_model import Ridge
+
+model = TransformedTargetRegressor(
+    regressor=Ridge(alpha=1.0),
+    func=np.log1p,
+    inverse_func=np.expm1,
+)
+model.fit(X_train, y_train)
+preds = model.predict(X_test)`}
+  tsCode={String.raw`import { Compose, Linear, utils } from '@kanaries/ml';
+
+const model = new Compose.TransformedTargetRegressor({
+  regressor: new Linear.RidgeRegression({ alpha: 1.0 }),
+  transformer: new utils.Preprocessing.FunctionTransformer({
+    func: 'log1p',
+    inverseFunc: 'expm1',
+  }),
+});
+model.fit(XTrain, yTrain);
+const preds = model.predict(XTest);`}
+/>
 
 ## Detailed API reference
 
-`new TransformedTargetRegressor({ regressor?, transformer?, func?, inverseFunc? })` defaults to linear regression and an identity transform. Pass either a transformer or a `func`/`inverseFunc` pair; the two forms are mutually exclusive. `fit(X, y)` trains cloned components, `predict(X)` returns inverse-transformed values, and `score(X, y)` reports R² in the original target space. Nested parameters use `regressor__param` and `transformer__param` in `setParams`.
+- **`new Compose.TransformedTargetRegressor({ regressor?, transformer?, func?, inverseFunc? })`** — defaults to `LinearRegression` and identity transform. Supply either `transformer` (recommended for JSON serialization) or a `func` / `inverseFunc` pair (mutually exclusive).
+- **`fit(X, y)` / `predict(X)` / `score(X, y)`** — `score` computes R² in the **original untransformed** target space.
+- **Related pages**: [ML Pipelines](/docs/apis/pipeline), [Generalized Linear Models (Poisson/Gamma)](/docs/apis/linear/generalizedLinearModels), [Model Serialization](/docs/apis/serialization).

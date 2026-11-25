@@ -1,29 +1,64 @@
 ---
 title: Gaussian & Sparse Random Projection in JS
-description: Reduce high-dimensional data with Johnson-Lindenstrauss Gaussian or sparse random projections in JavaScript and TypeScript.
+description: Compress wide feature matrices with Johnson-Lindenstrauss GaussianRandomProjection and SparseRandomProjection in JavaScript and TypeScript via @kanaries/ml.
 ---
 
-# Random projection in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Random projection reduces dimensionality with a data-independent matrix while approximately preserving pairwise distances. It is useful when deterministic decomposition is too expensive.
+Computing an exact SVD or [PCA](/docs/apis/decomposition/pca) on thousands of features can be slow or memory-intensive in browser tabs and edge runtimes. Backed by the **Johnson–Lindenstrauss lemma**, **Random Projection** multiplies high-dimensional feature vectors by a carefully scaled, data-independent random matrix to shrink dimensionality while approximately preserving all pairwise Euclidean distances within factor `1 ± eps`.
+
+`@kanaries/ml` provides two complementary random-projection transformers:
+
+- **`GaussianRandomProjection`**: draws dense projection weights from `N(0, 1 / nComponents)`—simple and accurate for moderate feature widths.
+- **`SparseRandomProjection`**: uses Achlioptas / Li sparse ternary projection weights (`{-s, 0, +s}`), cutting multiply-add cost and memory dramatically while matching Gaussian distance-preservation guarantees.
 
 ## JavaScript implementation
 
-`@kanaries/ml` generates seeded Gaussian or sparse projection matrices in browser and Node.js and exposes the fitted components for serialization. Random projection is a lightweight choice when PCA-style fitting is too expensive or data arrives only at inference time; the sparse variant reduces multiply cost for high-dimensional frontend features.
+Both estimators live under `import { RandomProjection } from '@kanaries/ml'` in pure TypeScript for browsers and Node.js. Fitting is near-instantaneous because no eigendecomposition is required, deterministic `randomState` seeds guarantee reproducible projections, and fitted `components` serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start
 
 ```ts
 import { RandomProjection } from '@kanaries/ml';
 
-const X = [[1, 0, 2], [0, 1, 3], [2, 1, 0]];
-const model = new RandomProjection.SparseRandomProjection({ nComponents: 128, randomState: 42 });
+const X = [[1, 0, 2, 4], [0, 1, 3, 2], [2, 1, 0, 5]];
+const model = new RandomProjection.SparseRandomProjection({
+  nComponents: 2,
+  randomState: 42,
+});
 const reduced = model.fitTransform(X);
-console.log(reduced[0].length);
+console.log({ shape: [reduced.length, reduced[0].length], reduced });
 ```
+
+<AlgorithmComparison
+  title="GaussianRandomProjection & SparseRandomProjection"
+  pythonCode={String.raw`from sklearn.random_projection import GaussianRandomProjection, SparseRandomProjection
+
+grp = GaussianRandomProjection(n_components=64, random_state=42)
+X_gauss = grp.fit_transform(X)
+
+srp = SparseRandomProjection(n_components="auto", eps=0.2, random_state=42)
+X_sparse = srp.fit_transform(X)`}
+  tsCode={String.raw`import { RandomProjection } from '@kanaries/ml';
+
+const grp = new RandomProjection.GaussianRandomProjection({ nComponents: 64, randomState: 42 });
+const XGauss = grp.fitTransform(X);
+
+const srp = new RandomProjection.SparseRandomProjection({ nComponents: 'auto', eps: 0.2, randomState: 42 });
+const XSparse = srp.fitTransform(X);`}
+/>
 
 ## Detailed API reference
 
-Set `nComponents: 'auto'` with `eps` to use the sklearn Johnson-Lindenstrauss bound. Both estimators expose `components`; `computeInverseComponents` enables approximate `inverseTransform`.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number \| 'auto'` | `'auto'` | Target dimensionality, or `'auto'` to compute the minimum Johnson–Lindenstrauss bound from `nSamples` and `eps`. |
+| `eps` | `number` | `0.1` | Maximum relative pairwise distance distortion in `(0, 1)` when `nComponents: 'auto'`. |
+| `density` *(Sparse only)* | `number \| 'auto'` | `'auto'` (`1 / sqrt(nFeatures)`) | Ratio of non-zero entries in the sparse projection matrix. |
+| `computeInverseComponents` | `boolean` | `false` | Precomputes pseudo-inverse enabling approximate `inverseTransform()`. |
+| `randomState` | `number` | `undefined` | Seed for reproducible projection matrices. |
+
+- **Methods & properties**: `fit(X)`, `transform(X)`, `fitTransform(X)`, `inverseTransform(X)`, and fitted `components`.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [TruncatedSVD](/docs/apis/decomposition/truncatedSVD), [Feature Hashing](/docs/apis/feature_extraction/hashingAndDictionaries).

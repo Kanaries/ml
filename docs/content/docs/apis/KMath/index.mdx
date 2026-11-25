@@ -1,17 +1,19 @@
 ---
 title: KMath Utilities in JavaScript with @kanaries/ml
-description: Use lightweight math and descriptive statistics helpers from the @kanaries/ml KMath JavaScript and TypeScript implementation.
+description: Compute sums, expected mean, sample/population variance, standard deviation, and covariance in JavaScript and TypeScript with KMath from @kanaries/ml.
 ---
 
-# KMath Utilities in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
-## Algorithm overview
+## Module overview
 
-KMath provides small numeric helpers for sums, expectations, variance, covariance, and standard deviation. These are useful for examples, feature calculations, and lightweight statistical summaries.
+Exploratory data analysis, browser CSV profilers, z-score outlier rules, and feature engineering pipelines constantly need crisp descriptive statistics—mean, sample vs. population variance, standard deviation, and pairwise covariance—with clear degrees-of-freedom semantics (`ddof = 0` vs `ddof = 1`).
+
+The **`KMath`** module packages `@kanaries/ml`'s lightweight, zero-dependency numeric statistics helpers for flat `number[]` vectors so you can profile columns and compute summary metrics without adding another math dependency.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exports this module as `KMath`, keeping simple numeric utilities available in browser and Node.js code without switching runtimes.
+Import helpers from `import { KMath } from '@kanaries/ml'` in browser and Node.js codebases. Every function operates on standard JavaScript `number[]` arrays and explicitly distinguishes **sample** (`n - 1` denominator: `varSample`, `SDSample`) from **population** (`n` denominator: `varPopulation`, `SDPopulation`) estimators so results match NumPy (`ddof=1` vs `ddof=0`) cleanly.
 
 ## Quick start example
 
@@ -22,19 +24,39 @@ const values = [1, 2, 3, 4];
 const mean = KMath.expected(values);
 const sampleVariance = KMath.varSample(values);
 const populationSd = KMath.SDPopulation(values);
+const cov = KMath.covariance([1, 2, 3, 4], [2, 4, 5, 8]);
+console.log({ mean, sampleVariance, populationSd, cov });
 ```
+
+<AlgorithmComparison
+  title="Descriptive Statistics (KMath vs NumPy)"
+  pythonCode={String.raw`import numpy as np
+
+x = np.array([1.0, 2.0, 3.0, 4.0])
+y = np.array([2.0, 4.0, 5.0, 8.0])
+mean = np.mean(x)
+var_sample = np.var(x, ddof=1)
+sd_pop = np.std(x, ddof=0)
+cov_xy = np.cov(x, y, ddof=1)[0, 1]`}
+  tsCode={String.raw`import { KMath } from '@kanaries/ml';
+
+const x = [1, 2, 3, 4];
+const y = [2, 4, 5, 8];
+const mean = KMath.expected(x);
+const varSample = KMath.varSample(x);
+const sdPop = KMath.SDPopulation(x);
+const covXY = KMath.covariance(x, y);`}
+/>
 
 ## Detailed API reference
 
-```ts
-KMath.sum(nums: number[]): number
-KMath.expected(nums: number[]): number
-KMath.variance(nums: number[], df: number): number
-KMath.covariance(X: number[], Y: number[]): number
-KMath.varSample(nums: number[]): number
-KMath.SDSample(nums: number[]): number
-KMath.varPopulation(nums: number[]): number
-KMath.SDPopulation(nums: number[]): number
-```
+| Function | Signature | Description |
+| --- | --- | --- |
+| `KMath.sum` | `(nums: number[]) => number` | Arithmetic sum of all elements. |
+| `KMath.expected` | `(nums: number[]) => number` | Arithmetic mean (`sum(nums) / nums.length`). |
+| `KMath.variance` | `(nums: number[], df: number) => number` | Variance with explicit denominator `nums.length - df`. |
+| `KMath.varSample` / `KMath.SDSample` | `(nums: number[]) => number` | Unbiased sample variance and standard deviation (`n - 1`). |
+| `KMath.varPopulation` / `KMath.SDPopulation` | `(nums: number[]) => number` | Population variance and standard deviation (`n`). |
+| `KMath.covariance` | `(X: number[], Y: number[]) => number` | Pairwise covariance between equal-length numeric arrays `X` and `Y`. |
 
-`covariance` requires arrays with the same length.
+- **Related pages**: [Statistical Utilities (`utils.Stat`)](/docs/apis/utils/stat), [Covariance Estimators](/docs/apis/covariance), [Algebra Utilities](/docs/apis/algebra), [Outlier Detection Calculator](/tools/outlier-calculator).

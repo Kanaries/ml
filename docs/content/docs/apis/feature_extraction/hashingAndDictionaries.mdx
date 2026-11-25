@@ -1,17 +1,21 @@
 ---
 title: Feature Hashing & Dict Vectorizer in JavaScript
-description: Use HashingVectorizer, DictVectorizer, and FeatureHasher for bounded-memory JavaScript and TypeScript feature extraction.
+description: Extract bounded-memory hashed features or one-hot encoded JS objects in JavaScript and TypeScript with HashingVectorizer, FeatureHasher, and DictVectorizer.
 ---
 
-# Feature hashing in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Hashing maps features into a fixed-width sparse matrix without storing a vocabulary. Dictionary vectorization instead learns explicit names, which is preferable when interpretability matters.
+Learning an explicit string-to-column vocabulary map is ideal when interpretability matters, but can consume substantial memory on streaming text, high-cardinality user IDs, or unbounded web logs. `@kanaries/ml` offers three complementary vectorizers depending on whether your inputs are raw text or structured key-value records—and whether you prefer stateless hashing or invertible names:
+
+- **`HashingVectorizer`**: stateless text tokenizer that hashes tokens via MurmurHash3 into a fixed `nFeatures`-column [`CSRMatrix`](/docs/apis/data)—zero `fit()` state, constant memory, instant streaming.
+- **`FeatureHasher`**: applies the same signed MurmurHash3 hashing trick to JavaScript objects (`{ city: 'NYC', age: 32 }`), `[key, value]` pairs, or string arrays.
+- **`DictVectorizer`**: learns an explicit feature vocabulary from JavaScript objects—passing numeric values through and one-hot encoding string categorical values—while supporting `getFeatureNamesOut()`, `inverseTransform()`, and `restrict()`.
 
 ## JavaScript implementation
 
-`HashingVectorizer` tokenizes text, `FeatureHasher` accepts dictionaries, pairs, or strings, and `DictVectorizer` expands numeric and categorical dictionary values.
+All three transformers live under `import { FeatureExtraction } from '@kanaries/ml'` in pure TypeScript for browser and Node.js pipelines. Both hashers use scikit-learn-compatible MurmurHash3 column indices and alternating signs (`alternateSign: true`) to keep inner products approximately unbiased under hash collisions.
 
 ## Quick start
 
@@ -19,10 +23,34 @@ Hashing maps features into a fixed-width sparse matrix without storing a vocabul
 import { FeatureExtraction } from '@kanaries/ml';
 
 const documents = ['red fox', 'blue fox'];
-const X = new FeatureExtraction.HashingVectorizer({ nFeatures: 4096 }).fitTransform(documents);
-console.log(X.shape);
+const hashed = new FeatureExtraction.HashingVectorizer({ nFeatures: 4096 }).fitTransform(documents);
+
+const dictVec = new FeatureExtraction.DictVectorizer({ sparse: false });
+const rows = dictVec.fitTransform([
+  { city: 'NYC', temp: 22 },
+  { city: 'SF', temp: 16 },
+]);
+console.log({ hashedShape: hashed.shape, features: dictVec.getFeatureNamesOut(), rows });
 ```
+
+<AlgorithmComparison
+  title="HashingVectorizer & DictVectorizer"
+  pythonCode={String.raw`from sklearn.feature_extraction.text import HashingVectorizer
+from sklearn.feature_extraction import DictVectorizer, FeatureHasher
+
+X_hash = HashingVectorizer(n_features=4096).transform(documents)
+dv = DictVectorizer(sparse=False)
+X_dict = dv.fit_transform([{"city": "NYC", "temp": 22}, {"city": "SF", "temp": 16}])`}
+  tsCode={String.raw`import { FeatureExtraction } from '@kanaries/ml';
+
+const XHash = new FeatureExtraction.HashingVectorizer({ nFeatures: 4096 }).transform(documents);
+const dv = new FeatureExtraction.DictVectorizer({ sparse: false });
+const XDict = dv.fitTransform([{ city: 'NYC', temp: 22 }, { city: 'SF', temp: 16 }]);`}
+/>
 
 ## Detailed API reference
 
-Both hashers use sklearn-compatible MurmurHash3 indices and signed collisions. `DictVectorizer` exposes `vocabulary`, `getFeatureNamesOut()`, `inverseTransform()`, and `restrict()`, and can return CSR or dense output.
+- **`HashingVectorizer({ nFeatures = 1048576, alternateSign = true, norm = 'l2', ngramRange = [1, 1], lowercase = true, stopWords = [] })`** — stateless `transform(documents)` returning `CSRMatrix`. Set `alternateSign: false` before non-negative estimators like [`Bayes.MultinomialNB`](/docs/apis/bayes/multinomialNB).
+- **`FeatureHasher({ nFeatures = 1048576, inputType = 'dict', alternateSign = true })`** — hashes dicts, `[name, value]` pairs, or raw token arrays into `CSRMatrix`.
+- **`DictVectorizer({ sparse = true, separator = '=', sort = true })`** — exposes `fit`, `transform`, `fitTransform`, `inverseTransform`, `restrict(support)`, `getFeatureNamesOut()`, and `vocabulary`.
+- **Related pages**: [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer), [CountVectorizer](/docs/apis/feature_extraction/countVectorizer), [CSRMatrix](/docs/apis/data).

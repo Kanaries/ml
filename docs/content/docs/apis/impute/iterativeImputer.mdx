@@ -1,17 +1,19 @@
 ---
 title: IterativeImputer in JavaScript and TypeScript
-description: Estimate each missing numeric feature from the others using the @kanaries/ml JavaScript IterativeImputer implementation in browser or Node.js.
+description: Impute missing NaN features using multivariate round-robin regression (MICE) in JavaScript and TypeScript with Impute.IterativeImputer from @kanaries/ml.
 ---
 
-# IterativeImputer in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Iterative imputation begins with a column statistic, then repeatedly predicts each feature from the other features. It is useful when missing columns are correlated and a single mean or median would erase that relationship.
+**IterativeImputer** (Multivariate Imputation by Chained Equations / MICE) models each column containing missing `NaN` values as a regression target predicted from all remaining feature columns. Starting from a simple univariate fill (`initialStrategy`: `'mean'`, `'median'`, `'mostFrequent'`, or `'constant'`), it cycles through incomplete features in rounds—refitting a regressor per column and updating imputed entries—until changes fall below `tol` or `maxIter` rounds complete.
+
+Because it exploits cross-column correlations, `IterativeImputer` preserves covariance structure far better than single-column mean/median filling—especially before linear models, [PCA](/docs/apis/decomposition/pca), or clustering.
 
 ## JavaScript implementation
 
-`@kanaries/ml` clones and fits a registered regressor for every imputation step, records the fitted sequence for later `transform`, and supports deterministic ordering and bounds. Until `BayesianRidge` is added, the default base estimator is lightly regularized `RidgeRegression`; supply another registered regressor when needed.
+`Impute.IterativeImputer` runs in pure TypeScript across browsers and Node.js. It defaults to lightly regularized `RidgeRegression` and accepts any registered `@kanaries/ml` regressor via `estimator` (such as [`Linear.BayesianRidge`](/docs/apis/linear/bayesianRegressors) or [`Ensemble.ExtraTreesRegressor`](/docs/apis/ensemble/extraTreesRegressor) for non-linear relationships). It records its fitted `imputationSequence` so `transform(XTest)` replays the exact learned predictors without peeking at test labels, and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -24,8 +26,42 @@ const future = imputer.transform([[4, NaN]]);
 console.log({ complete, future });
 ```
 
+<AlgorithmComparison
+  title="IterativeImputer"
+  pythonCode={String.raw`from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+imp = IterativeImputer(max_iter=10, tol=1e-3, initial_strategy="mean", random_state=42)
+X_train_clean = imp.fit_transform(X_train)
+X_test_clean = imp.transform(X_test)`}
+  tsCode={String.raw`import { Impute } from '@kanaries/ml';
+
+const imp = new Impute.IterativeImputer({
+  maxIter: 10,
+  tol: 1e-3,
+  initialStrategy: 'mean',
+  randomState: 42,
+});
+const XTrainClean = imp.fitTransform(XTrain);
+const XTestClean = imp.transform(XTest);`}
+/>
+
 ## Detailed API reference
 
-Options: `estimator`, `maxIter`, `tol`, `initialStrategy: 'mean' | 'median' | 'mostFrequent' | 'constant'`, `fillValue`, `imputationOrder: 'ascending' | 'descending' | 'roman' | 'arabic' | 'random'`, `skipComplete`, `minValue`, `maxValue`, and `randomState`.
+### `new Impute.IterativeImputer(props?)`
 
-Methods: `fit`, `fitTransform`, and `transform`. Learned `imputationSequence` and `nIter` are exposed. Missing values must be represented by `NaN`.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `RegressorBase` | `RidgeRegression` | Registered regressor cloned and fitted per feature round (e.g. `Linear.BayesianRidge`). |
+| `maxIter` / `tol` | `number` | `10` / `1e-3` | Maximum round-robin passes and convergence threshold. |
+| `initialStrategy` | `'mean' \| 'median' \| 'mostFrequent' \| 'constant'` | `'mean'` | Initial fill before iterative refinement (`fillValue` sets the value for `'constant'`). |
+| `imputationOrder` | `'ascending' \| 'descending' \| 'roman' \| 'arabic' \| 'random'` | `'ascending'` | Column traversal order per round. |
+| `skipComplete` | `boolean` | `false` | Skip fitting regressors for columns with zero missing values during `fit()`. |
+| `minValue` / `maxValue` | `number \| number[]` | `-Infinity` / `Infinity` | Optional domain bounds clamping imputed outputs. |
+| `randomState` | `number` | `undefined` | Seed used when `imputationOrder: 'random'`. |
+
+### Methods & properties
+
+- `fit(X)` / `fitTransform(X)` / `transform(X)` — represent missing entries with `NaN`.
+- `imputationSequence` and `nIter` expose the fitted column estimators and convergence rounds.
+- **Related pages**: [Imputation Overview](/docs/apis/impute), [BayesianRidge](/docs/apis/linear/bayesianRegressors), [ML Pipelines](/docs/apis/pipeline).

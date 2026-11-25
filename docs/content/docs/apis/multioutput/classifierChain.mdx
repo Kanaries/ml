@@ -1,17 +1,23 @@
 ---
 title: ClassifierChain in JavaScript and TypeScript
-description: Model dependencies between multiple binary labels with the @kanaries/ml JavaScript ClassifierChain implementation in browser or Node.js.
+description: Model label dependencies in multi-label classification in JavaScript and TypeScript with MultiOutput.ClassifierChain from @kanaries/ml for browser and Node.js.
 ---
 
-# ClassifierChain in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-A classifier chain fits one binary classifier per output. Each member sees the original features plus earlier labels, allowing later predictions to depend on earlier outputs rather than assuming label independence.
+**ClassifierChain** solves multi-label binary classification (`Y` of shape `[nSamples][nLabels]`) while capturing correlations among output labels. Instead of fitting `L` completely isolated binary classifiers, it arranges the `L` labels in a sequence (`order`):
+
+1. Classifier `0` predicts the first label from the original feature matrix `X`.
+2. Classifier `1` receives `[X, label_0]` as input to predict the second label.
+3. Classifier `k` receives `[X, label_0, ..., label_{k-1}]`, allowing co-occurrence and mutual-exclusion patterns across labels to directly inform later predictions.
+
+During inference (`predict` / `predictProba`), each link feeds its predicted output forward down the chain. Setting `cv` (for example `cv: 3`) uses out-of-fold predictions rather than ground-truth labels during training, aligning training-time and test-time distributions.
 
 ## JavaScript implementation
 
-Pass any registered single-output classifier to `MultiOutput.ClassifierChain`. A fixed, identity, or seeded random order is supported, and optional cross-validated training extensions reduce target leakage.
+`MultiOutput.ClassifierChain` accepts any registered single-output `@kanaries/ml` classifier (such as `Bayes.GaussianNB`, `Linear.LogisticRegression`, or `Tree.DecisionTreeClassifier`), runs synchronously in browsers and Node.js, supports explicit or `'random'` seeded ordering, and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -21,13 +27,48 @@ import { Bayes, MultiOutput } from '@kanaries/ml';
 const X = [[0], [1], [2]];
 const testX = [[1.5]];
 const chain = new MultiOutput.ClassifierChain({
-  estimator: new Bayes.GaussianNB(), order: [0, 1],
+  estimator: new Bayes.GaussianNB(),
+  order: [0, 1],
 });
 chain.fit(X, [[0, 0], [0, 1], [1, 1]]);
 const labels = chain.predict(testX);
 console.log(labels);
 ```
 
+<AlgorithmComparison
+  title="ClassifierChain"
+  pythonCode={String.raw`from sklearn.multioutput import ClassifierChain
+from sklearn.naive_bayes import GaussianNB
+
+chain = ClassifierChain(estimator=GaussianNB(), order=[0, 1], random_state=42)
+chain.fit(X_train, Y_train)
+preds = chain.predict(X_test)
+proba = chain.predict_proba(X_test)`}
+  tsCode={String.raw`import { Bayes, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.ClassifierChain({
+  estimator: new Bayes.GaussianNB(),
+  order: [0, 1],
+  randomState: 42,
+});
+chain.fit(XTrain, YTrain);
+const preds = chain.predict(XTest);
+const proba = chain.predictProba(XTest);`}
+/>
+
 ## Detailed API reference
 
-Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, `predictProba(X)`, and exact-match `score(X, Y)`. `chainOrder` and `estimators` return defensive arrays. `predictProba` requires the base classifier to expose probabilities and returns the positive-class probability per output.
+### `new MultiOutput.ClassifierChain(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `ClassifierBase` | *required* | Prototype binary classifier cloned once per label in the chain. |
+| `order` | `number[] \| 'random'` | `[0, 1, ..., L-1]` | Explicit permutation of label indices or `'random'` for a shuffled chain order. |
+| `cv` | `number \| null` | `null` | When set (`≥ 2`), generates out-of-fold predictions for upstream chain columns during `fit()` to reduce exposure bias. |
+| `randomState` | `number` | `undefined` | Seed for `'random'` order and CV splits. |
+
+### Methods & properties
+
+- `fit(X, Y)` / `predict(X)` / `predictProba(X)` (requires base estimator to implement `predictProba`) / `score(X, Y)` (exact-match subset accuracy).
+- `chainOrder` and `estimators` return defensive copies of the resolved order and fitted members.
+- **Related pages**: [RegressorChain](/docs/apis/multioutput/regressorChain), [Multi-Output Overview](/docs/apis/multioutput), [Multiclass Wrappers](/docs/apis/multiclass).

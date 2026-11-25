@@ -1,17 +1,19 @@
 ---
 title: TfidfTransformer in JavaScript and TypeScript
-description: Weight dense or CSR term-count matrices with TF-IDF in browser or Node.js using the @kanaries/ml JavaScript implementation.
+description: Apply TF-IDF re-weighting and L1/L2 row normalization to dense or CSR count matrices in JavaScript and TypeScript with TfidfTransformer from @kanaries/ml.
 ---
 
-# TfidfTransformer in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-TF-IDF reduces the influence of terms that occur in many documents while preserving terms that distinguish individual documents. `TfidfTransformer` is useful when counts already come from another source.
+**TfidfTransformer** converts an existing non-negative term-count matrix (dense `number[][]` or sparse [`CSRMatrix`](/docs/apis/data)) into a TF-IDF weighted sparse matrix. Scaling raw counts by inverse document frequency suppresses ubiquitous filler words while highlighting terms specific to individual documents, and L2 row normalization ensures long documents do not overwhelm short documents under dot-product or cosine similarity.
+
+Use `TfidfTransformer` separately from [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer) when counts already come from a custom tokenizer, [`CountVectorizer`](/docs/apis/feature_extraction/countVectorizer), [`HashingVectorizer`](/docs/apis/feature_extraction/hashingAndDictionaries), or an upstream analytics SQL table.
 
 ## JavaScript implementation
 
-`@kanaries/ml` accepts either `number[][]` or `CSRMatrix` counts and returns a sparse CSR result. This keeps text preprocessing memory-efficient in browser and Node.js pipelines.
+`FeatureExtraction.TfidfTransformer` runs in pure TypeScript across browsers and Node.js. It accepts both dense and sparse `CSRMatrix` inputs, always returns a memory-efficient `CSRMatrix`, plugs into [`Pipeline`](/docs/apis/pipeline), and persists learned `idf` weights via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -20,23 +22,39 @@ import { FeatureExtraction } from '@kanaries/ml';
 
 const tfidf = new FeatureExtraction.TfidfTransformer({ norm: 'l2' });
 const weighted = tfidf.fitTransform([[2, 0, 1], [0, 1, 1]]);
-console.log(weighted.toDense());
+console.log({ idf: tfidf.idf, dense: weighted.toDense() });
 ```
+
+<AlgorithmComparison
+  title="TfidfTransformer"
+  pythonCode={String.raw`from sklearn.feature_extraction.text import TfidfTransformer
+
+tfidf = TfidfTransformer(norm="l2", use_idf=True, smooth_idf=True, sublinear_tf=False)
+X_tfidf = tfidf.fit_transform(X_counts)`}
+  tsCode={String.raw`import { FeatureExtraction } from '@kanaries/ml';
+
+const tfidf = new FeatureExtraction.TfidfTransformer({
+  norm: 'l2',
+  useIdf: true,
+  smoothIdf: true,
+  sublinearTf: false,
+});
+const XTfidf = tfidf.fitTransform(XCounts);`}
+/>
 
 ## Detailed API reference
 
-```ts
-new FeatureExtraction.TfidfTransformer({
-  norm?: 'l1' | 'l2' | null; // 'l2'
-  useIdf?: boolean;          // true
-  smoothIdf?: boolean;       // true
-  sublinearTf?: boolean;     // false
-})
-```
+### `new FeatureExtraction.TfidfTransformer(props?)`
 
-- `fit(X): void` learns inverse-document-frequency weights.
-- `transform(X): CSRMatrix` applies term-frequency scaling, IDF, and normalization.
-- `fitTransform(X): CSRMatrix` combines both operations.
-- `idf: number[]` returns a defensive copy of the learned weights.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `norm` | `'l1' \| 'l2' \| null` | `'l2'` | Row-wise normalization applied after weighting (`'l2'` makes dot products equal cosine similarity). |
+| `useIdf` | `boolean` | `true` | Multiply term frequencies by learned inverse document frequencies (`false` applies normalization only). |
+| `smoothIdf` | `boolean` | `true` | Adds `1` to document frequencies (`log((1 + n) / (1 + df)) + 1`), preventing division by zero on unseen terms. |
+| `sublinearTf` | `boolean` | `false` | Replaces raw term frequency `tf` with `1 + log(tf)` for non-zero counts. |
 
-Inputs must contain non-negative term counts and use the fitted feature count.
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` — require non-negative numeric counts matching the fitted column count; return `CSRMatrix`.
+- `idf: number[]` — returns a defensive copy of learned IDF weights.
+- **Related pages**: [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer), [CountVectorizer](/docs/apis/feature_extraction/countVectorizer), [CSRMatrix](/docs/apis/data).

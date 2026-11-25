@@ -1,23 +1,24 @@
 ---
 title: RegressorChain in JavaScript and TypeScript
-description: Predict related numeric targets with the @kanaries/ml JavaScript RegressorChain implementation in browser or Node.js.
+description: Predict multiple correlated continuous targets in JavaScript and TypeScript with MultiOutput.RegressorChain from @kanaries/ml. Includes live playground.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# RegressorChain in JavaScript
 
 ## Algorithm overview
 
-A regressor chain fits one model per target and appends earlier target values or predictions as features for later members. This can capture dependencies that independent multi-output regressors miss.
+**RegressorChain** predicts multiple continuous targets (`Y` of shape `[nSamples][nTargets]`) simultaneously while modeling dependencies across outputs. Targets are arranged in a sequence (`order`): the first regressor predicts target `order[0]` from `X`, the second regressor predicts `order[1]` from `[X, target_0]`, and each subsequent regressor augments `X` with all preceding targets in the chain.
+
+This design is especially valuable when outputs obey physical, financial, or temporal coupling—for example predicting both item demand and fulfillment cost, or multi-step horizon values where earlier predictions strongly inform later ones.
 
 ## JavaScript implementation
 
-`@kanaries/ml` accepts a registered single-output regressor and supports explicit or seeded random chain order. Set `cv` to use out-of-fold predictions while building training extensions.
+`MultiOutput.RegressorChain` wraps any registered single-output `@kanaries/ml` regressor in pure TypeScript for browser and Node.js runtimes. Prefer regularized base learners like [`Linear.RidgeRegression`](/docs/apis/linear/ridgeRegression) when correlated target columns could introduce collinearity into augmented matrices. Setting `cv` uses out-of-fold predictions during training so downstream models adapt to realistic upstream prediction error. Fitted chains serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive regressor chain playground
 
-Tune the Ridge base estimator and modify the dataset below. A two-output `MultiOutput.RegressorChain` is fitted live; the chart displays its first target while both outputs participate in the chain.
+Tune the Ridge base estimator and modify the dataset below. A two-output `MultiOutput.RegressorChain` is fitted live in your browser; the chart renders its first target while both outputs interact across the chain.
 
 <RegressionPlayground algorithm="regressorChain" />
 
@@ -30,13 +31,46 @@ const X = [[0], [1], [2], [3]];
 const targets = [[0, 1], [1, 3], [2, 5], [3, 7]];
 const testX = [[4]];
 const chain = new MultiOutput.RegressorChain({
-  estimator: new Linear.RidgeRegression({ alpha: 1 }), order: [1, 0],
+  estimator: new Linear.RidgeRegression({ alpha: 1 }),
+  order: [1, 0],
 });
 chain.fit(X, targets);
 const predictions = chain.predict(testX);
 console.log(predictions);
 ```
 
+<AlgorithmComparison
+  title="RegressorChain"
+  pythonCode={String.raw`from sklearn.multioutput import RegressorChain
+from sklearn.linear_model import Ridge
+
+chain = RegressorChain(estimator=Ridge(alpha=1.0), order=[1, 0], random_state=42)
+chain.fit(X_train, Y_train)
+preds = chain.predict(X_test)`}
+  tsCode={String.raw`import { Linear, MultiOutput } from '@kanaries/ml';
+
+const chain = new MultiOutput.RegressorChain({
+  estimator: new Linear.RidgeRegression({ alpha: 1.0 }),
+  order: [1, 0],
+  randomState: 42,
+});
+chain.fit(XTrain, YTrain);
+const preds = chain.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-Options: `estimator`, `order?: number[] | 'random'`, `cv?: number | null`, and `randomState`. Methods: `fit(X, Y)`, `predict(X)`, and mean-output `score(X, Y)`. Learned `chainOrder` and `estimators` are available as defensive arrays. Ridge regression is a safe base choice when true earlier targets make augmented columns collinear.
+### `new MultiOutput.RegressorChain(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `RegressorBase` | *required* | Prototype single-output regressor cloned for each target in the chain. |
+| `order` | `number[] \| 'random'` | `[0, 1, ..., T-1]` | Order in which targets are predicted and appended as features. |
+| `cv` | `number \| null` | `null` | Integer fold count (`≥ 2`) for out-of-fold upstream training predictions. |
+| `randomState` | `number` | `undefined` | Seed for `'random'` chain order. |
+
+### Methods & properties
+
+- `fit(X, Y)` / `predict(X)` / `score(X, Y)` (mean R² across all outputs).
+- `chainOrder` and `estimators` expose defensive copies of the resolved order and fitted regressors.
+- **Related pages**: [ClassifierChain](/docs/apis/multioutput/classifierChain), [Ridge Regression](/docs/apis/linear/ridgeRegression), [Multi-Output Overview](/docs/apis/multioutput).

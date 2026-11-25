@@ -1,17 +1,19 @@
 ---
 title: CountVectorizer in JavaScript and TypeScript
-description: Tokenize browser or Node.js text into a memory-efficient CSR count matrix with the @kanaries/ml JavaScript CountVectorizer implementation.
+description: Tokenize raw text into sparse CSR bag-of-words and n-gram count matrices in JavaScript and TypeScript with FeatureExtraction.CountVectorizer from @kanaries/ml.
 ---
 
-# CountVectorizer in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-`CountVectorizer` learns a vocabulary from documents and represents each document by token or n-gram frequency. It is a strong baseline for text classification, search features, and document analytics.
+**CountVectorizer** converts a collection of raw text strings into a sparse document-term matrix of token and n-gram occurrence counts. It handles lowercasing, stop-word filtering, configurable n-gram windows (`ngramRange`), document-frequency pruning (`minDf`, `maxDf`), and vocabulary capping (`maxFeatures`).
+
+Bag-of-words count matrices are the required input for probabilistic count models such as [`Decomposition.LatentDirichletAllocation`](/docs/apis/decomposition/latentDirichletAllocation) and [`Bayes.MultinomialNB`](/docs/apis/bayes/multinomialNB), and serve as the foundation for [`TfidfTransformer`](/docs/apis/feature_extraction/tfidfTransformer).
 
 ## JavaScript implementation
 
-The `@kanaries/ml` implementation accepts `string[]` and returns `CSRMatrix`, avoiding a dense allocation when the vocabulary is large. The fitted vectorizer can run in a browser or Node.js and can be serialized with the standard model codec.
+`FeatureExtraction.CountVectorizer` runs in pure TypeScript across browsers and Node.js and returns a [`CSRMatrix`](/docs/apis/data) so large vocabularies never blow up heap memory. Fitted vocabularies serialize cleanly with `toJSON()` / [`loadModel()`](/docs/apis/serialization) and compose inside [`Pipeline`](/docs/apis/pipeline).
 
 ## Quick start example
 
@@ -24,31 +26,43 @@ const vectorizer = new FeatureExtraction.CountVectorizer({
   stopWords: ['the'],
 });
 const counts = vectorizer.fitTransform(['the red fox', 'the red bird']);
-console.log(vectorizer.getFeatureNamesOut());
-console.log(counts.toDense());
+console.log(vectorizer.getFeatureNamesOut(), counts.toDense());
 ```
 
-Python uses `CountVectorizer(ngram_range=(1, 2), stop_words=['the'])`; JavaScript uses camel-case option names and the same `fit`/`transform` workflow.
+<AlgorithmComparison
+  title="CountVectorizer"
+  pythonCode={String.raw`from sklearn.feature_extraction.text import CountVectorizer
+
+vec = CountVectorizer(ngram_range=(1, 2), stop_words=["the"], max_features=2000)
+X_counts = vec.fit_transform(documents)
+terms = vec.get_feature_names_out()`}
+  tsCode={String.raw`import { FeatureExtraction } from '@kanaries/ml';
+
+const vec = new FeatureExtraction.CountVectorizer({
+  ngramRange: [1, 2],
+  stopWords: ['the'],
+  maxFeatures: 2000,
+});
+const XCounts = vec.fitTransform(documents);
+const terms = vec.getFeatureNamesOut();`}
+/>
 
 ## Detailed API reference
 
-```ts
-new FeatureExtraction.CountVectorizer({
-  lowercase?: boolean;              // true
-  stopWords?: string[];             // []
-  ngramRange?: [number, number];     // [1, 1]
-  minDf?: number;                    // 1; values below 1 are proportions
-  maxDf?: number;                    // 1; values at or below 1 are proportions
-  maxFeatures?: number;
-  binary?: boolean;                  // false
-  vocabulary?: Record<string, number> | Map<string, number>;
-})
-```
+### `new FeatureExtraction.CountVectorizer(props?)`
 
-- `fit(documents: string[]): void` learns the vocabulary.
-- `transform(documents: string[]): CSRMatrix` produces sparse counts.
-- `fitTransform(documents: string[]): CSRMatrix` combines both operations.
-- `getFeatureNamesOut(): string[]` returns terms in column order.
-- `vocabulary` returns a defensive `ReadonlyMap` copy.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `lowercase` | `boolean` | `true` | Lowercase input strings before tokenization. |
+| `stopWords` | `string[]` | `[]` | Exact tokens excluded from the learned vocabulary. |
+| `ngramRange` | `[number, number]` | `[1, 1]` | Inclusive `[minN, maxN]` token n-gram range (for example `[1, 2]` for unigrams + bigrams). |
+| `minDf` / `maxDf` | `number` | `1` / `1` | Document-frequency bounds. Values `< 1` (`<= 1` for `maxDf`) act as proportions of total documents; integers `> 1` act as absolute document counts. |
+| `maxFeatures` | `number` | `undefined` | Retain only the top `maxFeatures` terms ordered by corpus frequency. |
+| `binary` | `boolean` | `false` | Store `1` for presence instead of raw counts (ideal for [`Bayes.BernoulliNB`](/docs/apis/bayes/bernoulliNB)). |
+| `vocabulary` | `Record<string, number> \| Map<string, number>` | `undefined` | Fixed pre-supplied term-to-index map bypassing vocabulary learning. |
 
-Because JavaScript has one numeric type, `maxDf: 1` follows the proportional/default interpretation; use an integer greater than one for an absolute document threshold.
+### Methods & properties
+
+- `fit(documents)` / `transform(documents)` / `fitTransform(documents)` — produce sparse `CSRMatrix` outputs.
+- `getFeatureNamesOut()` and `vocabulary` expose learned column names and a defensive `ReadonlyMap`.
+- **Related pages**: [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer), [Latent Dirichlet Allocation](/docs/apis/decomposition/latentDirichletAllocation), [CSRMatrix](/docs/apis/data).

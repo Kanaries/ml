@@ -1,39 +1,61 @@
 ---
 title: Algebra Utilities in JavaScript with @kanaries/ml
-description: Use lightweight linear algebra helpers from the @kanaries/ml Algebra JavaScript and TypeScript implementation in browser and Node.js applications.
+description: Run lightweight matrix transpose, determinants, Gaussian elimination, cofactors, and matrix inversion in JavaScript and TypeScript with @kanaries/ml Algebra.
 ---
 
-# Algebra Utilities in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
-## Algorithm overview
+## Module overview
 
-The Algebra module contains small matrix helpers used by the library and useful in application-level numeric code: transposition, Gaussian elimination, identity matrices, matrix augmentation, determinants, cofactors, and elementary matrix inverse.
+Many machine learning algorithms, custom feature transforms, and interactive math visualizations require a handful of fundamental matrix primitives—transposing feature tables, computing determinants, row-reducing linear systems, or inverting small covariance/design matrices—without pulling in a multi-megabyte linear algebra bundle or WebAssembly binary.
+
+The **`Algebra`** module exposes `@kanaries/ml`'s built-in pure-JavaScript dense matrix helpers operating directly on native `number[][]` 2D arrays.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exports these helpers under `Algebra`, so simple linear algebra operations can run in browser or Node.js without another dependency.
+Import matrix utilities from `import { Algebra } from '@kanaries/ml'` in both browser and Node.js applications. Every function is side-effect-safe for common downstream numeric code and returns plain JavaScript arrays (or `false` when an elimination or inverse encounters a singular matrix with no valid pivot).
 
 ## Quick start example
 
 ```ts
 import { Algebra } from '@kanaries/ml';
 
-const X = [[1, 2], [3, 4]];
-const XT = Algebra.transpose(X);
-const determinant = Algebra.det(X);
-const inverse = Algebra.Inverse.elementary(X);
+const A = [[1, 2], [3, 4]];
+const AT = Algebra.transpose(A);
+const determinant = Algebra.det(A);
+const inverse = Algebra.Inverse.elementary(A);
+console.log({ AT, determinant, inverse });
 ```
+
+<AlgorithmComparison
+  title="Matrix Transpose, Determinant & Inverse"
+  pythonCode={String.raw`import numpy as np
+
+A = np.array([[1.0, 2.0], [3.0, 4.0]])
+AT = A.T
+det = np.linalg.det(A)
+inv = np.linalg.inv(A)`}
+  tsCode={String.raw`import { Algebra } from '@kanaries/ml';
+
+const A = [[1, 2], [3, 4]];
+const AT = Algebra.transpose(A);
+const det = Algebra.det(A);
+const inv = Algebra.Inverse.elementary(A);`}
+/>
 
 ## Detailed API reference
 
-```ts
-Algebra.transpose(matrix: number[][]): number[][]
-Algebra.identityMatrix(A: number[][]): number[][]
-Algebra.augmentMatrix(matrix: number[][], expanded: number[][]): number[][]
-Algebra.gaussianElimination(A: number[][]): number[][] | false
-Algebra.cofactorMatrix(matrix: number[][], minorRowIndex: number, minorColIndex: number): number[][]
-Algebra.det(matrix: number[][]): number
-Algebra.Inverse.elementary(A: number[][]): number[][] | false
-```
+| Function | Signature | Description |
+| --- | --- | --- |
+| `Algebra.transpose` | `(matrix: number[][]) => number[][]` | Swaps rows and columns of a rectangular 2D matrix. |
+| `Algebra.identityMatrix` | `(A: number[][]) => number[][]` | Creates an identity matrix matching the dimensions of square matrix `A`. |
+| `Algebra.augmentMatrix` | `(matrix: number[][], expanded: number[][]) => number[][]` | Concatenates two matrices with matching row counts horizontally (`[A \| B]`). |
+| `Algebra.gaussianElimination` | `(A: number[][]) => number[][] \| false` | Reduces a matrix to row-echelon form; returns `false` if singular. |
+| `Algebra.cofactorMatrix` | `(matrix: number[][], minorRow: number, minorCol: number) => number[][]` | Returns the submatrix obtained by removing `minorRow` and `minorCol`. |
+| `Algebra.det` | `(matrix: number[][]) => number` | Computes the determinant of a non-empty square matrix. |
+| `Algebra.Inverse.elementary` | `(A: number[][]) => number[][] \| false` | Computes `A⁻¹` via Gauss-Jordan elimination on `[A \| I]`; returns `false` if non-invertible. |
 
-`det` requires a non-empty square matrix. Inverse and elimination helpers return `false` when the matrix cannot be reduced with the available pivot logic.
+### Usage notes
+
+- Always check `if (inv === false)` before using results from `gaussianElimination` or `Inverse.elementary` on user-supplied matrices that may be rank-deficient.
+- For large sparse feature matrices, use [`CSRMatrix`](/docs/apis/data); for descriptive statistics, see [`KMath`](/docs/apis/KMath).

@@ -1,17 +1,19 @@
 ---
 title: Preprocessing Utilities in JavaScript with @kanaries/ml
-description: Scale numeric columns and encode categories in JavaScript and TypeScript with @kanaries/ml Preprocessing utilities for browser and Node.js pipelines.
+description: Scale numeric columns, encode categories, impute missing values, and filter features in JavaScript and TypeScript with utils.Preprocessing from @kanaries/ml.
 ---
 
-# Preprocessing Utilities in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Preprocessing utilities convert raw arrays into model-ready features. They cover scaling, normalization, label and categorical encoding, binarization, missing-value imputation, variance filtering, and univariate feature selection.
+Raw tabular inputs rarely enter a machine learning estimator unchanged. Distance-based models ([K-Means](/docs/apis/clusters/kmeans), [k-NN](/docs/apis/neighbors/knn), [DBSCAN](/docs/apis/clusters/dbscan)) and regularized linear models ([Ridge](/docs/apis/linear/ridgeRegression), [Lasso](/docs/apis/linear/lassoRegression), [SVC](/docs/apis/svm/SVC)) degrade sharply when one column spans `[0, 100000]` while another sits in `[0, 1]`. Categorical strings must be encoded numerically, missing values must be imputed, and zero-variance columns should be removed before fitting.
+
+`utils.Preprocessing` provides scikit-learn-style fit/transform preprocessors that learn training statistics once and replay them identically on validation and production inputs—preventing train/test leakage when wrapped inside a [`Pipeline`](/docs/apis/pipeline) or [`ColumnTransformer`](/docs/apis/pipeline/column-transformer).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exports these helpers under `utils.Preprocessing`, so feature preparation can run in the same JavaScript or TypeScript runtime as model training and prediction.
+All scalers, normalizers, encoders, `SimpleImputer`, `VarianceThreshold`, and `SelectKBest` live under `import { utils } from '@kanaries/ml'` in pure TypeScript for browser and Node.js runtimes, and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -26,58 +28,38 @@ const encoded = encoder.fitTransform([
   ['red', 'S'],
   ['blue', 'M'],
 ]);
-console.log(encoded);
+console.log({ scaled, encoded });
 ```
+
+<AlgorithmComparison
+  title="StandardScaler & OneHotEncoder"
+  pythonCode={String.raw`from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+
+X_scaled = StandardScaler().fit_transform(X_train)
+X_ohe = OneHotEncoder(drop="if_binary").fit_transform(X_cat)
+X_imp = SimpleImputer(strategy="median").fit_transform(X_missing)`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const XScaled = new utils.Preprocessing.StandardScaler().fitTransform(XTrain);
+const XOhe = new utils.Preprocessing.OneHotEncoder({ drop: 'ifBinary' }).fitTransform(XCat);
+const XImp = new utils.Preprocessing.SimpleImputer({ strategy: 'median' }).fitTransform(XMissing);`}
+/>
 
 ## Detailed API reference
 
-### Scalers and normalizers
+### Scalers & normalizers
 
-```ts
-new utils.Preprocessing.StandardScaler({ withMean?: boolean; withStd?: boolean })
-new utils.Preprocessing.MinMaxScaler({ featureRange?: [number, number] })
-new utils.Preprocessing.MaxAbsScaler()
-new utils.Preprocessing.Normalizer({ norm?: 'l1' | 'l2' | 'max' })
-```
+| Class | Options | Methods |
+| --- | --- | --- |
+| `StandardScaler` | `{ withMean = true, withStd = true }` | `fit`, `transform`, `fitTransform`, `inverseTransform` |
+| `MinMaxScaler` | `{ featureRange = [0, 1] }` | `fit`, `transform`, `fitTransform`, `inverseTransform` |
+| `MaxAbsScaler` | none | `fit`, `transform`, `fitTransform`, `inverseTransform` |
+| `Normalizer` | `{ norm = 'l2' }` (`'l1' \| 'l2' \| 'max'`) | `fit` (no-op), `transform`, `fitTransform` |
 
-Scaler methods:
+### Encoders, imputation & filtering
 
-- `fit(X: number[][]): void`
-- `transform(X: number[][]): number[][]`
-- `fitTransform(X: number[][]): number[][]`
-- `inverseTransform(X: number[][]): number[][]` for `StandardScaler`, `MinMaxScaler`, and `MaxAbsScaler`
-
-`Normalizer` supports `fit`, `transform`, and `fitTransform`; `fit` is a no-op.
-
-### Encoders and binarizer
-
-```ts
-new utils.Preprocessing.LabelEncoder()
-new utils.Preprocessing.OrdinalEncoder()
-new utils.Preprocessing.OneHotEncoder({ drop?: 'none' | 'first' | 'ifBinary' })
-new utils.Preprocessing.Binarizer({ threshold?: number })
-```
-
-`LabelEncoder` works on numeric label arrays. `OrdinalEncoder` and `OneHotEncoder` accept categorical matrices containing `string`, `number`, `boolean`, or `null` values.
-
-### Imputation and feature selection
-
-```ts
-new utils.Preprocessing.SimpleImputer({
-  strategy?: 'mean' | 'median' | 'mostFrequent' | 'constant';
-  fillValue?: number;
-  missingValues?: number | null;
-})
-
-new utils.Preprocessing.VarianceThreshold({ threshold?: number })
-utils.Preprocessing.fRegression(X: number[][], y: number[]): number[]
-new utils.Preprocessing.SelectKBest({ k?: number; scoreFunc?: FeatureScoreFunc })
-```
-
-`SimpleImputer` supports `fit`, `transform`, and `fitTransform`. `VarianceThreshold` and `SelectKBest` remove features during `transform`.
-
-## JavaScript deployment notes
-
-- Fit preprocessing on training data only, then reuse the fitted transformer for inference.
-- Keep encoder category assumptions stable between browser sessions or Node.js jobs.
-- Use `fitTransform` for quick experiments, but keep explicit `fit` and `transform` calls in production pipelines.
+- **Encoders**: `LabelEncoder()` (numeric class labels), `OrdinalEncoder()`, `OneHotEncoder({ drop?: 'none' | 'first' | 'ifBinary' })`, and `Binarizer({ threshold?: number })`.
+- **Simple imputation**: `SimpleImputer({ strategy?: 'mean' | 'median' | 'mostFrequent' | 'constant', fillValue?, missingValues? })`. For correlated numeric columns, see [`Impute.IterativeImputer`](/docs/apis/impute/iterativeImputer).
+- **Filtering**: `VarianceThreshold({ threshold?: number })`, `fRegression(X, y)`, and `SelectKBest({ k?: number, scoreFunc? })`.
+- **Related pages**: [Advanced Preprocessing (Splines & TargetEncoder)](/docs/apis/utils/advancedPreprocessing), [ML Pipelines](/docs/apis/pipeline), [ColumnTransformer](/docs/apis/pipeline/column-transformer).

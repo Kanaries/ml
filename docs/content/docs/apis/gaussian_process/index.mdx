@@ -1,17 +1,41 @@
 ---
 title: Gaussian Processes in JavaScript and TypeScript
-description: Run Gaussian process regression with uncertainty estimates and Laplace GP classification in JavaScript and TypeScript using @kanaries/ml.
+description: Run Gaussian Process regression with uncertainty bands and Laplace GP classification in JavaScript and TypeScript using @kanaries/ml in browser and Node.js.
 ---
 
-# Gaussian processes in JavaScript
+## Module overview
 
-Suppose you have a few sensor readings taken at unevenly spaced positions. A Gaussian process can use the distance between measurements to estimate the reading at a new position and how uncertain that estimate is. For labeled observations, the same idea can estimate the probability of each operating state.
+Suppose you have a few dozen unevenly spaced sensor measurements, hyperparameter trial outcomes, or physical lab observations—and you need not only a smooth non-linear prediction at new coordinates, but also a principled **uncertainty estimate** telling you where the model is confident versus where you need more data.
 
-The `GaussianProcess` module in `@kanaries/ml` runs in the browser and Node.js. Both estimators use a radial basis function (RBF) kernel. Its length scale controls the distance over which observations influence each other. Start with features in comparable units, or choose a separate length scale for each feature.
+**Gaussian Processes (GPs)** place a non-parametric probability distribution directly over functions, governed by a covariance kernel (Radial Basis Function / RBF) whose length scale determines how quickly correlation decays with distance:
 
-| If you need | Use |
-| --- | --- |
-| A continuous estimate with a standard deviation for each prediction, or a covariance matrix for a set of predictions | [Gaussian process regression](/docs/apis/gaussian_process/regressor) |
-| Class labels and per-class probabilities | [Gaussian process classification](/docs/apis/gaussian_process/classifier) |
+- **[`GaussianProcess.GaussianProcessRegressor`](/docs/apis/gaussian_process/regressor)**: predicts continuous posterior means alongside per-point standard deviations (`predictStd`) or full predictive covariance matrices—ideal for confidence ribbons, Bayesian optimization, and active learning.
+- **[`GaussianProcess.GaussianProcessClassifier`](/docs/apis/gaussian_process/classifier)**: uses the Laplace approximation to predict calibrated binary and multiclass probabilities on smooth, small-sample classification tasks.
 
-Both estimators factor dense matrices with one row per training observation. Training memory grows quadratically with sample count, so these estimators are best suited to small datasets.
+## JavaScript implementation
+
+Both estimators live under `import { GaussianProcess } from '@kanaries/ml'` in pure TypeScript for browser and Node.js runtimes, support per-feature ARD length scales, compose inside [`Pipeline`](/docs/apis/pipeline), and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+| Task | Estimator | Key outputs |
+| --- | --- | --- |
+| Smooth regression with uncertainty bands or posterior covariance | [`GaussianProcessRegressor`](/docs/apis/gaussian_process/regressor) | `predict(X)`, `predictStd(X)`, `predictCov(X)`, `logMarginalLikelihood` |
+| Probabilistic non-linear classification on small datasets | [`GaussianProcessClassifier`](/docs/apis/gaussian_process/classifier) | `predict(X)`, `predictProba(X)` |
+
+## Quick start example
+
+```ts
+import { GaussianProcess } from '@kanaries/ml';
+
+const gpr = new GaussianProcess.GaussianProcessRegressor({
+  lengthScale: 1.0,
+  alpha: 1e-4,
+});
+gpr.fit([[0], [1], [2], [4]], [0, 0.84, 0.91, -0.76]);
+console.log({ mean: gpr.predict([[3]]), std: gpr.predictStd([[3]]) });
+```
+
+## Scaling & preprocessing guidance
+
+- **Dataset size**: Exact GPs factor a dense `n × n` Gram matrix (`O(n²)` memory, `O(n³)` Cholesky factorization), making them best suited for datasets of tens to several hundred rows in the browser. For larger regressions with uncertainty, compare against [`Linear.BayesianRidge`](/docs/apis/linear/bayesianRegressors).
+- **Feature scaling**: Standardize columns with [`StandardScaler`](/docs/apis/utils/preprocessing) unless you supply explicit per-feature length scales.
+- **Related pages**: [GaussianProcessRegressor](/docs/apis/gaussian_process/regressor), [GaussianProcessClassifier](/docs/apis/gaussian_process/classifier), [BayesianRidge](/docs/apis/linear/bayesianRegressors), [Kernel Methods](/docs/apis/kernel).

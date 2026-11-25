@@ -1,42 +1,76 @@
 ---
 title: TfidfVectorizer in JavaScript (Browser & Node)
-description: Build sparse TF-IDF text features with a scikit-learn-style JavaScript and TypeScript API using @kanaries/ml in browser or Node.js.
+description: Convert raw text into normalized sparse TF-IDF CSRMatrix features in JavaScript and TypeScript with FeatureExtraction.TfidfVectorizer from @kanaries/ml.
 ---
 
-# TfidfVectorizer in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-`TfidfVectorizer` combines vocabulary learning, count vectorization, inverse-document-frequency weighting, and row normalization. Use it for document classification, similarity, and lightweight semantic search baselines.
+**TfidfVectorizer** combines tokenization, vocabulary learning, term-frequency counting, inverse-document-frequency (IDF) weighting, and row normalization into a single transformer. Words that appear in nearly every document ("the", "system", "update") are down-weighted automatically, while rare discriminative terms receive higher weight—making TF-IDF the standard workhorse for lightweight text classification, document clustering, keyword extraction, and client-side semantic search baselines.
+
+Because TF-IDF vectors are mostly zeros, returning a sparse [`CSRMatrix`](/docs/apis/data) avoids allocating huge dense arrays in browser tabs and Node.js services.
 
 ## JavaScript implementation
 
-The `@kanaries/ml` implementation takes raw `string[]`, returns a `CSRMatrix`, works in `Pipeline`, and feeds sparse-aware `MultinomialNB` without converting the entire corpus to dense arrays.
+`FeatureExtraction.TfidfVectorizer` runs in pure TypeScript across browsers and Node.js. It accepts `string[]`, returns a `CSRMatrix`, plugs directly into [`Pipeline`](/docs/apis/pipeline) ahead of sparse-aware estimators (`MultinomialNB`, `ComplementNB`), and serializes its learned vocabulary and `idf` vector via `JSON.stringify()` and [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
 ```ts
 import { Bayes, FeatureExtraction, Pipeline } from '@kanaries/ml';
 
-const pipeline = new Pipeline({ steps: [
-  ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2] })],
-  ['nb', new Bayes.MultinomialNB()],
-] });
+const pipeline = new Pipeline({
+  steps: [
+    ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2] })],
+    ['nb', new Bayes.MultinomialNB()],
+  ],
+});
 pipeline.fit(['red apple sweet', 'blue sea deep'], [0, 1]);
 console.log(pipeline.predict(['deep blue ocean']));
 ```
 
-The equivalent Python workflow uses `Pipeline([('tfidf', TfidfVectorizer()), ('nb', MultinomialNB())])`.
+<AlgorithmComparison
+  title="TfidfVectorizer"
+  pythonCode={String.raw`from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+
+pipe = Pipeline([
+    ("tfidf", TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True)),
+    ("nb", MultinomialNB()),
+])
+pipe.fit(docs_train, y_train)
+preds = pipe.predict(docs_test)`}
+  tsCode={String.raw`import { Bayes, FeatureExtraction, Pipeline } from '@kanaries/ml';
+
+const pipe = new Pipeline({
+  steps: [
+    ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2], sublinearTf: true })],
+    ['nb', new Bayes.MultinomialNB()],
+  ],
+});
+pipe.fit(docsTrain, yTrain);
+const preds = pipe.predict(docsTest);`}
+/>
 
 ## Detailed API reference
 
-The constructor accepts every [CountVectorizer](countVectorizer) option plus every [TfidfTransformer](tfidfTransformer) option.
+### `new FeatureExtraction.TfidfVectorizer(props?)`
 
-- `fit(documents: string[]): void`
-- `transform(documents: string[]): CSRMatrix`
-- `fitTransform(documents: string[]): CSRMatrix`
-- `getFeatureNamesOut(): string[]`
-- `vocabulary: ReadonlyMap<string, number>`
-- `idf: number[]`
+Accepts every [`CountVectorizer`](/docs/apis/feature_extraction/countVectorizer) option (`lowercase`, `stopWords`, `ngramRange`, `minDf`, `maxDf`, `maxFeatures`, `binary`, `vocabulary`) plus every [`TfidfTransformer`](/docs/apis/feature_extraction/tfidfTransformer) option (`norm`, `useIdf`, `smoothIdf`, `sublinearTf`).
 
-Serialize a fitted instance with `JSON.stringify(vectorizer)` and restore it with the root `loadModel` export.
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(documents: string[]) => void` | Learns vocabulary and inverse-document-frequency weights. |
+| `transform` / `fitTransform` | `(documents: string[]) => CSRMatrix` | Transforms raw text into a sparse TF-IDF `CSRMatrix`. |
+| `getFeatureNamesOut` | `() => string[]` | Returns vocabulary terms in column index order. |
+| `vocabulary` / `idf` | `ReadonlyMap<string, number>` / `number[]` | Defensive copies of the term-to-column map and IDF weights. |
+
+### Tuning tips
+
+- Set `maxFeatures` (for example `5000`) and `minDf: 2` on large browser corpora to cap vocabulary width and keep serialized `toJSON()` payloads compact.
+- Enable `sublinearTf: true` (`1 + log(tf)`) when long documents repeat keywords heavily compared to short documents.
+- **Related pages**: [CountVectorizer](/docs/apis/feature_extraction/countVectorizer), [TfidfTransformer](/docs/apis/feature_extraction/tfidfTransformer), [CSRMatrix](/docs/apis/data), [ComplementNB](/docs/apis/bayes/complementNB).

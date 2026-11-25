@@ -1,23 +1,25 @@
 ---
 title: PLS Regression and CCA in JavaScript
-description: Model two related data blocks with PLSRegression and canonical correlation analysis in JavaScript or TypeScript.
+description: Model paired multivariate feature and target blocks in JavaScript and TypeScript with CrossDecomposition.PLSRegression and CCA from @kanaries/ml.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# PLS and CCA in JavaScript
 
 ## Algorithm overview
 
-Partial least squares finds latent directions that predict a target block, while canonical correlation analysis finds directions with high cross-block correlation. Both help with correlated, multivariate features.
+When a dataset has many strongly collinear predictors (`X`)—or even more columns than samples—and multiple correlated targets (`Y`), ordinary least squares becomes ill-conditioned while unsupervised [PCA](/docs/apis/decomposition/pca) can discard low-variance directions that actually predict `Y`. **Cross Decomposition** finds paired latent projections of both `X` and `Y` simultaneously:
+
+- **`PLSRegression` (Partial Least Squares)**: extracts latent components maximizing **covariance** between `X` scores and `Y` scores via mode-A NIPALS with regression deflation—a staple in chemometrics, spectroscopy, and wide multi-output tabular forecasting.
+- **`CCA` (Canonical Correlation Analysis)**: extracts latent projections maximizing **correlation** between `X` and `Y` via mode-B weights with canonical deflation—ideal for multi-view alignment (comparing two paired sensor arrays or behavioral feature blocks).
 
 ## JavaScript implementation
 
-`PLSRegression` uses mode-A NIPALS with regression deflation. `CCA` uses mode-B weights with canonical deflation.
+`CrossDecomposition.PLSRegression` and `CrossDecomposition.CCA` run in pure TypeScript across browsers and Node.js, support both `transform()` (latent score extraction) and `predict()` (multi-target prediction), compose inside [`Pipeline`](/docs/apis/pipeline), and serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive PLS regression playground
 
-Change the latent-component count and data distribution below. The visible first target and holdout metrics come from a live multi-output `CrossDecomposition.PLSRegression` fit.
+Adjust the number of latent components (`nComponents`) and dataset noise below. A live multi-output `CrossDecomposition.PLSRegression` fits in your browser and plots holdout accuracy and fitted curve updates immediately.
 
 <RegressionPlayground algorithm="pls" />
 
@@ -33,6 +35,33 @@ model.fit(X, Y);
 console.log(model.predict([[4, 6]]));
 ```
 
+<AlgorithmComparison
+  title="PLSRegression & CCA"
+  pythonCode={String.raw`from sklearn.cross_decomposition import PLSRegression, CCA
+
+pls = PLSRegression(n_components=2).fit(X_train, Y_train)
+Y_pred = pls.predict(X_test)
+
+cca = CCA(n_components=2).fit(X_view1, Y_view2)
+X_c, Y_c = cca.transform(X_view1, Y_view2)`}
+  tsCode={String.raw`import { CrossDecomposition } from '@kanaries/ml';
+
+const pls = new CrossDecomposition.PLSRegression({ nComponents: 2 });
+pls.fit(XTrain, YTrain);
+const YPred = pls.predict(XTest);
+
+const cca = new CrossDecomposition.CCA({ nComponents: 2 });
+cca.fit(XView1, YView2);
+const scores = cca.transform(XView1, YView2);`}
+/>
+
 ## Detailed API reference
 
-Both expose weights, loadings, rotations, iteration counts, `transform`, and `predict`.
+| Option | Default | Description |
+| --- | --- | --- |
+| `nComponents` | `2` | Number of latent cross-decomposition components (at most `min(nSamples, nFeaturesX, nFeaturesY)`). |
+| `scale` | `true` | Standardize `X` and `Y` internally before NIPALS iterations. |
+| `maxIter` / `tol` | `500` / `1e-6` | NIPALS iteration cap and convergence tolerance. |
+
+Both estimators expose `fit(X, Y)`, `transform(X, Y?)`, `predict(X)`, plus fitted `xWeights`, `yWeights`, `xLoadings`, `yLoadings`, `xRotations`, `yRotations`, `coef`, and `nIter`.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [Ridge Regression](/docs/apis/linear/ridgeRegression), [RegressorChain](/docs/apis/multioutput/regressorChain).

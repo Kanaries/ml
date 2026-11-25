@@ -1,17 +1,21 @@
 ---
 title: Spline, Target & Multi-Label Encoders in JS
-description: Build spline bases, leakage-safe target encodings, and multi-label indicator matrices in JavaScript or TypeScript with @kanaries/ml.
+description: Build B-spline bases, cross-fitted TargetEncoder features, and MultiLabelBinarizer matrices in JavaScript and TypeScript with @kanaries/ml.
 ---
 
-# Advanced Preprocessing in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Spline features capture smooth nonlinear relationships, target encoding converts high-cardinality categories into compact numeric features, and multi-label binarization turns sets of labels into indicator matrices. These transformations are useful when ordinary scaling or one-hot encoding does not fit the data shape.
+Standard scaling and one-hot encoding break down on three common tabular feature patterns:
+
+- **Smooth nonlinear numeric curves**: [`SplineTransformer`](#splinetransformer) expands each numeric column into piecewise-polynomial **B-spline basis functions**, letting linear models ([Ridge](/docs/apis/linear/ridgeRegression), [LogisticRegression](/docs/apis/linear/logisticRegression)) capture flexible smooth curves without the wild boundary oscillations of high-degree global polynomials.
+- **High-cardinality categoricals** (postal codes, product SKUs, user segments): one-hot encoding explodes feature width, whereas [`TargetEncoder`](#targetencoder) replaces each category with a smoothed empirical target mean—using **internal cross-fitting** during `fitTransform()` to prevent target leakage.
+- **Multi-label tag arrays** (`['search', 'ml']`): [`MultiLabelBinarizer`](#multilabelbinarizer) converts variable-length label sets into fixed binary indicator matrices (`number[][]` or sparse [`CSRMatrix`](/docs/apis/data)).
 
 ## JavaScript implementation
 
-`@kanaries/ml` runs all three transformations locally in browser or Node.js. `SplineTransformer` creates a B-spline basis per numeric feature. `TargetEncoder.fitTransform` uses cross-fitting to keep a row's own target out of its encoding. `MultiLabelBinarizer` can return a dense matrix or the library's serializable CSR representation.
+`@kanaries/ml` exports `utils.SplineTransformer`, `utils.TargetEncoder`, and `utils.MultiLabelBinarizer` in pure TypeScript for browser and Node.js pipelines. All three integrate seamlessly with [`Pipeline`](/docs/apis/pipeline) and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start
 
@@ -32,10 +36,31 @@ const indicators = labels.fitTransform([['search', 'ml'], ['charts'], []]);
 console.log({ curved, encoded, indicators });
 ```
 
+<AlgorithmComparison
+  title="SplineTransformer, TargetEncoder & MultiLabelBinarizer"
+  pythonCode={String.raw`from sklearn.preprocessing import SplineTransformer, TargetEncoder, MultiLabelBinarizer
+
+X_spline = SplineTransformer(n_knots=4, degree=3).fit_transform(X_num)
+X_target = TargetEncoder(smooth="auto", cv=3).fit_transform(X_cat, y)
+Y_multi = MultiLabelBinarizer().fit_transform([["search", "ml"], ["charts"], []])`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const XSpline = new utils.SplineTransformer({ nKnots: 4, degree: 3 }).fitTransform(XNum);
+const XTarget = new utils.TargetEncoder({ smooth: 2, cv: 3 }).fitTransform(XCat, y);
+const YMulti = new utils.MultiLabelBinarizer().fitTransform([['search', 'ml'], ['charts'], []]);`}
+/>
+
 ## Detailed API reference
 
-`SplineTransformer` accepts `nKnots`, `degree`, `knots` (`uniform`, `quantile`, or explicit per-feature knots), `extrapolation`, and `includeBias`.
+### `SplineTransformer`
 
-`TargetEncoder` accepts `categories`, `targetType` (`auto`, `continuous`, or `binary`), `smooth`, `cv`, `shuffle`, and `randomState`. Unknown categories map to the global target mean.
+Accepts `nKnots`, `degree`, `knots` (`'uniform'`, `'quantile'`, or explicit per-feature knot arrays), `extrapolation`, and `includeBias`.
 
-`MultiLabelBinarizer` accepts optional ordered `classes` and `sparseOutput`. It exposes `fit`, `transform`, `fitTransform`, `inverseTransform`, and fitted `classes`.
+### `TargetEncoder`
+
+Accepts `categories`, `targetType` (`'auto'`, `'continuous'`, or `'binary'`), `smooth`, `cv`, `shuffle`, and `randomState`. During `fitTransform(X, y)`, out-of-fold cross-fitting keeps each sample's own target out of its encoded value; during `transform(XTest)`, unseen categories safely fall back to the global training target mean.
+
+### `MultiLabelBinarizer`
+
+Accepts optional ordered `classes` and `sparseOutput: boolean`. Exposes `fit`, `transform`, `fitTransform`, `inverseTransform`, and fitted `classes`.
+- **Related pages**: [Preprocessing Utilities](/docs/apis/utils/preprocessing), [ClassifierChain](/docs/apis/multioutput/classifierChain), [Polynomial Regression](/docs/apis/linear/polynomialRegression).

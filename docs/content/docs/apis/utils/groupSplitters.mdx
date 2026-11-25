@@ -1,17 +1,22 @@
 ---
 title: Group Cross-Validation Splitters in JavaScript
-description: Prevent entity leakage with GroupShuffleSplit and StratifiedGroupKFold JavaScript implementations from @kanaries/ml in browser or Node.js.
+description: Prevent entity leakage in cross-validation with GroupShuffleSplit and StratifiedGroupKFold in JavaScript and TypeScript using @kanaries/ml.
 ---
 
-# Group-Aware Cross-Validation in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Random sample splits leak information when multiple rows belong to the same user, patient, session, or device. Group-aware splitters keep each group entirely on one side of a fold; stratified group folds additionally balance class proportions.
+Standard random K-Fold and train/test splits silently leak information whenever multiple observations belong to the same underlying **group**—such as repeated medical measurements from the same patient, multiple clicks from the same user session, or telemetry rows from the same IoT device. When rows from the same entity appear in both train and validation folds, a model can memorize entity idiosyncrasies and report artificially inflated accuracy that collapses on unseen users in production.
+
+**Group-aware cross-validation splitters** enforce a strict invariant: every row sharing a `group` identifier is placed together on only one side of each train/test split:
+
+- **`GroupShuffleSplit`**: generates `nSplits` random group-level train/test partitions where fractional `testSize`/`trainSize` refers to the fraction of **unique groups**, not rows.
+- **`StratifiedGroupKFold`**: partitions groups into `nSplits` non-overlapping folds while greedily balancing **class label proportions** across folds—essential for imbalanced classification with grouped entities.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes both splitters through `utils.ModelSelection`, so browser experiments and Node.js evaluation jobs can use leakage-resistant indices within the same JS workflow.
+`@kanaries/ml` provides both splitters under `utils.ModelSelection` in pure TypeScript for browser and Node.js evaluation pipelines, supporting string or numeric group identifiers and deterministic `randomState` seeds.
 
 ## Quick start example
 
@@ -21,22 +26,46 @@ import { utils } from '@kanaries/ml';
 const X = [[0], [1], [2], [3], [4], [5]];
 const y = [0, 0, 1, 1, 0, 1];
 const patientIds = ['a', 'a', 'b', 'b', 'c', 'c'];
+
 const folds = new utils.ModelSelection.StratifiedGroupKFold({
-  nSplits: 3, shuffle: true, randomState: 42,
+  nSplits: 3,
+  shuffle: true,
+  randomState: 42,
 }).split(X, y, patientIds);
 console.log(folds);
 ```
 
+<AlgorithmComparison
+  title="StratifiedGroupKFold & GroupShuffleSplit"
+  pythonCode={String.raw`from sklearn.model_selection import StratifiedGroupKFold, GroupShuffleSplit
+
+sgkf = StratifiedGroupKFold(n_splits=3, shuffle=True, random_state=42)
+folds = list(sgkf.split(X, y, groups=patient_ids))
+
+gss = GroupShuffleSplit(n_splits=5, test_size=0.2, random_state=42)
+splits = list(gss.split(X, y, groups=patient_ids))`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const sgkf = new utils.ModelSelection.StratifiedGroupKFold({
+  nSplits: 3,
+  shuffle: true,
+  randomState: 42,
+});
+const folds = sgkf.split(X, y, patientIds);
+
+const gss = new utils.ModelSelection.GroupShuffleSplit({
+  nSplits: 5,
+  testSize: 0.2,
+  randomState: 42,
+});
+const splits = gss.split(X, y, patientIds);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new utils.ModelSelection.GroupShuffleSplit({
-  nSplits?: number; testSize?: number; trainSize?: number; randomState?: number;
-})
+| Class | Options | `split()` return value |
+| --- | --- | --- |
+| `GroupShuffleSplit` | `{ nSplits = 5, testSize?, trainSize?, randomState? }` | `FoldIndices[]` (`{ trainIndices, testIndices }`) |
+| `StratifiedGroupKFold` | `{ nSplits = 5, shuffle = false, randomState? }` | `FoldIndices[]` (`y` and `groups` required) |
 
-new utils.ModelSelection.StratifiedGroupKFold({
-  nSplits?: number; shuffle?: boolean; randomState?: number;
-})
-```
-
-Both expose `split(X, y?, groups): FoldIndices[]`. `GroupShuffleSplit` samples unique groups and interprets fractional sizes against the group count, not the row count. `StratifiedGroupKFold` requires `y` and greedily balances per-class proportions while never splitting a group.
+- **Related pages**: [Model Selection & Grid Search](/docs/apis/utils/modelSelection), [Sampling Utilities](/docs/apis/utils/sampling), [ML Pipelines](/docs/apis/pipeline).

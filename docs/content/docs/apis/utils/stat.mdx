@@ -1,17 +1,21 @@
 ---
 title: Statistical Utilities in JavaScript with @kanaries/ml
-description: Compute simple statistics with the @kanaries/ml Stat JavaScript and TypeScript utilities for browser and Node.js machine learning helpers.
+description: Compute mode, mean, probability normalization, Shannon entropy, and Gini impurity in JavaScript and TypeScript with utils.Stat from @kanaries/ml.
 ---
 
-# Statistical Utilities in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-The Stat utilities provide small helpers used by models and examples: mode, mean, probability conversion, entropy, and Gini impurity.
+Decision trees, split-quality diagnostics, and exploratory data checks all rely on a core set of fast summary and impurity functions:
+
+- **Central tendency (`mode`, `mean`)**: compute the most frequent discrete value or arithmetic mean of a numeric vector.
+- **Distribution conversion (`freqs2Probs`)**: normalize non-negative frequency counts into a probability distribution summing to `1`.
+- **Node impurity (`entropy`, `gini`)**: quantify class uncertainty inside a group of counts—Shannon entropy (`-Σ p log₂ p`) and Gini impurity (`1 - Σ p²`) are the exact split criteria used inside [`Tree.DecisionTreeClassifier`](/docs/apis/tree/decisionTreeClassifier).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes these functions under `utils.Stat`, so lightweight statistics can stay in the same JavaScript runtime as preprocessing, training, and inference.
+`@kanaries/ml` exposes these zero-dependency helpers under `utils.Stat` for both browser and Node.js codebases, so custom tree diagnostics, interactive educational demos, and data-profiling panels can share the same tested math routines used internally by the library.
 
 ## Quick start example
 
@@ -20,18 +24,38 @@ import { utils } from '@kanaries/ml';
 
 const majority = utils.Stat.mode([1, 1, 2, 3]);
 const avg = utils.Stat.mean([1, 2, 3]);
+const probs = utils.Stat.freqs2Probs([2, 2, 4]);
 const entropy = utils.Stat.entropy([2, 2, 4]);
-console.log(entropy);
+const gini = utils.Stat.gini([2, 2, 4]);
+console.log({ majority, avg, probs, entropy, gini });
 ```
+
+<AlgorithmComparison
+  title="Entropy & Gini Impurity"
+  pythonCode={String.raw`import numpy as np
+from scipy.stats import entropy
+
+counts = np.array([2, 2, 4], dtype=float)
+probs = counts / counts.sum()
+h = entropy(probs, base=2)
+gini = 1.0 - np.sum(probs ** 2)`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const counts = [2, 2, 4];
+const probs = utils.Stat.freqs2Probs(counts);
+const h = utils.Stat.entropy(counts);
+const gini = utils.Stat.gini(counts);`}
+/>
 
 ## Detailed API reference
 
-```ts
-utils.Stat.mode(data: number[]): number
-utils.Stat.mean(data: number[]): number
-utils.Stat.freqs2Probs(freqs: number[]): number[]
-utils.Stat.entropy(data: number[]): number
-utils.Stat.gini(data: number[]): number
-```
+| Function | Signature | Description |
+| --- | --- | --- |
+| `utils.Stat.mode` | `(data: number[]) => number` | Returns the most frequent numeric value in `data`. |
+| `utils.Stat.mean` | `(data: number[]) => number` | Returns the arithmetic mean of `data`. |
+| `utils.Stat.freqs2Probs` | `(freqs: number[]) => number[]` | Normalizes a count vector by its sum into probabilities in `[0, 1]`. |
+| `utils.Stat.entropy` | `(data: number[]) => number` | Converts frequency counts to probabilities and returns Shannon entropy. |
+| `utils.Stat.gini` | `(data: number[]) => number` | Converts frequency counts to probabilities and returns Gini impurity `1 - Σ pᵢ²`. |
 
-`entropy` and `gini` treat the input array as frequencies and convert it to probabilities internally.
+- **Need variance, standard deviation, covariance, or quantiles?** See [`KMath`](/docs/apis/KMath) and [`Metrics`](/docs/apis/metrics).
+- **Related pages**: [KMath Descriptive Statistics](/docs/apis/KMath), [DecisionTreeClassifier](/docs/apis/tree/decisionTreeClassifier), [Decision Tree Playground](/playground/decision-tree).

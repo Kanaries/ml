@@ -1,17 +1,21 @@
 ---
 title: SelectFromModel, RFE, and RFECV in JavaScript
-description: Run model-based and recursive feature selection in JavaScript or TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml.
+description: Run model-based and recursive feature selection in JavaScript and TypeScript with SelectFromModel, RFE, and RFECV from @kanaries/ml for browser and Node.js.
 ---
 
-# Model-based feature selection in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-`SelectFromModel` keeps features above an importance threshold. `RFE` repeatedly removes the least important features. `RFECV` evaluates RFE feature counts with cross-validation and chooses the best count. All three require an estimator that exposes `featureImportances` or `coef`.
+Unlike univariate filters that inspect one feature in isolation, **model-based and recursive feature selectors** evaluate features jointly using a supervised estimator's learned `featureImportances` or linear `coef` weights:
+
+- **`SelectFromModel`**: fits the estimator once and retains all features whose importance meets or exceeds `threshold` (a fixed cutoff, `'mean'`, `'median'`, or scaled expression like `'1.25*median'`). Fast and ideal inside a [`Pipeline`](/docs/apis/pipeline).
+- **`RFE` (Recursive Feature Elimination)**: fits the estimator, drops the weakest `step` features, and repeats until exactly `nFeaturesToSelect` remain—capturing interactions that change once redundant features are pruned.
+- **`RFECV`**: runs cross-validated RFE across candidate subset sizes (`minFeaturesToSelect..nFeatures`) and automatically keeps the subset count maximizing CV score.
 
 ## JavaScript implementation
 
-The `FeatureSelection` namespace brings these sklearn-style meta-estimators to browser and Node.js workflows. Each selector clones its estimator, so the supplied prototype remains unfitted.
+`FeatureSelection.SelectFromModel`, `FeatureSelection.RFE`, and `FeatureSelection.RFECV` run in pure TypeScript across browsers and Node.js. Each selector clones its prototype `estimator` safely without mutating it, supports `transform()` for seamless [`Pipeline`](/docs/apis/pipeline) integration, and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -28,8 +32,36 @@ selector.fit(X, y);
 console.log(selector.getSupport(true), selector.transform(X));
 ```
 
+<AlgorithmComparison
+  title="SelectFromModel, RFE & RFECV"
+  pythonCode={String.raw`from sklearn.feature_selection import SelectFromModel, RFE, RFECV
+from sklearn.tree import DecisionTreeClassifier
+
+sfm = SelectFromModel(DecisionTreeClassifier(random_state=42), threshold="median").fit(X, y)
+rfe = RFE(DecisionTreeClassifier(random_state=42), n_features_to_select=2).fit(X, y)
+rfecv = RFECV(DecisionTreeClassifier(random_state=42), cv=3).fit(X, y)`}
+  tsCode={String.raw`import { FeatureSelection, Tree } from '@kanaries/ml';
+
+const sfm = new FeatureSelection.SelectFromModel({
+  estimator: new Tree.DecisionTreeClassifier({ randomState: 42 }),
+  threshold: 'median',
+});
+sfm.fit(X, y);
+
+const rfe = new FeatureSelection.RFE({
+  estimator: new Tree.DecisionTreeClassifier({ randomState: 42 }),
+  nFeaturesToSelect: 2,
+});
+rfe.fit(X, y);`}
+/>
+
 ## Detailed API reference
 
-- `SelectFromModel({ estimator, threshold?, maxFeatures? })`: threshold accepts a number, `mean`, `median`, `k*mean`, or `k*median`. Exposes `fit`, `transform`, `getSupport`, and `fittedEstimator`.
-- `RFE({ estimator, nFeaturesToSelect?, step? })`: counts may be integers or fractions. Exposes `fit`, `transform`, `predict`, `score`, `getSupport`, and `ranking`.
-- `RFECV({ estimator, minFeaturesToSelect?, step?, cv?, scoring? })`: classifier defaults use stratified folds. It additionally exposes `gridScores` and `cvResults` with `nFeatures` and `meanTestScore`.
+| Class | Options | Key methods & properties |
+| --- | --- | --- |
+| `SelectFromModel` | `estimator`, `threshold?` (number, `'mean'`, `'median'`, `'k*mean'`, `'k*median'`), `maxFeatures?` | `fit`, `transform`, `getSupport(indices?)`, `fittedEstimator` |
+| `RFE` | `estimator`, `nFeaturesToSelect?` (int or fraction), `step?` (int or fraction) | `fit`, `transform`, `predict`, `score`, `getSupport(indices?)`, `ranking` |
+| `RFECV` | `estimator`, `minFeaturesToSelect?`, `step?`, `cv?`, `scoring?` | Same as `RFE`, plus `gridScores` and `cvResults` (`nFeatures`, `meanTestScore`) |
+
+- **Tip**: Use [`Linear.LassoRegression`](/docs/apis/linear/lassoRegression), [`Linear.RidgeRegression`](/docs/apis/linear/ridgeRegression), [`Tree.DecisionTreeClassifier`](/docs/apis/tree/decisionTreeClassifier), or [`Ensemble.ExtraTreesClassifier`](/docs/apis/ensemble/extraTreesClassifier) as base estimators since all declare `coef` or `featureImportances`.
+- **Related pages**: [Univariate Feature Selection](/docs/apis/feature_selection/univariate), [Feature Selection Overview](/docs/apis/feature_selection), [ML Pipelines](/docs/apis/pipeline).

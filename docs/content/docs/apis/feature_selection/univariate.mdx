@@ -1,17 +1,26 @@
 ---
 title: Univariate Feature Selection in JavaScript
-description: Rank classification and regression features with chi-square, ANOVA F, and k-nearest-neighbor mutual information JavaScript functions from @kanaries/ml.
+description: Rank features with chi2, ANOVA F (fClassif), and k-NN mutual information in JavaScript and TypeScript using FeatureSelection from @kanaries/ml.
 ---
 
-# Univariate feature scores in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Univariate scores examine one feature at a time. Chi-square is suited to non-negative count features, ANOVA F measures class separation, and mutual information detects more general nonlinear dependence using discrete counts or k-nearest-neighbor entropy estimates.
+**Univariate feature scoring** evaluates each feature column independently against the target vector `y` without training a full predictive model. Because every column is scored in isolation, univariate tests run in milliseconds and make an ideal first-pass diagnostic for spotting strong signals, zero-variance columns, and non-linear relationships before building pipelines.
+
+Choose the right statistical test for your feature and target types:
+
+| Function | Target type | Feature type | Detects |
+| --- | --- | --- | --- |
+| `chi2(X, y)` | Classification | Non-negative counts / frequencies | Dependence between counts and class labels |
+| `fClassif(X, y)` | Classification | Continuous numeric | Linear mean differences across classes (ANOVA F) |
+| `mutualInfoClassif(X, y)` | Classification | Discrete or continuous | Arbitrary linear & non-linear statistical dependence |
+| `mutualInfoRegression(X, y)` | Regression | Discrete or continuous | Arbitrary non-linear dependence with numeric `y` |
 
 ## JavaScript implementation
 
-`@kanaries/ml` makes these score functions available in browser and Node.js code through `FeatureSelection`, including seeded jitter for repeated continuous values.
+`@kanaries/ml` provides all four scikit-learn-compatible functions under `import { FeatureSelection } from '@kanaries/ml'` in pure TypeScript for browser and Node.js apps. Mutual-information estimators implement Ross / Kraskov k-nearest-neighbor entropy estimation with optional seeded jitter (`randomState`) to break ties reproducibly on repeated continuous values.
 
 ## Quick start example
 
@@ -25,8 +34,26 @@ const information = FeatureSelection.mutualInfoClassif(X, y, { randomState: 42 }
 console.log({ fScores, pValues, information });
 ```
 
+<AlgorithmComparison
+  title="Univariate Feature Scores (chi2, fClassif, mutualInfo)"
+  pythonCode={String.raw`from sklearn.feature_selection import chi2, f_classif, mutual_info_classif, mutual_info_regression
+
+f_scores, p_vals = f_classif(X, y)
+mi_cls = mutual_info_classif(X, y, n_neighbors=3, random_state=42)
+mi_reg = mutual_info_regression(X, y_num, n_neighbors=3, random_state=42)`}
+  tsCode={String.raw`import { FeatureSelection } from '@kanaries/ml';
+
+const [fScores, pVals] = FeatureSelection.fClassif(X, y);
+const miCls = FeatureSelection.mutualInfoClassif(X, y, { nNeighbors: 3, randomState: 42 });
+const miReg = FeatureSelection.mutualInfoRegression(X, yNum, { nNeighbors: 3, randomState: 42 });`}
+/>
+
 ## Detailed API reference
 
-- `chi2(X, y)` and `fClassif(X, y)` return `[scores, pValues]`.
-- `mutualInfoClassif(X, y, options?)` and `mutualInfoRegression(X, y, options?)` return one non-negative score per feature.
-- Mutual-information options are `discreteFeatures?: boolean | boolean[]`, `nNeighbors?: number` (default `3`), and `randomState?: number`.
+- **`FeatureSelection.chi2(X, y)`** → `[scores: number[], pValues: number[]]` — requires strictly non-negative features (`X[i][j] >= 0`).
+- **`FeatureSelection.fClassif(X, y)`** → `[scores: number[], pValues: number[]]` — computes one-way ANOVA F-statistics and exact p-values per column.
+- **`FeatureSelection.mutualInfoClassif(X, y, options?)`** / **`mutualInfoRegression(X, y, options?)`** → `number[]` (non-negative nats per feature).
+  - `discreteFeatures?: boolean | boolean[]` (default `false`) — treat all or specific columns as discrete counts.
+  - `nNeighbors?: number` (default `3`) — k-NN neighborhood size controlling bias/variance of entropy estimation.
+  - `randomState?: number` — seed for deterministic tie-breaking noise on continuous features.
+- **Related pages**: [SelectFromModel, RFE & RFECV](/docs/apis/feature_selection/selectors), [Feature Selection Overview](/docs/apis/feature_selection), [ML Pipelines](/docs/apis/pipeline).

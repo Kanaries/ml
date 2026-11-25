@@ -1,17 +1,20 @@
 ---
 title: Permutation Importance & PDP in JavaScript
-description: Explain JavaScript and TypeScript machine-learning models with permutation importance and partial dependence in browser or Node.js using @kanaries/ml.
+description: Explain any trained JS/TS model with model-agnostic permutationImportance and partialDependence (PDP) plots using @kanaries/ml in browser and Node.js.
 ---
 
-# Model Inspection in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Permutation importance measures how much a fitted model's score degrades when one feature is shuffled. Partial dependence averages predictions while forcing one or two features across a grid. Together they help identify influential inputs and visualize broad model response patterns.
+Accuracy metrics tell you *how well* a model performs, but product teams, auditors, and analysts need to know *why* it predicts what it does. **Model-agnostic inspection** works identically across linear models, trees, ensembles, SVMs, k-NN, and full [`Pipeline`](/docs/apis/pipeline) objects without relying on estimator internals:
+
+- **`permutationImportance`**: measures how much a fitted model's validation score drops when a single feature column is randomly shuffled across rows (repeated `nRepeats` times for mean and standard deviation). Unlike tree impurity importance—which biases toward high-cardinality numeric columns and evaluates training data—permutation importance runs cleanly on **held-out test sets**.
+- **`partialDependence` (PDP)**: evaluates how average predictions change as one feature (1D curve) or two features (2D surface) sweep across a quantile grid while keeping all other columns at their observed values.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes model-agnostic inspection functions that work with fitted estimators in browser and Node.js. They do not depend on tree internals or linear coefficients, so the same workflow works across compatible models.
+`@kanaries/ml` exposes `utils.permutationImportance` and `utils.partialDependence` in pure TypeScript for browser dashboards and Node.js analytics jobs—making it straightforward to render live feature-importance bar charts and PDP response curves alongside client-side models.
 
 ## Quick start
 
@@ -28,13 +31,30 @@ const importance = utils.permutationImportance(model, X, y, {
   randomState: 42,
 });
 const dependence = utils.partialDependence(model, X, [0], {
-  gridResolution: 50,
+  gridResolution: 20,
 });
-console.log({ importance, dependence });
+console.log({ importancesMean: importance.importancesMean, gridLen: dependence.gridValues[0].length });
 ```
+
+<AlgorithmComparison
+  title="permutationImportance & partialDependence"
+  pythonCode={String.raw`from sklearn.inspection import permutation_importance, partial_dependence
+
+imp = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42)
+pdp = partial_dependence(model, X_test, features=[0], grid_resolution=50)`}
+  tsCode={String.raw`import { utils } from '@kanaries/ml';
+
+const imp = utils.permutationImportance(model, XTest, yTest, {
+  nRepeats: 10,
+  randomState: 42,
+});
+const pdp = utils.partialDependence(model, XTest, [0], {
+  gridResolution: 50,
+});`}
+/>
 
 ## Detailed API reference
 
-`permutationImportance(estimator, X, y, { nRepeats?, randomState?, scoring? })` returns `importances`, `importancesMean`, and `importancesStd` by feature.
-
-`partialDependence(estimator, X, features, { gridResolution?, percentiles? })` supports one or two numeric feature indices and returns `gridValues` plus averaged predictions shaped by the requested grid.
+- **`utils.permutationImportance(estimator, X, y, { nRepeats = 5, randomState?, scoring? })`** — returns `{ importances: number[][], importancesMean: number[], importancesStd: number[] }`. Always pass a held-out validation/test set to measure true generalization importance.
+- **`utils.partialDependence(estimator, X, features, { gridResolution = 100, percentiles = [0.05, 0.95] })`** — accepts 1 or 2 column indices (`[col]` or `[colA, colB]`) and returns `gridValues` and averaged predictions matching the grid shape.
+- **Related pages**: [Feature Selection](/docs/apis/feature_selection), [Evaluation Metrics](/docs/apis/metrics), [ML Pipelines](/docs/apis/pipeline).
