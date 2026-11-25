@@ -31,9 +31,9 @@ function runBrowser(fn: Function, args: any[]): Promise<any> {
     });
 }
 
-function runNode(fn: Function, args: any[]): Promise<any> {
+async function runNode(fn: Function, args: any[]): Promise<any> {
+    const { Worker } = await import('worker_threads');
     return new Promise((resolve, reject) => {
-        const { Worker } = require('worker_threads');
         const worker = new Worker(
             `const { parentPort } = require('worker_threads');\nparentPort.on('message', (data) => {\n  const fn = eval('(' + data.fnStr + ')');\n  Promise.resolve(fn.apply(null, data.args)).then(r => {\n    parentPort.postMessage({ result: r });\n  }).catch(err => {\n    parentPort.postMessage({ error: err.message });\n  });\n});`,
             { eval: true }

@@ -19,6 +19,7 @@
   "scripts": {
     "gen-data": "node scripts/run_gen_data.js",
     "test": "jest",
+    "test:package": "yarn build && node scripts/test-package.mjs",
     "test:regen-data": "npm run gen-data",
     "build": "vite build && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
