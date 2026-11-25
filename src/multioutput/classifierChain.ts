@@ -26,15 +26,24 @@ export class ClassifierChain extends BaseEstimator {
         return this.order.slice();
     }
     public fit(X: number[][], Y: number[][]): void {
-        validateMultiOutputTargets(X, Y, 'ClassifierChain'); this.orderState = this.resolveOrder(Y[0].length); this.estimatorsState = [];
-        if (Y.some(row => row.some(value => value !== 0 && value !== 1))) throw new Error('ClassifierChain requires a binary indicator target matrix');
+        validateMultiOutputTargets(X, Y, 'ClassifierChain');
+        const order = this.resolveOrder(Y[0].length);
+        if (Y.some(row => row.some(value => value !== 0 && value !== 1))) {
+            throw new Error('ClassifierChain requires a binary indicator target matrix');
+        }
+        const estimators: SingleOutputEstimator[] = [];
         let augmented = X.map(row => row.slice());
-        for (const output of this.orderState) {
+        for (const output of order) {
             const target = Y.map(row => row[output]);
-            const member = this.estimator.clone() as SingleOutputEstimator; member.fit(augmented, target); this.estimatorsState.push(member);
-            const extension = this.cv === null ? target : crossValPredict(() => this.estimator.clone() as SingleOutputEstimator, augmented, target, { cv: this.cv });
+            const member = this.estimator.clone() as SingleOutputEstimator;
+            member.fit(augmented, target);
+            estimators.push(member);
+            const extension = this.cv === null ? target : crossValPredict(
+                () => this.estimator.clone() as SingleOutputEstimator, augmented, target, { cv: this.cv });
             augmented = augmented.map((row, i) => [...row, extension[i]]);
         }
+        this.orderState = order;
+        this.estimatorsState = estimators;
     }
     public predict(X: number[][]): number[][] {
         if (this.estimatorsState.length === 0) throw new Error('ClassifierChain is not fitted');
