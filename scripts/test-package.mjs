@@ -45,6 +45,10 @@ add('2', 3);
     execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--noEmit', '--strict',
         '--skipLibCheck', '--module', 'NodeNext', 'consumer.mts'], { cwd: consumer, stdio: 'inherit' });
     console.log('Packed ESM, CommonJS, and TypeScript consumers passed.');
+    if (process.argv.includes('--browser')) {
+        const { checkBrowserConsumer } = await import('./test-package-browser.mjs');
+        await checkBrowserConsumer(consumer);
+    }
 } finally {
-    await rm(consumer, { recursive: true, force: true });
+    await rm(consumer, { recursive: true, force: true, maxRetries: 4 });
 }
