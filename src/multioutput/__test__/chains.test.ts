@@ -74,3 +74,57 @@ test('ClassifierChain rejects one-class probability columns instead of reporting
     model.fit([[0], [1], [2], [3]], [[0, 0], [0, 0], [1, 0], [1, 0]]);
     expect(() => model.predictProba([[1]])).toThrow('exactly two classes');
 });
+
+describe('ClassifierChain fit and parameter boundaries', () => {
+    const X = [[-2], [-1], [1], [2]];
+    const Y = [[0, 1], [0, 1], [1, 0], [1, 0]];
+    const order = [1, 0];
+
+    test('a failure training a later output leaves the previous complete chain usable', () => {
+        const model = new ClassifierChain({ estimator: new GaussianNB({ priors: [0.5, 0.5] }), order });
+        // The first member (column 1) can fit. Column 0 has one class for two priors.
+        const invalid = Y.map(([, second]) => [0, second]);
+        expect(() => model.fit(X, invalid)).toThrow(/priors/);
+        expect(model.chainOrder).toEqual([]);
+        expect(() => model.predict(X)).toThrow(/not fitted/);
+        expect(() => model.predictProba(X)).toThrow(/not fitted/);
+
+        model.fit(X, Y);
+        const probabilities = model.predictProba(X);
+        expect(model.predict(X)).toEqual(Y);
+        expect(() => model.fit(X, invalid)).toThrow(/priors/);
+        expect(model.chainOrder).toEqual(order);
+        expect(model.predict(X)).toEqual(Y);
+        expect(model.predictProba(X)).toEqual(probabilities);
+    });
+
+    test('checks order, fold count, binary targets and score dimensions', () => {
+        const estimator = new GaussianNB();
+        expect(() => new ClassifierChain({ estimator, cv: 1 })).toThrow(/cv/);
+        expect(() => new ClassifierChain({ estimator, order: [1, 1] }).fit(X, Y)).toThrow(/permutation/);
+        const model = new ClassifierChain({ estimator });
+        expect(() => model.fit(X, Y.map(() => [0, 2]))).toThrow(/binary/);
+        model.fit(X, Y);
+        expect(() => model.score(X, Y.map(([first]) => [first]))).toThrow(/output count/);
+    });
+
+    test('seeded order survives cloning and nested parameters reset fitted state', () => {
+        const base = new GaussianNB();
+        const model = new ClassifierChain({ estimator: base, order: 'random', randomState: 23 });
+        const copy = model.clone() as ClassifierChain;
+        model.fit(X, Y);
+        copy.fit(X, Y);
+        expect(copy.chainOrder).toEqual(model.chainOrder);
+        expect([...model.chainOrder].sort()).toEqual([0, 1]);
+        model.setParams({ estimator__varSmoothing: 0.01 });
+        expect(() => model.predict(X)).toThrow(/not fitted/);
+        expect((model.getParams().estimator as GaussianNB).getParams().varSmoothing).toBe(0.01);
+        expect(base.getParams().varSmoothing).toBe(1e-9);
+    });
+
+    test('predictProba reports the missing capability on a fitted base estimator', () => {
+        const model = new ClassifierChain({ estimator: new RidgeRegression() });
+        model.fit(X, Y);
+        expect(() => model.predictProba(X)).toThrow(/base estimator must implement predictProba/);
+    });
+});
