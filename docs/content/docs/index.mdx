@@ -38,8 +38,12 @@ Analyze your own CSV: [find outliers](/tools/outlier-calculator), [fit a polynom
 ```typescript
 import { Ensemble } from '@kanaries/ml';
 
-// constructor(subsamplingSize = 256, treeNum = 100, contamination = 'auto' | number)
-const isolationForest = new Ensemble.IsolationForest(256, 100, 'auto');
+const isolationForest = new Ensemble.IsolationForest({
+  subsampling_size: 256,
+  tree_num: 100,
+  contamination: 'auto',
+  random_state: 42,
+});
 
 // "normal" points form a tight cluster
 const trainingData = [[0.1], [0.2], [0.15], [0.3], [0.25], [0.18], [0.22], [0.27]];
@@ -55,11 +59,12 @@ Isolation Forest isolates anomalies quickly by measuring the path length needed 
 
 | Topic | What you can build | Resources |
 | --- | --- | --- |
-| Clustering and segmentation | Customer cohorts, anomaly buckets, recommendation seeds | [Clusters API](/docs/apis/clusters) |
-| Dimensionality reduction | Feature compression, visualization prep, noise filtering | [Decomposition API](/docs/apis/decomposition) |
-| Predictive modeling | Regressions and classifiers for tabular or streaming data | [Linear](/docs/apis/linear), [Tree](/docs/apis/tree), [SVM](/docs/apis/svm) |
-| Deep learning basics | Lightweight neural networks for inference on the edge | [Neural Network module](/docs/apis/neural_network) |
-| Data preparation | Normalization, metrics, and helpers for production workflows | [Utils module](/docs/apis/utils) |
+| Pipelines & model persistence | Leakage-free preprocessing, `ColumnTransformer`, and JSON `toJSON()` / `loadModel()` | [Pipeline API](/docs/apis/pipeline), [Serialization API](/docs/apis/serialization) |
+| Clustering and mixture models | Customer cohorts, soft density clustering, anomaly buckets | [Clusters API](/docs/apis/clusters), [Mixture Models API](/docs/apis/mixture) |
+| Dimensionality reduction | Feature compression, visualization prep, noise filtering | [Decomposition API](/docs/apis/decomposition), [Manifold API](/docs/apis/manifold) |
+| Predictive modeling | Regressions, classifiers, calibration, and multiclass wrappers | [Linear](/docs/apis/linear), [Discriminant Analysis](/docs/apis/discriminant-analysis), [Tree](/docs/apis/tree), [SVM](/docs/apis/svm), [Calibration](/docs/apis/calibration) |
+| Data & evaluation | Sparse `CSRMatrix`, synthetic datasets, metrics, and preprocessing helpers | [Datasets](/docs/apis/datasets), [Sparse Data](/docs/apis/data), [Metrics](/docs/apis/metrics), [Utils](/docs/apis/utils) |
+| Architecture & migration guides | Compare JS ML runtimes, deploy to Edge/Web Workers, port sklearn pipelines | [JS ML Libraries Comparison](/docs/guides/javascript-ml-libraries-comparison), [Edge & Web Workers](/docs/guides/edge-and-web-workers-ml), [Migrate sklearn Pipeline](/docs/guides/migrating-sklearn-pipeline-to-typescript) |
 | Interactive evaluation | Browser-native calculators, model visualization, and exportable examples | [ML tools](/tools), [algorithm playgrounds](/playground) |
 
 For a complete view of available modules and helper utilities, head to the [full API reference](/docs/apis).

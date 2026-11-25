@@ -141,5 +141,16 @@ test('Phase 1 technical SEO invariants hold across layout, home, sitemap, header
       rendered.length <= 65,
       `${rel} rendered title exceeds 65 chars (${rendered.length}): "${rendered}"`,
     );
+
+    const proseWords = raw
+      .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '')
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .split(/\s+/)
+      .filter((token) => /[a-zA-Z0-9]/.test(token)).length;
+    assert.ok(
+      proseWords >= 200,
+      `${rel} has thin prose (${proseWords} words); Phase 2 requires at least 200 prose words`,
+    );
   }
 });

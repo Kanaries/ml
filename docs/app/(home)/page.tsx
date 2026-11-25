@@ -99,49 +99,47 @@ const FEATURES = [
 ];
 
 const ALGORITHMS: Record<string, { label: string; href: string }[]> = {
-  'Linear, SVM & Kernel': [
+  'Linear, Discriminant & SVM': [
     { label: 'Linear module', href: '/docs/apis/linear' },
-    { label: 'LinearRegression', href: '/docs/apis/linear/linearRegression' },
-    { label: 'LogisticRegression', href: '/docs/apis/linear/logisticRegression' },
+    { label: 'LinearRegression & LogisticRegression', href: '/docs/apis/linear/logisticRegression' },
     { label: 'Robust & Bayesian GLMs', href: '/docs/apis/linear/generalizedLinearModels' },
+    { label: 'Discriminant Analysis (LDA / QDA)', href: '/docs/apis/discriminant-analysis' },
     { label: 'SVM (SVC / NuSVC / LinearSVC)', href: '/docs/apis/svm/SVC' },
     { label: 'Kernel & RBFSampler / Nystroem', href: '/docs/apis/kernel' },
-    { label: 'Gaussian Process', href: '/docs/apis/gaussian_process' },
+    { label: 'Gaussian Process & Isotonic', href: '/docs/apis/gaussian_process' },
   ],
-  'Tree & Ensemble': [
-    { label: 'Tree module', href: '/docs/apis/tree' },
-    { label: 'DecisionTreeClassifier', href: '/docs/apis/tree/decisionTreeClassifier' },
-    { label: 'ExtraTreeClassifier', href: '/docs/apis/tree/extraTreeClassifier' },
+  'Tree, Ensemble & Meta': [
+    { label: 'Tree module (Decision / Extra)', href: '/docs/apis/tree' },
     { label: 'Ensemble module', href: '/docs/apis/ensemble' },
-    { label: 'RandomForest', href: '/docs/apis/ensemble/randomForestClassifier' },
-    { label: 'HistGradientBoosting', href: '/docs/apis/ensemble/histGradientBoosting' },
+    { label: 'RandomForest & ExtraTrees', href: '/docs/apis/ensemble/randomForestClassifier' },
+    { label: 'HistGradientBoosting & XGBoost', href: '/docs/apis/ensemble/histGradientBoosting' },
     { label: 'IsolationForest', href: '/docs/apis/ensemble/iforest' },
+    { label: 'Probability Calibration (Platt / Isotonic)', href: '/docs/apis/calibration' },
+    { label: 'Multiclass (OvR / OvO) & Dummy', href: '/docs/apis/multiclass' },
   ],
-  'Neighbors & Clustering': [
-    { label: 'Neighbors module', href: '/docs/apis/neighbors' },
-    { label: 'KNearestNeighbors', href: '/docs/apis/neighbors/knn' },
-    { label: 'BallTree / KDTree', href: '/docs/apis/neighbors/ballTree' },
+  'Neighbors, Clustering & Mixture': [
+    { label: 'Neighbors (KNN / LOF / BallTree / KDTree)', href: '/docs/apis/neighbors' },
     { label: 'Clusters module', href: '/docs/apis/clusters' },
-    { label: 'KMeans', href: '/docs/apis/clusters/kmeans' },
-    { label: 'E-Means', href: '/docs/apis/clusters/eMeans' },
+    { label: 'KMeans & E-Means', href: '/docs/apis/clusters/eMeans' },
     { label: 'DBSCAN / OPTICS / HDBSCAN', href: '/docs/apis/clusters/dbscan' },
     { label: 'Birch / Affinity / Bisecting K-Means', href: '/docs/apis/clusters/advancedClustering' },
+    { label: 'GaussianMixture & BayesianGMM', href: '/docs/apis/mixture' },
   ],
   'Decomposition, Manifold & Covariance': [
     { label: 'Decomposition (PCA / NMF / FastICA / LDA)', href: '/docs/apis/decomposition' },
-    { label: 'PCA', href: '/docs/apis/decomposition/pca' },
-    { label: 'Manifold (t-SNE / MDS / LLE)', href: '/docs/apis/manifold' },
+    { label: 'PCA & IncrementalPCA', href: '/docs/apis/decomposition/pca' },
+    { label: 'Manifold (t-SNE / MDS / Isomap / LLE)', href: '/docs/apis/manifold' },
     { label: 'Cross Decomposition (PLS / CCA)', href: '/docs/apis/cross_decomposition' },
     { label: 'Random Projection', href: '/docs/apis/random_projection' },
     { label: 'Covariance & EllipticEnvelope', href: '/docs/apis/covariance' },
   ],
-  'Features, Bayes & Workflow': [
-    { label: 'Feature Extraction (TF-IDF / Count)', href: '/docs/apis/feature_extraction' },
+  'Pipelines, Serialization & Data': [
+    { label: 'Pipeline, ColumnTransformer & FeatureUnion', href: '/docs/apis/pipeline' },
+    { label: 'Model Serialization (toJSON / loadModel)', href: '/docs/apis/serialization' },
+    { label: 'Feature Extraction (TF-IDF / Count / Hashing)', href: '/docs/apis/feature_extraction' },
     { label: 'Feature Selection (RFE / Univariate)', href: '/docs/apis/feature_selection' },
-    { label: 'Imputation & Compose', href: '/docs/apis/impute' },
-    { label: 'Metrics', href: '/docs/apis/metrics' },
-    { label: 'Bayes & Semi-Supervised', href: '/docs/apis/bayes' },
-    { label: 'Multi-Output & Neural Network', href: '/docs/apis/multioutput' },
+    { label: 'Imputation, Compose & Multi-Output', href: '/docs/apis/impute' },
+    { label: 'Datasets, Sparse CSRMatrix & Metrics', href: '/docs/apis/datasets' },
     { label: 'Utils (preprocessing, splits, asyncMode)', href: '/docs/apis/utils' },
   ],
 };
@@ -177,14 +175,15 @@ const INTERACTIVE_RESOURCES = [
   {
     category: 'Practical Guides',
     title: 'Walkthroughs & sklearn mapping',
-    description: 'Task-first guides and side-by-side Python scikit-learn translations for production JS/TS teams.',
+    description: 'Task-first guides, runtime comparisons, and side-by-side Python scikit-learn translations for production JS/TS teams.',
     href: '/docs/sklearn-equivalents',
     links: [
       { label: 'scikit-learn Equivalents', href: '/docs/sklearn-equivalents' },
+      { label: 'JS ML Libraries Comparison', href: '/docs/guides/javascript-ml-libraries-comparison' },
+      { label: 'Migrate sklearn Pipeline to TS', href: '/docs/guides/migrating-sklearn-pipeline-to-typescript' },
+      { label: 'Edge & Web Workers ML', href: '/docs/guides/edge-and-web-workers-ml' },
       { label: 'Isolation Forest Guide', href: '/docs/guides/isolation-forest' },
-      { label: 'Find Outliers in CSV', href: '/docs/guides/find-outliers-csv' },
       { label: 'IQR vs Z-Score vs IForest', href: '/docs/guides/outlier-methods' },
-      { label: 'RFM vs K-Means', href: '/docs/guides/rfm-vs-kmeans' },
     ],
   },
 ];
