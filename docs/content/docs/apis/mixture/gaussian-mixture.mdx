@@ -1,0 +1,130 @@
+---
+title: GaussianMixture (GMM) in JavaScript
+description: Run Expectation-Maximization Gaussian Mixture Models in JavaScript and TypeScript with @kanaries/ml. Supports full, diag, tied, and spherical covariances.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+**GaussianMixture (GMM)** models continuous observations as draws from `nComponents` multivariate Gaussian distributions, each parameterized by a mixing weight, a mean vector, and a covariance matrix. Parameters are estimated with **Expectation-Maximization (EM)**:
+
+1. **E-step**: compute log-domain responsibilities (posterior probability that each sample belongs to each component) using numerically stable `logsumexp`.
+2. **M-step**: update component weights, means, and covariances from weighted sufficient statistics, adding `regCovar` to covariance diagonals to prevent singular matrices.
+3. **Convergence**: stop when the improvement in average per-sample log-likelihood drops below `tol` or `maxIter` is reached, keeping the highest lower-bound run across `nInit` restarts.
+
+GMMs shine when clusters vary in spread or orientation, when observations sit in overlap zones where soft probabilities matter, or when low log-density (`scoreSamples`) is used to flag anomalies.
+
+## JavaScript implementation
+
+`Mixture.GaussianMixture` in `@kanaries/ml` mirrors `sklearn.mixture.GaussianMixture` with camelCase options and zero native dependencies. Because all E-step log-densities and Cholesky decompositions execute in pure TypeScript, you can fit GMMs directly in browser data-exploration apps, Web Workers, or Node.js analytics services—and export fitted models via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { Mixture, Datasets } from '@kanaries/ml';
+
+const { X } = Datasets.makeBlobs({ nSamples: 60, centers: 3, clusterStd: 0.6, randomState: 42 });
+
+const gmm = new Mixture.GaussianMixture({
+  nComponents: 3,
+  covarianceType: 'full',
+  nInit: 3,
+  randomState: 42,
+});
+
+gmm.fit(X);
+console.log({
+  labels: gmm.predict(X.slice(0, 5)),
+  proba: gmm.predictProba(X.slice(0, 2)),
+  bic: gmm.bic(X),
+});
+```
+
+<AlgorithmComparison
+  title="GaussianMixture"
+  pythonCode={String.raw`from sklearn.mixture import GaussianMixture
+
+gmm = GaussianMixture(
+    n_components=3,
+    covariance_type="full",
+    n_init=5,
+    random_state=42,
+)
+gmm.fit(X)
+labels = gmm.predict(X)
+probs = gmm.predict_proba(X)
+log_density = gmm.score_samples(X)
+bic_score = gmm.bic(X)`}
+  tsCode={String.raw`import { Mixture } from '@kanaries/ml';
+
+const gmm = new Mixture.GaussianMixture({
+  nComponents: 3,
+  covarianceType: 'full',
+  nInit: 5,
+  randomState: 42,
+});
+
+gmm.fit(X);
+const labels = gmm.predict(X);
+const probs = gmm.predictProba(X);
+const logDensity = gmm.scoreSamples(X);
+const bicScore = gmm.bic(X);`}
+/>
+
+### Selecting `nComponents` with BIC
+
+Lower BIC (Bayesian Information Criterion) balances goodness of fit against parameter count:
+
+```ts
+import { Mixture, Datasets } from '@kanaries/ml';
+
+const { X } = Datasets.makeBlobs({ nSamples: 90, centers: 3, clusterStd: 0.7, randomState: 7 });
+const candidates = [2, 3, 4].map((k) => {
+  const model = new Mixture.GaussianMixture({ nComponents: k, nInit: 2, randomState: 7 });
+  model.fit(X);
+  return { k, bic: model.bic(X), aic: model.aic(X) };
+});
+
+candidates.sort((a, b) => a.bic - b.bic);
+console.log('Best k by BIC:', candidates[0]);
+```
+
+## Detailed API reference
+
+### `new Mixture.GaussianMixture(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `1` | Positive integer number of mixture components. |
+| `covarianceType` | `'full' \| 'tied' \| 'diag' \| 'spherical'` | `'full'` | Covariance structure: `'full'` (each component has its own `d×d` covariance), `'tied'` (shared `d×d`), `'diag'` (axis-aligned per-component variances), or `'spherical'` (single scalar variance per component). |
+| `tol` | `number` | `1e-3` | Convergence threshold on the change in average per-sample log-likelihood. |
+| `regCovar` | `number` | `1e-6` | Non-negative diagonal regularization keeping covariance matrices positive definite. |
+| `maxIter` | `number` | `100` | Maximum EM iterations per initialization. |
+| `nInit` | `number` | `1` | Number of EM restarts; the run with the highest lower bound is retained. |
+| `initParams` | `'kmeans' \| 'random'` | `'kmeans'` | Initial responsibility assignment strategy. |
+| `randomState` | `number` | `undefined` | Seed for deterministic initialization. |
+| `weightsInit` | `number[]` | `undefined` | Optional initial component weights (length `nComponents`). |
+| `meansInit` | `number[][]` | `undefined` | Optional initial means (`[nComponents][nFeatures]`). |
+| `precisionsInit` | `Covariances` | `undefined` | Optional initial precision matrices matching `covarianceType` shape. |
+
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][]) => this` | Fits the mixture parameters with EM and returns `this`. |
+| `predict` | `(X: number[][]) => number[]` | Returns the most likely component index (`0..nComponents-1`) per row. |
+| `predictProba` | `(X: number[][]) => number[][]` | Returns posterior component responsibilities `[nSamples][nComponents]`. |
+| `fitPredict` | `(X: number[][]) => number[]` | Fits on `X` and returns component labels. |
+| `scoreSamples` | `(X: number[][]) => number[]` | Computes per-sample log probability density `log p(x)`. |
+| `score` | `(X: number[][]) => number` | Returns the average per-sample log-likelihood across `X`. |
+| `aic` / `bic` | `(X: number[][]) => number` | Computes Akaike / Bayesian Information Criterion for model selection. |
+| `getWeights` / `getMeans` / `getCovariances` | `() => ... \| null` | Inspects learned mixing weights, means, and covariance structures. |
+| `getLowerBound` / `getLowerBoundHistory` | `() => number` / `number[]` | Returns the final average log-likelihood and per-iteration trace. |
+| `converged` / `nIter` | `boolean` / `number` | Public properties indicating EM convergence and iteration count of the winning run. |
+
+### Practical guidance
+
+- **Feature scaling**: Standardize skewed or high-magnitude features with [`StandardScaler`](/docs/apis/utils/preprocessing) before fitting `'full'` or `'spherical'` mixtures so one feature does not dominate covariance conditioning.
+- **High-dimensional datasets**: Prefer `covarianceType: 'diag'` when `nFeatures` is large relative to `nSamples` to avoid overfitting full `d×d` covariance matrices and to keep browser fit times fast.
+- **Related pages**: [Mixture Models Overview](/docs/apis/mixture), [BayesianGaussianMixture](/docs/apis/mixture/bayesian-gaussian-mixture), [K-Means Clustering](/docs/apis/clusters/kmeans), [Model Serialization](/docs/apis/serialization).

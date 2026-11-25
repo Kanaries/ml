@@ -1,0 +1,42 @@
+---
+title: Discriminant Analysis in JavaScript
+description: Run Linear (LDA) and Quadratic (QDA) Discriminant Analysis in JavaScript and TypeScript with @kanaries/ml for classification and supervised projection.
+---
+
+## Module overview
+
+**Discriminant Analysis** models each class as a multivariate Gaussian distribution and applies Bayes' rule to compute closed-form class posteriors—requiring no iterative gradient descent or learning-rate tuning.
+
+- **[Linear Discriminant Analysis (`LDA`)](/docs/apis/discriminant-analysis/lda)** assumes all classes share a single pooled covariance matrix. This yields linear decision boundaries and also serves as a **supervised dimensionality-reduction transformer** (`transform` / `fitTransform`) that projects data onto up to `min(nClasses - 1, nFeatures)` maximally class-separating axes.
+- **[Quadratic Discriminant Analysis (`QDA`)](/docs/apis/discriminant-analysis/qda)** estimates a separate covariance matrix for every class, producing curved quadratic decision boundaries when classes differ significantly in variance or correlation structure.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports both canonical scikit-learn names and short aliases under `import { DiscriminantAnalysis } from '@kanaries/ml'`:
+
+| Canonical class | Alias | Decision boundary | Supervised `transform()` |
+| --- | --- | --- | --- |
+| `DiscriminantAnalysis.LinearDiscriminantAnalysis` | `DiscriminantAnalysis.LDA` | Linear (shared covariance) | Yes (`nComponents ≤ min(K - 1, p)`) |
+| `DiscriminantAnalysis.QuadraticDiscriminantAnalysis` | `DiscriminantAnalysis.QDA` | Quadratic (per-class covariance) | No (classifier only) |
+
+Both classes extend `ClassifierBase`, use SVD-based numerical solvers that stay well-behaved in pure TypeScript without external linear-algebra binaries, work seamlessly inside [`Pipeline`](/docs/apis/pipeline), and serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const lda = new DiscriminantAnalysis.LDA({ solver: 'svd', nComponents: 2 });
+lda.fit(XTrain, yTrain);
+
+const predictions = lda.predict(XTest);
+const probabilities = lda.predictProba(XTest);
+const projected = lda.transform(XTest); // supervised 2D projection
+```
+
+## Choosing between LDA, QDA, and Logistic Regression
+
+- Start with **[LDA](/docs/apis/discriminant-analysis/lda)** when features are roughly Gaussian per class, you want closed-form fitting with zero learning-rate tuning, or you need supervised dimensionality reduction before plotting or downstream modeling.
+- Switch to **[QDA](/docs/apis/discriminant-analysis/qda)** when classes clearly have different covariance shapes and you have enough samples per class to estimate per-class covariances (use `regParam > 0` to stabilize small classes).
+- Use **[Logistic Regression](/docs/apis/linear/logisticRegression)** when class distributions are heavily non-Gaussian or sparse and you prefer discriminative regularization.
+- **Related pages**: [Linear Discriminant Analysis (LDA)](/docs/apis/discriminant-analysis/lda), [Quadratic Discriminant Analysis (QDA)](/docs/apis/discriminant-analysis/qda), [PCA](/docs/apis/decomposition/pca), [Logistic Regression](/docs/apis/linear/logisticRegression).

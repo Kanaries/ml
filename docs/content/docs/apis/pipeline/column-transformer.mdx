@@ -1,0 +1,105 @@
+---
+title: ColumnTransformer in JavaScript
+description: Apply different scalers, encoders, or transformers to specific feature columns in JavaScript and TypeScript with ColumnTransformer from @kanaries/ml.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Real-world tabular datasets rarely treat every column the same way. Some columns represent continuous measurements that benefit from z-score standardization, others are bounded ratios that work better with min-max scaling, and some columns are already binary indicators that should pass through unchanged or be dropped.
+
+**ColumnTransformer** applies distinct transformers to specified subsets of feature columns and horizontally concatenates the resulting blocks into a single numeric feature matrix. When placed inside a [`Pipeline`](/docs/apis/pipeline), every column-specific transformation fits strictly on training data and replays identically during validation and production inference.
+
+## JavaScript implementation
+
+`ColumnTransformer` in `@kanaries/ml` mirrors `sklearn.compose.ColumnTransformer` for JavaScript and TypeScript environments using zero-based numeric column indices (`number[]`). It is exported both at the root (`import { ColumnTransformer } from '@kanaries/ml'`) and under `MLPipeline`.
+
+Because `ColumnTransformer` extends `BaseEstimator`, it supports `getParams()`, nested `name__param` updates via `setParams()`, deep `clone()`, and full JSON serialization via `toJSON()` and [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { ColumnTransformer, Pipeline, Linear, utils } from '@kanaries/ml';
+
+const XTrain = [
+  [10, 200, 0.2, 1],
+  [20, 400, 0.5, 0],
+  [30, 600, 0.8, 1],
+  [40, 800, 1.0, 0],
+];
+const yTrain = [12, 22, 31, 40];
+
+const preprocessor = new ColumnTransformer({
+  transformers: [
+    ['std', new utils.Preprocessing.StandardScaler(), [0, 1]],
+    ['minmax', new utils.Preprocessing.MinMaxScaler(), [2]],
+    ['keep', 'passthrough', [3]],
+  ],
+  remainder: 'drop',
+});
+
+const pipe = new Pipeline({
+  steps: [
+    ['prep', preprocessor],
+    ['model', new Linear.RidgeRegression({ alpha: 1.0 })],
+  ],
+});
+
+pipe.fit(XTrain, yTrain);
+console.log(pipe.predict([[25, 500, 0.6, 1]]));
+```
+
+<AlgorithmComparison
+  title="ColumnTransformer"
+  pythonCode={String.raw`from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+ct = ColumnTransformer(
+    transformers=[
+        ("std", StandardScaler(), [0, 1]),
+        ("minmax", MinMaxScaler(), [2]),
+        ("keep", "passthrough", [3]),
+    ],
+    remainder="drop",
+)
+X_transformed = ct.fit_transform(X_train)`}
+  tsCode={String.raw`import { ColumnTransformer, utils } from '@kanaries/ml';
+
+const ct = new ColumnTransformer({
+  transformers: [
+    ['std', new utils.Preprocessing.StandardScaler(), [0, 1]],
+    ['minmax', new utils.Preprocessing.MinMaxScaler(), [2]],
+    ['keep', 'passthrough', [3]],
+  ],
+  remainder: 'drop',
+});
+const XTransformed = ct.fitTransform(XTrain);`}
+/>
+
+## Detailed API reference
+
+### `new ColumnTransformer(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `transformers` | `ColumnTransformerEntry[]` | *required* | Non-empty array of `[name, transformer, columns]` triples, where `transformer` is a `BaseEstimator` implementing `fit()`/`transform()`, `'passthrough'`, or `'drop'`, and `columns` is a `number[]` of non-negative column indices. |
+| `remainder` | `'drop' \| 'passthrough'` | `'drop'` | Controls columns not claimed by any entry in `transformers`. `'drop'` discards unclaimed columns; `'passthrough'` appends them after all declared transformer blocks in original index order. |
+
+### Methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y?: number[]) => void` | Records `nFeaturesIn`, computes unclaimed remainder indices, and fits each non-string transformer on its column slice. |
+| `transform` | `(X: number[][]) => number[][]` | Transforms each column subset, skips `'drop'` entries, appends `'passthrough'` remainder columns if enabled, and concatenates blocks horizontally with `hstack`. |
+| `fitTransform` | `(X: number[][], y?: number[]) => number[][]` | Fits on `(X, y)` and returns `transform(X)`. |
+| `getTransformer` | `(name: string) => BaseEstimator \| 'passthrough' \| 'drop'` | Retrieves a configured transformer entry by name; throws if unknown. |
+| `getParams` | `() => Params` | Returns `{ transformers, remainder }` with defensive copies of column index arrays. |
+| `setParams` | `(params: Params) => this` | Supports updating `remainder` as well as nested `transformerName__param` (throws if targeting a `'passthrough'` or `'drop'` entry). |
+
+### Behavior & validation details
+
+- **Output column order**: Output columns always follow the declaration order of `transformers` (omitting `'drop'` entries), with `remainder: 'passthrough'` columns placed last.
+- **Feature count validation**: `transform(X)` checks that `X[0].length` matches the feature width seen during `fit()`, catching schema drift early in browser forms or API payloads.
+- **Name constraints**: Transformer names must be unique and cannot contain `'__'` so nested `setParams()` keys remain unambiguous inside a `Pipeline` (for example `prep__std__withMean`).
+- **Related pages**: [ML Pipelines](/docs/apis/pipeline), [FeatureUnion](/docs/apis/pipeline/feature-union), [Preprocessing Utilities](/docs/apis/utils/preprocessing), [Model Serialization](/docs/apis/serialization).

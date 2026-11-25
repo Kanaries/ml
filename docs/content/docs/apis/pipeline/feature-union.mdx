@@ -1,0 +1,113 @@
+---
+title: FeatureUnion in JavaScript
+description: Combine multiple parallel feature transformers horizontally in JavaScript and TypeScript with FeatureUnion from @kanaries/ml for browser and Node.js pipelines.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+Sometimes a single feature representation is not enough for a downstream model: you may want both **PCA** components and **univariate selected features**, or both raw scaled features and **random projections** fed side by side into a classifier.
+
+**FeatureUnion** runs several transformers in parallel on the *same* input matrix `X` and concatenates their outputs column-wise (`hstack`) into one wider feature matrix. Unlike [`ColumnTransformer`](/docs/apis/pipeline/column-transformer), which routes disjoint column subsets to different transformers, `FeatureUnion` passes the full matrix to every branch and merges all generated representations.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports `FeatureUnion` at the root (`import { FeatureUnion } from '@kanaries/ml'`) and under `MLPipeline`. It extends `BaseEstimator`, integrates cleanly inside [`Pipeline`](/docs/apis/pipeline), supports `name__param` parameter routing in `setParams()`, and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+In browser and Node.js applications, `FeatureUnion` keeps multi-view feature engineering deterministic and declarative—avoiding manual array slicing and concatenation bugs when serving predictions.
+
+## Quick start example
+
+```ts
+import { FeatureUnion, Pipeline, Decomposition, Linear, utils } from '@kanaries/ml';
+
+const XTrain = [
+  [1, 0, 5, 2],
+  [2, 1, 6, 3],
+  [8, 9, 1, 7],
+  [9, 8, 2, 8],
+];
+const yTrain = [0, 0, 1, 1];
+
+const union = new FeatureUnion({
+  transformerList: [
+    ['scaled', new utils.Preprocessing.StandardScaler()],
+    ['pca', new Decomposition.PCA({ nComponents: 2 })],
+  ],
+});
+
+const pipe = new Pipeline({
+  steps: [
+    ['features', union],
+    ['clf', new Linear.LogisticRegression()],
+  ],
+});
+
+pipe.fit(XTrain, yTrain);
+console.log(pipe.predict([[1.5, 0.5, 5.5, 2.5], [8.5, 8.5, 1.5, 7.5]]));
+```
+
+<AlgorithmComparison
+  title="FeatureUnion"
+  pythonCode={String.raw`from sklearn.pipeline import FeatureUnion, Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+
+union = FeatureUnion([
+    ("scaled", StandardScaler()),
+    ("pca", PCA(n_components=2)),
+])
+
+pipe = Pipeline([
+    ("features", union),
+    ("clf", LogisticRegression()),
+])
+pipe.fit(X_train, y_train)`}
+  tsCode={String.raw`import { FeatureUnion, Pipeline, Decomposition, Linear, utils } from '@kanaries/ml';
+
+const union = new FeatureUnion({
+  transformerList: [
+    ['scaled', new utils.Preprocessing.StandardScaler()],
+    ['pca', new Decomposition.PCA({ nComponents: 2 })],
+  ],
+});
+
+const pipe = new Pipeline({
+  steps: [
+    ['features', union],
+    ['clf', new Linear.LogisticRegression()],
+  ],
+});
+pipe.fit(XTrain, yTrain);`}
+/>
+
+## Detailed API reference
+
+### `new FeatureUnion(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `transformerList` | `Array<[string, BaseEstimator]>` | *required* | Non-empty list of `[name, transformer]` pairs. Each transformer must extend `BaseEstimator` and implement `fit()` and `transform()`. Names must be unique and must not contain `'__'`. |
+
+### Methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y?: number[]) => void` | Fits every transformer in `transformerList` on `(X, y)`. |
+| `transform` | `(X: number[][]) => number[][]` | Transforms `X` with each branch and concatenates outputs horizontally into `[nRows][sumOfCols]`. |
+| `fitTransform` | `(X: number[][], y?: number[]) => number[][]` | Calls `fit(X, y)` followed by `transform(X)`. |
+| `getTransformer` | `(name: string) => BaseEstimator` | Looks up a branch transformer by name; throws if not found. |
+| `getParams` | `() => Params` | Returns `{ transformerList }` with a shallow copy of the pairs list. |
+| `setParams` | `(params: Params) => this` | Supports nested `transformerName__param` addressing so branches can be tuned inside grid search. |
+
+### `FeatureUnion` vs `ColumnTransformer`
+
+| Need | Use |
+| --- | --- |
+| Run multiple transformers on the **same full matrix** and concatenate all outputs | `FeatureUnion` |
+| Route **different column indices** to different scalers/transformers | [`ColumnTransformer`](/docs/apis/pipeline/column-transformer) |
+| Run transformers **sequentially** one after another | [`Pipeline`](/docs/apis/pipeline) |
+
+- **Related pages**: [ML Pipelines](/docs/apis/pipeline), [ColumnTransformer](/docs/apis/pipeline/column-transformer), [Feature Selection](/docs/apis/feature_selection), [Dimensionality Reduction (PCA)](/docs/apis/decomposition/pca).

@@ -1,0 +1,143 @@
+---
+title: ML Pipelines in JavaScript
+description: Chain preprocessing, feature extraction, and ML estimators in JavaScript or TypeScript with Pipeline and makePipeline from @kanaries/ml for browser and Node.js.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+A machine learning **Pipeline** chains one or more preprocessing or feature-transformation steps with a final estimator into a single unified object. Instead of manually calling `fit`, `transform`, and `predict` on separate scalers, vectorizers, and classifiers—and risking subtle train/test data leakage—a pipeline enforces identical step ordering during training, cross-validation, hyperparameter tuning, and inference.
+
+Pipelines are essential whenever your workflow includes:
+
+- **Leakage-free cross-validation**: scalers, imputers, and TF-IDF vectorizers fit strictly on each training fold and transform the validation fold without peeking at held-out statistics.
+- **Nested hyperparameter tuning**: tune any step's parameter with scikit-learn-style `stepName__paramName` notation via `setParams()`, `GridSearchCV`, or `RandomizedSearchCV`.
+- **Single-artifact deployment**: serialize an entire preprocessing-plus-model graph with `toJSON()` and revive it in browser or Node.js with `loadModel()`.
+- **Mixed data flows**: move seamlessly from raw text (`string[]`) through `TfidfVectorizer` into sparse `CSRMatrix` or dense `number[][]` estimators.
+
+## JavaScript implementation
+
+`@kanaries/ml` exports `Pipeline`, `makePipeline`, `ColumnTransformer`, and `FeatureUnion` at both the top level (`import { Pipeline, makePipeline } from '@kanaries/ml'`) and under the `MLPipeline` namespace (`import { MLPipeline } from '@kanaries/ml'`).
+
+Because `Pipeline` extends `BaseEstimator` and runs in pure TypeScript with zero native bindings, you can train and serve multi-step tabular or text workflows directly inside browser tabs, Web Workers, Node.js APIs, and edge runtimes. TypeScript preserves step tuple types (`Pipeline<const TSteps>`), so calling `transform()` on a transformer-only pipeline infers the final step's output type automatically.
+
+## Quick start example
+
+```ts
+import { Pipeline, makePipeline, Linear, utils } from '@kanaries/ml';
+
+const XTrain = [[1, 100], [2, 110], [8, 20], [9, 15]];
+const yTrain = [0, 0, 1, 1];
+const XTest = [[1.5, 105], [8.5, 18]];
+
+const pipe = new Pipeline({
+  steps: [
+    ['scaler', new utils.Preprocessing.StandardScaler()],
+    ['clf', new Linear.LogisticRegression({ maxIter: 200 })],
+  ],
+});
+
+pipe.fit(XTrain, yTrain);
+console.log(pipe.predict(XTest), pipe.predictProba(XTest));
+
+// Update nested step parameters with step__param syntax
+pipe.setParams({ clf__maxIter: 400 });
+
+// Shorthand: auto-names steps from lowercase class names
+const quick = makePipeline(
+  new utils.Preprocessing.StandardScaler(),
+  new Linear.LogisticRegression()
+);
+quick.fit(XTrain, yTrain);
+console.log(quick.predict(XTest));
+```
+
+<AlgorithmComparison
+  title="Pipeline & makePipeline"
+  pythonCode={String.raw`from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipe = Pipeline([
+    ("scaler", StandardScaler()),
+    ("clf", LogisticRegression()),
+])
+pipe.fit(X_train, y_train)
+preds = pipe.predict(X_test)
+pipe.set_params(clf__max_iter=400)
+
+quick = make_pipeline(StandardScaler(), LogisticRegression())`}
+  tsCode={String.raw`import { Pipeline, makePipeline, Linear, utils } from '@kanaries/ml';
+
+const pipe = new Pipeline({
+  steps: [
+    ['scaler', new utils.Preprocessing.StandardScaler()],
+    ['clf', new Linear.LogisticRegression({ maxIter: 200 })],
+  ],
+});
+pipe.fit(XTrain, yTrain);
+const preds = pipe.predict(XTest);
+pipe.setParams({ clf__maxIter: 400 });
+
+const quick = makePipeline(
+  new utils.Preprocessing.StandardScaler(),
+  new Linear.LogisticRegression()
+);`}
+/>
+
+### End-to-end text classification pipeline
+
+`Pipeline` validates input kinds (`'text'`, `'csr'`, `'dense'`) between steps. You can pass raw `string[]` documents directly into a text pipeline:
+
+```ts
+import { Pipeline, FeatureExtraction, Bayes } from '@kanaries/ml';
+
+const textPipe = new Pipeline({
+  steps: [
+    ['tfidf', new FeatureExtraction.TfidfVectorizer()],
+    ['nb', new Bayes.MultinomialNB({ alpha: 1.0 })],
+  ],
+});
+
+textPipe.fit(
+  ['fast browser machine learning', 'javascript typescript ml', 'quarterly revenue report', 'balance sheet audit'],
+  [0, 0, 1, 1]
+);
+
+console.log(textPipe.predict(['typescript browser analytics']));
+```
+
+## Detailed API reference
+
+### `new Pipeline(props)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `steps` | `readonly [string, BaseEstimator][]` | *required* | Non-empty ordered list of `[name, estimator]` pairs. Every intermediate step must implement `fit()` and `transform()`. Step names must be unique and must not contain `'__'`. |
+
+### `makePipeline(...estimators)`
+
+Convenience factory mirroring `sklearn.pipeline.make_pipeline`. Automatically derives each step's name from `estimator.constructor.name.toLowerCase()`. If the same estimator class appears multiple times, duplicate names are numbered as `name-1`, `name-2`, and so on.
+
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: FeatureData, y?: number[], sampleWeight?: number[]) => void` | Fits and transforms `X` sequentially through all intermediate steps, then fits the final estimator (`sampleWeight` is forwarded to a final predictor). |
+| `predict` | `(X: FeatureData) => number[]` | Transforms `X` through intermediate steps and calls `predict()` on the final estimator. |
+| `predictProba` | `(X: FeatureData) => number[][]` | Transforms `X` through intermediate steps and calls `predictProba()` on the final estimator. |
+| `transform` | `(X: FeatureData) => PipelineOutput` | Transforms `X` through every step. Requires the final step to implement `transform()`. |
+| `fitTransform` | `(X: FeatureData, y?: number[]) => PipelineOutput` | Fits and transforms through every step when the final step is a transformer. |
+| `score` | `(X: FeatureData, y: number[]) => number` | Transforms `X` through intermediate steps and delegates to the final estimator's `score()`. |
+| `getStep` | `(name: string) => BaseEstimator` | Returns the estimator registered under `name`; throws if unknown. |
+| `namedSteps` | `Record<string, BaseEstimator>` | Read-only getter returning an object mapping step names to their estimators. |
+| `getParams` | `() => Params` | Returns `{ steps }` containing the current `[name, estimator]` pairs. |
+| `setParams` | `(params: Params) => this` | Supports nested `stepName__paramName` addressing (for example `{ scaler__withMean: false, clf__C: 10 }`) and cascades into nested `ColumnTransformer` or `FeatureUnion` steps. |
+| `clone` / `toJSON` | Inherited from `BaseEstimator` | Deep-clones every step without sharing fitted state, or serializes the entire pipeline for [`loadModel()`](/docs/apis/serialization). |
+
+### Behavior & compatibility notes
+
+- **Type checking between steps**: If a numeric estimator receives raw `string[]` documents without a preceding text vectorizer, `Pipeline` throws an explicit error telling you to add a text transformer first. Likewise, if a transformer outputs a `CSRMatrix` and the final estimator only accepts dense `number[][]` inputs, `Pipeline` rejects the mismatch cleanly.
+- **Combining parallel feature pipelines**: Use [`ColumnTransformer`](/docs/apis/pipeline/column-transformer) to apply different transformers to different numeric column indices, or [`FeatureUnion`](/docs/apis/pipeline/feature-union) to concatenate multiple parallel transformations of the same matrix.
+- **Related pages**: [ColumnTransformer](/docs/apis/pipeline/column-transformer), [FeatureUnion](/docs/apis/pipeline/feature-union), [Model Serialization (`toJSON` / `loadModel`)](/docs/apis/serialization), [scikit-learn Equivalents](/docs/sklearn-equivalents).

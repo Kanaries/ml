@@ -1,0 +1,106 @@
+---
+title: BayesianGaussianMixture in JavaScript
+description: Fit Variational Bayesian Gaussian Mixture Models with Dirichlet Process priors in JavaScript and TypeScript using @kanaries/ml for automatic cluster pruning.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+A **Bayesian Gaussian Mixture Model** replaces maximum-likelihood EM estimation with **variational Bayesian inference** over mixture weights, component means, and precisions. By placing a stick-breaking **Dirichlet Process** prior (or finite Dirichlet distribution prior) on the mixing weights and a Gaussian-Wishart prior on each component's parameters, the model penalizes unnecessary complexity automatically.
+
+In practice, this means you can set `nComponents` to an upper bound (for example, `8`) and let variational inference concentrate weight onto the active clusters while shrinking redundant components toward zero weight—avoiding brittle manual grid searches over cluster counts when the true number of groups is uncertain.
+
+## JavaScript implementation
+
+`Mixture.BayesianGaussianMixture` in `@kanaries/ml` implements Bishop's PRML variational inference updates (matching `sklearn.mixture.BayesianGaussianMixture`) in pure TypeScript for browser and Node.js runtimes. It supports both `'dirichletProcess'` (default) and `'dirichletDistribution'` weight priors with `'full'` and `'diag'` covariance parametrizations, deterministic `randomState` seeding, and JSON persistence via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { Mixture, Datasets } from '@kanaries/ml';
+
+const { X } = Datasets.makeBlobs({ nSamples: 60, centers: 2, clusterStd: 0.6, randomState: 42 });
+
+const bgmm = new Mixture.BayesianGaussianMixture({
+  nComponents: 5,
+  covarianceType: 'full',
+  weightConcentrationPriorType: 'dirichletProcess',
+  weightConcentrationPrior: 0.1,
+  randomState: 42,
+});
+
+bgmm.fit(X);
+const weights = bgmm.getWeights() ?? [];
+const activeComponents = weights.filter((w) => w > 0.05).length;
+console.log({ activeComponents, labels: bgmm.predict(X.slice(0, 5)) });
+```
+
+<AlgorithmComparison
+  title="BayesianGaussianMixture"
+  pythonCode={String.raw`from sklearn.mixture import BayesianGaussianMixture
+
+bgmm = BayesianGaussianMixture(
+    n_components=8,
+    covariance_type="full",
+    weight_concentration_prior_type="dirichlet_process",
+    weight_concentration_prior=0.1,
+    random_state=42,
+)
+bgmm.fit(X)
+labels = bgmm.predict(X)
+weights = bgmm.weights_`}
+  tsCode={String.raw`import { Mixture } from '@kanaries/ml';
+
+const bgmm = new Mixture.BayesianGaussianMixture({
+  nComponents: 8,
+  covarianceType: 'full',
+  weightConcentrationPriorType: 'dirichletProcess',
+  weightConcentrationPrior: 0.1,
+  randomState: 42,
+});
+
+bgmm.fit(X);
+const labels = bgmm.predict(X);
+const weights = bgmm.getWeights();`}
+/>
+
+## Detailed API reference
+
+### `new Mixture.BayesianGaussianMixture(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `1` | Upper bound on the number of mixture components. |
+| `covarianceType` | `'full' \| 'diag'` | `'full'` | Covariance parametrization. (`'tied'` and `'spherical'` are not implemented and throw a clear error.) |
+| `weightConcentrationPriorType` | `'dirichletProcess' \| 'dirichletDistribution'` | `'dirichletProcess'` | Prior family on component weights. `'dirichletProcess'` uses stick-breaking to favor fewer active components; `'dirichletDistribution'` places a symmetric finite Dirichlet prior. |
+| `weightConcentrationPrior` | `number` | `1 / nComponents` | Concentration parameter controlling sparsity of active components. Smaller values push unused component weights closer to zero. |
+| `meanPrecisionPrior` | `number` | `1` | Precision prior on component means. Smaller values allow component means to move further from `meanPrior`. |
+| `meanPrior` | `number[]` | empirical mean of `X` | Prior center for component means. |
+| `degreesOfFreedomPrior` | `number` | `nFeatures` | Wishart degrees-of-freedom prior; must exceed `nFeatures - 1`. |
+| `covariancePrior` | `number[][] \| number[]` | empirical covariance | `d×d` matrix for `'full'` or length-`d` variance vector for `'diag'`. |
+| `tol` | `number` | `1e-3` | Convergence threshold on the variational lower-bound change. |
+| `regCovar` | `number` | `1e-6` | Non-negative diagonal regularization. |
+| `maxIter` | `number` | `100` | Maximum variational EM iterations per restart. |
+| `nInit` | `number` | `1` | Number of restarts; retains the run with the highest variational lower bound. |
+| `initParams` | `'kmeans' \| 'random'` | `'kmeans'` | Responsibility initialization method. |
+| `randomState` | `number` | `undefined` | Seed for reproducible runs. |
+
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][]) => this` | Runs variational inference and returns `this`. |
+| `predict` | `(X: number[][]) => number[]` | Assigns each sample to its highest-responsibility component. |
+| `predictProba` | `(X: number[][]) => number[][]` | Returns variational posterior responsibilities `[nSamples][nComponents]`. |
+| `fitPredict` | `(X: number[][]) => number[]` | Fits on `X` and returns component labels. |
+| `scoreSamples` / `score` | `(X: number[][]) => number[]` / `number` | Computes per-sample / average predictive log probability density. |
+| `getWeights` / `getMeans` / `getCovariances` | `() => ... \| null` | Inspects posterior expected weights, means, and covariances. |
+| `getLowerBound` / `getLowerBoundHistory` | `() => number` / `number[]` | Returns the variational evidence lower bound (ELBO) and convergence trace. |
+| `converged` / `nIter` | `boolean` / `number` | Convergence flag and iteration count for the winning run. |
+
+### Tuning tips
+
+- Lower `weightConcentrationPrior` (for example `0.01` to `0.1`) to prune redundant clusters more aggressively; raise it (for example `1.0` to `10.0`) when expecting many balanced subpopulations.
+- Inspect `getWeights()` after fitting to see how many components carry meaningful mass (for instance `weight > 0.02`).
+- **Related pages**: [GaussianMixture](/docs/apis/mixture/gaussian-mixture), [Mixture Models Overview](/docs/apis/mixture), [HDBSCAN](/docs/apis/clusters/hdbscan).

@@ -1,0 +1,52 @@
+---
+title: Gaussian Mixture Models in JavaScript
+description: Fit Gaussian Mixture and Variational Bayesian Mixture models in JavaScript and TypeScript with @kanaries/ml for soft clustering and density estimation.
+---
+
+## Module overview
+
+**Gaussian Mixture Models (GMMs)** represent a dataset as a weighted combination of multivariate Gaussian distributions. Unlike hard-assignment partitioners such as [K-Means](/docs/apis/clusters/kmeans), mixture models assign every observation a **soft membership probability** (`predictProba`) across components and estimate the full data log-density (`scoreSamples`), making them well suited for elliptical clusters, overlapping subpopulations, and density-based anomaly scoring.
+
+Use `Mixture` models when:
+
+- Clusters have different sizes, variances, or diagonal/tilted orientations where spherical K-Means boundaries fail.
+- You need calibrated cluster responsibilities (`predictProba`) rather than a single hard label.
+- You want principled model selection via **AIC** and **BIC** (`GaussianMixture`) or automatic pruning of excess components via a Dirichlet-process prior (`BayesianGaussianMixture`).
+
+## JavaScript implementation
+
+`@kanaries/ml` provides two scikit-learn-compatible mixture estimators under `import { Mixture } from '@kanaries/ml'`, written in pure TypeScript for browsers and Node.js:
+
+| Estimator | Fitting algorithm | Covariance types | Best for |
+| --- | --- | --- | --- |
+| [`Mixture.GaussianMixture`](/docs/apis/mixture/gaussian-mixture) | Expectation-Maximization (EM) in the log domain | `'full'`, `'tied'`, `'diag'`, `'spherical'` | Soft clustering, density estimation, AIC/BIC selection of `nComponents` |
+| [`Mixture.BayesianGaussianMixture`](/docs/apis/mixture/bayesian-gaussian-mixture) | Variational Bayesian inference (Dirichlet Process / Dirichlet Distribution) | `'full'`, `'diag'` | Automatic pruning of redundant components when the true cluster count is unknown |
+
+Both classes extend `ClusterBase`, support reproducible `randomState` seeds, multiple restarts (`nInit`), and full JSON serialization with `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { Mixture, Datasets } from '@kanaries/ml';
+
+const { X } = Datasets.makeBlobs({ nSamples: 150, centers: 3, clusterStd: 0.7, randomState: 42 });
+
+const gmm = new Mixture.GaussianMixture({
+  nComponents: 3,
+  covarianceType: 'full',
+  nInit: 3,
+  randomState: 42,
+});
+
+gmm.fit(X);
+const labels = gmm.predict(X);
+const probs = gmm.predictProba(X);
+const bic = gmm.bic(X);
+```
+
+## Choosing between GMM, Bayesian GMM, and K-Means
+
+- Choose **[K-Means](/docs/apis/clusters/kmeans)** or **[E-Means](/docs/apis/clusters/eMeans)** when you want fast, spherical hard clustering on large vector sets.
+- Choose **[GaussianMixture](/docs/apis/mixture/gaussian-mixture)** when clusters are elliptical or overlapping, you need log-densities (`scoreSamples`), or you plan to pick `nComponents` with `aic()` / `bic()`.
+- Choose **[BayesianGaussianMixture](/docs/apis/mixture/bayesian-gaussian-mixture)** when you prefer to set an upper bound on `nComponents` and let variational priors shrink unused component weights toward zero automatically.
+- **Related pages**: [GaussianMixture](/docs/apis/mixture/gaussian-mixture), [BayesianGaussianMixture](/docs/apis/mixture/bayesian-gaussian-mixture), [Clustering Algorithms](/docs/apis/clusters), [Kernel Density Estimation](/docs/apis/kernel).

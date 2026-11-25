@@ -1,0 +1,120 @@
+---
+title: Model Serialization in JavaScript
+description: Save and load trained @kanaries/ml models in browser or Node.js using toJSON(), loadModel(), and fromJSON() with full Pipeline and typed-state support.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+In production machine learning workflows, training and inference rarely happen in the same process or at the same time. You might train a classifier or [`Pipeline`](/docs/apis/pipeline) in a Node.js build job, store the fitted artifact in object storage or `localStorage`, and load it later inside a browser tab, Web Worker, or serverless edge function for sub-millisecond inference.
+
+**Model serialization** converts both an estimator's hyperparameters (`params`) and its learned internal state (`state`) into a portable, self-describing JSON payload—and revives it back into a live estimator instance without retraining.
+
+## JavaScript implementation
+
+Every contract estimator in `@kanaries/ml` extends `Base.BaseEstimator` and ships with built-in JSON serialization—no `pickle`, binary blobs, or native addons required:
+
+- `model.toJSON()` returns a versioned `SerializedModel` object (`format: '@kanaries/ml-model'`, `formatVersion: 1`), so `JSON.stringify(model)` works out of the box.
+- `loadModel(json)` revives any registered estimator—including nested `Pipeline`, `ColumnTransformer`, `FeatureUnion`, `CalibratedClassifierCV`, `OneVsRestClassifier`, and `CSRMatrix` payloads—from either a JSON string or a parsed object.
+- `EstimatorClass.fromJSON(json)` provides a type-safe static revival helper that verifies the deserialized instance matches the expected class.
+
+Non-JSON JavaScript types used inside fitted states—such as `Float64Array`, `Int32Array`, `Map`, `Set`, `NaN`, `Infinity`, `-Infinity`, and `-0`—are encoded cleanly with tagged envelopes and restored faithfully on load. Prototype-polluting keys (`__proto__`, `constructor`, `prototype`) are explicitly rejected during deserialization.
+
+## Quick start example
+
+```ts
+import { makePipeline, loadModel, Linear, utils } from '@kanaries/ml';
+
+const XTrain = [[1, 10], [2, 12], [8, 2], [9, 1]];
+const yTrain = [0, 0, 1, 1];
+
+const pipe = makePipeline(
+  new utils.Preprocessing.StandardScaler(),
+  new Linear.LogisticRegression()
+);
+pipe.fit(XTrain, yTrain);
+
+// Serialize to a portable JSON string (works in Node.js and browser)
+const payload = JSON.stringify(pipe);
+
+// Revive anywhere (localStorage, IndexedDB, Web Worker, edge function)
+const loaded = loadModel(payload) as typeof pipe;
+console.log(loaded.predict([[1.5, 11], [8.5, 1.5]]));
+```
+
+<AlgorithmComparison
+  title="Save & Load Models"
+  pythonCode={String.raw`import joblib
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipe = make_pipeline(StandardScaler(), LogisticRegression())
+pipe.fit(X_train, y_train)
+
+joblib.dump(pipe, "model.joblib")
+loaded = joblib.load("model.joblib")
+preds = loaded.predict(X_test)`}
+  tsCode={String.raw`import { makePipeline, loadModel, Linear, utils } from '@kanaries/ml';
+
+const pipe = makePipeline(
+  new utils.Preprocessing.StandardScaler(),
+  new Linear.LogisticRegression()
+);
+pipe.fit(XTrain, yTrain);
+
+const payload = JSON.stringify(pipe);
+const loaded = loadModel(payload) as typeof pipe;
+const preds = loaded.predict(XTest);`}
+/>
+
+### Type-safe revival with `fromJSON()`
+
+When you know the exact estimator class at the call site, `fromJSON()` avoids manual type assertions and throws a clear error if the payload belongs to a different estimator:
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const points = [[0, 0], [0, 1], [10, 10], [10, 11]];
+const kmeans = new Clusters.KMeans({ k: 2, randomState: 42 });
+kmeans.fit(points);
+
+const json = JSON.stringify(kmeans);
+const restored = Clusters.KMeans.fromJSON(json);
+console.log(restored.predict([[0.2, 0.2], [9.8, 10.2]]));
+```
+
+## Detailed API reference
+
+### `SerializedModel` payload schema
+
+```ts
+interface SerializedModel {
+  format: '@kanaries/ml-model';
+  formatVersion: 1;
+  estimator: string;
+  params: unknown;
+  state: Record<string, unknown>;
+}
+```
+
+### Top-level & `Base` exports
+
+| Symbol | Signature | Description |
+| --- | --- | --- |
+| `loadModel` | `(json: SerializedModel \| string) => BaseEstimator` | Revives any serialized `@kanaries/ml` estimator from a JSON string or parsed `SerializedModel`. Throws if the format, version, or estimator registry entry is invalid. |
+| `model.toJSON()` | `() => SerializedModel` | Serializes hyperparameters and fitted state into a JSON-safe object. Automatically invoked by `JSON.stringify(model)`. |
+| `Class.fromJSON` | `(json: SerializedModel \| string) => BaseEstimator` | Static method on `BaseEstimator` subclasses that calls `loadModel(json)` and asserts `model instanceof Class`. |
+| `model.clone()` | `() => this` | Returns a fresh **unfitted** copy with identical hyperparameters, recursively cloning nested estimators inside pipelines or meta-estimators. |
+| `model.getParams()` | `() => Params` | Returns the estimator's current constructor parameters. |
+| `model.setParams(params)` | `(params: Params) => this` | Merges updated parameters and resets the estimator to the unfitted state, re-running constructor validation. Throws on unknown parameter names. |
+| `Base.registerEstimator` | `(name: string, ctor: AnyCtor) => void` | Registers a custom `BaseEstimator` subclass so `toJSON()` and `loadModel()` can serialize and revive it. |
+| `Base.getRegisteredEstimators` | `() => ReadonlyMap<string, AnyCtor>` | Inspects all estimator names registered in the current runtime. |
+
+### Production best practices
+
+1. **Import modules before calling `loadModel()`**: If your bundler tree-shakes unused modules, make sure the estimator's module (or `@kanaries/ml` namespace) is imported before calling `loadModel()`, otherwise the estimator registry will throw an `Unknown estimator` error.
+2. **Avoid custom function closures in serializable models**: Plain numbers, arrays, typed arrays, `Map`, `Set`, and nested estimators serialize cleanly, while arbitrary JavaScript functions cannot be serialized to JSON and throw a clear error in `encodeValue()`.
+3. **Store models alongside preprocessing**: Wrap scalers, encoders, and vectorizers inside a [`Pipeline`](/docs/apis/pipeline) before calling `JSON.stringify()` so inference never drifts from training preprocessing.
+4. **Related pages**: [ML Pipelines](/docs/apis/pipeline), [scikit-learn Equivalents](/docs/sklearn-equivalents), [Sparse Data (`CSRMatrix`)](/docs/apis/data).

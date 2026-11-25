@@ -1,0 +1,92 @@
+---
+title: Quadratic Discriminant Analysis in JS
+description: Train Quadratic Discriminant Analysis (QDA) classifiers with per-class covariances in JavaScript and TypeScript using @kanaries/ml for browser and Node.js.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+**Quadratic Discriminant Analysis (QDA)** is a generative Bayes classifier that fits a separate multivariate Gaussian—with its own mean vector and its own covariance matrix—to each class. Because covariances are not shared across classes, the log-posterior boundary between classes is **quadratic**, allowing QDA to separate elliptical, rotated, or nested class distributions that linear classifiers cannot split cleanly.
+
+QDA is most effective when:
+
+- Classes clearly differ in spread, correlation, or orientation.
+- Each class has enough training samples to estimate its covariance reliably (or `regParam` is tuned to stabilize small-sample classes).
+- You want closed-form training and calibrated Gaussian posterior probabilities (`predictProba`) without tuning a learning rate.
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `DiscriminantAnalysis.QuadraticDiscriminantAnalysis` and its short alias `DiscriminantAnalysis.QDA`. Rather than inverting dense covariance matrices explicitly, `@kanaries/ml` fits each class through a centered per-class SVD and regularizes covariance eigenvalues via `(1 - regParam) * s² + regParam`.
+
+A practical improvement over scikit-learn: on rank-deficient class data with `regParam: 0`, directions whose covariance eigenvalue is `≤ tol` are cleanly dropped from the Mahalanobis distance and log-determinant so predictions stay finite instead of producing `NaN` or `Infinity`.
+
+## Quick start example
+
+```ts
+import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const XTrain = [
+  [-2, -1], [-1.8, -1.5], [-2.2, -0.8], [-1.5, -1.1],
+  [2, 2], [4, 0], [0, 4], [3, 3],
+];
+const yTrain = [0, 0, 0, 0, 1, 1, 1, 1];
+
+const qda = new DiscriminantAnalysis.QuadraticDiscriminantAnalysis({
+  regParam: 0.1,
+});
+
+qda.fit(XTrain, yTrain);
+console.log({
+  preds: qda.predict([[-1.9, -1.0], [2.5, 2.5]]),
+  proba: qda.predictProba([[-1.9, -1.0], [2.5, 2.5]]),
+});
+```
+
+<AlgorithmComparison
+  title="QuadraticDiscriminantAnalysis (QDA)"
+  pythonCode={String.raw`from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+
+qda = QuadraticDiscriminantAnalysis(reg_param=0.1)
+qda.fit(X_train, y_train)
+preds = qda.predict(X_test)
+proba = qda.predict_proba(X_test)`}
+  tsCode={String.raw`import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const qda = new DiscriminantAnalysis.QuadraticDiscriminantAnalysis({
+  regParam: 0.1,
+});
+
+qda.fit(XTrain, yTrain);
+const preds = qda.predict(XTest);
+const proba = qda.predictProba(XTest);`}
+/>
+
+## Detailed API reference
+
+### `new DiscriminantAnalysis.QuadraticDiscriminantAnalysis(props?)`
+
+*(Also exported as `DiscriminantAnalysis.QDA`.)*
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `priors` | `number[]` | empirical class frequencies | Prior probabilities in sorted-class order. |
+| `regParam` | `number` | `0` | Regularization strength in `[0, 1]`. Blends each class covariance eigenvalue toward `1` via `(1 - regParam) * s² + regParam`. |
+| `tol` | `number` | `1e-4` | Eigenvalue rank threshold for dropping collinear directions during Mahalanobis scoring. |
+
+### Methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y: number[]) => void` | Estimates per-class means, priors, and SVD covariance factors (requires at least 2 classes). |
+| `predict` | `(testX: number[][]) => number[]` | Returns the class label maximizing `log P(x \| k) + log P(k)`. |
+| `predictProba` | `(testX: number[][]) => number[][]` | Returns softmax-normalized class posterior probabilities. |
+| `decisionFunction` | `(testX: number[][]) => number[] \| number[][]` | Returns signed binary log-posterior differences (`number[]`) for 2 classes or per-class log-posteriors (`number[][]`) for multiclass problems. |
+| `getClasses` / `getMeans` / `getPriors` | `() => number[]` / `number[][]` | Inspects sorted class labels, per-class means, and class priors. |
+| `getCovariance` | `() => number[][][]` | Reconstructs the `[nClasses][nFeatures][nFeatures]` per-class covariance matrices. |
+
+### Tuning tips
+
+- Increase `regParam` (for example `0.05` to `0.5`) when any class has relatively few samples compared to `nFeatures`, shrinking noisy per-class covariance estimates toward isotropic Gaussians.
+- Standardize features with [`StandardScaler`](/docs/apis/utils/preprocessing) when `regParam > 0`, because isotropic regularization assumes comparable feature scales.
+- **Related pages**: [Linear Discriminant Analysis (LDA)](/docs/apis/discriminant-analysis/lda), [Discriminant Analysis Overview](/docs/apis/discriminant-analysis), [Gaussian Naive Bayes](/docs/apis/bayes/gaussianNB), [GaussianMixture](/docs/apis/mixture/gaussian-mixture).

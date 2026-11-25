@@ -1,0 +1,109 @@
+---
+title: Linear Discriminant Analysis in JS
+description: Run Linear Discriminant Analysis (LDA) classification and supervised projection in JavaScript and TypeScript with @kanaries/ml using SVD or eigen solvers.
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Algorithm overview
+
+**Linear Discriminant Analysis (LDA)** is both a closed-form generative classifier and a supervised dimensionality-reduction technique. It models each class with a multivariate Gaussian sharing a common within-class covariance matrix, yielding linear decision boundaries without iterative gradient descent.
+
+As a transformer (`transform` / `fitTransform`), LDA finds linear combinations of features that maximize the ratio of **between-class scatter** to **within-class scatter**—unlike unsupervised [PCA](/docs/apis/decomposition/pca), which maximizes total variance regardless of class labels. This makes LDA ideal for visualizing class separation in 1D–2D charts or compressing correlated features inside a [`Pipeline`](/docs/apis/pipeline).
+
+## JavaScript implementation
+
+`@kanaries/ml` provides `DiscriminantAnalysis.LinearDiscriminantAnalysis` and its alias `DiscriminantAnalysis.LDA`. It implements scikit-learn's `'svd'` solver (default—avoids explicitly forming the covariance matrix, making it robust on high-dimensional or rank-deficient features) and `'eigen'` solver (solves the generalized eigenproblem with optional covariance `shrinkage` in `[0, 1]`).
+
+Everything runs synchronously in pure TypeScript across browsers and Node.js, and trained LDA models serialize cleanly with `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+## Quick start example
+
+```ts
+import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const XTrain = [
+  [-2, -1], [-1.5, -1.2], [-1, -2],
+  [1, 1], [1.5, 1.3], [2, 1.1],
+  [5, -2], [5.5, -1.8], [6, -2.2],
+];
+const yTrain = [0, 0, 0, 1, 1, 1, 2, 2, 2];
+
+const lda = new DiscriminantAnalysis.LinearDiscriminantAnalysis({
+  solver: 'svd',
+  nComponents: 2,
+});
+
+const projected = lda.fitTransform(XTrain, yTrain);
+const preds = lda.predict([[-1.4, -1.5], [1.2, 1.2], [5.4, -2.0]]);
+console.log({ preds, varianceRatio: lda.getExplainedVarianceRatio(), projectedShape: [projected.length, projected[0].length] });
+```
+
+<AlgorithmComparison
+  title="LinearDiscriminantAnalysis (LDA)"
+  pythonCode={String.raw`from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+lda = LinearDiscriminantAnalysis(solver="svd", n_components=2)
+X_proj = lda.fit_transform(X_train, y_train)
+preds = lda.predict(X_test)
+proba = lda.predict_proba(X_test)`}
+  tsCode={String.raw`import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const lda = new DiscriminantAnalysis.LinearDiscriminantAnalysis({
+  solver: 'svd',
+  nComponents: 2,
+});
+
+const XProj = lda.fitTransform(XTrain, yTrain);
+const preds = lda.predict(XTest);
+const proba = lda.predictProba(XTest);`}
+/>
+
+### Shrinkage LDA for high-dimensional data
+
+When `nFeatures` approaches `nSamples`, switch to `solver: 'eigen'` with `shrinkage` to regularize the within-class covariance toward a scaled identity matrix:
+
+```ts
+import { DiscriminantAnalysis } from '@kanaries/ml';
+
+const shrunkLda = new DiscriminantAnalysis.LDA({
+  solver: 'eigen',
+  shrinkage: 0.2,
+});
+shrunkLda.fit([[-2, -1], [-1, -2], [2, 1], [1, 2]], [0, 0, 1, 1]);
+console.log(shrunkLda.predict([[-1.5, -1.5], [1.5, 1.5]]));
+```
+
+## Detailed API reference
+
+### `new DiscriminantAnalysis.LinearDiscriminantAnalysis(props?)`
+
+*(Also exported as `DiscriminantAnalysis.LDA`.)*
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `solver` | `'svd' \| 'eigen'` | `'svd'` | `'svd'` avoids forming the covariance matrix and handles rank-deficient features cleanly; `'eigen'` solves `Sw⁻¹ Sb` and supports `shrinkage`. |
+| `shrinkage` | `number` | `undefined` | Shrinkage weight in `[0, 1]` for within-class covariance. Supported only when `solver: 'eigen'` (throws with `'svd'`). |
+| `priors` | `number[]` | empirical class frequencies | Custom class prior probabilities in sorted-class order. |
+| `nComponents` | `number` | `min(nClasses - 1, nFeatures)` | Number of discriminant components returned by `transform()` and `fitTransform()`. |
+| `tol` | `number` | `1e-4` | Singular-value rank threshold for the `'svd'` solver. |
+
+### Methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(X: number[][], y: number[]) => void` | Fits class means, priors, linear decision weights, and discriminant scalings. |
+| `predict` | `(testX: number[][]) => number[]` | Predicts the highest-posterior class label for each sample. |
+| `predictProba` | `(testX: number[][]) => number[][]` | Computes softmax-normalized class posterior probabilities. |
+| `decisionFunction` | `(testX: number[][]) => number[] \| number[][]` | Returns signed binary margins (`number[]`) for 2 classes or per-class scores (`number[][]`) for multiclass problems. |
+| `transform` | `(X: number[][]) => number[][]` | Projects `X` onto the top `nComponents` discriminant axes. |
+| `fitTransform` | `(X: number[][], y: number[]) => number[][]` | Fits LDA on `(X, y)` and returns `transform(X)`. |
+| `getClasses` / `getMeans` / `getPriors` | `() => number[]` / `number[][]` | Inspects sorted labels, per-class feature means, and class priors. |
+| `getCoef` / `getIntercept` | `() => number[][]` / `number[]` | Returns linear scoring coefficients and intercepts. |
+| `getScalings` / `getExplainedVarianceRatio` | `() => number[][]` / `number[]` | Returns discriminant projection vectors and fraction of between-class variance explained per axis. |
+
+### Compatibility & practical notes
+
+- **Maximum projection dimensions**: LDA can extract at most `min(nClasses - 1, nFeatures)` components—so binary classification produces at most 1 discriminant axis.
+- **sklearn note**: scikit-learn's `'lsqr'` solver is omitted intentionally because it produces the same classifier as `'eigen'` without supporting `transform()`.
+- **Related pages**: [Quadratic Discriminant Analysis (QDA)](/docs/apis/discriminant-analysis/qda), [Discriminant Analysis Overview](/docs/apis/discriminant-analysis), [PCA](/docs/apis/decomposition/pca), [ML Pipelines](/docs/apis/pipeline).
