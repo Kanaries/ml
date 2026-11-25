@@ -1,9 +1,11 @@
-import subprocess, os, sys
+import subprocess
+import sys
+from pathlib import Path
 
-here = os.path.dirname(os.path.abspath(__file__))
+here = Path(__file__).resolve().parent
 
 def run(script):
-    subprocess.run([sys.executable, os.path.join(here, script)], check=True)
+    subprocess.run([sys.executable, here / script], cwd=here.parent, check=True)
 
 scripts = [
     'gen_linear_regression.py',
@@ -66,5 +68,24 @@ scripts = [
     'gen_phase3_e2e.py'
 ]
 
-for s in scripts:
-    run(s)
+def fixture_versions(directory):
+    versions = {}
+    for path in directory.rglob('*'):
+        if path.name.endswith(('.json', '.json.gz')) and path.is_file():
+            stat = path.stat()
+            versions[path.relative_to(directory).as_posix()] = (stat.st_ino, stat.st_mtime_ns, stat.st_ctime_ns)
+    return versions
+
+
+if __name__ == '__main__':
+    directory = here.parent / 'test_data'
+    directory.mkdir(exist_ok=True)
+    before = fixture_versions(directory)
+    for script in scripts:
+        run(script)
+    after = fixture_versions(directory)
+    # A deterministic generator can write exactly the same bytes again.
+    written = sorted(name for name, version in after.items() if before.get(name) != version)
+    reused = sorted(after.keys() - set(written))
+    print(f'Regenerated ({len(written)}): {", ".join(written) or "none"}')
+    print(f'Reused existing fixtures ({len(reused)}): {", ".join(reused) or "none"}')
