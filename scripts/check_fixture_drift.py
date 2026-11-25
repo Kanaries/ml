@@ -17,6 +17,7 @@ committed fixture — still fails loudly; cross-platform float noise does not.
 
 Usage: python scripts/check_fixture_drift.py   (after `yarn gen-data`)
 """
+import gzip
 import json
 import math
 import subprocess
@@ -43,20 +44,29 @@ CHAOTIC_REL_RMSE = 0.5
 repo = Path(__file__).resolve().parent.parent
 
 
+FIXTURE_SUFFIXES = ('.json', '.json.gz')
+
+
 def committed_fixtures():
     out = subprocess.run(
-        ['git', 'ls-files', 'test_data/*.json'],
+        ['git', 'ls-tree', '-r', '--name-only', 'HEAD', '--', 'test_data'],
         cwd=repo, capture_output=True, text=True, check=True,
-    ).stdout.split()
-    return sorted(out)
+    ).stdout.splitlines()
+    return [name for name in out if name.endswith(FIXTURE_SUFFIXES)]
+
+
+def parse_fixture(path, data):
+    if path.endswith('.gz'):
+        data = gzip.decompress(data)
+    return json.loads(data)
 
 
 def committed_content(path):
     out = subprocess.run(
         ['git', 'show', f'HEAD:{path}'],
-        cwd=repo, capture_output=True, text=True, check=True,
+        cwd=repo, capture_output=True, check=True,
     ).stdout
-    return json.loads(out)
+    return parse_fixture(path, out)
 
 
 def compare(a, b, path, errors):
@@ -112,7 +122,11 @@ def main():
             failed.append((rel, [f'{rel}: committed fixture was not regenerated']))
             continue
         baseline = committed_content(rel)
-        regenerated = json.loads(f.read_text())
+        try:
+            regenerated = parse_fixture(rel, f.read_bytes())
+        except (OSError, EOFError, ValueError) as error:
+            failed.append((rel, [f'{rel}: invalid fixture: {error}']))
+            continue
         errors = []
         chaotic = CHAOTIC_FIELDS.get(rel, set())
         if chaotic and isinstance(baseline, dict) and isinstance(regenerated, dict):
@@ -126,8 +140,10 @@ def main():
 
     # generated fixtures that are not committed at all
     tracked_set = set(tracked)
-    for f in sorted((repo / 'test_data').glob('*.json')):
-        rel = f'test_data/{f.name}'
+    for f in sorted((repo / 'test_data').rglob('*')):
+        if not f.is_file() or not f.name.endswith(FIXTURE_SUFFIXES):
+            continue
+        rel = f.relative_to(repo).as_posix()
         if rel not in tracked_set:
             failed.append((rel, [f'{rel}: generated but not committed (git add it)']))
 
