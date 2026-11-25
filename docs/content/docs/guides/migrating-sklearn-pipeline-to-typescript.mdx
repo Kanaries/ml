@@ -1,0 +1,164 @@
+---
+title: Migrate a scikit-learn Pipeline to TypeScript
+description: Port a Python scikit-learn Pipeline, ColumnTransformer, cross-validation, and joblib artifact workflow to TypeScript with @kanaries/ml and loadModel().
+---
+
+import { AlgorithmComparison } from '@/components/algorithmComparison';
+
+## Why migrate a scikit-learn pipeline to TypeScript?
+
+Many product teams prototype tabular or text models in Python with `scikit-learn`, then hit an architectural wall when deploying to production:
+
+- Maintaining a separate Python microservice just to score a logistic regression, gradient-boosted tree, or TF-IDF classifier adds network latency, extra containers, and schema drift between TypeScript app code and Python preprocessing.
+- Frontend analytics features (instant CSV scoring, interactive what-if sliders, privacy-first local segmentation) cannot call a Python runtime in the browser without shipping heavy WebAssembly wheels.
+
+Because `@kanaries/ml` mirrors scikit-learn's **estimator contract** (`fit`, `predict`, `predictProba`, `transform`, `getParams`, `setParams`, `clone`), **pipeline composition** (`Pipeline`, `makePipeline`, `ColumnTransformer`, `FeatureUnion`), and **cross-validation utilities**, you can translate an end-to-end scikit-learn workflow into pure TypeScript in under an hour.
+
+## Step 1: Map your Python imports to `@kanaries/ml` namespaces
+
+`@kanaries/ml` groups estimators by domain namespace matching scikit-learn's module tree:
+
+| Python (`scikit-learn`) | TypeScript (`@kanaries/ml`) |
+| --- | --- |
+| `sklearn.pipeline.Pipeline`, `make_pipeline`, `FeatureUnion` | `Pipeline`, `makePipeline`, `FeatureUnion` (root or `MLPipeline`) |
+| `sklearn.compose.ColumnTransformer` | `ColumnTransformer` (root or `MLPipeline`) |
+| `sklearn.preprocessing.StandardScaler`, `MinMaxScaler`, `OneHotEncoder` | `utils.Preprocessing.StandardScaler`, `MinMaxScaler`, `OneHotEncoder` |
+| `sklearn.impute.SimpleImputer` / `IterativeImputer` | `utils.Preprocessing.SimpleImputer` / `Impute.IterativeImputer` |
+| `sklearn.model_selection.train_test_split`, `StratifiedKFold`, `GridSearchCV` | `utils.Sampling.trainTestSplit`, `utils.ModelSelection.StratifiedKFold`, `GridSearchCV` |
+| `sklearn.linear_model.*` | `Linear.*` (`LogisticRegression`, `Ridge`, `Lasso`, `ElasticNet`, etc.) |
+| `sklearn.ensemble.*` | `Ensemble.*` (`RandomForestClassifier`, `GradientBoostingClassifier`, `IsolationForest`, etc.) |
+| `sklearn.metrics.*` | `Metrics.*` (`accuracyScore`, `f1Score`, `rocAucScore`, `confusionMatrix`, etc.) |
+| `joblib.dump` / `joblib.load` | `JSON.stringify(model)` (`toJSON()`) / `loadModel(json)` |
+
+See the complete lookup table in [scikit-learn Equivalents in JS & TypeScript](/docs/sklearn-equivalents).
+
+## Step 2: Translate `ColumnTransformer` + `Pipeline` side by side
+
+Notice the two primary syntactic shifts when porting from Python to TypeScript:
+
+1. **Options objects & camelCase**: most newer estimators use camelCase props (`maxIter`, `randomState`, `nEstimators`) inside a single options object (check individual API pages for legacy snake_case props such as `KMeans` `n_clusters` or `IsolationForest` `tree_num`).
+2. **Numeric column indices**: `ColumnTransformer` selects slices by zero-based column indices (`number[]`) over numeric `number[][]` matrices rather than pandas DataFrame column name strings. Keep a small `COLUMNS` constant map in TypeScript so feature ordering stays self-documenting and type-safe.
+
+<AlgorithmComparison
+  title="End-to-End Tabular Pipeline: Python vs TypeScript"
+  pythonCode={String.raw`import joblib
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import IterativeImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num_std", StandardScaler(), [0, 1]),
+        ("num_ratio", MinMaxScaler(), [2]),
+        ("flags", "passthrough", [3]),
+    ],
+    remainder="drop",
+)
+
+pipe = Pipeline([
+    ("impute", IterativeImputer(max_iter=10, random_state=42)),
+    ("prep", preprocessor),
+    ("clf", LogisticRegression(max_iter=300)),
+])
+
+pipe.fit(X_train, y_train)
+preds = pipe.predict(X_test)
+print("F1:", f1_score(y_test, preds))
+
+joblib.dump(pipe, "churn_pipeline.joblib")`}
+  tsCode={String.raw`import {
+  Pipeline,
+  ColumnTransformer,
+  Impute,
+  Linear,
+  Metrics,
+  utils,
+  loadModel,
+} from '@kanaries/ml';
+
+const { XTrain, XTest, yTrain, yTest } = utils.Sampling.trainTestSplit(X, y, {
+  testSize: 0.2,
+  randomState: 42,
+});
+
+const preprocessor = new ColumnTransformer({
+  transformers: [
+    ['num_std', new utils.Preprocessing.StandardScaler(), [0, 1]],
+    ['num_ratio', new utils.Preprocessing.MinMaxScaler(), [2]],
+    ['flags', 'passthrough', [3]],
+  ],
+  remainder: 'drop',
+});
+
+const pipe = new Pipeline({
+  steps: [
+    ['impute', new Impute.IterativeImputer({ maxIter: 10, randomState: 42 })],
+    ['prep', preprocessor],
+    ['clf', new Linear.LogisticRegression({ maxIter: 300 })],
+  ],
+});
+
+pipe.fit(XTrain, yTrain);
+const preds = pipe.predict(XTest);
+console.log('F1:', Metrics.f1Score(yTest!, preds));
+
+// Portable JSON artifact replacing joblib
+const serialized = JSON.stringify(pipe);
+const restored = loadModel(serialized) as typeof pipe;`}
+/>
+
+## Step 3: Tune nested parameters with `step__param` & `GridSearchCV`
+
+Just like scikit-learn, `Pipeline`, `ColumnTransformer`, `FeatureUnion`, `OneVsRestClassifier`, and `TransformedTargetRegressor` support double-underscore (`__`) parameter routing in `setParams()` and `GridSearchCV`:
+
+```ts
+import { Pipeline, Linear, utils } from '@kanaries/ml';
+
+const pipe = new Pipeline({
+  steps: [
+    ['scaler', new utils.Preprocessing.StandardScaler()],
+    ['reg', new Linear.RidgeRegression({ alpha: 1.0 })],
+  ],
+});
+
+// Update nested hyperparameters directly
+pipe.setParams({
+  scaler__withMean: true,
+  reg__alpha: 0.25,
+});
+
+const search = new utils.ModelSelection.GridSearchCV(
+  pipe,
+  { reg__alpha: [0.01, 0.1, 1.0, 10.0] },
+  { cv: 5 }
+);
+search.fit(XTrain, yTrain);
+console.log(search.bestParams, search.bestScore);
+```
+
+## Step 4: Verify numerical parity before cutting over
+
+When migrating a production model from Python to TypeScript, never expect bit-for-bit identical internal floats across completely different PRNG streams or solver stopping tolerances. Instead, run a **parity test suite** on a frozen golden dataset:
+
+1. **Export a fixed test fixture** (`X_train`, `y_train`, `X_test`, `y_test`, and Python reference predictions/scores) to JSON from your existing scikit-learn notebook.
+2. **Verify conventions that intentionally differ**:
+   - **`IsolationForest` labels**: `@kanaries/ml` returns `1` (anomaly) / `0` (normal); scikit-learn returns `-1` (anomaly) / `1` (normal).
+   - **Class ordering**: verify `predictProba` column order matches sorted unique numeric class labels.
+   - **Text `maxDf` threshold**: in JavaScript there is only one `number` type, so `maxDf: 1` means `100%` (proportion) rather than an absolute count of `1` document.
+3. **Assert tolerance on business metrics**: compare held-out accuracy, macro-F1, ROC-AUC, or RMSE (for example within `±1–2%` for stochastic tree ensembles, or `< 1e-4` for closed-form linear/SVD estimators like Ridge, PCA, LDA, and QDA).
+4. **Verify serialization round-trip**: assert that `loadModel(JSON.stringify(pipe)).predict(XTest)` matches `pipe.predict(XTest)` identically to `1e-12` before deploying to browser or Edge workers.
+
+### Next steps
+
+- [ML Pipelines API Reference](/docs/apis/pipeline)
+- [Model Serialization (`toJSON` / `loadModel`)](/docs/apis/serialization)
+- [Classical ML in Edge & Web Workers](/docs/guides/edge-and-web-workers-ml)
+- [JS ML Libraries: `@kanaries/ml` vs TensorFlow.js & Pyodide](/docs/guides/javascript-ml-libraries-comparison)

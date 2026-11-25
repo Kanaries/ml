@@ -1,0 +1,143 @@
+---
+title: Classical ML in Edge & Web Workers (JS/TS)
+description: Run classical ML training and inference in Cloudflare Workers, Vercel Edge, and browser Web Workers with pure TypeScript @kanaries/ml and JSON models.
+---
+
+## Why run classical ML in Edge runtimes and Web Workers?
+
+Modern web products run JavaScript across three distinct execution environments:
+
+1. **Browser Web Workers**: keeps UI rendering at 60 FPS while fitting clustering, PCA, or anomaly detection locally on user-uploaded CSVs—zero server cost, zero PII leaving the user's device.
+2. **Edge Runtimes (Cloudflare Workers, Vercel Edge Functions, Deno Deploy)**: delivers sub-10ms global inference close to the user for fraud heuristics, text classification, lead scoring, or anomaly gating—without maintaining a Python container cluster.
+3. **Node.js Backend Services**: runs periodic batch training, cross-validation (`GridSearchCV`), and publishes lightweight versioned JSON artifacts directly into object storage, KV, or your application bundle.
+
+Because `@kanaries/ml` is written in **pure TypeScript with zero native C++ addons, zero filesystem assumptions, and built-in JSON serialization (`toJSON()` / `loadModel()`)**, the exact same estimator code runs identically across all three environments.
+
+## Pattern 1: Train in Node.js, infer at the Edge
+
+Edge runtimes impose strict CPU time limits (often 10–50 ms per request) and bundle size ceilings, and they forbid native binaries. The cleanest architecture splits training from serving:
+
+1. **Offline / CI training (Node.js)**: fit your [`Pipeline`](/docs/apis/pipeline) (including scalers, [`ColumnTransformer`](/docs/apis/pipeline/column-transformer), [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer), and estimator), validate metrics, and write `JSON.stringify(pipe)` to `model.json` or Cloudflare KV / R2.
+2. **Cold-start revival (Edge module scope)**: call [`loadModel()`](/docs/apis/serialization) **once at module initialization** (or lazily cached per isolate), then run pure-JS `predict()` / `predictProba()` on every incoming HTTP request in microseconds.
+
+### Step 1: Train & export artifact in Node.js
+
+```ts
+import fs from 'node:fs';
+import { Pipeline, FeatureExtraction, Bayes } from '@kanaries/ml';
+
+const textPipe = new Pipeline({
+  steps: [
+    ['tfidf', new FeatureExtraction.TfidfVectorizer({ ngramRange: [1, 2], maxFeatures: 3000 })],
+    ['nb', new Bayes.ComplementNB({ alpha: 0.5, norm: true })],
+  ],
+});
+
+textPipe.fit(trainingTickets, trainingLabels);
+fs.writeFileSync('./artifacts/ticket-router.json', JSON.stringify(textPipe));
+```
+
+### Step 2: Serve at the Edge (Cloudflare Worker / Vercel Edge)
+
+Remember to import the modules referenced by your serialized pipeline (`Pipeline`, `FeatureExtraction`, `Bayes`) so tree-shaking bundlers register those classes before `loadModel()` executes:
+
+```ts
+import { Pipeline, FeatureExtraction, Bayes, loadModel } from '@kanaries/ml';
+import modelJson from './artifacts/ticket-router.json';
+
+// Keep references alive for tree-shakers & revive once per isolate
+void [Pipeline, FeatureExtraction, Bayes];
+const routerModel = loadModel(modelJson as unknown as string) as Pipeline;
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const { text } = (await request.json()) as { text: string };
+    const [predictedClass] = routerModel.predict([text]);
+    return Response.json({ category: predictedClass });
+  },
+};
+```
+
+## Pattern 2: Offload browser training to a Web Worker
+
+Fitting K-Means on 5,000 rows, HDBSCAN on 2,000 points, or Random Forest with 100 trees on the browser main thread can block click handlers and animations for hundreds of milliseconds. Moving fitting into a dedicated **Web Worker** keeps the interface completely responsive and lets you cancel stale runs when users drag sliders quickly.
+
+### `ml.worker.ts`
+
+```ts
+import { Clusters, utils, Pipeline } from '@kanaries/ml';
+
+interface ClusterRequest {
+  id: number;
+  rows: number[][];
+  nClusters: number;
+}
+
+self.onmessage = (event: MessageEvent<ClusterRequest>) => {
+  const { id, rows, nClusters } = event.data;
+
+  const scaler = new utils.Preprocessing.StandardScaler();
+  const scaled = scaler.fitTransform(rows);
+
+  const kmeans = new Clusters.KMeans({
+    n_clusters: nClusters,
+    n_init: 5,
+    random_state: 42,
+  });
+  const labels = kmeans.fitPredict(scaled);
+
+  self.postMessage({
+    id,
+    labels,
+    centroids: kmeans.getCentroids(),
+    inertia: kmeans.getInertia(),
+    serializedModel: JSON.stringify(kmeans),
+  });
+};
+```
+
+### React / browser client caller
+
+```ts
+const worker = new Worker(new URL('./ml.worker.ts', import.meta.url), { type: 'module' });
+let requestSeq = 0;
+
+export function runClusteringInWorker(rows: number[][], nClusters: number) {
+  const id = ++requestSeq;
+  return new Promise<{ labels: number[]; inertia: number }>((resolve) => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.data.id !== id) return; // ignore superseded slider drags
+      worker.removeEventListener('message', onMessage);
+      resolve(e.data);
+    };
+    worker.addEventListener('message', onMessage);
+    worker.postMessage({ id, rows, nClusters });
+  });
+}
+```
+
+## Practical performance & memory budgets
+
+Use these rules of thumb when sizing models for browser tabs and edge isolates:
+
+| Workload | Recommended estimator choice | Typical payload & latency target |
+| --- | --- | --- |
+| **Edge classification (< 1 ms inference)** | `Linear.LogisticRegression`, `Linear.RidgeClassifier`, `DiscriminantAnalysis.LDA`, `Bayes.ComplementNB` | 5–150 KB JSON; < 0.2 ms per prediction |
+| **Edge non-linear tabular scoring** | `Ensemble.RandomForestClassifier` or `XGBoostClassifier` with capped `max_depth: 6..8`, `nEstimators: 30..80` | 50–500 KB JSON; < 1 ms per prediction |
+| **Browser clustering on 10,000+ vectors** | [`Clusters.EMeans`](/docs/apis/clusters/eMeans) or [`Clusters.Birch`](/docs/apis/clusters/advancedClustering) inside a Web Worker | Avoid `O(n²)` methods (`AffinityPropagation`, `Isomap`, `KernelPCA`) above ~1,500 rows |
+| **High-dimensional text in browser/Edge** | [`FeatureExtraction.TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer) with `maxFeatures: 3000..10000` + [`CSRMatrix`](/docs/apis/data), or stateless [`HashingVectorizer`](/docs/apis/feature_extraction/hashingAndDictionaries) | Keeps memory proportional to non-zeros (`nnz`), not `docs × vocab` |
+| **Large streaming PCA in browser** | [`Decomposition.IncrementalPCA`](/docs/apis/decomposition/incrementalPCA) via `partialFit(chunk)` | Constant memory per batch |
+
+## Caching & serialization checklist for production
+
+1. **Always serialize the entire `Pipeline`**: never ship a raw classifier JSON without its `StandardScaler`, `IterativeImputer`, or `TfidfVectorizer` step, or inference preprocessing will drift.
+2. **Revive once per isolate/worker**: parse JSON and call `loadModel()` once at module startup (or cache in an LRU map keyed by model version), not inside every request handler.
+3. **Avoid non-serializable closures**: prefer built-in named transforms (e.g., `FunctionTransformer({ func: 'log1p', inverseFunc: 'expm1' })`) over custom arrow functions so `toJSON()` succeeds without error.
+4. **Keep deterministic seeds (`randomState`)**: pin seeds across Node.js training jobs and browser demos so serialized outputs are reproducible across CI checks.
+
+### Related resources
+
+- [Model Serialization (`toJSON` / `loadModel`) API](/docs/apis/serialization)
+- [ML Pipelines API](/docs/apis/pipeline)
+- [JS ML Libraries: `@kanaries/ml` vs TensorFlow.js & Pyodide](/docs/guides/javascript-ml-libraries-comparison)
+- [Migrating a scikit-learn Pipeline to TypeScript](/docs/guides/migrating-sklearn-pipeline-to-typescript)

@@ -1,0 +1,94 @@
+---
+title: JS ML Libraries vs TensorFlow.js & Pyodide
+description: Compare @kanaries/ml, TensorFlow.js, scikit.js, and Pyodide for browser and Node.js ML across bundle size, classical tabular algorithms, and edge runtimes.
+---
+
+## Why choosing the right JavaScript ML runtime matters
+
+When engineering teams decide to move machine learning out of a Python microservice and into a **browser tab, Web Worker, Node.js API, or edge runtime**, they quickly discover that "JavaScript ML" is not a single category. A library built for GPU tensor graphs solves a very different problem from a library built for classical tabular models, or a WebAssembly port of the entire CPython scientific stack.
+
+Picking the wrong runtime usually leads to one of three costly mistakes:
+
+- Shipping a **15–40 MB WebAssembly Python runtime** into a browser just to run K-Means, PCA, or Logistic Regression on a 500-row CSV.
+- Trying to hand-build **decision trees, Isolation Forest, DBSCAN, or TF-IDF pipelines** on top of a neural-network tensor framework that was never designed for tree splits or sparse CSR text matrices.
+- Relying on native C++ Node.js bindings (`node-gyp`) that fail to install on ARM laptops, break in Cloudflare Workers / Vercel Edge, and cannot run in the browser at all.
+
+This guide gives a candid, engineering-level comparison of **`@kanaries/ml`**, **TensorFlow.js**, **scikit.js**, and **Pyodide** so you can pick the right tool—or combine them cleanly.
+
+## Side-by-side comparison matrix
+
+| Dimension | `@kanaries/ml` | TensorFlow.js (`@tensorflow/tfjs`) | `scikitjs` | Pyodide (CPython + scikit-learn in WASM) |
+| --- | --- | --- | --- | --- |
+| **Primary strength** | Classical tabular ML, clustering, anomaly detection, text TF-IDF, pipelines | Deep learning, CNNs, embeddings, WebGL/WebGPU tensor ops | Thin TensorFlow.js wrapper over a subset of sklearn estimators | Full Python `scikit-learn` / `numpy` / `scipy` compatibility in browser |
+| **Runtime architecture** | Pure TypeScript, zero native binaries | JS + WebGL / WebGPU / WASM / native C++ (`tfjs-node`) | Requires TensorFlow.js tensor backend | Full WebAssembly CPython interpreter + wheel loader |
+| **Typical cold-start & payload** | Tens to low hundreds of KB (tree-shakeable ESM) | ~1–4 MB JS + backend shaders/WASM | TF.js payload + wrapper overhead | ~15–40+ MB WASM + `numpy`/`scipy`/`scikit-learn` wheels; multi-second startup |
+| **Edge runtimes (Cloudflare Workers / Vercel Edge)** | Runs natively (pure JS/TS, no native addons) | Limited (no WebGL/WebGPU; CPU backend or custom WASM only) | Limited by TF.js backend constraints | Impractical for standard edge memory & cold-start budgets |
+| **Classical estimators (Trees, Forests, SVM, GMM, HDBSCAN, IsolationForest, LOF, LDA/QDA)** | Broad native coverage (35+ modules) | Not built-in (neural layers & tensors only) | Partial subset; maintenance lags behind core sklearn | Complete scikit-learn coverage |
+| **Composable `Pipeline` & `ColumnTransformer`** | Native (`Pipeline`, `ColumnTransformer`, `FeatureUnion`) | Keras `Sequential`/Functional layers (tensors, not tabular pipelines) | Partial | Complete scikit-learn pipelines |
+| **Model persistence** | Built-in portable JSON (`toJSON()` / `loadModel()`) | `model.json` + binary weight shards | TF.js / custom state | `pickle` / `joblib` inside WASM virtual filesystem |
+| **Best hardware accelerator** | Single-threaded JS / Web Workers | GPU (WebGL / WebGPU / CUDA in Node) | TensorFlow.js backend | Single-threaded WASM CPU |
+
+## When to choose each library
+
+### 1. Choose `@kanaries/ml` for classical ML in browser, Node.js, and Edge
+
+`@kanaries/ml` is purpose-built for **classical tabular, clustering, anomaly-detection, dimensionality-reduction, and text-vectorization workflows** in pure TypeScript with a scikit-learn-like API.
+
+Choose `@kanaries/ml` when you need:
+
+- **Zero-upload privacy in browser tools**: run [K-Means](/docs/apis/clusters/kmeans), [Isolation Forest](/docs/apis/ensemble/iforest), [PCA](/docs/apis/decomposition/pca), [Logistic Regression](/docs/apis/linear/logisticRegression), or [Random Forest](/docs/apis/ensemble/randomForestClassifier) directly on user CSVs or interactive dashboard filters without sending data to a backend.
+- **Tiny cold starts in Node.js & Edge functions**: load a trained [`Pipeline`](/docs/apis/pipeline) JSON artifact with [`loadModel()`](/docs/apis/serialization) in sub-millisecond time inside Cloudflare Workers, Vercel Edge, or AWS Lambda without Python sidecars.
+- **Full tabular ML ergonomics in TypeScript**: combine [`ColumnTransformer`](/docs/apis/pipeline/column-transformer), [`IterativeImputer`](/docs/apis/impute/iterativeImputer), [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer), [`CSRMatrix`](/docs/apis/data), [`CalibratedClassifierCV`](/docs/apis/calibration), and [`Metrics`](/docs/apis/metrics) with strong static typing.
+
+### 2. Choose TensorFlow.js (or ONNX Runtime Web) for neural networks & GPU inference
+
+If your problem involves **vision (CNNs), audio spectrograms, transformer embeddings, or custom autodiff neural networks**, GPU matrix multiplication is non-negotiable. TensorFlow.js (with WebGL/WebGPU backends) or `onnxruntime-web` will outperform pure-JavaScript CPU loops by orders of magnitude on dense tensor workloads.
+
+A very common hybrid architecture uses **TensorFlow.js / ONNX** to compute dense embeddings and **`@kanaries/ml`** to run fast downstream clustering ([`Clusters.EMeans`](/docs/apis/clusters/eMeans), [`Clusters.HDBSCAN`](/docs/apis/clusters/hdbscan)), projection ([`Decomposition.PCA`](/docs/apis/decomposition/pca)), or anomaly scoring ([`Ensemble.IsolationForest`](/docs/apis/ensemble/iforest)) over those embeddings right in the browser.
+
+### 3. Choose `scikitjs` only if you are already standardized on TensorFlow.js tensors
+
+`scikitjs` wraps TensorFlow.js tensors with familiar scikit-learn method names. If your pipeline already lives exclusively inside `tf.Tensor` objects and you only need a small subset of basic estimators, it can bridge the gap. However, carrying the full TensorFlow.js runtime (and manual tensor memory disposal via `tf.tidy()`) is unnecessary overhead for plain `number[][]` tabular arrays, tree ensembles, sparse text, or serverless edge functions.
+
+### 4. Choose Pyodide when you need verbatim Python notebooks in the browser
+
+If you are building an in-browser Jupyter notebook (like JupyterLite), teaching a Python data-science course, or executing arbitrary user-authored Python scripts that rely on obscure `scipy.stats` or `scikit-learn` internals, Pyodide is unmatched. The tradeoff is UX and operational footprint: downloading 20–40 MB of WebAssembly wheels and booting CPython takes seconds—acceptable in an IDE/notebook tab, unacceptable for a responsive consumer SaaS widget or edge middleware.
+
+## Concrete workflow comparison: tabular pipeline in TypeScript
+
+Notice how clean a complete preprocessing + model + JSON serialization flow looks with `@kanaries/ml` compared to maintaining a separate Python service or managing GPU tensor lifecycles:
+
+```ts
+import { Pipeline, loadModel, Linear, utils, Metrics } from '@kanaries/ml';
+
+const XTrain = [[1, 100], [2, 110], [8, 20], [9, 15], [1.5, 105], [8.5, 18]];
+const yTrain = [0, 0, 1, 1, 0, 1];
+
+const pipe = new Pipeline({
+  steps: [
+    ['scaler', new utils.Preprocessing.StandardScaler()],
+    ['clf', new Linear.LogisticRegression({ maxIter: 200 })],
+  ],
+});
+
+pipe.fit(XTrain, yTrain);
+
+// Portable JSON artifact — works in localStorage, KV, S3, or Edge bundles
+const artifact = JSON.stringify(pipe);
+const restored = loadModel(artifact) as typeof pipe;
+
+const preds = restored.predict([[1.8, 108], [8.2, 19]]);
+console.log({ preds, accuracy: Metrics.accuracyScore([0, 1], preds) });
+```
+
+## Summary decision checklist
+
+1. **Deep learning / vision / GPU tensors?** → TensorFlow.js or ONNX Runtime Web.
+2. **In-browser Python IDE / exact CPython scientific stack?** → Pyodide.
+3. **Classical tabular ML, clustering, anomaly detection, TF-IDF, or lightweight Edge/Web Worker inference in TypeScript?** → `@kanaries/ml`.
+
+### Next steps
+
+- Check exact class mappings in [scikit-learn Equivalents in JS & TypeScript](/docs/sklearn-equivalents).
+- Learn how to ship zero-lag browser and edge inference in [Classical ML in Edge & Web Workers](/docs/guides/edge-and-web-workers-ml).
+- Walk through a real port in [Migrating a scikit-learn Pipeline to TypeScript](/docs/guides/migrating-sklearn-pipeline-to-typescript).
