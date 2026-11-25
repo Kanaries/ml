@@ -1,32 +1,74 @@
 ---
 title: Local Outlier Factor in JavaScript with @kanaries/ml
-description: Detect density-based local anomalies in JavaScript or TypeScript with the LocalOutlierFactor implementation in @kanaries/ml for browser and Node.js.
+description: Detect density-based local anomalies and novelties in JavaScript and TypeScript with Neighbors.LocalOutlierFactor from @kanaries/ml for browser and Node.js.
 ---
 
-# Local Outlier Factor in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Local Outlier Factor (LOF) compares a sample's local reachability density with the densities of its nearest neighbors. It is useful when anomalies live in sparse local regions even though the dataset has several clusters with different densities.
+**Local Outlier Factor (LOF)** is an unsupervised anomaly-detection algorithm that compares each sample's **local reachability density** against the densities of its `nNeighbors` nearest neighbors. Points residing in a region substantially sparser than their immediate neighborhood receive a high LOF ratio (strongly negative `negativeOutlierFactor`) and are flagged as outliers (`-1`).
+
+LOF solves a classic failure mode of global anomaly detectors: when a dataset contains **multiple clusters of different densities** (for example, one tightly packed urban cluster and one broad rural cluster), global distance thresholds either miss anomalies hovering near the dense cluster or falsely flag normal points inside the sparse cluster. Because LOF normalizes every point relative to its *local* neighborhood, it catches both cleanly.
 
 ## JavaScript implementation
 
-`Neighbors.LocalOutlierFactor` runs density-based anomaly detection in browser or Node.js code. Training-set detection and novelty detection are deliberately separate, matching sklearn's two usage modes.
+`Neighbors.LocalOutlierFactor` runs in pure TypeScript across browsers and Node.js and mirrors scikit-learn's two explicit operating modes:
+
+- **Outlier detection (`novelty: false`, default)**: call `fitPredict(X)` to flag anomalies inside the training batch itself (`1` = inlier, `-1` = outlier).
+- **Novelty detection (`novelty: true`)**: call `fit(XClean)` on normal data, then call `predict(XNew)`, `decisionFunction(XNew)`, or `scoreSamples(XNew)` on unseen production rows—and serialize the fitted detector with `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
 ```ts
 import { Neighbors } from '@kanaries/ml';
 
-const X = [[0, 0], [.1, .2], [.2, .1], [1, 1], [8, 8]];
-const labels = new Neighbors.LocalOutlierFactor({ nNeighbors: 2, contamination: .2 })
-  .fitPredict(X);
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [1, 1], [8, 8]];
+const labels = new Neighbors.LocalOutlierFactor({
+  nNeighbors: 2,
+  contamination: 0.2,
+}).fitPredict(X);
 
 const novelty = new Neighbors.LocalOutlierFactor({ nNeighbors: 2, novelty: true });
 novelty.fit(X);
-console.log(novelty.predict([[.15, .1], [20, 20]]));
+console.log({ labels, noveltyPreds: novelty.predict([[0.15, 0.1], [20, 20]]) });
 ```
+
+<AlgorithmComparison
+  title="LocalOutlierFactor (LOF)"
+  pythonCode={String.raw`from sklearn.neighbors import LocalOutlierFactor
+
+# Batch outlier detection
+lof = LocalOutlierFactor(n_neighbors=20, contamination=0.05)
+labels = lof.fit_predict(X)  # 1 = inlier, -1 = outlier
+
+# Novelty detection on unseen data
+nov = LocalOutlierFactor(n_neighbors=20, novelty=True).fit(X_train)
+new_labels = nov.predict(X_test)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+// Batch outlier detection
+const lof = new Neighbors.LocalOutlierFactor({ nNeighbors: 20, contamination: 0.05 });
+const labels = lof.fitPredict(X); // 1 = inlier, -1 = outlier
+
+// Novelty detection on unseen data
+const nov = new Neighbors.LocalOutlierFactor({ nNeighbors: 20, novelty: true });
+nov.fit(XTrain);
+const newLabels = nov.predict(XTest);`}
+/>
 
 ## Detailed API reference
 
-The constructor accepts `nNeighbors?: number`, `contamination?: number | 'auto'`, and `novelty?: boolean`. With `novelty: false`, call `fitPredict(X)` and read `negativeOutlierFactor`. With `novelty: true`, call `fit(X)` followed by `scoreSamples(X)`, `decisionFunction(X)`, or `predict(X)`. The fitted threshold is available as `offset`.
+### `new Neighbors.LocalOutlierFactor(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nNeighbors` | `number` | `20` | Neighborhood size used to estimate local density (must be smaller than `X.length`). |
+| `contamination` | `number \| 'auto'` | `'auto'` | Expected outlier fraction in `(0, 0.5]`, or `'auto'` (uses offset `-1.5` matching scikit-learn). |
+| `novelty` | `boolean` | `false` | `false` enables `fitPredict(X)` only; `true` enables `fit(X)` + `predict` / `decisionFunction` / `scoreSamples` on new rows. |
+
+### Methods & properties
+
+- `fitPredict(X)` (`novelty: false`) — returns `1` (inlier) and `-1` (outlier); read `negativeOutlierFactor` (values near `-1` are normal; values much smaller than `-1` are outliers).
+- `fit(X)` / `scoreSamples(X)` / `decisionFunction(X)` / `predict(X)` (`novelty: true`) — scores unseen observations against `offset`.
+- **Related pages**: [Isolation Forest](/docs/apis/ensemble/iforest), [EllipticEnvelope](/docs/apis/covariance/ellipticEnvelope), [Outlier Methods Comparison Guide](/docs/guides/outlier-methods).

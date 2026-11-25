@@ -1,17 +1,25 @@
 ---
 title: Isomap in JavaScript and TypeScript with @kanaries/ml
-description: Preserve nonlinear geodesic distances with the Isomap JavaScript implementation in @kanaries/ml, including out-of-sample transforms for browser and Node.js.
+description: Preserve nonlinear geodesic manifold distances in JavaScript and TypeScript with Manifold.Isomap from @kanaries/ml, including out-of-sample transform().
 ---
 
-# Isomap in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Isomap builds a nearest-neighbor graph, computes all-pairs shortest-path distances, and embeds those geodesic distances with classical multidimensional scaling. It is useful when Euclidean distance cuts across a curved manifold but graph paths follow its true geometry.
+**Isomap (Isometric Feature Mapping)** is a nonlinear dimensionality-reduction algorithm that preserves global **geodesic distances** measured *along* a curved manifold rather than straight-line Euclidean chords cutting through empty space. It runs in three stages:
+
+1. Construct a `k`-nearest-neighbor graph connecting locally adjacent samples.
+2. Compute all-pairs shortest-path (geodesic) distances across the neighborhood graph.
+3. Apply classical Multidimensional Scaling (MDS) to embed the geodesic distance matrix into `nComponents` dimensions.
+
+Compared to [t-SNE](/docs/apis/manifold/tsne), Isomap preserves global manifold geometry and supports **out-of-sample `transform(XNew)`** on unseen points via Nyström kernel projection—making it usable both for 2D visualization and as a nonlinear feature extractor inside a [`Pipeline`](/docs/apis/pipeline).
 
 ## JavaScript implementation
 
-`Manifold.Isomap` provides both `fitTransform` and out-of-sample `transform` in browser and Node.js. The implementation stores an O(n²) distance matrix and uses an O(n³) shortest-path phase, so it is intended for moderate interactive datasets rather than unbounded production traffic.
+`Manifold.Isomap` in `@kanaries/ml` runs in pure TypeScript across browsers and Node.js. If the `k`-NN graph breaks into disconnected components, Isomap automatically warns and bridges each component pair at its closest Euclidean samples (matching scikit-learn's recovery path).
+
+**Browser scaling guidance**: Because Isomap builds an `O(n²)` geodesic distance matrix and runs an `O(n³)` shortest-path + eigendecomposition phase, keep interactive browser datasets to a few hundred samples (or offload fitting to a Web Worker). Fitted embeddings serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -25,6 +33,31 @@ const newPoints = model.transform([[2.5, 1]]);
 console.log({ embedding, newPoints });
 ```
 
+<AlgorithmComparison
+  title="Isomap"
+  pythonCode={String.raw`from sklearn.manifold import Isomap
+
+iso = Isomap(n_neighbors=5, n_components=2)
+embedding = iso.fit_transform(X_train)
+projected = iso.transform(X_test)`}
+  tsCode={String.raw`import { Manifold } from '@kanaries/ml';
+
+const iso = new Manifold.Isomap({ nNeighbors: 5, nComponents: 2 });
+const embedding = iso.fitTransform(XTrain);
+const projected = iso.transform(XTest);`}
+/>
+
 ## Detailed API reference
 
-`new Manifold.Isomap({ nNeighbors?: number, nComponents?: number })` defaults to 5 neighbors and 2 components. Methods are `fit(X)`, `fitTransform(X)`, and `transform(X)`. Read-only `embedding` and `distMatrix` properties expose the fitted coordinates and geodesic distances. If the neighbor graph is disconnected, the implementation warns and joins each component pair at its closest Euclidean samples, matching sklearn's non-precomputed recovery path.
+### `new Manifold.Isomap(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nNeighbors` | `number` | `5` | Number of nearest neighbors per node in the neighborhood graph. Too small fractures the graph; too large creates "short-circuit" edges across folds. |
+| `nComponents` | `number` | `2` | Target embedding dimensionality. |
+
+### Methods & properties
+
+- `fit(X)` / `fitTransform(X)` / `transform(X)` — fit geodesic manifold embedding and project training or unseen samples.
+- Read-only `embedding` (`[nSamples][nComponents]`) and `distMatrix` (`[nSamples][nSamples]` geodesic distances).
+- **Related pages**: [Locally Linear Embedding (LLE)](/docs/apis/manifold/lle), [t-SNE](/docs/apis/manifold/tsne), [MDS](/docs/apis/manifold/MDS), [Kernel PCA](/docs/apis/decomposition/kernelPCA).

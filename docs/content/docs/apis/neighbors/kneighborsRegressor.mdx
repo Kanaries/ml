@@ -1,23 +1,27 @@
 ---
 title: KNeighborsRegressor in JavaScript with @kanaries/ml
-description: Predict numeric targets from nearby examples with the KNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+description: Predict continuous targets from nearby examples in JavaScript and TypeScript with KNeighborsRegressor from @kanaries/ml. Includes live demo and API docs.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# KNeighborsRegressor in JavaScript
 
 ## Algorithm overview
 
-KNeighborsRegressor predicts a continuous value by finding nearby training samples and averaging their targets. It is useful as a non-parametric baseline when similar examples should have similar outcomes.
+**KNeighborsRegressor (k-NN Regression)** is a non-parametric, instance-based regressor that predicts a query sample's continuous target by averaging the `y` values of its `nNeighbors` closest training observations. Rather than fitting a global algebraic equation, it adapts locally to arbitrary curves, step changes, and multi-modal surfaces.
+
+Choosing between uniform and distance weighting controls local smoothness:
+
+- **`weights: 'uniform'`**: every neighbor contributes equally (`1 / k`), smoothing out local measurement noise.
+- **`weights: 'distance'`**: closer neighbors receive higher inverse-distance weight (`1 / d`), reducing bias near sharp transitions and reproducing exact training points.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Neighbors.KNeighborsRegressor` for browser and Node.js workflows. It supports uniform or distance weighting and the distance metrics exposed by `Metrics.Distance`.
+`@kanaries/ml` provides `Neighbors.KNeighborsRegressor` in pure TypeScript for browser and Node.js runtimes. Prefer the options-object constructor (`{ nNeighbors, weights, metric, p }`) over the deprecated positional form. It supports all distance metrics in `Metrics.Distance`, plugs into [`Pipeline`](/docs/apis/pipeline), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive K-neighbors regression playground
 
-Tune `k`, change the sample density, and add observations to see the local average move. Every prediction comes from a live distance-weighted `Neighbors.KNeighborsRegressor`.
+Tune `k`, adjust sample density, and click to add new training observations. Every prediction comes from a live distance-weighted `Neighbors.KNeighborsRegressor` running in your browser.
 
 <RegressionPlayground algorithm="knn" />
 
@@ -32,22 +36,38 @@ const pred = reg.predict([[2]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="KNeighborsRegressor"
+  pythonCode={String.raw`from sklearn.neighbors import KNeighborsRegressor
+
+reg = KNeighborsRegressor(n_neighbors=5, weights="distance", metric="euclidean")
+reg.fit(X_train, y_train)
+preds = reg.predict(X_test)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const reg = new Neighbors.KNeighborsRegressor({
+  nNeighbors: 5,
+  weights: 'distance',
+  metric: 'euclidean',
+});
+reg.fit(XTrain, yTrain);
+const preds = reg.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Neighbors.KNeighborsRegressor()
-new Neighbors.KNeighborsRegressor(nNeighbors: number, weights?: 'uniform' | 'distance', metric?: Distance.IDistanceType, p?: number)
-new Neighbors.KNeighborsRegressor(props?: {
-  nNeighbors?: number;
-  weights?: 'uniform' | 'distance';
-  metric?: Distance.IDistanceType;
-  p?: number;
-})
-```
+### `new Neighbors.KNeighborsRegressor(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nNeighbors` | `number` | `5` | Number of nearest neighbors averaged per prediction. Smaller values fit finer detail; larger values smooth noise. |
+| `weights` | `'uniform' \| 'distance'` | `'uniform'` | Neighbor weighting scheme. |
+| `metric` | `Distance.IDistanceType` | `'euclidean'` | Distance metric (`'euclidean'`, `'manhattan'`, `'minkowski'`, `'cosine'`, etc.). |
+| `p` | `number` | `2` | Order parameter when `metric: 'minkowski'` (`1` = Manhattan, `2` = Euclidean). |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods & practical guidance
 
-`metric` defaults to `'euclidean'`, `nNeighbors` defaults to `5`, and `p` is used by Minkowski distance.
+- `fit(trainX: number[][], trainY: number[]): void` — stores the reference training set.
+- `predict(testX: number[][]): number[]` — computes weighted neighbor averages for each query row.
+- **Feature scaling is mandatory**: Wrap `StandardScaler` and `KNeighborsRegressor` inside a [`Pipeline`](/docs/apis/pipeline) so large-magnitude columns do not dominate distance calculations.
+- **Related pages**: [K-Nearest Neighbors Classifier](/docs/apis/neighbors/knn), [RadiusNeighborsRegressor](/docs/apis/neighbors/radiusNeighborsRegressor), [KNN Playground](/playground/knn).

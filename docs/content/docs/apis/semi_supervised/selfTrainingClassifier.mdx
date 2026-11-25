@@ -1,17 +1,24 @@
 ---
 title: Self-Training Classifier in JavaScript
-description: Pseudo-label confident unlabeled samples with the @kanaries/ml SelfTrainingClassifier JavaScript implementation in browser or Node.js.
+description: Run semi-supervised pseudo-labeling in JavaScript and TypeScript with SemiSupervised.SelfTrainingClassifier from @kanaries/ml for browser and Node.js.
 ---
 
-# Self-Training Classifier in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Self-training repeatedly fits a probabilistic classifier, assigns pseudo-labels to the most confident unlabeled rows, and refits with the expanded labeled set. It helps when labels are scarce but class probabilities are reasonably calibrated.
+In many real-world applications—support ticket tagging, anomaly triage, document classification—labeling thousands of rows is expensive while unlabeled data is abundant. **Self-Training** turns any supervised classifier that emits class probabilities (`predictProba`) into a **semi-supervised learner**:
+
+1. Fit the base classifier on the initially labeled rows (every row whose target `y[i] !== -1`).
+2. Score all remaining unlabeled rows (`y[i] === -1`) with `predictProba()`.
+3. Promote the most confident unlabeled predictions into pseudo-labels (either all rows exceeding `threshold` or the top `kBest` rows) and refit.
+4. Repeat until no unlabeled rows qualify, all rows are labeled, or `maxIter` rounds finish.
+
+Self-training works best when your base classifier's probabilities are reasonably calibrated—consider wrapping uncalibrated models with [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration) or choosing probabilistic learners like [`Bayes.GaussianNB`](/docs/apis/bayes/gaussianNB) or [`Linear.LogisticRegression`](/docs/apis/linear/logisticRegression).
 
 ## JavaScript implementation
 
-`@kanaries/ml` wraps any registered classifier with `predictProba`, including `GaussianNB`. Use `-1` for unlabeled targets and choose a confidence threshold or a fixed number of additions per iteration.
+`SemiSupervised.SelfTrainingClassifier` wraps any registered `@kanaries/ml` classifier exposing `predictProba()` in pure TypeScript for browser and Node.js workflows. Unlabeled targets follow scikit-learn's `-1` sentinel convention, and the fitted meta-estimator serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -19,14 +26,56 @@ Self-training repeatedly fits a probabilistic classifier, assigns pseudo-labels 
 import { Bayes, SemiSupervised } from '@kanaries/ml';
 
 const model = new SemiSupervised.SelfTrainingClassifier({
-  estimator: new Bayes.GaussianNB(), threshold: 0.8, maxIter: 10,
+  estimator: new Bayes.GaussianNB(),
+  threshold: 0.8,
+  maxIter: 10,
 });
 model.fit([[-3], [-2], [-1], [1], [2], [3]], [0, 0, -1, -1, 1, 1]);
-console.log(model.transduction);
+console.log({
+  transduction: model.transduction,
+  termination: model.terminationCondition,
+});
 ```
+
+<AlgorithmComparison
+  title="SelfTrainingClassifier"
+  pythonCode={String.raw`from sklearn.naive_bayes import GaussianNB
+from sklearn.semi_supervised import SelfTrainingClassifier
+
+clf = SelfTrainingClassifier(
+    estimator=GaussianNB(),
+    threshold=0.8,
+    criterion="threshold",
+    max_iter=10,
+)
+clf.fit(X, y_with_minus_one)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Bayes, SemiSupervised } from '@kanaries/ml';
+
+const clf = new SemiSupervised.SelfTrainingClassifier({
+  estimator: new Bayes.GaussianNB(),
+  threshold: 0.8,
+  criterion: 'threshold',
+  maxIter: 10,
+});
+clf.fit(X, yWithMinusOne);
+const preds = clf.predict(XTest);`}
+/>
 
 ## Detailed API reference
 
-Options: `estimator`, `threshold` (default `.75`), `criterion: 'threshold' | 'kBest'`, `kBest` (default `10`), and `maxIter` (default `10`).
+### `new SemiSupervised.SelfTrainingClassifier(props)`
 
-Methods: `fit`, `predict`, `predictProba`. Learned fields: `transduction`, `labeledIteration`, `nIter`, and `terminationCondition`. Seed labels retain iteration `0`; labels that remain unknown retain `-1`.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `estimator` | `ClassifierBase` | *required* | Any registered classifier implementing `fit()`, `predict()`, and `predictProba()`. |
+| `criterion` | `'threshold' \| 'kBest'` | `'threshold'` | Selection policy for promoting unlabeled rows to pseudo-labels. |
+| `threshold` | `number` | `0.75` | Minimum maximum-class probability required when `criterion: 'threshold'`. |
+| `kBest` | `number` | `10` | Maximum rows promoted per iteration when `criterion: 'kBest'`. |
+| `maxIter` | `number` | `10` | Maximum self-training rounds. |
+
+### Methods & fitted properties
+
+- `fit(X, y)` / `predict(X)` / `predictProba(X)` — trains semi-supervised model (`-1` marks unlabeled rows) and predicts labels or probabilities.
+- Properties: `transduction` (final labels including pseudo-labels; remaining unlabeled stay `-1`), `labeledIteration` (`0` for original seed labels, `1..nIter` for pseudo-labeled rows, `-1` if unlabeled), `nIter`, and `terminationCondition`.
+- **Related pages**: [LabelPropagation](/docs/apis/semi_supervised/labelPropagation), [LabelSpreading](/docs/apis/semi_supervised/labelSpreading), [Probability Calibration](/docs/apis/calibration).

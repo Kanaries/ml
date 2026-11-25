@@ -1,17 +1,19 @@
 ---
 title: FastICA in JavaScript and TypeScript
-description: Separate statistically independent signals with the @kanaries/ml FastICA JavaScript implementation in browser and Node.js environments.
+description: Separate independent mixed signals and extract non-Gaussian components in JavaScript and TypeScript with Decomposition.FastICA from @kanaries/ml.
 ---
 
-# FastICA in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-FastICA recovers statistically independent sources from observed mixtures by maximizing non-Gaussianity. Common uses include blind source separation, artifact removal, and exploratory feature extraction.
+**Independent Component Analysis (FastICA)** separates a multivariate dataset into additive, **statistically independent** latent sources by maximizing non-Gaussianity (approximated via negentropy contrast functions such as `logcosh`, `exp`, or `cube`).
+
+Whereas [PCA](/docs/apis/decomposition/pca) only produces *uncorrelated* orthogonal directions based on second-order covariance, FastICA leverages higher-order statistics to untangle mixed signals—famous for the "cocktail party problem" (separating overlapping audio recordings), removing eye-blink artifacts from EEG/sensor streams, or uncovering independent drivers in multivariate financial and telemetry series.
 
 ## JavaScript implementation
 
-`@kanaries/ml` offers parallel and deflation FastICA with deterministic initialization, whitening choices, transforms, and inverse transforms for JS-only signal and analytics workflows.
+`Decomposition.FastICA` in `@kanaries/ml` provides both `'parallel'` (symmetric) and `'deflation'` fixed-point updates in pure TypeScript for browser and Node.js runtimes, with configurable whitening modes (`'unit-variance'`, `'arbitrary-variance'`, or `false`), deterministic `randomState` initialization, forward `transform()`, signal reconstruction via `inverseTransform()`, and JSON serialization (`toJSON()` / [`loadModel()`](/docs/apis/serialization)).
 
 ## Quick start example
 
@@ -29,8 +31,48 @@ const reconstructed = ica.inverseTransform(sources);
 console.log({ sources, reconstructed });
 ```
 
+<AlgorithmComparison
+  title="FastICA"
+  pythonCode={String.raw`from sklearn.decomposition import FastICA
+
+ica = FastICA(
+    n_components=2,
+    algorithm="parallel",
+    whiten="unit-variance",
+    fun="logcosh",
+    random_state=0,
+)
+sources = ica.fit_transform(X)
+reconstructed = ica.inverse_transform(sources)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const ica = new Decomposition.FastICA({
+  nComponents: 2,
+  algorithm: 'parallel',
+  whiten: 'unit-variance',
+  fun: 'logcosh',
+  randomState: 0,
+});
+const sources = ica.fitTransform(X);
+const reconstructed = ica.inverseTransform(sources);`}
+/>
+
 ## Detailed API reference
 
-Options include `nComponents`, `algorithm: 'parallel' | 'deflation'`, `whiten: 'unit-variance' | 'arbitrary-variance' | false`, `fun: 'logcosh' | 'exp' | 'cube'`, `funArgs.alpha`, `maxIter`, `tol`, and `randomState`.
+### `new Decomposition.FastICA(props?)`
 
-Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `mixing`, `mean`, and `nIter`. With `whiten: false`, input is not centered and `nComponents` is ignored, matching sklearn semantics.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `nFeatures` | Number of independent sources to extract (ignored when `whiten: false`, matching scikit-learn). |
+| `algorithm` | `'parallel' \| 'deflation'` | `'parallel'` | `'parallel'` estimates all components simultaneously; `'deflation'` extracts components one by one. |
+| `whiten` | `'unit-variance' \| 'arbitrary-variance' \| false` | `'unit-variance'` | Centers and decorrelates data via PCA whitening before unmixing (`false` assumes input is already whitened and skips centering). |
+| `fun` | `'logcosh' \| 'exp' \| 'cube'` | `'logcosh'` | Negentropy contrast nonlinearity (`'logcosh'` is robust general-purpose; `'exp'` works well for super-Gaussian signals). |
+| `funArgs` | `{ alpha?: number }` | `{ alpha: 1.0 }` | Parameter `alpha` in `[1, 2]` for `'logcosh'`. |
+| `maxIter` / `tol` | `number` | `200` / `1e-4` | Fixed-point convergence budget and tolerance. |
+| `randomState` | `number` | `undefined` | Seed for initial unmixing matrix. |
+
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` / `inverseTransform(S)` — unmix signals and reconstruct observations.
+- Learned fields: `components` (unmixing matrix), `mixing` (pseudo-inverse mixing matrix), `mean`, and `nIter`.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [Factor Analysis](/docs/apis/decomposition/factorAnalysis), [NMF](/docs/apis/decomposition/nmf).

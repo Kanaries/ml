@@ -1,17 +1,22 @@
 ---
 title: RadiusNeighborsClassifier in JavaScript with @kanaries/ml
-description: Classify samples from all neighbors inside a radius using the RadiusNeighborsClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+description: Classify observations using all neighbors within a fixed radius in JavaScript and TypeScript with Neighbors.RadiusNeighborsClassifier from @kanaries/ml.
 ---
 
-# RadiusNeighborsClassifier in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-RadiusNeighborsClassifier assigns a class from all training samples within a fixed distance radius. It is useful when a fixed neighborhood size is more meaningful than a fixed number of neighbors.
+**RadiusNeighborsClassifier** is a non-parametric classifier that predicts a query point's class by voting across **every training observation within a fixed distance `radius`**, rather than always pulling a fixed count `k` of neighbors.
+
+This distinction matters in unevenly sampled feature spaces:
+
+- In **dense regions**, radius search automatically averages over more nearby evidence for lower variance.
+- In **sparse or out-of-distribution regions**, standard k-NN forces votes from distant, unrelated points—whereas `RadiusNeighborsClassifier` recognizes that no neighbors lie within `radius` and explicitly returns your configured `outlierLabel` (or throws an error so your app can flag an unknown input).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Neighbors.RadiusNeighborsClassifier` with uniform or distance-weighted voting in browser and Node.js applications.
+`@kanaries/ml` provides `Neighbors.RadiusNeighborsClassifier` in pure TypeScript for browser and Node.js apps with `'uniform'` or `'distance'` voting, configurable `Metrics.Distance` metrics, explicit `outlierLabel` handling, [`Pipeline`](/docs/apis/pipeline) support, and JSON persistence via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -26,24 +31,39 @@ const clf = new Neighbors.RadiusNeighborsClassifier({
 
 clf.fit([[0], [1], [4]], [0, 0, 1]);
 const pred = clf.predict([[0.5], [10]]);
-console.log(pred);
+console.log(pred); // [0, -1]
 ```
+
+<AlgorithmComparison
+  title="RadiusNeighborsClassifier"
+  pythonCode={String.raw`from sklearn.neighbors import RadiusNeighborsClassifier
+
+clf = RadiusNeighborsClassifier(radius=1.5, weights="distance", outlier_label=-1)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const clf = new Neighbors.RadiusNeighborsClassifier({
+  radius: 1.5,
+  weights: 'distance',
+  outlierLabel: -1,
+});
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
 
 ## Detailed API reference
 
-```ts
-new Neighbors.RadiusNeighborsClassifier(props?: {
-  radius?: number;
-  weights?: 'uniform' | 'distance';
-  metric?: Distance.IDistanceType;
-  p?: number;
-  outlierLabel?: number | null;
-})
-```
+### `new Neighbors.RadiusNeighborsClassifier(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `radius` | `number` | `1.0` | Maximum distance defining the local voting neighborhood. |
+| `weights` | `'uniform' \| 'distance'` | `'uniform'` | Equal vote per neighbor or inverse-distance weighting. |
+| `metric` / `p` | `Distance.IDistanceType` / `number` | `'euclidean'` / `2` | Distance metric and Minkowski order. |
+| `outlierLabel` | `number \| null` | `null` | Fallback class returned when zero neighbors fall within `radius`. If `null`, `predict()` throws an error on isolated points. |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods & tuning tips
 
-If no neighbors are found, `predict` returns `outlierLabel` when it is not `null`; otherwise it throws.
+- `fit(trainX, trainY)` / `predict(testX)` — always standardize numeric features with [`StandardScaler`](/docs/apis/utils/preprocessing) first so `radius` has consistent scale across dimensions.
+- **Related pages**: [RadiusNeighborsRegressor](/docs/apis/neighbors/radiusNeighborsRegressor), [K-Nearest Neighbors](/docs/apis/neighbors/knn), [NearestNeighbors](/docs/apis/neighbors/nearestNeighbors).

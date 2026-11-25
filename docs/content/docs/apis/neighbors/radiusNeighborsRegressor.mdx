@@ -1,23 +1,24 @@
 ---
 title: RadiusNeighborsRegressor in JavaScript with @kanaries/ml
-description: Predict numeric targets from all neighbors inside a radius using the RadiusNeighborsRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+description: Predict numeric targets from neighbors inside a fixed radius in JavaScript and TypeScript with Neighbors.RadiusNeighborsRegressor from @kanaries/ml.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# RadiusNeighborsRegressor in JavaScript
 
 ## Algorithm overview
 
-RadiusNeighborsRegressor predicts continuous values from all training samples within a fixed radius. It can be more stable than K-neighbor regression when sample density varies across the feature space.
+**RadiusNeighborsRegressor** predicts a query sample's continuous target by averaging (uniformly or by inverse distance) all training observations within a fixed `radius` of the query. Unlike [`KNeighborsRegressor`](/docs/apis/neighbors/kneighborsRegressor), which always averages `k` points no matter how far away they sit, radius regression refuses to average over distant unrelated observations—returning `Number.NaN` wherever a query falls in an empty gap of the feature space.
+
+This makes `RadiusNeighborsRegressor` ideal for spatial interpolation, physical sensor lookup tables, and uneven tabular regions where you want local smoothing inside dense clusters and explicit `NaN` uncertainty markers outside known coverage.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Neighbors.RadiusNeighborsRegressor` for JavaScript applications with uniform or distance-weighted averaging.
+`@kanaries/ml` provides `Neighbors.RadiusNeighborsRegressor` in pure TypeScript for browser and Node.js applications, supporting `'uniform'` and `'distance'` weighting, all `Metrics.Distance` metrics, [`Pipeline`](/docs/apis/pipeline) composition, and JSON serialization via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive radius-neighbors regression playground
 
-Change the radius to control which observations contribute at each x value. The live curve uses `Neighbors.RadiusNeighborsRegressor`; gaps show locations where the chosen radius finds no neighbors.
+Change the neighborhood radius to see which points contribute at each x coordinate. The curve is fitted live with `Neighbors.RadiusNeighborsRegressor`; gaps indicate regions where no training observation falls within `radius`.
 
 <RegressionPlayground algorithm="radiusNeighbors" />
 
@@ -29,23 +30,38 @@ import { Neighbors } from '@kanaries/ml';
 const reg = new Neighbors.RadiusNeighborsRegressor({ radius: 1.25, weights: 'distance' });
 reg.fit([[0], [1], [4]], [0, 1, 4]);
 const pred = reg.predict([[0.5], [10]]);
-console.log(pred);
+console.log(pred); // [0.5, NaN]
 ```
+
+<AlgorithmComparison
+  title="RadiusNeighborsRegressor"
+  pythonCode={String.raw`from sklearn.neighbors import RadiusNeighborsRegressor
+
+reg = RadiusNeighborsRegressor(radius=1.25, weights="distance")
+reg.fit(X_train, y_train)
+preds = reg.predict(X_test)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const reg = new Neighbors.RadiusNeighborsRegressor({
+  radius: 1.25,
+  weights: 'distance',
+});
+reg.fit(XTrain, yTrain);
+const preds = reg.predict(XTest);`}
+/>
 
 ## Detailed API reference
 
-```ts
-new Neighbors.RadiusNeighborsRegressor(props?: {
-  radius?: number;
-  weights?: 'uniform' | 'distance';
-  metric?: Distance.IDistanceType;
-  p?: number;
-})
-```
+### `new Neighbors.RadiusNeighborsRegressor(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `radius` | `number` | `1.0` | Neighborhood radius for selecting contributing training points. |
+| `weights` | `'uniform' \| 'distance'` | `'uniform'` | Equal average (`'uniform'`) or inverse-distance weighted average (`'distance'`). |
+| `metric` / `p` | `Distance.IDistanceType` / `number` | `'euclidean'` / `2` | Distance metric and Minkowski exponent. |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods & practical tips
 
-If no neighbors are found for a query sample, the prediction is `Number.NaN`.
+- `fit(trainX, trainY)` / `predict(testX)` — check `Number.isNaN(pred)` when handling out-of-coverage queries in production UIs.
+- Always scale features with [`StandardScaler`](/docs/apis/utils/preprocessing) so a single scalar `radius` treats every dimension evenly.
+- **Related pages**: [KNeighborsRegressor](/docs/apis/neighbors/kneighborsRegressor), [RadiusNeighborsClassifier](/docs/apis/neighbors/radiusNeighborsClassifier), [NearestNeighbors](/docs/apis/neighbors/nearestNeighbors).

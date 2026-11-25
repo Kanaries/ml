@@ -1,17 +1,23 @@
 ---
 title: Non-negative Matrix Factorization (NMF) in JS
-description: Factor non-negative data into additive parts using the @kanaries/ml NMF JavaScript and TypeScript implementation in browser or Node.js.
+description: Factor non-negative matrices into additive latent parts in JavaScript and TypeScript with Decomposition.NMF from @kanaries/ml for topics and embeddings.
 ---
 
-# NMF in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Non-negative Matrix Factorization approximates `X ≈ W × H` while keeping every factor non-negative. The additive representation is useful for topic features, parts-based image representations, and interpretable latent components.
+**Non-negative Matrix Factorization (NMF)** approximates a non-negative feature matrix `X` (`nSamples × nFeatures`) as the product of two lower-rank non-negative matrices `W × H`, where `W` holds per-sample component weights and `H` (`components`) holds additive basis patterns.
+
+Unlike [PCA](/docs/apis/decomposition/pca) or [TruncatedSVD](/docs/apis/decomposition/truncatedSVD), which allow positive and negative cancellations across components, NMF's strict non-negativity constraint forces representations to be **purely additive**. That makes NMF especially interpretable for:
+
+- **Topic modeling over TF-IDF or bag-of-words counts**: each component in `H` reads like a coherent list of top weighted keywords.
+- **Parts-based signal & spectrogram analysis**: decomposing audio spectra, image patches, or user-activity counts into reusable additive building blocks.
+- **Recommender & behavior profiles**: expressing each customer as a positive blend of latent archetypes.
 
 ## JavaScript implementation
 
-`@kanaries/ml` uses multiplicative Frobenius-loss updates and supports random and NNDSVD initializations. It runs in browser or Node.js and exposes both learned components and reconstruction error.
+`@kanaries/ml` provides `Decomposition.NMF` using multiplicative Frobenius-loss updates with optional L1/L2 regularization (`alphaW`, `alphaH`, `l1Ratio`) and scikit-learn's `nndsvd` / `nndsvda` / `nndsvdar` / `random` initializers. Everything runs in pure TypeScript across browsers and Node.js, composes with [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer) inside [`Pipeline`](/docs/apis/pipeline), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -21,11 +27,45 @@ import { Decomposition } from '@kanaries/ml';
 const nmf = new Decomposition.NMF({ nComponents: 2, init: 'nndsvda', randomState: 0 });
 const W = nmf.fitTransform([[1, 2, 0], [0, 1, 3], [1, 3, 3]]);
 const approximation = nmf.inverseTransform(W);
-console.log({ W, approximation });
+console.log({ W, approximation, err: nmf.reconstructionErr });
 ```
+
+<AlgorithmComparison
+  title="Non-negative Matrix Factorization (NMF)"
+  pythonCode={String.raw`from sklearn.decomposition import NMF
+
+nmf = NMF(n_components=2, init="nndsvda", random_state=0)
+W = nmf.fit_transform(X)
+H = nmf.components_
+X_hat = nmf.inverse_transform(W)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const nmf = new Decomposition.NMF({
+  nComponents: 2,
+  init: 'nndsvda',
+  randomState: 0,
+});
+const W = nmf.fitTransform(X);
+const H = nmf.components;
+const XHat = nmf.inverseTransform(W);`}
+/>
 
 ## Detailed API reference
 
-Options: `nComponents`, `init: 'random' | 'nndsvd' | 'nndsvda' | 'nndsvdar'`, `maxIter`, `tol`, `alphaW`, `alphaH`, `l1Ratio`, and `randomState`.
+### `new Decomposition.NMF(props?)`
 
-Methods: `fit`, `transform`, `fitTransform`, `inverseTransform`. Learned fields: `components`, `reconstructionErr`, and `nIter`. Input must be a finite, rectangular, non-negative matrix.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `nFeatures` | Number of additive latent factors (`k`). |
+| `init` | `'random' \| 'nndsvd' \| 'nndsvda' \| 'nndsvdar'` | `'nndsvda'` | Initialization strategy. `'nndsvda'` is deterministic and works well for dense matrices; `'nndsvd'` favors sparse factors. |
+| `maxIter` | `number` | `200` | Maximum multiplicative-update iterations. |
+| `tol` | `number` | `1e-4` | Stopping tolerance on relative reconstruction-error change. |
+| `alphaW` / `alphaH` | `number` | `0` | Regularization multipliers for factor matrices `W` and `H`. |
+| `l1Ratio` | `number` | `0` | Balance between L2 (`0`) and L1 (`1`) sparsity regularization. |
+| `randomState` | `number` | `undefined` | Seed for stochastic initializations (`'random'`, `'nndsvdar'`). |
+
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` / `inverseTransform(W)` — require finite, rectangular, non-negative matrices (negative values throw an error).
+- Learned fields: `components` (`H`), `reconstructionErr` (Frobenius norm of `X - W H`), and `nIter`.
+- **Related pages**: [Latent Dirichlet Allocation](/docs/apis/decomposition/latentDirichletAllocation), [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer), [TruncatedSVD](/docs/apis/decomposition/truncatedSVD).

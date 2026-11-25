@@ -1,29 +1,74 @@
 ---
 title: EllipticEnvelope Anomaly Detection in JavaScript with @kanaries/ml
-description: Detect multivariate outliers with robust covariance using the EllipticEnvelope JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js.
+description: Detect multivariate outliers with robust Gaussian envelopes in JavaScript and TypeScript using Covariance.EllipticEnvelope from @kanaries/ml.
 ---
 
-# EllipticEnvelope anomaly detection in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-EllipticEnvelope fits a robust Gaussian-shaped envelope around inliers and flags samples whose robust Mahalanobis distance exceeds a contamination-based threshold. It works best when the inlier cloud is approximately elliptical.
+**EllipticEnvelope** detects multivariate outliers by fitting a robust Gaussian distribution around the central inlier cloud via [FAST-MCD (`MinCovDet`)](/docs/apis/covariance/minCovDet) and flagging observations whose **robust Mahalanobis distance** exceeds a quantile threshold derived from `contamination`.
+
+Unlike univariate z-score or IQR rules—which inspect one column at a time and miss points that look normal on every individual axis yet break feature correlations—`EllipticEnvelope` accounts for feature covariance and draws an elliptical boundary around normal behavior. It works best when clean data forms a roughly unimodal, elliptical Gaussian cloud.
 
 ## JavaScript implementation
 
-`Covariance.EllipticEnvelope` wraps `MinCovDet`, so JavaScript applications can score or label tabular anomalies locally in a browser or Node.js process.
+`Covariance.EllipticEnvelope` wraps `MinCovDet` in pure TypeScript for browser and Node.js runtimes. It follows scikit-learn's anomaly convention (`1` for inliers, `-1` for outliers), provides continuous anomaly scores (`scoreSamples`, `decisionFunction`), integrates into [`Pipeline`](/docs/apis/pipeline), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+*(Convention note: `EllipticEnvelope` returns `1` for normal and `-1` for outlier—matching scikit-learn and `LocalOutlierFactor`—whereas [`Ensemble.IsolationForest`](/docs/apis/ensemble/iforest) returns `0` for normal and `1` for anomaly.)*
 
 ## Quick start example
 
 ```ts
 import { Covariance } from '@kanaries/ml';
 
-const X = [[0, 0], [.1, .2], [.2, .1], [-.1, 0], [8, 8]];
-const detector = new Covariance.EllipticEnvelope({ contamination: .2, randomState: 42 });
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [-0.1, 0], [8, 8]];
+const detector = new Covariance.EllipticEnvelope({
+  contamination: 0.2,
+  randomState: 42,
+});
 detector.fit(X);
-console.log(detector.predict(X)); // 1 for inlier, -1 for outlier
+console.log({
+  labels: detector.predict(X),
+  scores: detector.decisionFunction(X),
+});
 ```
+
+<AlgorithmComparison
+  title="EllipticEnvelope"
+  pythonCode={String.raw`from sklearn.covariance import EllipticEnvelope
+
+detector = EllipticEnvelope(contamination=0.1, random_state=42)
+detector.fit(X_train)
+labels = detector.predict(X_test)      # 1 = inlier, -1 = outlier
+scores = detector.decision_function(X_test)`}
+  tsCode={String.raw`import { Covariance } from '@kanaries/ml';
+
+const detector = new Covariance.EllipticEnvelope({
+  contamination: 0.1,
+  randomState: 42,
+});
+detector.fit(XTrain);
+const labels = detector.predict(XTest); // 1 = inlier, -1 = outlier
+const scores = detector.decisionFunction(XTest);`}
+/>
 
 ## Detailed API reference
 
-The constructor accepts `contamination` in `(0, 0.5]` plus all `MinCovDet` options. Methods are `fit(X)`, `scoreSamples(X)`, `decisionFunction(X)`, and `predict(X)`. The fitted `offset`, `location`, and `covariance` are readable properties.
+### `new Covariance.EllipticEnvelope(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `contamination` | `number` | `0.1` | Expected outlier proportion in `(0, 0.5]`, setting the `offset` cutoff on negative Mahalanobis distances. |
+| `supportFraction` | `number` | sklearn `h` heuristic | Fraction of points included in the raw MCD subset `(0, 1]`. |
+| `assumeCentered` | `boolean` | `false` | If `true`, skips location estimation and centers at zero. |
+| `randomState` | `number` | `undefined` | Seed for reproducible FAST-MCD elemental subsampling. |
+
+### Methods & properties
+
+- `fit(X)` — fits robust location, covariance, and `offset` threshold.
+- `scoreSamples(X)` — returns negative squared robust Mahalanobis distances (higher = more normal).
+- `decisionFunction(X)` — returns `scoreSamples(X) - offset` (`>= 0` inlier, `< 0` outlier).
+- `predict(X)` — returns `1` for inliers and `-1` for outliers.
+- Properties: `location`, `covariance`, `offset`.
+- **Non-Gaussian or multimodal data?** Compare against [`Ensemble.IsolationForest`](/docs/apis/ensemble/iforest) and [`Neighbors.LocalOutlierFactor`](/docs/apis/neighbors/localOutlierFactor), or read our [Outlier Detection Methods Guide](/docs/guides/outlier-methods).

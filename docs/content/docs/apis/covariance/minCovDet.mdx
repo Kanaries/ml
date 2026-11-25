@@ -1,42 +1,69 @@
 ---
 title: MinCovDet (FAST-MCD) in JavaScript with @kanaries/ml
-description: Compute robust multivariate location, covariance, and Mahalanobis distances with MinCovDet in JavaScript and TypeScript using @kanaries/ml.
+description: Estimate outlier-resistant multivariate location, covariance, and Mahalanobis distances in JavaScript and TypeScript with MinCovDet from @kanaries/ml.
 ---
 
-# MinCovDet (FAST-MCD) in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Minimum Covariance Determinant finds a subset whose covariance determinant is small, then reweights observations using robust Mahalanobis distances. This makes location and covariance estimates resistant to multivariate outliers. The implementation uses FAST-MCD elemental starts, C-steps, consistency correction, and chi-square reweighting.
+Classical sample mean and covariance have a breakdown point of zero: a single extreme outlier can drag the mean and stretch the covariance matrix arbitrarily far. **Minimum Covariance Determinant (`MinCovDet`)** finds the subset of `h` observations (at least half the dataset) whose empirical covariance matrix has the **smallest determinant**, yielding a high-breakdown robust estimate of multivariate center (`location`) and spread (`covariance`).
+
+`@kanaries/ml` implements the **FAST-MCD** algorithm (Rousseeuw & Van Driessen): random elemental starts, iterative concentration steps (C-steps) that monotonically reduce the determinant, Gaussian consistency scaling, and chi-square distance reweighting (`support`) to recover high statistical efficiency without sacrificing outlier resistance.
 
 ## JavaScript implementation
 
-`Covariance.MinCovDet` runs in browsers and Node.js without a Python service. It is appropriate for moderate tabular datasets; repeated matrix inversions make it substantially more expensive than empirical covariance.
+`Covariance.MinCovDet` runs entirely in pure TypeScript across browsers and Node.js—powering both direct robust Mahalanobis scoring and [`Covariance.EllipticEnvelope`](/docs/apis/covariance/ellipticEnvelope). Because FAST-MCD performs repeated `p × p` covariance inversions across C-steps, it is best suited for small-to-moderate feature widths (`p ≤ 30`) and tabular browser datasets; for large jobs, run inside a Web Worker. Fitted models serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
 ```ts
 import { Covariance } from '@kanaries/ml';
 
-const X = [[0, 0], [.1, .2], [.2, .1], [-.1, 0], [8, 8]];
-const robust = new Covariance.MinCovDet({ supportFraction: .8, randomState: 42 });
+const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [-0.1, 0], [8, 8]];
+const robust = new Covariance.MinCovDet({ supportFraction: 0.8, randomState: 42 });
 robust.fit(X);
 
-console.log(robust.location, robust.covariance);
-console.log(robust.support, robust.mahalanobis(X));
+console.log({
+  location: robust.location,
+  support: robust.support,
+  mahalanobis: robust.mahalanobis(X),
+});
 ```
+
+<AlgorithmComparison
+  title="MinCovDet (FAST-MCD)"
+  pythonCode={String.raw`from sklearn.covariance import MinCovDet
+
+mcd = MinCovDet(support_fraction=0.8, random_state=42)
+mcd.fit(X)
+dist_sq = mcd.mahalanobis(X)
+inliers = mcd.support_`}
+  tsCode={String.raw`import { Covariance } from '@kanaries/ml';
+
+const mcd = new Covariance.MinCovDet({
+  supportFraction: 0.8,
+  randomState: 42,
+});
+mcd.fit(X);
+const distSq = mcd.mahalanobis(X);
+const inliers = mcd.support;`}
+/>
 
 ## Detailed API reference
 
-```ts
-new Covariance.MinCovDet({
-  supportFraction?: number; // (0, 1]; default uses sklearn's h formula
-  randomState?: number;
-  assumeCentered?: boolean; // default false
-})
-```
+### `new Covariance.MinCovDet(props?)`
 
-- `fit(X): void` estimates raw and reweighted robust covariance.
-- `mahalanobis(X): number[]` returns squared robust Mahalanobis distances.
-- `location`, `covariance`, `precision`, and `support` expose reweighted results.
-- `rawLocation`, `rawCovariance`, and `rawSupport` expose the pre-reweighting FAST-MCD result.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `supportFraction` | `number` | `(n + p + 1) / (2n)` | Proportion of samples in `(0, 1]` used in the raw MCD subset. Lower values tolerate higher outlier contamination (up to ~50%). |
+| `assumeCentered` | `boolean` | `false` | If `true`, assumes data is already centered at the origin and estimates scatter only. |
+| `randomState` | `number` | `undefined` | Seed for reproducible elemental subsampling. |
+
+### Methods & properties
+
+- `fit(X: number[][]): void` — computes raw FAST-MCD and chi-square reweighted estimates.
+- `mahalanobis(X: number[][]): number[]` — returns squared robust Mahalanobis distances `(x - μ)ᵀ Σ⁻¹ (x - μ)`.
+- Reweighted properties: `location`, `covariance`, `precision`, `support` (boolean inlier mask).
+- Raw pre-reweighting properties: `rawLocation`, `rawCovariance`, `rawSupport`.
+- **Related pages**: [EllipticEnvelope](/docs/apis/covariance/ellipticEnvelope), [Covariance Estimators](/docs/apis/covariance/covarianceEstimators), [Robust Regression](/docs/apis/linear/robustRegressors).

@@ -1,17 +1,19 @@
 ---
 title: Factor Analysis in JavaScript and TypeScript
-description: Fit a latent Gaussian factor model with per-feature noise in browser or Node.js using @kanaries/ml FactorAnalysis.
+description: Fit Gaussian latent factor models with per-feature noise variance and varimax rotation in JavaScript and TypeScript using FactorAnalysis from @kanaries/ml.
 ---
 
-# Factor analysis in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Factor analysis explains correlated observations with a smaller set of latent variables while estimating separate noise variance for every feature. It is useful when measurement noise matters more than PCA's total-variance objective.
+**Factor Analysis** is a probabilistic generative model that explains correlations among observed numeric variables using a smaller set of shared latent factors (`nComponents`) plus **independent per-feature noise variance** (`noiseVariance`).
+
+Whereas [PCA](/docs/apis/decomposition/pca) assumes isotropic (equal) noise across every column and simply maximizes total variance—including noisy columns—Factor Analysis explicitly models heteroscedastic measurement noise (`Ψ = diag(noiseVariance)`). That makes Factor Analysis invariant to individual feature rescaling and well suited for psychometrics, survey analytics, financial factor modeling, and multi-sensor telemetry where each instrument carries a different noise floor.
 
 ## JavaScript implementation
 
-`FactorAnalysis` runs the sklearn-style EM/SVD update in JavaScript and supports optional varimax or quartimax rotation.
+`Decomposition.FactorAnalysis` in `@kanaries/ml` implements scikit-learn's EM/SVD log-likelihood optimization in pure TypeScript for browser and Node.js runtimes. It supports optional orthogonal **`'varimax'`** and **`'quartimax'`** factor rotations to produce sparser, easier-to-interpret factor loadings, exposes full model covariance/precision matrices (`getCovariance()`, `getPrecision()`), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start
 
@@ -21,9 +23,44 @@ import { Decomposition } from '@kanaries/ml';
 const X = [[1, 2, 1], [2, 4, 1], [3, 6, 2], [4, 8, 2]];
 const model = new Decomposition.FactorAnalysis({ nComponents: 2 });
 const scores = model.fitTransform(X);
-console.log(scores);
+console.log({ scores, noiseVariance: model.noiseVariance });
 ```
+
+<AlgorithmComparison
+  title="FactorAnalysis"
+  pythonCode={String.raw`from sklearn.decomposition import FactorAnalysis
+
+fa = FactorAnalysis(n_components=2, rotation="varimax", max_iter=1000)
+scores = fa.fit_transform(X)
+loadings = fa.components_
+noise = fa.noise_variance_`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const fa = new Decomposition.FactorAnalysis({
+  nComponents: 2,
+  rotation: 'varimax',
+  maxIter: 1000,
+});
+const scores = fa.fitTransform(X);
+const loadings = fa.components;
+const noise = fa.noiseVariance;`}
+/>
 
 ## Detailed API reference
 
-Constructor options are `nComponents`, `tol`, `maxIter`, `noiseVarianceInit`, and `rotation`. Fitted state includes `components`, `mean`, `noiseVariance`, `loglike`, and `nIter`, plus `getCovariance()` and `getPrecision()`.
+### `new Decomposition.FactorAnalysis(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `nFeatures` | Number of latent factors to extract. |
+| `tol` | `number` | `1e-2` | Stopping threshold on log-likelihood gain between EM iterations. |
+| `maxIter` | `number` | `1000` | Maximum EM iterations. |
+| `noiseVarianceInit` | `number[]` | all ones | Optional initial per-feature noise variances (length `nFeatures`). |
+| `rotation` | `'varimax' \| 'quartimax' \| null` | `null` | Post-fit orthogonal rotation (`'varimax'` simplifies columns/factors; `'quartimax'` simplifies rows/variables). |
+
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` — fit latent factors and compute posterior expected factor scores.
+- `getCovariance()` / `getPrecision()` — returns the model-implied `WᵀW + Ψ` covariance matrix and its inverse.
+- Fitted properties: `components` (`[nComponents][nFeatures]`), `mean`, `noiseVariance`, `loglike` (trace of log-likelihoods), and `nIter`.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [FastICA](/docs/apis/decomposition/fastICA), [Covariance Estimators](/docs/apis/covariance/covarianceEstimators).

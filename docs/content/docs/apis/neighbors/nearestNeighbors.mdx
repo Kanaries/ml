@@ -1,17 +1,22 @@
 ---
 title: NearestNeighbors Search in JavaScript
-description: Run unsupervised nearest-neighbor and radius queries with brute-force, KD Tree, or Ball Tree search in browser and Node.js using @kanaries/ml.
+description: Run unsupervised k-nearest and radius neighbor queries with brute-force, KDTree, or BallTree in JavaScript and TypeScript using @kanaries/ml.
 ---
 
-# NearestNeighbors Search in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Nearest-neighbor search finds the closest reference samples without requiring labels. It supports similarity lookup, retrieval, deduplication, local analysis, and the search layer behind many non-parametric models.
+**Unsupervised Nearest Neighbors (`NearestNeighbors`)** indexes a reference dataset without target labels and answers two foundational spatial queries:
+
+- **`kneighbors(X, nNeighbors)`**: returns the `k` closest points and their sorted distances for every query vector (or each training point's nearest *other* neighbors when `X` is omitted).
+- **`radiusNeighbors(X, radius)`**: returns every reference sample lying within a fixed distance cutoff `radius`.
+
+It powers similarity search, client-side embedding lookup, near-duplicate detection, DBSCAN `eps` knee-plot estimation, and graph construction for manifold learning.
 
 ## JavaScript implementation
 
-`Neighbors.NearestNeighbors` provides the familiar sklearn-style `fit`, `kneighbors`, and `radiusNeighbors` workflow in browser and Node.js. Choose brute force explicitly or reuse the library's KD Tree and Ball Tree search structures. Only the training matrix is serialized; indexes are rebuilt safely for each query.
+`Neighbors.NearestNeighbors` in `@kanaries/ml` provides scikit-learn's `fit`, `kneighbors`, and `radiusNeighbors` API in pure TypeScript for browser and Node.js environments. You can pick `'brute'`, `'kdTree'`, `'ballTree'`, or `'auto'` indexing; when serialized with `toJSON()` / [`loadModel()`](/docs/apis/serialization), only the reference matrix and parameters are stored and spatial trees rebuild safely on load.
 
 ## Quick start
 
@@ -28,6 +33,41 @@ console.log(search.kneighbors([[1]]));
 // { distances: [[1, 1]], indices: [[0, 1]] }
 ```
 
+<AlgorithmComparison
+  title="NearestNeighbors"
+  pythonCode={String.raw`from sklearn.neighbors import NearestNeighbors
+
+nn = NearestNeighbors(n_neighbors=3, algorithm="kd_tree", metric="euclidean")
+nn.fit(X_ref)
+distances, indices = nn.kneighbors(X_query)
+r_dist, r_idx = nn.radius_neighbors(X_query, radius=1.5)`}
+  tsCode={String.raw`import { Neighbors } from '@kanaries/ml';
+
+const nn = new Neighbors.NearestNeighbors({
+  nNeighbors: 3,
+  algorithm: 'kdTree',
+  metric: 'euclidean',
+});
+nn.fit(XRef);
+const { distances, indices } = nn.kneighbors(XQuery);
+const withinRadius = nn.radiusNeighbors(XQuery, 1.5);`}
+/>
+
 ## Detailed API reference
 
-Constructor options are `nNeighbors`, `radius`, `algorithm` (`auto`, `brute`, `kdTree`, or `ballTree`), `leafSize`, `metric`, and Minkowski `p`. `kneighbors(X?, nNeighbors?, returnDistance?)` returns sorted distances and indices; omitting `X` queries the fitted samples while excluding each sample itself. `radiusNeighbors` follows the same pattern for a distance threshold.
+### `new Neighbors.NearestNeighbors(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nNeighbors` | `number` | `5` | Default number of neighbors returned by `kneighbors()`. |
+| `radius` | `number` | `1.0` | Default distance threshold used by `radiusNeighbors()`. |
+| `algorithm` | `'auto' \| 'brute' \| 'kdTree' \| 'ballTree'` | `'auto'` | Spatial search backend (`kdTree` shines in low dimensions `d ≤ 15`; `ballTree` handles general metrics; `brute` is fastest in high dimensions or small `n`). |
+| `leafSize` | `number` | `30` | Leaf bucket size for `kdTree` and `ballTree`. |
+| `metric` / `p` | `Distance.IDistanceType` / `number` | `'euclidean'` / `2` | Distance metric and Minkowski order. |
+
+### Methods
+
+- `fit(X: number[][]): void` — stores the reference dataset and prepares the chosen spatial structure.
+- `kneighbors(X?, nNeighbors?, returnDistance?)` — returns `{ distances, indices }` (or `indices` alone when `returnDistance: false`). Omitting `X` queries each training sample against all *other* training points.
+- `radiusNeighbors(X?, radius?, returnDistance?)` — returns neighbors within `radius` for each query point.
+- **Related pages**: [KDTree](/docs/apis/neighbors/kdTree), [BallTree](/docs/apis/neighbors/ballTree), [LocalOutlierFactor](/docs/apis/neighbors/localOutlierFactor).

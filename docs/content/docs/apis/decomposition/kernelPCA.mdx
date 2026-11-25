@@ -1,17 +1,25 @@
 ---
 title: Kernel PCA in JavaScript and TypeScript
-description: Learn nonlinear dimensionality reduction and run the @kanaries/ml KernelPCA JavaScript implementation in browser or Node.js applications.
+description: Run nonlinear dimensionality reduction with RBF, polynomial, and cosine kernels in JavaScript and TypeScript using KernelPCA from @kanaries/ml.
 ---
 
-# Kernel PCA in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Kernel PCA applies PCA to an implicit nonlinear feature space. It can unfold curved structure that ordinary linear PCA cannot represent, using RBF, polynomial, sigmoid, cosine, or linear similarity.
+Standard [PCA](/docs/apis/decomposition/pca) finds orthogonal linear projections—so if data lies on concentric circles, spirals, or curved manifolds, linear PCA collapses distinct classes right on top of each other. **Kernel PCA** applies the kernel trick to project observations implicitly into a higher-dimensional reproducing kernel Hilbert space (RKHS) and performs eigen-decomposition on the centered `n × n` Gram (kernel) matrix.
+
+Use Kernel PCA when:
+
+- Linear PCA fails to separate curved or concentric clusters before visualization or linear classification.
+- You need **out-of-sample `transform(XTest)`** on unseen points (unlike non-parametric embeddings such as [t-SNE](/docs/apis/manifold/tsne)).
+- You want optional pre-image reconstruction (`fitInverseTransform: true`) via kernel ridge regression.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `KernelPCA` for browser visualization and Node.js preprocessing without a Python service. It supports out-of-sample `transform`, and optional kernel-ridge pre-image reconstruction.
+`Decomposition.KernelPCA` in `@kanaries/ml` supports `'linear'`, `'poly'`, `'rbf'`, `'sigmoid'`, and `'cosine'` kernels in pure TypeScript for browser and Node.js workflows. It composes directly inside [`Pipeline`](/docs/apis/pipeline) and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+**Memory & scaling note**: Because Kernel PCA builds and eigendecomposes an `O(n²)` Gram matrix (`n × n`), keep browser datasets under roughly 1,000–1,500 rows, or approximate RBF kernels at scale with [`Kernel.Nystroem`](/docs/apis/kernel/nystroem) or [`Kernel.RBFSampler`](/docs/apis/kernel/rbfSampler) followed by linear PCA.
 
 ## Quick start example
 
@@ -27,15 +35,45 @@ const embedded = model.fitTransform([[1, 0], [0, 1], [-1, 0], [0, -1]]);
 console.log(embedded);
 ```
 
+<AlgorithmComparison
+  title="KernelPCA"
+  pythonCode={String.raw`from sklearn.decomposition import KernelPCA
+
+kpca = KernelPCA(
+    n_components=2,
+    kernel="rbf",
+    gamma=2.0,
+    fit_inverse_transform=True,
+)
+embedded = kpca.fit_transform(X_train)
+test_embedded = kpca.transform(X_test)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const kpca = new Decomposition.KernelPCA({
+  nComponents: 2,
+  kernel: 'rbf',
+  gamma: 2.0,
+  fitInverseTransform: true,
+});
+const embedded = kpca.fitTransform(XTrain);
+const testEmbedded = kpca.transform(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Decomposition.KernelPCA({
-  nComponents?: number | null;
-  kernel?: 'linear' | 'poly' | 'rbf' | 'sigmoid' | 'cosine';
-  gamma?: number; degree?: number; coef0?: number;
-  alpha?: number; fitInverseTransform?: boolean; randomState?: number;
-})
-```
+### `new Decomposition.KernelPCA(props?)`
 
-Methods: `fit`, `transform`, `fitTransform`, and `inverseTransform`. Learned `eigenvalues` and `eigenvectors` are exposed as defensive copies. Kernel methods build an O(n²) training matrix, so constrain browser sample counts.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number \| null` | `null` (all positive eigenvalues) | Number of nonlinear components to retain. |
+| `kernel` | `'linear' \| 'poly' \| 'rbf' \| 'sigmoid' \| 'cosine'` | `'linear'` | Kernel function computing pairwise similarity. |
+| `gamma` | `number` | `1 / nFeatures` | Kernel coefficient for `'rbf'`, `'poly'`, and `'sigmoid'`. |
+| `degree` / `coef0` | `number` | `3` / `1` | Degree and independent offset for `'poly'` and `'sigmoid'` kernels. |
+| `fitInverseTransform` / `alpha` | `boolean` / `number` | `false` / `1.0` | Enables kernel-ridge `inverseTransform()` with L2 regularization `alpha`. |
+| `randomState` | `number` | `undefined` | Seed for deterministic sign/eigensolver tie-breaking. |
+
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` / `inverseTransform(X)` (requires `fitInverseTransform: true`).
+- `eigenvalues` and `eigenvectors` expose defensive copies of the centered Gram spectrum.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [Kernel Approximation (`Nystroem` / `RBFSampler`)](/docs/apis/kernel), [Isomap](/docs/apis/manifold/isomap).

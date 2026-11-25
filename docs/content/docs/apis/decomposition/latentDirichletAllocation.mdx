@@ -1,29 +1,75 @@
 ---
 title: Latent Dirichlet Allocation (LDA) in JavaScript
-description: Discover document topics from dense or CSR word-count matrices in JavaScript and TypeScript with @kanaries/ml.
+description: Run probabilistic topic modeling over document-term count matrices in JavaScript and TypeScript with LatentDirichletAllocation from @kanaries/ml.
 ---
 
-# Latent Dirichlet Allocation in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-LDA models each document as a mixture of latent topics and each topic as a distribution over words. It is useful for exploratory topic discovery after count vectorization.
+**Latent Dirichlet Allocation (LDA)** is a generative probabilistic topic model that discovers hidden semantic themes across a collection of text documents. It assumes every document is a soft probability mixture over `nComponents` latent topics, and every topic is a probability distribution over vocabulary terms.
+
+Unlike [NMF](/docs/apis/decomposition/nmf) (which operates cleanly on TF-IDF weights via matrix factorization), LDA is designed specifically for **raw non-negative word-count matrices** produced by [`CountVectorizer`](/docs/apis/feature_extraction/countVectorizer). Each row returned by `transform()` is a normalized topic-proportion vector summing to `1`, making it easy to cluster articles, tag support logs, or chart theme distributions directly in a frontend dashboard.
+
+*(Note: For supervised classification/projection Linear Discriminant Analysis, see [`DiscriminantAnalysis.LDA`](/docs/apis/discriminant-analysis/lda).)*
 
 ## JavaScript implementation
 
-`LatentDirichletAllocation` accepts dense or `CSRMatrix` non-negative counts and performs batch variational updates entirely in browser or Node.js.
+`Decomposition.LatentDirichletAllocation` runs batch variational Bayes inference in pure TypeScript for browser and Node.js environments. It accepts both dense `number[][]` and sparse [`CSRMatrix`](/docs/apis/data) count matrices, chains directly after `FeatureExtraction.CountVectorizer` inside a [`Pipeline`](/docs/apis/pipeline), and serializes trained topic models via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start
 
 ```ts
 import { Decomposition, FeatureExtraction } from '@kanaries/ml';
 
-const documents = ['cats chase mice', 'dogs chase balls', 'cats and dogs'];
+const documents = ['cats chase mice', 'dogs chase balls', 'cats and dogs', 'mice eat cheese'];
 const counts = new FeatureExtraction.CountVectorizer().fitTransform(documents);
-const topics = new Decomposition.LatentDirichletAllocation({ nComponents: 5, randomState: 0 }).fitTransform(counts);
-console.log(topics);
+const lda = new Decomposition.LatentDirichletAllocation({
+  nComponents: 2,
+  maxIter: 15,
+  randomState: 0,
+});
+const topics = lda.fitTransform(counts);
+console.log({ topics, nTopics: lda.components.length });
 ```
+
+<AlgorithmComparison
+  title="LatentDirichletAllocation (Topic Modeling)"
+  pythonCode={String.raw`from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+
+counts = CountVectorizer().fit_transform(documents)
+lda = LatentDirichletAllocation(n_components=5, max_iter=10, random_state=0)
+doc_topics = lda.fit_transform(counts)
+topic_words = lda.components_`}
+  tsCode={String.raw`import { Decomposition, FeatureExtraction } from '@kanaries/ml';
+
+const counts = new FeatureExtraction.CountVectorizer().fitTransform(documents);
+const lda = new Decomposition.LatentDirichletAllocation({
+  nComponents: 5,
+  maxIter: 10,
+  randomState: 0,
+});
+const docTopics = lda.fitTransform(counts);
+const topicWords = lda.components;`}
+/>
 
 ## Detailed API reference
 
-Options include topic priors, `maxIter`, `maxDocUpdateIter`, and `meanChangeTol`. `components` contains unnormalized topic-word parameters.
+### `new Decomposition.LatentDirichletAllocation(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number` | `10` | Number of latent topics to infer. |
+| `docTopicPrior` | `number` | `1 / nComponents` | Dirichlet prior `alpha` controlling document-topic sparsity (smaller values encourage fewer topics per document). |
+| `topicWordPrior` | `number` | `1 / nComponents` | Dirichlet prior `eta` controlling topic-word sparsity (smaller values produce sharper top-word lists). |
+| `maxIter` | `number` | `10` | Number of variational EM passes over the corpus. |
+| `maxDocUpdateIter` | `number` | `100` | Inner E-step iterations per document. |
+| `meanChangeTol` | `number` | `1e-3` | Convergence threshold for per-document variational updates. |
+| `randomState` | `number` | `undefined` | Seed for reproducible topic initialization. |
+
+### Methods & properties
+
+- `fit(X)` / `transform(X)` / `fitTransform(X)` — accept dense or `CSRMatrix` non-negative counts; `transform` returns normalized document-topic distributions.
+- `components` — unnormalized topic-word variational parameters (`[nComponents][nVocab]`); sort each row descending to inspect top keywords per topic.
+- **Related pages**: [CountVectorizer](/docs/apis/feature_extraction/countVectorizer), [NMF](/docs/apis/decomposition/nmf), [CSRMatrix](/docs/apis/data).

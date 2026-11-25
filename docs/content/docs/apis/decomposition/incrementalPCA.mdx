@@ -1,17 +1,19 @@
 ---
 title: Incremental PCA in JavaScript and TypeScript
-description: Process numeric data in batches with the @kanaries/ml IncrementalPCA JavaScript implementation for memory-aware browser and Node.js workflows.
+description: Run streaming out-of-core PCA one batch at a time in JavaScript and TypeScript with IncrementalPCA from @kanaries/ml for memory-aware browser and Node.js apps.
 ---
 
-# Incremental PCA in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-Incremental PCA updates a low-rank SVD one batch at a time. It is useful when a complete dataset should not be retained in memory, while still producing PCA-style projections and inverse transforms.
+Standard [PCA](/docs/apis/decomposition/pca) loads the entire centered feature matrix into memory at once to compute its singular value decomposition. When processing large CSV uploads in a browser tab, streaming telemetry chunks in Node.js, or running inside memory-capped serverless functions, holding every row simultaneously can exhaust heap limits.
+
+**Incremental PCA** updates a mean-corrected low-rank SVD **one mini-batch at a time** via `partialFit()`, maintaining constant memory proportional to `batchSize × nFeatures` rather than total dataset size. Once all batches have been seen, it supports the exact same `transform()` and `inverseTransform()` projections as batch PCA.
 
 ## JavaScript implementation
 
-`@kanaries/ml` follows sklearn's mean-corrected incremental SVD update. Call `partialFit` for streamed batches, or `fit` to let the estimator split an in-memory matrix by `batchSize`.
+`Decomposition.IncrementalPCA` in `@kanaries/ml` implements Ross et al.'s mean-corrected incremental SVD update (matching `sklearn.decomposition.IncrementalPCA`) in pure TypeScript. You can stream arbitrary chunks manually with chained `partialFit(batch)` calls, or pass a full matrix to `fit(X)` and let `batchSize` chunk it automatically. Fitted models serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -21,21 +23,50 @@ import { Decomposition } from '@kanaries/ml';
 const batchOne = [[0, 1, 2], [1, 2, 3], [2, 1, 4]];
 const batchTwo = [[3, 4, 2], [4, 3, 1], [5, 5, 0]];
 const nextBatch = [[2, 3, 2]];
+
 const pca = new Decomposition.IncrementalPCA({ nComponents: 2 });
 pca.partialFit(batchOne).partialFit(batchTwo);
 const embedding = pca.transform(nextBatch);
-console.log(embedding);
+console.log({ embedding, seen: pca.nSamplesSeen });
 ```
+
+<AlgorithmComparison
+  title="IncrementalPCA"
+  pythonCode={String.raw`from sklearn.decomposition import IncrementalPCA
+
+ipca = IncrementalPCA(n_components=2, batch_size=256)
+ipca.partial_fit(batch_one)
+ipca.partial_fit(batch_two)
+embedding = ipca.transform(X_test)`}
+  tsCode={String.raw`import { Decomposition } from '@kanaries/ml';
+
+const ipca = new Decomposition.IncrementalPCA({
+  nComponents: 2,
+  batchSize: 256,
+});
+ipca.partialFit(batchOne).partialFit(batchTwo);
+const embedding = ipca.transform(XTest);`}
+/>
 
 ## Detailed API reference
 
-```ts
-new Decomposition.IncrementalPCA({ nComponents?: number | null, batchSize?: number })
-```
+### `new Decomposition.IncrementalPCA(props?)`
 
-- `partialFit(X: number[][]): this` updates the retained SVD.
-- `fit(X: number[][]): void` resets and processes batches.
-- `transform` and `inverseTransform` project data.
-- `components`, `mean`, `explainedVariance`, `singularValues`, and `nSamplesSeen` expose learned state.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nComponents` | `number \| null` | `null` (`min(batchSize, nFeatures)`) | Number of principal components retained across batches. |
+| `batchSize` | `number` | `5 * nFeatures` | Chunk size used when calling `fit(X)` on an in-memory matrix. |
 
-The first `partialFit` batch must contain at least `nComponents` samples and features.
+### Methods & properties
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `partialFit` | `(X: number[][]) => this` | Updates the running mean, sample count, and low-rank SVD with a new batch (chainable). |
+| `fit` | `(X: number[][]) => void` | Resets state and streams `X` in `batchSize` chunks through `partialFit()`. |
+| `transform` / `inverseTransform` | `(X: number[][]) => number[][]` | Projects samples onto principal axes or reconstructs them in feature space. |
+| `components` / `mean` / `explainedVariance` / `singularValues` / `nSamplesSeen` | Learned getters | Inspects principal directions, running column means, variance spectrum, and total rows processed. |
+
+### Practical constraints
+
+- **Minimum first batch size**: The very first `partialFit()` call must contain at least `nComponents` rows (and `nFeatures >= nComponents`), otherwise there are not enough samples to initialize the requested rank.
+- **Related pages**: [PCA](/docs/apis/decomposition/pca), [PCA Interactive Playground](/playground/pca), [TruncatedSVD](/docs/apis/decomposition/truncatedSVD), [SparsePCA](/docs/apis/decomposition/sparsePCA).
