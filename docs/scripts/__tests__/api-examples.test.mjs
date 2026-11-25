@@ -4,6 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { build } from 'esbuild';
 import * as ml from '@kanaries/ml';
 
 const TEST_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -36,7 +37,18 @@ test('every API page has a copy-paste quick start from package import to visible
   }
 });
 
-test('every algorithm quick start executes against the published docs dependency', async () => {
+test('every algorithm quick start executes against its documented library version', async () => {
+  // These estimators shipped on master after the version pinned by the docs app.
+  const repositoryPages = new Set([
+    'clusters/eMeans.mdx', 'ensemble/histGradientBoosting.mdx',
+    'gaussian_process/classifier.mdx', 'gaussian_process/regressor.mdx',
+    'kernel/nystroem.mdx', 'kernel/rbfSampler.mdx',
+  ]);
+  const { outputFiles } = await build({
+    entryPoints: [path.resolve(TEST_DIR, '../../../src/index.ts')],
+    platform: 'node', format: 'esm', bundle: true, write: false,
+  });
+  const repository = await import('data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64'));
   const files = (await walk(API_ROOT)).filter((file) => !file.includes(`${path.sep}utils${path.sep}`));
   for (const file of files) {
     const code = quickStartCode(await fs.readFile(file, 'utf8'), file);
@@ -54,7 +66,7 @@ test('every algorithm quick start executes against the published docs dependency
     await execute(
       (specifier) => {
         assert.equal(specifier, '@kanaries/ml', `${file} imports an unexpected dependency`);
-        return ml;
+        return repositoryPages.has(path.relative(API_ROOT, file).split(path.sep).join('/')) ? repository : ml;
       },
       module,
       module.exports,

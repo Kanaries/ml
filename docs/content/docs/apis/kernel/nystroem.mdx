@@ -26,6 +26,7 @@ const model = new Pipeline({
 });
 model.fit([[-2], [-1], [0], [1], [2]], [4, 1, 0, 1, 4]);
 const predictions = model.predict([[-1.5], [0.5]]);
+console.log(predictions);
 ```
 
 ## API reference

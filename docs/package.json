@@ -29,6 +29,7 @@
     "@types/node": "22.15.21",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
+    "esbuild": "^0.25.4",
     "gray-matter": "^4.0.3",
     "postcss": "^8.5.3",
     "remark-gfm": "^4.0.1",

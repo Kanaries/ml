@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "kmeans",
+    "eMeans",
     "dbscan",
     "hdbscan",
     "meanShift",

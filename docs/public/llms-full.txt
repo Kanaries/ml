@@ -583,6 +583,96 @@ Labels are numeric cluster ids starting at `0`. Noise points are labeled `-1`.
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/clusters/eMeans -->
+
+---
+title: "E-Means Clustering in JavaScript"
+description: "Cluster dense vectors in the browser or Node.js using the TypeScript E-Means estimator in @kanaries/ml. Explore the moving-average update, rare clusters, and measured JavaScript performance."
+canonical_url: "https://ml.kanaries.net/docs/apis/clusters/eMeans"
+markdown_url: "https://ml.kanaries.net/docs/apis/clusters/eMeans.md"
+---
+# E-Means Clustering in JavaScript
+
+## When to use E-Means
+
+If you have thousands of embedding vectors and want a small codebook to represent them, each pass of K-Means involves comparing every vector to every center. E-Means updates the centers several times during a pass. On our 10,000-vector retrieval benchmarks it reached a similar held-out error with less CPU time in both Node.js and Chrome. For a small two-dimensional dataset, Lloyd reached the target sooner.
+
+Like K-Means, E-Means takes a fixed number of clusters and minimizes squared Euclidean distance. A predicted label is the index of the nearest center. Features with large numerical scales dominate this distance, so choose scaling that reflects what similarity means in your application.
+
+## Quick start in JavaScript or TypeScript
+
+The repository build exposes `Clusters.EMeans` for browsers and Node.js. To use this feature before the next npm release, build the repository with `yarn install --frozen-lockfile && yarn build`, then run `yarn pack` and install the resulting tarball in your application. The example uses two-dimensional coordinates so you can inspect the assignments directly.
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const points = [[0, 0], [0, 1], [1, 0], [8, 8], [8, 9], [9, 8]];
+const model = new Clusters.EMeans({ nClusters: 2, epochs: 5, randomState: 42 });
+const labels = model.fitPredict(points);
+const centers = model.getCentroids();
+const nearest = model.predict([[8.5, 8]]);
+console.log(labels, centers, nearest, model.getInertia());
+```
+
+### Try a rare cluster
+
+Switch the dataset, pass budget or revival setting to see how the three fitted models score on held-out points. The plot shows the E-Means assignments. For larger interactive applications, run the synchronous fit in a Web Worker. [Example source](https://github.com/Kanaries/ml/blob/master/examples/e-means.ts)
+
+> The HTML page includes a live E-Means, Lloyd and MiniBatchKMeans comparison. Switch the data, pass budget and cluster revival setting to inspect held-out error. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters/eMeans).
+
+## How the centers move
+
+Swann Bessa and colleagues introduced e-means in November 2026. Lloyd rebuilds each center from one full pass. Conventional mini-batch K-Means accumulates counts, so a center with a long history tends to move slowly. E-Means discounts that history. Each batch first assigns its rows to the current centers, then updates two quantities per cluster. If the batch contributes a vector sum `s` and a count `m`, the updated running totals are `S = (1 − α) S + α s` and `N = (1 − α) N + α m`. Their ratio gives the center. A cluster receiving zero rows retains its location. [Original paper, algorithm 1](https://arxiv.org/html/2611.09501v1)
+
+The optimizer shuffles the data on each pass, retains short tail batches and gradually reduces the step size using a cosine schedule. The JavaScript defaults follow the CPU recipe shipped in Faiss **1.16.0**. It derives the batch size and initial step from the data size, cluster count and pass budget. Dimensions up to 16 use the smaller quality-oriented batch recipe. JavaScript uses double precision and its own seeded shuffle. [Reference recipe](https://github.com/facebookresearch/faiss/blob/v1.16.0/contrib/e_means/base.py)
+
+On the final pass E-Means averages all points assigned to each cluster during that pass. A center with no final-pass members keeps its position. The library then makes one extra exact assignment pass so that `getLabels()`, `predict(trainingData)` and `getInertia()` all describe the returned centers. Fit time below includes that scan. Exact assignment takes O(nkd) distance arithmetic per pass for n rows, k centers and d features. Training uses O(n + kd) extra storage, including row indices and output labels.
+
+### When rare groups matter
+
+Every five batch updates, mass-based revival can take a center whose moving count is very small and use it to split a busy cluster. This helps recover unused centers. It can also remove the only center covering a rare, distant group. In our 8-dimensional stress test, 1% of observations belonged to such a group. With identical starts covering the rare group, the standard E-Means recipe missed the quality target for all five seeds at all tested budgets. With `revivalThreshold: 0`, five passes reached the target for all five seeds; median held-out MSE was 6.96. If rare groups matter, compare this setting on your own held-out observations. [Published counterexamples](https://arxiv.org/abs/2611.22065)
+
+## Measured CPU performance
+
+We used Apple M4, Node.js 24.14 and headless Google Chrome 158, with five paired seeds. Each controlled fit starts from the same centers for its seed. We tried pass budgets of 1, 3, 5 and 25. The target is a held-out MSE at most 1% above the 25-pass Lloyd result for that seed. Each cell reports the median end-to-end fit time at the **first tested budget that reached the target**, in milliseconds. The parenthesis gives the number of successful seeds when fewer than five qualified.
+
+| Data and runtime                        | E-Means | Lloyd | MiniBatchKMeans |
+| --------------------------------------- | ------: | ----: | --------------: |
+| GloVe, 25 dimensions · Node.js          |    16.3 | 104.8 |     172.3 (3/5) |
+| GloVe, 25 dimensions · Chrome           |    15.3 | 104.4 |     120.7 (3/5) |
+| SIFT, 128 dimensions · Node.js          |    45.3 | 125.8 |           708.6 |
+| SIFT, 128 dimensions · Chrome           |    47.8 | 126.7 |           612.3 |
+| Synthetic blobs, 2 dimensions · Node.js |    0.65 |  0.46 |      1.66 (3/5) |
+| Synthetic blobs, 2 dimensions · Chrome  |     0.8 |   0.4 |       1.2 (3/5) |
+
+The GloVe and SIFT trials use the first 10,000 training and 1,000 test vectors with 32 centers and squared Euclidean distance on the original coordinates. The blobs trial uses 5,000 training rows, 1,000 test rows and three centers. Held-out scoring and data loading are outside the timer. MiniBatchKMeans receives the shared initialization through its benchmark harness. The downloadable results also include digits, rare groups, individual seeds, error values and separate runs using each public estimator's default initialization and stopping behavior. [Benchmark code, data preparation and results](https://github.com/Kanaries/ml/tree/master/scripts/e-means) · [Vector dataset distributions](https://ann-benchmarks.com/)
+
+## API reference
+
+`new Clusters.EMeans(options?)` accepts the following TypeScript properties.
+
+| Option             | Default                        | Behavior                                                                                                           |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `nClusters`        | `8`                            | Positive integer no larger than the training row count.                                                            |
+| `epochs`           | `5`                            | Positive integer giving the number of complete shuffled training passes. The final exact label scan is additional. |
+| `batchSize`        | Automatic                      | Positive integer, capped at the training row count. The initial step uses the resolved batch size.                 |
+| `randomState`      | Unseeded                       | An integer seed makes initialization, shuffling and revival reproducible in this implementation.                   |
+| `revivalThreshold` | `0` for d ≤ 2; `0.1` otherwise | Nonnegative fraction of the mean moving count. Use zero to disable revival.                                        |
+| `initCenters`      | Sample distinct row indices    | Optional dense array with one center per cluster and the same width as the training rows. Copied before use.       |
+
+| Method                          | Result                                                                                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `fit(X, sampleWeights?)`        | Fits on a nonempty, rectangular array of finite-valued vectors and returns the estimator. The optional weights must all equal 1.    |
+| `fitPredict(X, sampleWeights?)` | Fits and returns final nearest-center labels in input row order. Equal distances choose the lowest center index.                    |
+| `predict(X)`                    | Returns nearest-center labels for rows of the fitted width. An empty prediction batch returns an empty array.                       |
+| `getCentroids()`                | Returns a copy of the fitted centers, or `null` before fitting.                                                                     |
+| `getLabels()`                   | Returns a copy of the training labels, initially empty.                                                                             |
+| `getInertia()`                  | Returns the sum of squared training distances to the final centers, initially `Infinity`. Divide by the training row count for MSE. |
+
+A successful refit replaces the fitted state. Predicting before fitting, inconsistent feature dimensions and invalid hyperparameters raise errors. The estimator supports the library's usual `getParams()`, `setParams()`, `clone()` and JSON model persistence.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/clusters/hdbscan -->
 
 ---
@@ -729,6 +819,7 @@ If someone searches for "clustering in JavaScript", "K-Means in JavaScript", or 
 > The HTML version includes an interactive comparison of clustering algorithms. The agent-readable algorithm links and selection guidance continue below. [Open the HTML page](https://ml.kanaries.net/docs/apis/clusters).
 
 - [K-Means](/docs/apis/clusters/kmeans.md): centroid-based clustering when cluster count is known or estimated
+- [E-Means in JavaScript](/docs/apis/clusters/eMeans.md) for mini-batch clustering of dense embedding vectors with a fixed pass budget
 - [DBScan](/docs/apis/clusters/dbscan.md): density-based clustering with explicit radius and noise labels
 - [HDBSCAN](/docs/apis/clusters/hdbscan.md): density-based clustering when cluster count is unknown and noise matters
 - [Mean Shift](/docs/apis/clusters/meanShift.md): mode-seeking clustering without predefining cluster count
@@ -2696,6 +2787,94 @@ The model initializes with the mean of the targets. Each round computes the resi
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting -->
+
+---
+title: "Histogram Gradient Boosting in JavaScript for Classification and Regression"
+description: "Train histogram gradient boosting trees on numeric tables with missing values. Use @kanaries/ml in a browser or Node.js to predict classes, probabilities, and continuous targets."
+canonical_url: "https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting"
+markdown_url: "https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting.md"
+---
+# Histogram gradient boosting in JavaScript
+
+Histogram gradient boosting fits a sequence of decision trees to a table. Each round corrects the previous rounds' predictions. The learner groups each numeric feature into bins once, then compares potential splits using the gradient and curvature accumulated in each bin. This limits the number of split candidates even when most feature values are distinct.
+
+This works well for nonlinear relationships in numeric tables, such as estimating machine output from sensor readings or predicting whether a machine will fail. An absent reading can carry information of its own. Represent it as `NaN` and the tree can learn which child should receive it at each split.
+
+## JavaScript implementation
+
+Use `Ensemble.HistGradientBoostingClassifier` for numeric class labels and `Ensemble.HistGradientBoostingRegressor` for a continuous target. Both run in JavaScript in a browser or Node.js. They share the same binner and best-first tree grower. Regression and binary classification fit one tree per round. Multiclass classification fits one tree per class per round.
+
+## Quick start
+
+### Classify a machine from a sensor reading
+
+Suppose an unavailable reading often precedes a fault. In this small training set, readings of 8 or 9 and missing readings all have the fault label `1`.
+
+```js
+import { Ensemble } from '@kanaries/ml';
+
+const classifier = new Ensemble.HistGradientBoostingClassifier({
+  maxIter: 30,
+  minSamplesLeaf: 2,
+});
+const readings = [[1], [2], [3], [4], [8], [9], [NaN], [NaN]];
+classifier.fit(readings, [0, 0, 0, 0, 1, 1, 1, 1]);
+
+console.log(classifier.predict([[2], [NaN]])); // [0, 1]
+console.log(classifier.getClasses());         // [0, 1]
+console.log(classifier.predictProba([[NaN]])); // one row of [P(0), P(1)]
+```
+
+### Estimate output with an unavailable reading
+
+The measured outputs below cluster around 12–14 units for low readings, 36–38 for high readings, and 23–25 for absent readings. The smaller leaf size lets the example learn from pairs of measurements.
+
+```js
+import { Ensemble } from '@kanaries/ml';
+
+const regressor = new Ensemble.HistGradientBoostingRegressor({
+  maxIter: 60,
+  minSamplesLeaf: 2,
+});
+const readings = [[1], [2], [8], [9], [NaN], [NaN]];
+regressor.fit(readings, [12, 14, 36, 38, 23, 25]);
+
+console.log(regressor.predict([[2], [8], [NaN]]).map(Math.round)); // [14, 36, 24]
+```
+
+## API reference
+
+### Constructor options
+
+| Option             | Default                                                            | Behavior                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `loss`             | `'log_loss'` for classification, `'squared_error'` for regression. | Each estimator supports the loss shown for its task.                                                                                    |
+| `learningRate`     | `0.1`                                                              | Positive multiplier applied to each tree's update.                                                                                      |
+| `maxIter`          | `100`                                                              | Positive integer. Training runs exactly this many boosting rounds. Choose it using held-out data if you need validation-based stopping. |
+| `maxLeafNodes`     | `31`                                                               | Cap on leaves per tree. Accepts an integer of at least 2, or `null` to remove the cap.                                                  |
+| `maxDepth`         | `null`                                                             | Maximum depth per tree, with the root at depth 0. Set a positive integer to impose a limit.                                             |
+| `minSamplesLeaf`   | `20`                                                               | Minimum row count per leaf. A split needs at least this many rows in each child.                                                        |
+| `l2Regularization` | `0`                                                                | Nonnegative L2 penalty on leaf values. Larger values shrink Newton updates.                                                             |
+| `maxBins`          | `255`                                                              | Maximum number of bins for observed values per feature, from 2 through 255. Each feature has a separate missing-value bin.              |
+
+### Fitting and prediction
+
+- `fit(X, y, sampleWeight?)` trains a fresh model and returns `void`. Supply a nonempty rectangular `number[][]` with one row per sample and a finite numeric target for each row. Each feature value must be finite or `NaN`. Encode categorical inputs before fitting. The classifier needs at least two distinct numeric labels.
+- `sampleWeight` is an optional array of finite, nonnegative numbers with one weight per training row and a positive finite total. It affects the initial prediction, binning and tree updates.
+- `predict(X)` returns a `number[]` with one class label or estimated target per row. Use the training feature count and column order at prediction time. At a split on a feature that had no missing values in training, a new `NaN` follows the child containing more training samples. Ties go to the right child.
+- `score(X, y)` reports accuracy for the classifier and R² for the regressor. `nIter` is the number of fitted boosting rounds and is zero before fitting.
+
+### Classifier outputs
+
+| Method                | Return value                                                                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `getClasses()`        | Sorted numeric class labels, in the same order as probability columns.                                                                  |
+| `predictProba(X)`     | One row per sample, with a probability for each class.                                                                                  |
+| `decisionFunction(X)` | For two classes, a `number[]` of log-odds for the higher label. For three or more classes, a `number[][]` of raw scores in class order. |
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/ensemble/iforest -->
 
 ---
@@ -2841,6 +3020,7 @@ If someone searches for "Isolation Forest in JavaScript" or "AdaBoost in TypeScr
 - [AdaBoost Classifier](/docs/apis/ensemble/adaboostClassifier.md): boosted classification for harder decision boundaries
 - [GradientBoostingRegressor](/docs/apis/ensemble/gradientBoostingRegressor.md): squared-error gradient boosting for tabular regression
 - [GradientBoostingClassifier](/docs/apis/ensemble/gradientBoostingClassifier.md): log-loss gradient boosting for binary and multiclass classification
+- [Histogram gradient boosting](/docs/apis/ensemble/histGradientBoosting.md) trains classifiers and regressors on numeric tables with missing values.
 - [XGBoostRegressor](/docs/apis/ensemble/xgboostRegressor.md): exact-greedy, regularized XGBoost regression
 - [XGBoostClassifier](/docs/apis/ensemble/xgboostClassifier.md): exact-greedy, regularized XGBoost classification (binary and multiclass)
 
@@ -3593,6 +3773,145 @@ console.log({ fScores, pValues, information });
 
 ---
 
+<!-- Source: https://ml.kanaries.net/docs/apis/gaussian_process/classifier -->
+
+---
+title: "Gaussian Process Classification in JavaScript and TypeScript"
+description: "Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications."
+canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process/classifier"
+markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/classifier.md"
+---
+# Gaussian process classification in JavaScript
+
+A Gaussian process classifier uses a kernel to express how class membership varies between nearby observations. For example, if measurements on either side of a sensor threshold are noisy, the model can return the probability of each operating state at a new measurement. With an RBF kernel, points far from all training observations approach equal class probabilities.
+
+`GaussianProcess.GaussianProcessClassifier` trains on finite numeric features and labels. It approximates a binary logistic posterior using Laplace's method and supports multiple classes through one binary model per class. Each Newton update factors a dense matrix with one row and column per training sample. This makes the implementation practical for small datasets in the browser or Node.js.
+
+## Quick start
+
+```ts
+import { GaussianProcess } from '@kanaries/ml';
+
+const state = new GaussianProcess.GaussianProcessClassifier({ lengthScale: 0.8 });
+state.fit([[-2], [-1], [1], [2]], [10, 10, 20, 20]);
+
+const classes = state.getClasses(); // [10, 20]
+const [probabilities] = state.predictProba([[1.5]]);
+const [label] = state.predict([[1.5]]); // 20
+
+console.log(classes.map((value, i) => [value, probabilities[i]]));
+```
+
+## Constructor options
+
+| Option           | Default | Meaning                                                                                                                                                                    |
+| ---------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lengthScale`    | `1`     | Positive RBF length scale. Supply a number for all features or an array containing one scale per feature. A larger scale makes distant training observations more similar. |
+| `signalVariance` | `1`     | Positive prior variance of the latent function. The kernel equals this value when comparing a sample with itself.                                                          |
+| `maxIterPredict` | `100`   | Maximum Newton updates during fitting for each binary posterior.                                                                                                           |
+| `tol`            | `1e-8`  | Positive relative tolerance for convergence of latent function values.                                                                                                     |
+
+The supplied kernel parameters stay fixed during training. `fit(X, y)` requires at least two distinct class labels and throws if a binary posterior fails to converge.
+
+## Predictions
+
+- `predict(X)` returns one numeric class label per sample.
+- `predictProba(X)` returns one row per sample. Columns follow the ascending numeric order from `getClasses()`. For multiple classes, each one-vs-rest probability is divided by the sum across classes.
+- `score(X, y)` returns the fraction of correctly classified samples.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/gaussian_process -->
+
+---
+title: "Gaussian Processes in JavaScript and TypeScript"
+description: "Use Gaussian process regression for predictions with uncertainty and Gaussian process classification for class probabilities in the browser or Node.js with @kanaries/ml."
+canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process"
+markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/index.html.md"
+---
+# Gaussian processes in JavaScript
+
+Suppose you have a few sensor readings taken at unevenly spaced positions. A Gaussian process can use the distance between measurements to estimate the reading at a new position and how uncertain that estimate is. For labeled observations, the same idea can estimate the probability of each operating state.
+
+The `GaussianProcess` module in `@kanaries/ml` runs in the browser and Node.js. Both estimators use a radial basis function (RBF) kernel. Its length scale controls the distance over which observations influence each other. Start with features in comparable units, or choose a separate length scale for each feature.
+
+| If you need                                                                                                          | Use                                                                          |
+| -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| A continuous estimate with a standard deviation for each prediction, or a covariance matrix for a set of predictions | [Gaussian process regression](/docs/apis/gaussian_process/regressor.md)      |
+| Class labels and per-class probabilities                                                                             | [Gaussian process classification](/docs/apis/gaussian_process/classifier.md) |
+
+Both estimators factor dense matrices with one row per training observation. Training memory grows quadratically with sample count, so these estimators are best suited to small datasets.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/gaussian_process/regressor -->
+
+---
+title: "Gaussian Process Regression in JavaScript and TypeScript"
+description: "Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/gaussian_process/regressor"
+markdown_url: "https://ml.kanaries.net/docs/apis/gaussian_process/regressor.md"
+---
+# Gaussian process regression in JavaScript
+
+A Gaussian process uses the similarity between measurements to estimate a continuous target. Suppose you measure the temperature at a handful of points along a pipe. You can estimate the temperature between sensors and see where another measurement would reduce uncertainty. Nearby sensors with consistent readings usually narrow the uncertainty band.
+
+## JavaScript implementation
+
+`GaussianProcess.GaussianProcessRegressor` in `@kanaries/ml` fits one numeric target using a scaled RBF kernel. Run it in a browser to update a fitted curve as users add observations, or in Node.js to serve predictions with standard deviations. Exact training takes cubic time and quadratic memory in the number of training observations, making this estimator a good fit for small datasets.
+
+## Quick start
+
+```ts
+import { GaussianProcess } from '@kanaries/ml';
+
+const gp = new GaussianProcess.GaussianProcessRegressor({
+    lengthScale: 1.5,
+    alpha: 0.04,
+    normalizeY: true,
+});
+gp.fit([[0], [1], [2], [4]], [20.2, 21.5, 22.4, 20.7]);
+
+const positions = [[0.5], [3], [7]];
+const { mean, std } = gp.predict(positions, { returnStd: true });
+const intervals = mean.map((m, i) => [m - 1.96 * std[i], m + 1.96 * std[i]]);
+console.log(intervals);
+```
+
+Each interval is a pointwise 95% posterior interval for the underlying function, given the fitted kernel and noise variance. A future sensor reading also contains measurement noise.
+
+## Constructor options
+
+| Option           | Default | Meaning                                                                                                                                                                                                                                       |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lengthScale`    | `1`     | Positive RBF length scale. A larger value smooths changes over a greater distance. Supply an array with one positive scale per input feature when they have different units.                                                                  |
+| `signalVariance` | `1`     | Positive variance of the latent function. It multiplies the RBF kernel.                                                                                                                                                                       |
+| `alpha`          | `1e-10` | Nonnegative observation noise **variance** added to the training diagonal. Pass one number for all observations or an array with one variance per training sample. A positive value can stabilize repeated measurements at the same position. |
+| `normalizeY`     | `false` | Center targets and scale by their training population standard deviation. Predictions return to the original target units. With normalization enabled, specify `alpha` and `signalVariance` in normalized variance units.                     |
+| `optimizer`      | `null`  | By default, training keeps the supplied kernel parameters fixed. Pass an options object to search for better values.                                                                                                                          |
+
+### Optional kernel optimization
+
+`optimizer: {}` enables deterministic coordinate search over log signal variance and log length scales, maximizing the training log marginal likelihood. Each candidate requires another matrix factorization. With many input features, a scalar length scale reduces the number of parameters to search.
+
+`lengthScaleBounds` and `signalVarianceBounds` each accept two positive, ordered numbers and default to `[1e-5, 1e5]`. The starting parameters must lie within those bounds. One pair of length scale bounds applies to every dimension. Equal endpoints fix the corresponding parameter. `maxIter` sets the maximum number of coordinate sweeps and defaults to 50. The search starts at the supplied kernel, can reach a local optimum, and keeps `alpha` fixed throughout.
+
+## Methods and outputs
+
+| Method                            | Result                                                                                                                                                                                       |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fit(X, y)`                       | Fits the model on a nonempty, finite, rectangular `number[][]` and one finite target per row. A subsequent fit replaces the previous posterior.                                              |
+| `predict(X)`                      | An array of posterior means, one per query.                                                                                                                                                  |
+| `predict(X, { returnStd: true })` | `{ mean, std }` with one latent-function standard deviation per query. Use this for error bars.                                                                                              |
+| `predict(X, { returnCov: true })` | `{ mean, cov }` where `cov[i][j]` is the posterior covariance between query points. This output requires quadratic memory in the number of queries. Request one uncertainty format per call. |
+| `logMarginalLikelihood()`         | The fitted model's scalar training log marginal likelihood.                                                                                                                                  |
+| `fittedKernel`                    | A read-only getter returning a copy of the fitted signal variance and length scale.                                                                                                          |
+| `score(X, y)`                     | The coefficient of determination (R²) on labeled data.                                                                                                                                       |
+
+Calling `predict` before training returns the zero-mean prior, with the configured kernel supplying its standard deviations or covariance. After fitting, query rows must have the same number of features as the training rows.
+
+---
+
 <!-- Source: https://ml.kanaries.net/docs/apis/impute -->
 
 ---
@@ -3684,7 +4003,8 @@ This is especially useful when someone searches for "machine learning in JavaScr
 - **[Feature Extraction](/docs/apis/feature_extraction/index.html.md)**: turn raw text into sparse count and TF-IDF features.
 - **[Imputation](/docs/apis/impute/index.html.md)**: estimate correlated numeric values missing from feature matrices.
 - **[Linear](/docs/apis/linear/index.html.md)**: use classical, robust, Bayesian, quantile, and generalized linear models.
-- **[Kernel Methods](/docs/apis/kernel/index.html.md)**: fit kernel ridge regression or kernel density estimates.
+- **[Kernel Methods](/docs/apis/kernel/index.html.md)**: fit kernel ridge regression or density estimates, or approximate a kernel with random Fourier features and Nyström landmarks.
+- **[Gaussian Processes](/docs/apis/gaussian_process/index.html.md)** estimate a continuous target with uncertainty or predict class probabilities on small datasets.
 - **[Cross Decomposition](/docs/apis/cross_decomposition/index.html.md)**: model paired blocks with PLS Regression and CCA.
 - **[Random Projection](/docs/apis/random_projection/index.html.md)**: reduce dimensions with Gaussian or sparse Johnson-Lindenstrauss maps.
 - **[Compose](/docs/apis/compose/index.html.md)**: wrap regression targets in invertible preprocessing transformations.
@@ -3735,8 +4055,8 @@ Both names reference the same constructor; aliases do not duplicate estimator co
 <!-- Source: https://ml.kanaries.net/docs/apis/kernel -->
 
 ---
-title: "Kernel Ridge Regression and Kernel Density in JavaScript"
-description: "Use nonlinear KernelRidge prediction and KernelDensity estimation in JavaScript or TypeScript with @kanaries/ml."
+title: "Kernel Ridge Regression, Density and Approximation in JavaScript"
+description: "Use @kanaries/ml for kernel regression, density estimation and approximate nonlinear feature maps in JavaScript or TypeScript in the browser or Node.js."
 canonical_url: "https://ml.kanaries.net/docs/apis/kernel"
 markdown_url: "https://ml.kanaries.net/docs/apis/kernel/index.html.md"
 ---
@@ -3749,6 +4069,13 @@ Kernel methods compare samples through a similarity function instead of explicit
 ## JavaScript implementation
 
 `@kanaries/ml` keeps both estimators in the JavaScript runtime: fit nonlinear regression in a Node.js service, or score small density models directly in an interactive browser workflow without a Python inference endpoint. Choose this implementation when model state and product code need to share the same typed API; benchmark larger training sets because kernel matrices and pairwise scoring grow with the number of samples.
+
+## Kernel feature maps
+
+To train a linear model on nonlinear features, choose a feature width and put one of these transformers before the model in a pipeline.
+
+- Sample random Fourier features for an RBF kernel on dense or sparse inputs. [RBFSampler in JavaScript](/docs/apis/kernel/rbfSampler.md)
+- Use training rows as landmarks for RBF, polynomial, cosine, or linear kernels. [Nyström approximation in JavaScript](/docs/apis/kernel/nystroem.md)
 
 ## Interactive Kernel Ridge regression playground
 
@@ -3772,6 +4099,115 @@ console.log({ prediction: regressor.predict([[1.5]]), logDensity: density.scoreS
 ## Detailed API reference
 
 KernelRidge supports linear, polynomial, RBF, sigmoid, and cosine kernels. KernelDensity supports Gaussian, tophat, Epanechnikov, exponential, linear, and cosine radial kernels and exposes `scoreSamples` and `score`.
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/kernel/nystroem -->
+
+---
+title: "Nyström Kernel Approximation in JavaScript with Nystroem"
+description: "Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models."
+canonical_url: "https://ml.kanaries.net/docs/apis/kernel/nystroem"
+markdown_url: "https://ml.kanaries.net/docs/apis/kernel/nystroem.md"
+---
+# Nyström kernel approximation in JavaScript
+
+A kernel matrix stores the similarity of every training sample to every other sample. The Nyström method chooses a smaller set of training rows as landmarks. Each new row becomes a vector of similarities to those landmarks, normalized so feature dot products approximate the original kernel.
+
+## Using Nystroem in JavaScript
+
+`Kernel.Nystroem` lets you train with landmarks in Node.js or in a browser and reuse the same feature map at prediction time. Choose the kernel to express how your samples should be compared. The landmark count controls both the output width and the size of the square matrix that must be decomposed during fitting.
+
+## Quick start
+
+Fit an RBF feature map and a ridge regressor together. Keeping both steps in a pipeline lets you apply the fitted map when predicting new values.
+
+```ts
+import { Kernel, Linear, Pipeline } from '@kanaries/ml';
+
+const model = new Pipeline({
+    steps: [
+        ['features', new Kernel.Nystroem({ kernel: 'rbf', gamma: 0.5, nComponents: 3, randomState: 17 })],
+        ['regressor', new Linear.Ridge({ alpha: 0.1 })],
+    ],
+});
+model.fit([[-2], [-1], [0], [1], [2]], [4, 1, 0, 1, 4]);
+const predictions = model.predict([[-1.5], [0.5]]);
+console.log(predictions);
+```
+
+## API reference
+
+| Constructor option | Default | Meaning                                                                                                                                                             |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kernel`           | `'rbf'` | Similarity function. Supported values are `'rbf'`, `'linear'`, `'poly'`, and `'cosine'`.                                                                            |
+| `nComponents`      | `100`   | Requested number of distinct training row indices to sample as landmarks. The fitted width is the smaller of this positive integer and the number of training rows. |
+| `gamma`            | `null`  | Nonnegative RBF or polynomial kernel coefficient. The default uses the reciprocal of the input feature count.                                                       |
+| `degree`           | `3`     | Positive integer polynomial kernel degree.                                                                                                                          |
+| `coef0`            | `1`     | Constant added before raising the polynomial kernel to its specified degree.                                                                                        |
+| `randomState`      | Unset   | Unsigned 32-bit integer seed for reproducible landmark selection.                                                                                                   |
+
+- `fit(X)` selects landmarks from a dense numeric matrix and computes the normalization from their kernel matrix.
+- `transform(X)` returns one dense row per sample and one column per fitted landmark. Input rows must have the same feature count as the training data.
+- `fitTransform(X)` fits and returns the transformed training data.
+- `components` holds the landmark rows, and `componentIndices` gives their indices in the training matrix. `normalization` holds the square normalization matrix for the selected landmarks.
+
+For an initial experiment, try a small landmark count, then increase it while measuring held-out prediction quality and fit time. Doubling the count quadruples the number of entries in the landmark kernel matrix.
+
+[scikit-learn Nystroem reference](https://scikit-learn.org/stable/modules/generated/sklearn.kernel_approximation.Nystroem.html)
+
+---
+
+<!-- Source: https://ml.kanaries.net/docs/apis/kernel/rbfSampler -->
+
+---
+title: "Random Fourier Features with RBFSampler in JavaScript"
+description: "Approximate the RBF kernel with random Fourier features in JavaScript or TypeScript. Use @kanaries/ml to train a linear classifier on dense or sparse features in the browser or Node.js."
+canonical_url: "https://ml.kanaries.net/docs/apis/kernel/rbfSampler"
+markdown_url: "https://ml.kanaries.net/docs/apis/kernel/rbfSampler.md"
+---
+# Random Fourier features in JavaScript
+
+A linear classifier can learn a curved boundary if its input features already encode nonlinear relationships. `RBFSampler` creates such features by projecting each sample onto random directions and applying a cosine. The dot product of two transformed samples approximates their Gaussian radial basis function (RBF) kernel value. Samples close together in the original feature space tend to get a larger value.
+
+## Using RBFSampler in JavaScript
+
+Use `Kernel.RBFSampler` in a browser or Node.js pipeline when you need a nonlinear decision boundary and want to choose the feature width before fitting. With a fixed width, adding more training rows leaves the size of the fitted random feature map unchanged. Fit the sampler once and reuse it for new observations so every row is represented in the same coordinates.
+
+## Quick start
+
+The two classes below occupy opposite corners of a square. The sampler gives logistic regression nonlinear features to work with.
+
+```ts
+import { Kernel, Linear, Pipeline } from '@kanaries/ml';
+
+const model = new Pipeline({
+    steps: [
+        ['features', new Kernel.RBFSampler({ gamma: 1, nComponents: 128, randomState: 42 })],
+        ['classifier', new Linear.LogisticRegression()],
+    ],
+});
+model.fit([[-1, -1], [-1, 1], [1, -1], [1, 1]], [0, 1, 1, 0]);
+const labels = model.predict([[0.9, 1], [-1, 0.9]]);
+console.log(labels);
+```
+
+## API reference
+
+| Constructor option | Default | Meaning                                                                                                                                                                                                                                                            |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `gamma`            | `1`     | Nonnegative RBF coefficient. Larger values make similarity decay faster with distance. Set `'scale'` to use `1 / (nFeatures × variance)`, using the variance of all training entries including zeros. Constant training data uses a coefficient of 1 in this mode. |
+| `nComponents`      | `100`   | Positive integer giving the output width. Increasing it typically improves the kernel approximation and increases computation and storage.                                                                                                                         |
+| `randomState`      | Unset   | Unsigned 32-bit integer seed for repeatable draws of the random weights and offsets.                                                                                                                                                                               |
+
+- `fit(X)` learns a feature map for the input width. Both a dense numeric matrix and a `CSRMatrix` are supported.
+- `transform(X)` returns a dense `number[][]` with one row per input sample and `nComponents` columns. The input must have the same number of columns used for fitting.
+- `fitTransform(X)` fits the map and returns the transformed training rows.
+- `randomWeights` contains one row per input feature and one column per output component. `randomOffset` contains the offsets used inside the cosines.
+
+For text classification, a `FeatureExtraction.TfidfVectorizer` can feed its sparse output directly into the sampler. The fitted weights still occupy `nFeatures × nComponents` numbers, and the transformed batch occupies `nRows × nComponents` numbers. These two sizes help you choose a feature width for a browser memory budget.
+
+[scikit-learn RBFSampler reference](https://scikit-learn.org/stable/modules/generated/sklearn.kernel_approximation.RBFSampler.html)
 
 ---
 

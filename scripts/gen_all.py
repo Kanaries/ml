@@ -17,6 +17,7 @@ scripts = [
     'gen_ball_tree.py',
     'gen_kd_tree.py',
     'gen_kmeans.py',
+    'gen_e_means.py',
     'gen_mean_shift.py',
     'gen_dbscan.py',
     'gen_hdbscan.py',

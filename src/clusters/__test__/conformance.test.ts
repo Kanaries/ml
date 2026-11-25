@@ -7,11 +7,13 @@ import { HDBScan } from '../hdbscan';
 import { AgglomerativeClustering } from '../agglomerativeClustering';
 import { SpectralClustering } from '../spectralClustering';
 import { MiniBatchKMeans } from '../miniBatchKMeans';
+import { EMeans } from '../eMeans';
 import { Birch } from '../birch';
 import { AffinityPropagation } from '../affinityPropagation';
 import { BisectingKMeans } from '../bisectingKMeans';
 
 runEstimatorConformance([
+    { name: 'EMeans', kind: 'cluster', dataset: 'blobs', create: () => new EMeans({ nClusters: 3, randomState: 42 }) },
     {
         name: 'KMeans',
         kind: 'cluster',

@@ -18,6 +18,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 - [Clustering in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/index.html.md): Explore clustering algorithms in JavaScript and TypeScript with @kanaries/ml, including K-Means, DBSCAN, HDBSCAN, Mean Shift, OPTICS, and clustering utilities.
 - [K-Means in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/kmeans.md): Learn what K-Means clustering does, when to use it, and how to run K-Means in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [E-Means Clustering in JavaScript](https://ml.kanaries.net/docs/apis/clusters/eMeans.md): Cluster dense vectors in the browser or Node.js using the TypeScript E-Means estimator in @kanaries/ml. Explore the moving-average update, rare clusters, and measured JavaScript performance.
 - [DBScan in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/dbscan.md): Discover density-based clusters and noise with the DBScan JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
 - [HDBSCAN in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/hdbscan.md): Learn what HDBSCAN does, when to use it, and how to run HDBScan in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Mean Shift in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/clusters/meanShift.md): Learn what Mean Shift does, when to use it, and how to run MeanShift in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
@@ -61,6 +62,7 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 - [AdaBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/adaboostRegressor.md): Learn what AdaBoost Regressor does, when to use it, and how to run AdaBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Gradient Boosting Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingClassifier.md): Learn what Gradient Boosting Classifier does, when to use it, and how to run GradientBoostingClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [Gradient Boosting Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/gradientBoostingRegressor.md): Learn what Gradient Boosting Regressor does, when to use it, and how to run GradientBoostingRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+- [Histogram Gradient Boosting in JavaScript for Classification and Regression](https://ml.kanaries.net/docs/apis/ensemble/histGradientBoosting.md): Train histogram gradient boosting trees on numeric tables with missing values. Use @kanaries/ml in a browser or Node.js to predict classes, probabilities, and continuous targets.
 - [XGBoost Classifier in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostClassifier.md): Learn what XGBoost Classifier does, when to use it, and how to run XGBoostClassifier in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 - [XGBoost Regressor in JavaScript with @kanaries/ml](https://ml.kanaries.net/docs/apis/ensemble/xgboostRegressor.md): Learn what XGBoost Regressor does, when to use it, and how to run XGBoostRegressor in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
 
@@ -135,7 +137,15 @@ Agent search: https://ml.kanaries.net/api/agent/search?q={query}&limit={1-20}
 
 ## Kernel Methods
 
-- [Kernel Ridge Regression and Kernel Density in JavaScript](https://ml.kanaries.net/docs/apis/kernel/index.html.md): Use nonlinear KernelRidge prediction and KernelDensity estimation in JavaScript or TypeScript with @kanaries/ml.
+- [Kernel Ridge Regression, Density and Approximation in JavaScript](https://ml.kanaries.net/docs/apis/kernel/index.html.md): Use @kanaries/ml for kernel regression, density estimation and approximate nonlinear feature maps in JavaScript or TypeScript in the browser or Node.js.
+- [Random Fourier Features with RBFSampler in JavaScript](https://ml.kanaries.net/docs/apis/kernel/rbfSampler.md): Approximate the RBF kernel with random Fourier features in JavaScript or TypeScript. Use @kanaries/ml to train a linear classifier on dense or sparse features in the browser or Node.js.
+- [Nyström Kernel Approximation in JavaScript with Nystroem](https://ml.kanaries.net/docs/apis/kernel/nystroem.md): Use @kanaries/ml to build nonlinear features from sampled landmarks with the Nyström method in JavaScript or TypeScript for browser and Node.js models.
+
+## Gaussian Processes
+
+- [Gaussian Processes in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/index.html.md): Use Gaussian process regression for predictions with uncertainty and Gaussian process classification for class probabilities in the browser or Node.js with @kanaries/ml.
+- [Gaussian Process Regression in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/regressor.md): Fit a smooth curve and predict its uncertainty with GaussianProcessRegressor in @kanaries/ml, using the same JavaScript API in the browser and Node.js.
+- [Gaussian Process Classification in JavaScript and TypeScript](https://ml.kanaries.net/docs/apis/gaussian_process/classifier.md): Estimate how likely each class is on small, dense datasets using a Gaussian process classifier with an RBF kernel in browser or Node.js applications.
 
 ## Cross Decomposition
 

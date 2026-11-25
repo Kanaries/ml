@@ -26,6 +26,7 @@ gp.fit([[0], [1], [2], [4]], [20.2, 21.5, 22.4, 20.7]);
 const positions = [[0.5], [3], [7]];
 const { mean, std } = gp.predict(positions, { returnStd: true });
 const intervals = mean.map((m, i) => [m - 1.96 * std[i], m + 1.96 * std[i]]);
+console.log(intervals);
 ```
 
 Each interval is a pointwise 95% posterior interval for the underlying function, given the fitted kernel and noise variance. A future sensor reading also contains measurement noise.

@@ -20,3 +20,5 @@ export type HDBSCAN = HDBScan;
 export type { AgglomerativeClusteringProps, AgglomerativeLinkage } from './agglomerativeClustering';
 export type { SpectralClusteringProps, SpectralAffinity } from './spectralClustering';
 export type { MiniBatchKMeansProps } from './miniBatchKMeans';
+export { EMeans } from './eMeans';
+export type { EMeansProps } from './eMeans';

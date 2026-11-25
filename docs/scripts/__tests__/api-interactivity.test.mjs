@@ -9,6 +9,7 @@ const DOCS_ROOT = path.resolve(TEST_DIR, '..', '..');
 
 const clusterPages = [
   { file: 'index.mdx', pattern: /<ClusteringComparison \/>/ },
+  { file: 'eMeans.mdx', pattern: /<EMeansPlayground \/>/ },
   { file: 'kmeans.mdx', pattern: /<KMeansPlayground \/>/ },
   { file: 'dbscan.mdx', pattern: /<ClusteringPlayground algorithm="dbscan" \/>/ },
   { file: 'hdbscan.mdx', pattern: /<ClusteringPlayground algorithm="hdbscan" \/>/ },

@@ -20,7 +20,7 @@
     "gen-data": "node scripts/run_gen_data.js",
     "test": "jest",
     "test:regen-data": "npm run gen-data",
-    "build": "vite build && tsc --emitDeclarationOnly --outDir build",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "doc": "docsify serve docs",
     "dev": "NODE_ENV=development vite",

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-Means clustering comparison</title>
+<style>
+  body { max-width: 52rem; margin: 2rem auto; padding: 0 1rem; font: 1rem/1.5 system-ui; color: #152b39; }
+  label { display: inline-block; margin: 0 .8rem .8rem 0; }
+  canvas { width: 100%; background: #f5f8f8; border: 1px solid #b8c9ce; }
+  td, th { text-align: left; padding: .25rem 1.2rem .25rem 0; }
+</style>
+<h1>E-Means clustering comparison</h1>
+<label>Data <select id="data"><option>Three groups</option><option>Rare isolated group</option></select></label>
+<label>Pass budget <select id="epochs"><option>1</option><option>3</option><option selected>5</option><option>25</option></select></label>
+<label><input type="checkbox" id="revival"> Enable E-Means mass-based revival</label>
+<canvas width="800" height="340" aria-label="Observations colored by E-Means cluster, with crosshairs at the fitted centers"></canvas>
+<p>Crosshairs show the E-Means centers. The table measures mean squared distance to the nearest final center on a separate sample.</p>
+<table><thead><tr><th>Method</th><th>Held-out MSE</th></tr></thead><tbody id="scores"></tbody></table>
+<script type="module" src="./e-means.ts"></script>
+</html>

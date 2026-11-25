@@ -1,0 +1,84 @@
+---
+title: E-Means Clustering in JavaScript
+description: Cluster dense vectors in the browser or Node.js using the TypeScript E-Means estimator in @kanaries/ml. Explore the moving-average update, rare clusters, and measured JavaScript performance.
+---
+
+import { EMeansPlayground } from '@/components/playground/EMeansPlayground';
+
+## When to use E-Means
+
+If you have thousands of embedding vectors and want a small codebook to represent them, each pass of K-Means involves comparing every vector to every center. E-Means updates the centers several times during a pass. On our 10,000-vector retrieval benchmarks it reached a similar held-out error with less CPU time in both Node.js and Chrome. For a small two-dimensional dataset, Lloyd reached the target sooner.
+
+Like K-Means, E-Means takes a fixed number of clusters and minimizes squared Euclidean distance. A predicted label is the index of the nearest center. Features with large numerical scales dominate this distance, so choose scaling that reflects what similarity means in your application.
+
+## Quick start in JavaScript or TypeScript
+
+The repository build exposes `Clusters.EMeans` for browsers and Node.js. To use this feature before the next npm release, build the repository with `yarn install --frozen-lockfile && yarn build`, then run `yarn pack` and install the resulting tarball in your application. The example uses two-dimensional coordinates so you can inspect the assignments directly.
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const points = [[0, 0], [0, 1], [1, 0], [8, 8], [8, 9], [9, 8]];
+const model = new Clusters.EMeans({ nClusters: 2, epochs: 5, randomState: 42 });
+const labels = model.fitPredict(points);
+const centers = model.getCentroids();
+const nearest = model.predict([[8.5, 8]]);
+console.log(labels, centers, nearest, model.getInertia());
+```
+
+### Try a rare cluster
+
+Switch the dataset, pass budget or revival setting to see how the three fitted models score on held-out points. The plot shows the E-Means assignments. For larger interactive applications, run the synchronous fit in a Web Worker. [Example source](https://github.com/Kanaries/ml/blob/master/examples/e-means.ts)
+
+<EMeansPlayground />
+
+## How the centers move
+
+Swann Bessa and colleagues introduced e-means in November 2026. Lloyd rebuilds each center from one full pass. Conventional mini-batch K-Means accumulates counts, so a center with a long history tends to move slowly. E-Means discounts that history. Each batch first assigns its rows to the current centers, then updates two quantities per cluster. If the batch contributes a vector sum `s` and a count `m`, the updated running totals are `S = (1 − α) S + α s` and `N = (1 − α) N + α m`. Their ratio gives the center. A cluster receiving zero rows retains its location. [Original paper, algorithm 1](https://arxiv.org/html/2611.09501v1)
+
+The optimizer shuffles the data on each pass, retains short tail batches and gradually reduces the step size using a cosine schedule. The JavaScript defaults follow the CPU recipe shipped in Faiss **1.16.0**. It derives the batch size and initial step from the data size, cluster count and pass budget. Dimensions up to 16 use the smaller quality-oriented batch recipe. JavaScript uses double precision and its own seeded shuffle. [Reference recipe](https://github.com/facebookresearch/faiss/blob/v1.16.0/contrib/e_means/base.py)
+
+On the final pass E-Means averages all points assigned to each cluster during that pass. A center with no final-pass members keeps its position. The library then makes one extra exact assignment pass so that `getLabels()`, `predict(trainingData)` and `getInertia()` all describe the returned centers. Fit time below includes that scan. Exact assignment takes O(nkd) distance arithmetic per pass for n rows, k centers and d features. Training uses O(n + kd) extra storage, including row indices and output labels.
+
+### When rare groups matter
+
+Every five batch updates, mass-based revival can take a center whose moving count is very small and use it to split a busy cluster. This helps recover unused centers. It can also remove the only center covering a rare, distant group. In our 8-dimensional stress test, 1% of observations belonged to such a group. With identical starts covering the rare group, the standard E-Means recipe missed the quality target for all five seeds at all tested budgets. With `revivalThreshold: 0`, five passes reached the target for all five seeds; median held-out MSE was 6.96. If rare groups matter, compare this setting on your own held-out observations. [Published counterexamples](https://arxiv.org/abs/2611.22065)
+
+## Measured CPU performance
+
+We used Apple M4, Node.js 24.14 and headless Google Chrome 158, with five paired seeds. Each controlled fit starts from the same centers for its seed. We tried pass budgets of 1, 3, 5 and 25. The target is a held-out MSE at most 1% above the 25-pass Lloyd result for that seed. Each cell reports the median end-to-end fit time at the **first tested budget that reached the target**, in milliseconds. The parenthesis gives the number of successful seeds when fewer than five qualified.
+
+| Data and runtime | E-Means | Lloyd | MiniBatchKMeans |
+| --- | ---: | ---: | ---: |
+| GloVe, 25 dimensions · Node.js | 16.3 | 104.8 | 172.3 (3/5) |
+| GloVe, 25 dimensions · Chrome | 15.3 | 104.4 | 120.7 (3/5) |
+| SIFT, 128 dimensions · Node.js | 45.3 | 125.8 | 708.6 |
+| SIFT, 128 dimensions · Chrome | 47.8 | 126.7 | 612.3 |
+| Synthetic blobs, 2 dimensions · Node.js | 0.65 | 0.46 | 1.66 (3/5) |
+| Synthetic blobs, 2 dimensions · Chrome | 0.8 | 0.4 | 1.2 (3/5) |
+
+The GloVe and SIFT trials use the first 10,000 training and 1,000 test vectors with 32 centers and squared Euclidean distance on the original coordinates. The blobs trial uses 5,000 training rows, 1,000 test rows and three centers. Held-out scoring and data loading are outside the timer. MiniBatchKMeans receives the shared initialization through its benchmark harness. The downloadable results also include digits, rare groups, individual seeds, error values and separate runs using each public estimator's default initialization and stopping behavior. [Benchmark code, data preparation and results](https://github.com/Kanaries/ml/tree/master/scripts/e-means) · [Vector dataset distributions](https://ann-benchmarks.com/)
+
+## API reference
+
+`new Clusters.EMeans(options?)` accepts the following TypeScript properties.
+
+| Option | Default | Behavior |
+| --- | --- | --- |
+| `nClusters` | `8` | Positive integer no larger than the training row count. |
+| `epochs` | `5` | Positive integer giving the number of complete shuffled training passes. The final exact label scan is additional. |
+| `batchSize` | Automatic | Positive integer, capped at the training row count. The initial step uses the resolved batch size. |
+| `randomState` | Unseeded | An integer seed makes initialization, shuffling and revival reproducible in this implementation. |
+| `revivalThreshold` | `0` for d ≤ 2; `0.1` otherwise | Nonnegative fraction of the mean moving count. Use zero to disable revival. |
+| `initCenters` | Sample distinct row indices | Optional dense array with one center per cluster and the same width as the training rows. Copied before use. |
+
+| Method | Result |
+| --- | --- |
+| `fit(X, sampleWeights?)` | Fits on a nonempty, rectangular array of finite-valued vectors and returns the estimator. The optional weights must all equal 1. |
+| `fitPredict(X, sampleWeights?)` | Fits and returns final nearest-center labels in input row order. Equal distances choose the lowest center index. |
+| `predict(X)` | Returns nearest-center labels for rows of the fitted width. An empty prediction batch returns an empty array. |
+| `getCentroids()` | Returns a copy of the fitted centers, or `null` before fitting. |
+| `getLabels()` | Returns a copy of the training labels, initially empty. |
+| `getInertia()` | Returns the sum of squared training distances to the final centers, initially `Infinity`. Divide by the training row count for MSE. |
+
+A successful refit replaces the fitted state. Predicting before fitting, inconsistent feature dimensions and invalid hyperparameters raise errors. The estimator supports the library's usual `getParams()`, `setParams()`, `clone()` and JSON model persistence.
