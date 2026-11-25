@@ -106,6 +106,38 @@ describe('Pipeline', () => {
 });
 
 describe('FeatureUnion', () => {
+    it('validates member names, pairs, and transformer capabilities', () => {
+        const scale = new ScaleBy();
+        expect(() => new FeatureUnion({ transformerList: [] })).toThrow(/non-empty/);
+        // @ts-expect-error JavaScript callers can pass an incomplete pair.
+        expect(() => new FeatureUnion({ transformerList: [['scale']] })).toThrow(/pair/);
+        expect(() => new FeatureUnion({ transformerList: [['x', scale], ['x', scale]] })).toThrow(/Duplicate/);
+        expect(() => new FeatureUnion({ transformerList: [['x__factor', scale]] })).toThrow(/must not contain/);
+        expect(() => new FeatureUnion({ transformerList: [['model', new LogisticRegression()]] })).toThrow(/transform/);
+    });
+
+    it('resolves nested parameters against the replacement transformer list', () => {
+        const union = new FeatureUnion({ transformerList: [['old', new ScaleBy()]] });
+        union.fit([[1]]);
+        union.setParams({
+            first__factor: 3,
+            transformerList: [['first', new ScaleBy()], ['second', new ScaleBy()]],
+            second__factor: -1,
+        });
+        expect(() => union.transform([[2]])).toThrow(/not fitted/);
+        expect(union.fitTransform([[2], [4]])).toEqual([[6, -2], [12, -4]]);
+        expect(() => union.setParams({ old__factor: 4 })).toThrow(/Unknown transformer "old"/);
+        expect(() => union.setParams({ first__unknown: 1 })).toThrow(/Invalid parameter/);
+    });
+
+    it('rejects a row-dropping transformer before combining feature blocks', () => {
+        const dropping = new ScaleBy();
+        const union = new FeatureUnion({ transformerList: [['keep', new ScaleBy()], ['drop', dropping]] });
+        jest.spyOn(dropping, 'transform').mockReturnValueOnce([[42]]);
+        expect(() => union.fitTransform([[1], [2]])).toThrow(/1 rows, expected 2/);
+        expect(union.transform([[1], [2]])).toEqual([[2, 2], [4, 4]]);
+    });
+
     it('concatenates transformer outputs column-wise', () => {
         const union = new FeatureUnion({
             transformerList: [
