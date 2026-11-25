@@ -1,19 +1,5 @@
-import { KMeans } from '../src/clusters/kmeans';
-import vega from 'vega';
-import vegaLite from 'vega-lite';
+import { kmeansIterations } from './kmeansIterations';
 import embed from 'vega-embed';
-function reAssignLabel(labels: number[]): number[] {
-    const encoder: Map<number, number> = new Map();
-    let ans: number[] = [];
-    let counter = 0;
-    for (let i = 0; i < labels.length; i++) {
-        if (!encoder.has(labels[i])) {
-            encoder.set(labels[i], counter++);
-        }
-        ans.push(encoder.get(labels[i]));
-    }
-    return ans;
-}
 
 function getSamplesAroundCenter(center: number[], size: number = 2000): number[][] {
     const scale = 12;
@@ -39,29 +25,8 @@ export function kmeansTest () {
     let groups2 = getSamplesAroundCenter([80, 120])
     let groups3 = getSamplesAroundCenter([150, 20])
     data.push(...groups1, ...groups2, ...groups3)
-    let values = 'x,y,group,iterate\n';
-    for (let it = 0; it < 6; it++) {
-        const kmeans = new KMeans(3, 0.001, [
-            [20, 20],
-            [60, 60],
-            [100, 100]
-        ], it);
-        const tags = reAssignLabel(kmeans.fitPredict(data));
-        for (let i = 0; i < data.length; i++) {
-            values += data[i].join(',');
-            values += ',' + tags[i];
-            values += ',' + it;
-            values += '\n';
-        }
-    }
-
     embed(root, {
-        data: {
-            values,
-            format: {
-                type: 'csv'
-            }
-        },
+        data: { values: kmeansIterations(data) },
         mark: 'point',
         encoding: {
             x: {
