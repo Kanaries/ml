@@ -24,9 +24,10 @@
     "build": "vite build && tsc -p tsconfig.build.json",
     "prepublishOnly": "npm run build",
     "doc": "docsify serve docs",
-    "dev": "NODE_ENV=development vite",
-    "build:example": "NODE_ENV=development vite build",
-    "preview": "vite preview",
+    "dev": "vite --config examples/vite.config.ts",
+    "build:example": "vite build --config examples/vite.config.ts",
+    "test:examples": "yarn build:example && node scripts/test-examples.mjs",
+    "preview": "vite preview --config examples/vite.config.ts",
     "coverage:sklearn": "node scripts/coverage-vs-sklearn",
     "benchmark:csr": "npm run build && node --max-old-space-size=256 --expose-gc scripts/benchmark-csr-memory.mjs",
     "benchmark:csr:browser": "npm run build && node scripts/benchmark-csr-browser.mjs"

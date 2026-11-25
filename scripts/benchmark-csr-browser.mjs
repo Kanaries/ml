@@ -2,20 +2,11 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import { chrome } from './chrome.mjs';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const chromeCandidates = [
-    process.env.CHROME_BIN,
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/usr/bin/google-chrome',
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-].filter(Boolean);
-const chrome = chromeCandidates.find(candidate => fs.existsSync(candidate));
-if (!chrome) throw new Error('Chrome/Chromium not found; set CHROME_BIN to run the browser CSR benchmark');
-
 const contentTypes = new Map([
     ['.html', 'text/html; charset=utf-8'],
     ['.mjs', 'text/javascript; charset=utf-8'],
