@@ -1,38 +1,57 @@
 ---
 title: K-Means in JavaScript with @kanaries/ml
-description: Learn what K-Means clustering does, when to use it, and how to run K-Means in JavaScript or TypeScript with @kanaries/ml for browser and Node.js applications.
+description: Run K-Means clustering in JavaScript and TypeScript with @kanaries/ml. Includes k-means++ restarts, sample weights, inertia, serialization, and live demo.
 ---
 
 import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { KMeansPlayground } from '@/components/playground/KMeansPlayground';
 
-# K-Means in JavaScript
-
 ## Algorithm overview
 
-K-Means is an unsupervised clustering algorithm that groups samples into `k` clusters by assigning each point to the nearest centroid and then repeatedly updating those centroids. It is widely used for segmentation, coarse pattern discovery, and exploratory analysis when labels are not available.
+**K-Means** is an unsupervised partitioning algorithm that groups numeric observations into `n_clusters` compact clusters by minimizing within-cluster squared Euclidean distance (**inertia**). Each iteration alternates between assigning every sample to its nearest centroid and recomputing each centroid as the (optionally weighted) mean of its assigned points until the relative inertia improvement drops below `tol` or `max_iter` iterations complete.
 
-K-Means is a good fit when:
+K-Means is a strong first choice when:
 
-- you can estimate a reasonable cluster count ahead of time
-- your clusters are roughly compact and distance-based
-- you want a fast baseline for customer, product, or behavior segmentation
-
-It is usually one of the first clustering algorithms to try because it is simple, fast, and easy to explain.
+- You can estimate or sweep a small range of cluster counts (`k = 2..10`) using elbow curves or [silhouette scores](/docs/apis/metrics).
+- Clusters are roughly convex, spherical, and comparable in scale.
+- You need fast, interpretable customer segmentation, product grouping, or vector quantization in production.
 
 ## JavaScript implementation
 
-@kanaries/ml lets you run K-Means directly in JavaScript, which is useful for dashboards, segmentation tools, and in-product analytics where clustering needs to happen close to the user interaction. You can cluster points in the browser for exploratory work or in Node.js for server-side batch processing without leaving the JS stack.
+`@kanaries/ml` provides `Clusters.KMeans` in pure TypeScript for browsers and Node.js. It supports the canonical options-object constructor (`KMeansProps`) with k-means++ initialization, `n_init` restarts (keeping the lowest-inertia run), deterministic `random_state` seeding, optional per-sample weights, and full JSON persistence via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
-This is especially valuable when frontend engineers want scikit-learn-like clustering behavior but need the implementation to live alongside React, Next.js, or other TypeScript-based application code.
+Unlike server-only Python pipelines, running `Clusters.KMeans` directly in the browser lets users adjust `k`, inspect centroids, and segment CSV uploads instantaneously without uploading private data. For very large embedding tables (10,000+ vectors), see [`Clusters.EMeans`](/docs/apis/clusters/eMeans) or run fitting inside a Web Worker.
 
 ## Interactive K-Means playground
 
-Choose a dataset and cluster count, then play or step through the assignment and centroid-update loop. Click the plot to add observations; the transparent animation is checked against a real `Clusters.KMeans` fit in your browser.
+Choose a dataset and cluster count, then play or step through the assignment and centroid-update loop. Click the plot to add observations; the animation is checked against a real `Clusters.KMeans` fit in your browser.
 
 <KMeansPlayground />
 
 ## Quick start
+
+```ts
+import { Clusters } from '@kanaries/ml';
+
+const X = [
+  [0, 0],
+  [0.5, 0],
+  [0.5, 1],
+  [1, 1],
+  [8, 8],
+  [8.5, 8.2],
+];
+
+const kmeans = new Clusters.KMeans({
+  n_clusters: 2,
+  tol: 1e-4,
+  n_init: 10,
+  random_state: 42,
+});
+
+const labels = kmeans.fitPredict(X);
+console.log({ labels, centroids: kmeans.getCentroids(), inertia: kmeans.getInertia() });
+```
 
 <AlgorithmComparison
   title={"K-Means Clustering (KMeans)"}
@@ -40,55 +59,52 @@ Choose a dataset and cluster count, then play or step through the assignment and
 
 X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]]
 
-model = KMeans(n_clusters=2, random_state=0, n_init='auto')
-labels = model.fit_predict(X)`}
+model = KMeans(n_clusters=2, tol=1e-4, n_init=10, random_state=42)
+labels = model.fit_predict(X)
+centers = model.cluster_centers_
+inertia = model.inertia_`}
   tsCode={String.raw`import { Clusters } from '@kanaries/ml';
 
 const X = [[0, 0], [0.2, 0.1], [4, 4], [4.1, 4.2]];
 
-const model = new Clusters.KMeans(2);
-const labels = model.fitPredict(X);`}
+const model = new Clusters.KMeans({
+  n_clusters: 2,
+  tol: 1e-4,
+  n_init: 10,
+  random_state: 42,
+});
+const labels = model.fitPredict(X);
+const centers = model.getCentroids();
+const inertia = model.getInertia();`}
 />
-
-### Quick JavaScript example
-
-```ts
-import { Clusters } from '@kanaries/ml';
-
-const X = [
-    [0, 0],
-    [0.5, 0],
-    [0.5, 1],
-    [1, 1],
-];
-
-const sampleWeights = [3, 1, 1, 3];
-const initCenters = [[0, 0], [1, 1]];
-
-const kmeans = new Clusters.KMeans(2, 0.05, initCenters);
-const labels = kmeans.fitPredict(X, sampleWeights);
-console.log(labels);
-```
 
 ## Detailed API reference
 
-```ts
-constructor (n_clusters: number = 2, opt_ratio: number = 0.05, initCenters?: number[][], max_iter: number = 30)
-```
+### `new Clusters.KMeans(props?)`
 
-| props name | type | default value |
-|-|-|-|
-| n_clusters | number | 2 |
-| opt_ratio | number | 0.05 |
-| initCenters | number[][] | undefined |
-| max_iter | number | 30 |
+*(Legacy positional calls `new Clusters.KMeans(n_clusters, tol, initCenters, max_iter, random_state, n_init)` remain supported for backward compatibility, but prefer the options object.)*
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `n_clusters` | `number` | `2` | Number of clusters (`k`) to form. |
+| `tol` | `number` | `1e-4` | Relative tolerance on weighted inertia change to declare convergence. |
+| `initCenters` | `number[][]` | `undefined` | Optional explicit starting centroids (`[n_clusters][nFeatures]`). When supplied, `n_init` is forced to `1`. |
+| `max_iter` | `number` | `30` | Maximum Lloyd iterations per restart. |
+| `random_state` | `number` | `undefined` | Seed for reproducible k-means++ centroid initialization. |
+| `n_init` | `number` | `10` | Number of independent k-means++ restarts; the run with the lowest weighted inertia is kept. |
 
 ### Methods
 
-- `fitPredict(trainX: number[][], sampleWeights?: number[]): number[]`
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fitPredict` | `(sampleX: number[][], sampleWeights?: number[]) => number[]` | Fits centroids on `sampleX` (optionally weighted) and returns integer cluster labels `0..n_clusters-1`. |
+| `getCentroids` | `() => number[][] \| null` | Returns the fitted centroid coordinates (or `null` before fitting). |
+| `getInertia` | `() => number` | Returns the sum of squared weighted distances of samples to their closest centroid. |
+| `getParams` / `setParams` / `toJSON` | Inherited from `ClusterBase` | Full estimator contract & JSON serialization via [`loadModel()`](/docs/apis/serialization). |
 
-### Usage notes
+### Practical guidance & pitfalls
 
-- Normalize numeric features before clustering so distance behaves more predictably.
-- Try several values of `k` and compare cluster quality with both domain knowledge and quantitative metrics.
-- For interactive browser apps, run larger clustering jobs off the main thread.
+- **Always standardize feature scales**: Because K-Means relies on squared Euclidean distance, a feature measured in thousands (`revenue`) will drown out a feature in `[0, 1]` (`churn_rate`). Scale columns first with [`StandardScaler`](/docs/apis/utils/preprocessing).
+- **Choosing `k`**: Sweep `k` across candidate values and inspect both `getInertia()` (elbow curve) and [`Metrics.silhouetteScore`](/docs/apis/metrics).
+- **Non-spherical or noisy clusters**: If clusters have arbitrary shapes or outliers, try [`Clusters.DBSCAN`](/docs/apis/clusters/dbscan), [`Clusters.HDBSCAN`](/docs/apis/clusters/hdbscan), or [`Mixture.GaussianMixture`](/docs/apis/mixture/gaussian-mixture).
+- **Related pages**: [E-Means](/docs/apis/clusters/eMeans), [Customer Segmentation CSV Guide](/docs/guides/customer-segmentation-csv), [K-Means Playground](/playground/kmeans), [Clustering Overview](/docs/apis/clusters).

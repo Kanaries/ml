@@ -1,17 +1,23 @@
 ---
 title: MultinomialNB in JavaScript with @kanaries/ml
-description: Classify non-negative count features with the MultinomialNB JavaScript and TypeScript implementation in @kanaries/ml.
+description: Classify text counts and TF-IDF features in JavaScript and TypeScript with Bayes.MultinomialNB from @kanaries/ml for fast browser and Node.js NLP.
 ---
 
-# MultinomialNB in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-MultinomialNB is a naive Bayes classifier for non-negative feature counts, such as token counts or frequency-style encoded data.
+**Multinomial Naive Bayes (`MultinomialNB`)** is the classic probabilistic classifier for **non-negative count and frequency features**, especially bag-of-words counts and TF-IDF matrices produced from text documents. It models feature occurrences within each class using a multinomial distribution regularized by Laplace/Lidstone additive smoothing (`alpha`), preventing unseen test tokens from collapsing posterior probabilities to zero.
+
+Use `MultinomialNB` when:
+
+- Building fast client-side or Node.js text categorization (spam detection, support ticket routing, topic tagging, sentiment baselines).
+- Feature matrices are wide, sparse, and strictly non-negative (such as outputs from [`CountVectorizer`](/docs/apis/feature_extraction/countVectorizer) or [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer)).
+- You need millisecond training and instant prediction without tuning gradient descent schedules.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Bayes.MultinomialNB` for JavaScript and TypeScript applications that need fast probabilistic classification without leaving the browser or Node.js runtime.
+`@kanaries/ml` provides `Bayes.MultinomialNB` in pure TypeScript for browser and Node.js applications. It accepts both dense `number[][]` and sparse [`CSRMatrix`](/docs/apis/data) inputs, plugs directly after `FeatureExtraction.TfidfVectorizer` inside a [`Pipeline`](/docs/apis/pipeline), and serializes cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -27,20 +33,34 @@ const pred = clf.predict([[1, 0, 1], [0, 2, 2]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="MultinomialNB"
+  pythonCode={String.raw`from sklearn.naive_bayes import MultinomialNB
+
+clf = MultinomialNB(alpha=1.0, fit_prior=True)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Bayes } from '@kanaries/ml';
+
+const clf = new Bayes.MultinomialNB({ alpha: 1.0, fitPrior: true });
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Bayes.MultinomialNB(props?: {
-  alpha?: number;
-  forceAlpha?: boolean;
-  fitPrior?: boolean;
-  classPrior?: number[] | null;
-})
-```
+### `new Bayes.MultinomialNB(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1.0` | Additive (Laplace/Lidstone) smoothing parameter (`0` disables smoothing). Smaller values (`0.1`–`0.5`) often improve TF-IDF accuracy. |
+| `forceAlpha` | `boolean` | `true` | If `false`, clamps very small `alpha` values to `1e-10` to avoid numerical issues. |
+| `fitPrior` | `boolean` | `true` | Learn class priors from training counts (`false` assumes uniform priors across classes). |
+| `classPrior` | `number[] \| null` | `null` | Explicit class prior probabilities overriding `fitPrior`. |
 
-- `fit(X: number[][], y: number[]): void`
-- `predict(X: number[][]): number[]`
+### Methods & usage notes
 
-Feature values must be non-negative.
+- `fit(X: number[][] | CSRMatrix, y: number[]): void` — estimates smoothed log feature probabilities and class priors. Throws if any feature value is negative.
+- `predict(X: number[][] | CSRMatrix): number[]` — returns the maximum-posterior class label per sample.
+- **Imbalanced text classes**: When one category dominates your training corpus, compare `MultinomialNB` against [`Bayes.ComplementNB`](/docs/apis/bayes/complementNB), which corrects skewed class-length weights.
+- **Related pages**: [ComplementNB](/docs/apis/bayes/complementNB), [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer), [ML Pipelines](/docs/apis/pipeline), [CSRMatrix](/docs/apis/data).

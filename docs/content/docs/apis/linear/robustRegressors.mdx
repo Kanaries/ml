@@ -1,21 +1,29 @@
 ---
 title: Robust Regression in JavaScript and TypeScript
-description: Fit Huber, RANSAC, Theil-Sen, and quantile regression models in browser or Node.js applications with @kanaries/ml.
+description: Fit Huber, RANSAC, Theil-Sen, and Quantile regression in JavaScript and TypeScript with @kanaries/ml to handle outliers and predict quantile bands.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
 
-# Robust regression in JavaScript
+## Algorithm overview
 
-Ordinary least squares can move sharply when targets contain outliers. `HuberRegressor` softens large residuals, `RANSACRegressor` fits a consensus set, `TheilSenRegressor` aggregates many subsample fits, and `QuantileRegressor` estimates a conditional quantile instead of a mean.
+Ordinary least squares minimizes squared residuals, so even one corrupted sensor reading, typo, or extreme transaction can tilt the entire fitted slope dramatically. **Robust regression** estimators limit or eliminate the influence of outliers—or target conditional quantiles instead of conditional means:
+
+| Estimator | How it resists outliers | Best when |
+| --- | --- | --- |
+| `HuberRegressor` | Switches from quadratic loss to linear loss beyond `epsilon * scale` | Moderate `y`-outliers and you want fast smooth optimization |
+| `RANSACRegressor` | Repeatedly fits minimal subsets and keeps the largest consensus inlier set | Severe gross outliers (`20%–40%` bad rows) in `y` |
+| `TheilSenRegressor` | Computes the spatial median across many subsample slopes | Small-to-medium datasets with outliers in both `X` and `y` |
+| `QuantileRegressor` | Minimizes asymmetric pinball loss (L1 at `quantile: 0.5`) via ADMM | Median regression or prediction intervals (for example 10th & 90th percentiles) |
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes sklearn-style constructors and `fit`/`predict` methods that run in browser or Node.js. Use Huber for moderate contamination, RANSAC for clear gross outliers, Theil-Sen for small robust datasets, and quantile regression for medians or prediction bands.
+`@kanaries/ml` provides `Linear.HuberRegressor`, `Linear.RANSACRegressor`, `Linear.TheilSenRegressor`, and `Linear.QuantileRegressor` in pure TypeScript for browser and Node.js apps. All four expose scikit-learn-style `fit`/`predict` APIs, integrate inside [`Pipeline`](/docs/apis/pipeline), and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive robust regression playground
 
-Switch between Huber, RANSAC, Theil–Sen, and quantile regression, then try the outlier dataset or add extreme points yourself. Each curve is trained live by the selected `@kanaries/ml` estimator.
+Switch between Huber, RANSAC, Theil–Sen, and Quantile regression, select the outlier dataset, or click to add extreme points. Each curve refits live using `@kanaries/ml`.
 
 <RegressionPlayground algorithm="robust" />
 
@@ -26,12 +34,36 @@ import { Linear } from '@kanaries/ml';
 
 const model = new Linear.RANSACRegressor({ randomState: 42 });
 model.fit([[0], [1], [2], [3]], [0, 1, 20, 3]);
-console.log(model.predict([[4]]));
+console.log(model.predict([[4]]), model.inlierMask);
 ```
+
+<AlgorithmComparison
+  title="Robust Regressors (Huber, RANSAC, TheilSen, Quantile)"
+  pythonCode={String.raw`from sklearn.linear_model import HuberRegressor, RANSACRegressor, TheilSenRegressor, QuantileRegressor
+
+huber = HuberRegressor(epsilon=1.35).fit(X, y)
+ransac = RANSACRegressor(random_state=42).fit(X, y)
+theil = TheilSenRegressor(random_state=42).fit(X, y)
+q90 = QuantileRegressor(quantile=0.9, alpha=0.01).fit(X, y)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const huber = new Linear.HuberRegressor({ epsilon: 1.35 });
+huber.fit(X, y);
+
+const ransac = new Linear.RANSACRegressor({ randomState: 42 });
+ransac.fit(X, y);
+
+const theil = new Linear.TheilSenRegressor({ randomState: 42 });
+theil.fit(X, y);
+
+const q90 = new Linear.QuantileRegressor({ quantile: 0.9, alpha: 0.01 });
+q90.fit(X, y);`}
+/>
 
 ## Detailed API reference
 
-- `HuberRegressor({ epsilon=1.35, alpha=0.0001, maxIter=100, tol=1e-5, fitIntercept=true })` exposes `coef`, `intercept`, `scale`, and `outliers`.
-- `RANSACRegressor({ estimator, minSamples, residualThreshold, maxTrials=100, stopProbability=.99, randomState })` exposes `estimatorFitted`, `inlierMask`, and `nTrials`.
-- `TheilSenRegressor({ nSubsamples, maxSubpopulation=10000, maxIter=300, tol=1e-3, randomState })` exposes `coef`, `intercept`, and `nIter`.
-- `QuantileRegressor({ quantile=.5, alpha=1, fitIntercept=true, maxIter=5000, tol=1e-7 })` solves the pinball-loss problem with an ADMM optimizer.
+- **`Linear.HuberRegressor({ epsilon = 1.35, alpha = 0.0001, maxIter = 100, tol = 1e-5, fitIntercept = true })`** — smaller `epsilon` (minimum `1.0`) increases robustness; exposes `coef`, `intercept`, `scale`, and boolean `outliers`.
+- **`Linear.RANSACRegressor({ estimator, minSamples, residualThreshold, maxTrials = 100, stopProbability = 0.99, randomState })`** — defaults to `LinearRegression`; exposes `estimatorFitted`, boolean `inlierMask`, and `nTrials`.
+- **`Linear.TheilSenRegressor({ nSubsamples, maxSubpopulation = 10000, maxIter = 300, tol = 1e-3, randomState })`** — exposes `coef`, `intercept`, and `nIter`.
+- **`Linear.QuantileRegressor({ quantile = 0.5, alpha = 1, fitIntercept = true, maxIter = 5000, tol = 1e-7 })`** — fits any conditional quantile in `(0, 1)` via ADMM; fit `quantile: 0.1` and `quantile: 0.9` to build an 80% prediction interval.
+- **Related pages**: [Handling Outliers in Regression Guide](/docs/guides/outliers-regression), [Outlier Detection Calculator](/tools/outlier-calculator), [Ridge Regression](/docs/apis/linear/ridgeRegression).

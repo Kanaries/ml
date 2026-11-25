@@ -1,23 +1,27 @@
 ---
 title: Bayesian Ridge and ARD Regression in JavaScript
-description: Run BayesianRidge and sparse ARDRegression in JavaScript or TypeScript with posterior uncertainty and sklearn-style APIs.
+description: Fit BayesianRidge and sparse ARDRegression with predictive uncertainty in JavaScript and TypeScript using @kanaries/ml. Includes live demo and sklearn guide.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# Bayesian linear regression in JavaScript
 
 ## Algorithm overview
 
-Bayesian linear models place probability distributions over coefficients. They are useful when you want regularized predictions plus uncertainty, or automatic relevance determination that prunes weak features.
+**Bayesian linear regression** places conjugate Gaussian–Gamma priors over regression weights and noise precision, automatically estimating regularization strength from the data via empirical Bayes (evidence maximization) instead of requiring manual `alpha` grid searches.
+
+`@kanaries/ml` provides two complementary Bayesian linear regressors:
+
+- **`BayesianRidge`**: places a single isotropic precision `lambda` across all feature weights (analogous to Ridge regression with learned regularization) and returns **predictive standard deviations** (`predictStd`) quantifying epistemic plus noise uncertainty at every test point.
+- **`ARDRegression` (Automatic Relevance Determination)**: learns a *separate* precision `lambda_j` for every feature and prunes irrelevant weights whose precision exceeds `thresholdLambda`—producing sparse models with built-in uncertainty estimates.
 
 ## JavaScript implementation
 
-`BayesianRidge` learns a shared coefficient precision and supports `predictStd`. `ARDRegression` learns one precision per feature and zeros coefficients whose precision crosses `thresholdLambda`.
+Both `Linear.BayesianRidge` and `Linear.ARDRegression` run in pure TypeScript across browser and Node.js runtimes, mirror scikit-learn's `BayesianRidge` and `ARDRegression` hyperparameter families, compose inside [`Pipeline`](/docs/apis/pipeline), and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive Bayesian regression playground
 
-Compare Bayesian Ridge and ARD Regression while changing the data and iteration budget. The live curve and holdout metrics come from the selected `@kanaries/ml` model running in your browser.
+Compare `BayesianRidge` and `ARDRegression` while varying noise and iteration budgets. The live curve and holdout error metrics come directly from `@kanaries/ml` running in your browser.
 
 <RegressionPlayground algorithm="bayesian" />
 
@@ -35,6 +39,43 @@ const standardDeviation = model.predictStd([[4]]);
 console.log({ mean, standardDeviation });
 ```
 
+<AlgorithmComparison
+  title="BayesianRidge & ARDRegression"
+  pythonCode={String.raw`from sklearn.linear_model import BayesianRidge, ARDRegression
+
+br = BayesianRidge(max_iter=300, tol=1e-3)
+br.fit(X_train, y_train)
+mean, std = br.predict(X_test, return_std=True)
+
+ard = ARDRegression(threshold_lambda=1e4)
+ard.fit(X_train, y_train)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const br = new Linear.BayesianRidge({ maxIter: 300, tol: 1e-3 });
+br.fit(XTrain, yTrain);
+const mean = br.predict(XTest);
+const std = br.predictStd(XTest);
+
+const ard = new Linear.ARDRegression({ thresholdLambda: 1e4 });
+ard.fit(XTrain, yTrain);`}
+/>
+
 ## Detailed API reference
 
-Both estimators accept `maxIter`, `tol`, Gamma-prior hyperparameters, and `fitIntercept`, and expose `coef`, `intercept`, `alpha`, `lambda`, `sigma`, and `nIter`.
+### Shared constructor options (`BayesianRidge` & `ARDRegression`)
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `maxIter` | `number` | `300` | Maximum empirical-Bayes update iterations. |
+| `tol` | `number` | `1e-3` | Convergence tolerance on weight updates. |
+| `alpha1` / `alpha2` | `number` | `1e-6` | Gamma prior shape and rate on noise precision `alpha`. |
+| `lambda1` / `lambda2` | `number` | `1e-6` | Gamma prior shape and rate on weight precision `lambda`. |
+| `fitIntercept` | `boolean` | `true` | Center features and target to estimate an unpenalized intercept. |
+| `thresholdLambda` *(ARD only)* | `number` | `1e4` | Precision cutoff above which a feature weight is pruned to `0`. |
+
+### Methods & fitted properties
+
+- `fit(X, y)` — maximizes marginal log-likelihood to learn posterior mean `coef`, posterior covariance `sigma`, noise precision `alpha`, weight precision `lambda`, `intercept`, and iteration count `nIter`.
+- `predict(X)` — returns posterior predictive means.
+- `predictStd(X)` — returns per-sample predictive standard deviations (ideal for plotting confidence bands in browser dashboards).
+- **Related pages**: [Ridge Regression](/docs/apis/linear/ridgeRegression), [Gaussian Process Regressor](/docs/apis/gaussian_process/regressor), [Lasso Regression](/docs/apis/linear/lassoRegression).

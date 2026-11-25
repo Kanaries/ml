@@ -77,12 +77,12 @@ When you know the exact estimator class at the call site, `fromJSON()` avoids ma
 import { Clusters } from '@kanaries/ml';
 
 const points = [[0, 0], [0, 1], [10, 10], [10, 11]];
-const kmeans = new Clusters.KMeans({ k: 2, randomState: 42 });
-kmeans.fit(points);
+const kmeans = new Clusters.KMeans({ n_clusters: 2, random_state: 42 });
+kmeans.fitPredict(points);
 
 const json = JSON.stringify(kmeans);
 const restored = Clusters.KMeans.fromJSON(json);
-console.log(restored.predict([[0.2, 0.2], [9.8, 10.2]]));
+console.log(restored.getCentroids(), restored.getInertia());
 ```
 
 ## Detailed API reference

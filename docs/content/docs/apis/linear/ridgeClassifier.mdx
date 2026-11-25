@@ -1,17 +1,25 @@
 ---
 title: RidgeClassifier in JavaScript with @kanaries/ml
-description: Train L2-regularized linear classifiers with the RidgeClassifier JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+description: Train fast L2-regularized linear classifiers in JavaScript and TypeScript with Linear.RidgeClassifier from @kanaries/ml for browser and Node.js apps.
 ---
 
-# RidgeClassifier in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-RidgeClassifier adapts ridge regression for classification by fitting one-vs-rest linear models and selecting the class with the highest score. It is useful for fast, interpretable classification on numeric tabular data.
+**RidgeClassifier** repurposes L2-regularized [Ridge Regression](/docs/apis/linear/ridgeRegression) for binary and multiclass classification. It encodes target labels into numerical class indicators, solves one closed-form L2-penalized least-squares system per class (one-vs-rest), and predicts the class achieving the highest linear score.
+
+Compared to iterative classifiers such as [Logistic Regression](/docs/apis/linear/logisticRegression) or [LinearSVC](/docs/apis/svm/LinearSVC), `RidgeClassifier` requires no learning-rate schedule or epoch budget and fits rapidly in closed form—making it a fast, low-variance baseline on numeric tabular datasets and standardized feature matrices.
+
+Use `RidgeClassifier` when:
+
+- You want deterministic, closed-form linear classification without tuning optimizer convergence.
+- Features are correlated and benefit from L2 coefficient shrinkage (`alpha`).
+- You only need hard class labels (or combine with [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration) when calibrated probabilities are required).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Linear.RidgeClassifier` with a JavaScript estimator API. It supports binary and multiclass numeric labels through one-vs-rest fitting.
+`@kanaries/ml` provides `Linear.RidgeClassifier` in pure TypeScript for browser and Node.js runtimes. It sorts unique numeric class labels ascending, fits one internal `RidgeRegression` per class, integrates cleanly into [`Pipeline`](/docs/apis/pipeline) and [`utils.ModelSelection`](/docs/apis/utils/modelSelection), and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -27,18 +35,36 @@ const pred = clf.predict([[1, 1], [3, 3]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="RidgeClassifier"
+  pythonCode={String.raw`from sklearn.linear_model import RidgeClassifier
+
+clf = RidgeClassifier(alpha=1.0, fit_intercept=True)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const clf = new Linear.RidgeClassifier({ alpha: 1.0, fitIntercept: true });
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Linear.RidgeClassifier(props?: {
-  alpha?: number;
-  fitIntercept?: boolean;
-})
-```
+### `new Linear.RidgeClassifier(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1` | Non-negative L2 regularization strength controlling variance reduction. |
+| `fitIntercept` | `boolean` | `true` | Include an unpenalized intercept term per class model. |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods
 
-The classifier sorts numeric classes ascending and fits one `RidgeRegression` model per class.
+- `fit(trainX: number[][], trainY: number[]): void` — sorts unique class labels and fits one `RidgeRegression` estimator per class.
+- `predict(testX: number[][]): number[]` — evaluates every class score and returns the label with the highest score.
+
+### Practical guidance
+
+- Standardize input columns with [`StandardScaler`](/docs/apis/utils/preprocessing) inside a [`Pipeline`](/docs/apis/pipeline) before sweeping `alpha` across logarithmic values (`0.01`, `0.1`, `1`, `10`, `100`).
+- Need calibrated class probabilities out of the box? Compare against [`Linear.LogisticRegression`](/docs/apis/linear/logisticRegression) or [`DiscriminantAnalysis.LDA`](/docs/apis/discriminant-analysis/lda).
+- **Related pages**: [Logistic Regression](/docs/apis/linear/logisticRegression), [Ridge Regression](/docs/apis/linear/ridgeRegression), [LinearSVC](/docs/apis/svm/LinearSVC), [Confusion Matrix Calculator](/tools/confusion-matrix-calculator).

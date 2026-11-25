@@ -1,23 +1,28 @@
 ---
 title: Ridge Regression in JavaScript with @kanaries/ml
-description: Use the RidgeRegression JavaScript and TypeScript implementation in @kanaries/ml for regularized linear regression in browser and Node.js applications.
+description: Fit L2-regularized linear regression in JavaScript and TypeScript with Linear.RidgeRegression (Ridge) from @kanaries/ml. Includes live demo and API reference.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# Ridge Regression in JavaScript
 
 ## Algorithm overview
 
-Ridge regression is linear regression with L2 regularization. It is useful when features are correlated, coefficients are unstable, or an ordinary least squares model overfits.
+**Ridge Regression** adds an **L2 regularization penalty** (`alpha * ||w||²`) to the ordinary least squares objective. Whenever predictors are strongly correlated (multicollinearity), feature count approaches sample count, or unregularized coefficients explode in magnitude, L2 shrinkage pulls weights smoothly toward zero without forcing them to exactly zero—trading a tiny amount of bias for a substantial drop in prediction variance.
+
+Use Ridge Regression when:
+
+- Numeric features are collinear (for example, overlapping telemetry metrics or polynomial expansions).
+- Ordinary least squares (`LinearRegression`) overfits training noise or exhibits wild coefficient swings across cross-validation folds.
+- You expect most features to carry small, spread-out contributions rather than a handful of sparse nonzero predictors.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Linear.RidgeRegression` for JavaScript and TypeScript projects. It follows the familiar `fit` and `predict` estimator shape and works with numeric arrays in browser or Node.js.
+`@kanaries/ml` provides `Linear.RidgeRegression` along with its scikit-learn alias `Linear.Ridge`. Both run synchronously in pure TypeScript across browsers and Node.js, compose directly inside [`Pipeline`](/docs/apis/pipeline) with [`StandardScaler`](/docs/apis/utils/preprocessing), and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive Ridge regression playground
 
-Tune the L2 penalty and data noise below. `Linear.RidgeRegression` refits in the browser after every change, including observations you add directly to the chart.
+Tune the L2 penalty (`alpha`) and noise level below. `Linear.RidgeRegression` refits live in your browser after every change, including observations you click to add to the chart.
 
 <RegressionPlayground algorithm="ridge" />
 
@@ -35,35 +40,36 @@ const pred = model.predict([[4]]);
 console.log(pred);
 ```
 
-## Detailed API reference
+<AlgorithmComparison
+  title="Ridge Regression (RidgeRegression / Ridge)"
+  pythonCode={String.raw`from sklearn.linear_model import Ridge
 
-```ts
-new Linear.RidgeRegression(props?: {
-  alpha?: number;
-  fitIntercept?: boolean;
-})
-```
-
-Options:
-
-- `alpha?: number`, default `1`. L2 penalty strength. Must be finite and greater than or equal to 0.
-- `fitIntercept?: boolean`, default `true`.
-
-Methods:
-
-- `fit(X: number[][], Y: number[]): void`
-- `predict(X: number[][]): number[]`
-
-`predict` throws if the model has not been fitted or if the feature count differs from the fitted data.
-
-## sklearn-style alias: `Ridge`
-
-`Linear.Ridge` extends `Linear.RidgeRegression` with identical options and methods. Use it when you prefer the scikit-learn class name:
-
-```ts
-import { Linear } from '@kanaries/ml';
+model = Ridge(alpha=0.5, fit_intercept=True)
+model.fit(X_train, y_train)
+preds = model.predict(X_test)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
 
 const model = new Linear.Ridge({ alpha: 0.5, fitIntercept: true });
-model.fit([[0], [1], [2], [3]], [1, 2, 3, 4]);
-const pred = model.predict([[4]]);
-```
+model.fit(XTrain, yTrain);
+const preds = model.predict(XTest);`}
+/>
+
+## Detailed API reference
+
+### `new Linear.RidgeRegression(props?)` / `new Linear.Ridge(props?)`
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1` | Non-negative finite L2 penalty strength. Larger values shrink coefficients more aggressively toward zero. |
+| `fitIntercept` | `boolean` | `true` | Estimate an unpenalized intercept term (`false` assumes centered data). |
+
+### Methods
+
+- `fit(X: number[][], Y: number[]): void` — solves the closed-form L2-regularized normal equations.
+- `predict(X: number[][]): number[]` — predicts continuous targets; throws if unfitted or if feature count mismatches.
+
+### Tuning & comparison tips
+
+- **Scale features before regularizing**: Because L2 penalizes squared coefficient magnitude equally across features, wrap `StandardScaler` and `Ridge` inside a [`Pipeline`](/docs/apis/pipeline) so large-scale columns are not unfairly favored.
+- **Ridge vs Lasso vs ElasticNet**: Prefer Ridge when all features matter slightly; switch to [`Linear.LassoRegression`](/docs/apis/linear/lassoRegression) for sparse feature selection or [`Linear.ElasticNet`](/docs/apis/linear/elasticNet) when correlated groups need sparsity.
+- **Related pages**: [Linear Regression](/docs/apis/linear/linearRegression), [Lasso Regression](/docs/apis/linear/lassoRegression), [ElasticNet](/docs/apis/linear/elasticNet), [Bayesian Ridge](/docs/apis/linear/bayesianRegressors).

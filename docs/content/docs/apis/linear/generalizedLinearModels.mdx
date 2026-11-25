@@ -1,23 +1,30 @@
 ---
 title: Poisson, Gamma & Tweedie Regression in JS
-description: Model counts and positive skewed targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in browser or Node.js.
+description: Model count, positive skewed, and compound targets with PoissonRegressor, GammaRegressor, and TweedieRegressor in JavaScript and TypeScript using @kanaries/ml.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# Generalized linear models in JavaScript
 
 ## Algorithm overview
 
-Generalized linear models connect a linear predictor to non-Gaussian targets. Poisson regression is suited to counts, Gamma regression to positive continuous values, and Tweedie regression spans several variance relationships through its `power` parameter.
+Ordinary least squares assumes symmetric Gaussian noise with constant variance across the target range—an assumption that breaks down on **non-negative counts** (website clicks, support tickets, defect counts), **positive right-skewed continuous metrics** (response latency, order value, insurance severity), or **zero-inflated compound totals** (expected claim cost per policy).
+
+**Generalized Linear Models (GLMs)** pair a linear predictor `η = Xw + b` with a link function (such as the log link `μ = exp(η)`) and an exponential-dispersion deviance loss tailored to the target distribution:
+
+| Estimator | Target domain | Variance function `V(μ)` | Typical use case |
+| --- | --- | --- | --- |
+| `PoissonRegressor` | Non-negative (`y ≥ 0`) | `μ` (`power = 1`) | Event counts, rates, daily conversions |
+| `GammaRegressor` | Strictly positive (`y > 0`) | `μ²` (`power = 2`) | Latency, duration, skewed spend amounts |
+| `TweedieRegressor` | Depends on `power` | `μ^p` (`p ≤ 0` or `p ≥ 1`) | Compound Poisson–Gamma (`1 < p < 2`) for zero-inflated totals |
 
 ## JavaScript implementation
 
-The `@kanaries/ml` implementations use regularized Newton updates and a guarded line search, with log links for positive-mean families.
+`Linear.PoissonRegressor`, `Linear.GammaRegressor`, and `Linear.TweedieRegressor` in `@kanaries/ml` optimize L2-regularized deviance via damped Newton updates with a guarded line search in pure TypeScript—ensuring strictly positive log-link predictions in browsers and Node.js without external numerical libraries. All three serialize via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive generalized linear model playground
 
-Switch between Poisson, Gamma, and Tweedie regression, tune regularization, and add positive-valued observations. The prediction is refitted live with the chosen `Linear` estimator.
+Switch between Poisson, Gamma, and Tweedie regression, tune L2 regularization (`alpha`), and add positive observations directly on the plot. The fitted curve updates live using `@kanaries/ml`.
 
 <RegressionPlayground algorithm="glm" />
 
@@ -31,6 +38,40 @@ model.fit([[0], [1], [2]], [1, 2, 4]);
 console.log(model.predict([[3]]));
 ```
 
+<AlgorithmComparison
+  title="Poisson, Gamma & Tweedie Regressors"
+  pythonCode={String.raw`from sklearn.linear_model import PoissonRegressor, GammaRegressor, TweedieRegressor
+
+poisson = PoissonRegressor(alpha=0.1).fit(X, y_counts)
+gamma = GammaRegressor(alpha=0.1).fit(X, y_positive)
+tweedie = TweedieRegressor(power=1.5, alpha=0.1, link="log").fit(X, y_claims)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const poisson = new Linear.PoissonRegressor({ alpha: 0.1 });
+poisson.fit(X, yCounts);
+
+const gamma = new Linear.GammaRegressor({ alpha: 0.1 });
+gamma.fit(X, yPositive);
+
+const tweedie = new Linear.TweedieRegressor({ power: 1.5, alpha: 0.1, link: 'log' });
+tweedie.fit(X, yClaims);`}
+/>
+
 ## Detailed API reference
 
-All three accept `alpha`, `fitIntercept`, `maxIter`, and `tol`. Poisson and Gamma regression use their canonical log link. `TweedieRegressor` additionally accepts `power` (values in `(0, 1)` are undefined) and `link: 'auto' | 'identity' | 'log'`. Fitted models expose `coef`, `intercept`, and `nIter`.
+### Constructor options
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1` | L2 penalty strength shrinking non-intercept coefficients. |
+| `fitIntercept` | `boolean` | `true` | Estimate an unpenalized intercept term. |
+| `maxIter` | `number` | `100` | Maximum Newton iterations. |
+| `tol` | `number` | `1e-4` | Convergence tolerance on step size / gradient norm. |
+| `power` *(Tweedie only)* | `number` | `0` | Variance power (`0` = Normal, `1` = Poisson, `1 < p < 2` = Compound Poisson-Gamma, `2` = Gamma, `3` = Inverse Gaussian; values in `(0, 1)` are undefined). |
+| `link` *(Tweedie only)* | `'auto' \| 'identity' \| 'log'` | `'auto'` | `'auto'` picks `'identity'` for `power <= 0` and `'log'` for `power > 0`. |
+
+### Methods & properties
+
+- `fit(X, y)` / `predict(X)` — trains the GLM and predicts expected target means (strictly positive under log link).
+- Exposes fitted `coef`, `intercept`, and `nIter`.
+- **Related pages**: [Ridge Regression](/docs/apis/linear/ridgeRegression), [Robust Regressors](/docs/apis/linear/robustRegressors), [Compose (`TransformedTargetRegressor`)](/docs/apis/compose).

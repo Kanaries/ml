@@ -1,23 +1,24 @@
 ---
 title: ElasticNet in JavaScript with @kanaries/ml
-description: Fit linear regression with combined L1 and L2 regularization using the ElasticNet JavaScript and TypeScript implementation in @kanaries/ml.
+description: Fit L1+L2 regularized linear regression in JavaScript and TypeScript with Linear.ElasticNet from @kanaries/ml. Includes live playground and sklearn comparison.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# ElasticNet in JavaScript
 
 ## Algorithm overview
 
-ElasticNet combines L1 and L2 penalties. It is useful when you want sparse-ish linear models but pure Lasso is too unstable, especially with correlated features.
+**ElasticNet** combines the **L1 sparsity penalty** of [Lasso Regression](/docs/apis/linear/lassoRegression) with the **L2 stability penalty** of [Ridge Regression](/docs/apis/linear/ridgeRegression) via a mixing hyperparameter `l1Ratio` in `[0, 1]`.
+
+On real-world tabular datasets with groups of correlated predictors (or more features than rows), pure Lasso can arbitrarily pick one column from a correlated cluster and fluctuate wildly across resamples, while pure Ridge retains every noisy feature. ElasticNet delivers the best of both worlds: it zeros out irrelevant columns like Lasso while keeping correlated informative features together smoothly like Ridge.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Linear.ElasticNet` for browser and Node.js regression workflows. `l1Ratio` controls the balance between Ridge-like and Lasso-like behavior.
+`@kanaries/ml` provides `Linear.ElasticNet` in pure TypeScript for browser and Node.js runtimes. When `l1Ratio === 0`, it delegates directly to `RidgeRegression`; when `l1Ratio === 1`, it delegates to `LassoRegression`; for intermediate values it runs regularized coordinate descent. It integrates cleanly with [`Pipeline`](/docs/apis/pipeline), `GridSearchCV`, and JSON persistence via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive ElasticNet playground
 
-Tune the regularization strength and experiment with noisy or contaminated data. The displayed prediction is fitted live with `Linear.ElasticNet` and updates when you add a point.
+Tune regularization strength and test noisy or outlier-contaminated datasets below. The curve is refitted live with `Linear.ElasticNet` in your browser and updates immediately when you add points.
 
 <RegressionPlayground algorithm="elasticNet" />
 
@@ -35,29 +36,40 @@ const pred = model.predict([[4, 0]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="ElasticNet"
+  pythonCode={String.raw`from sklearn.linear_model import ElasticNet
+
+model = ElasticNet(alpha=0.1, l1_ratio=0.5, max_iter=1000, tol=1e-6)
+model.fit(X_train, y_train)
+preds = model.predict(X_test)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const model = new Linear.ElasticNet({
+  alpha: 0.1,
+  l1Ratio: 0.5,
+  maxIter: 1000,
+  tol: 1e-6,
+});
+model.fit(XTrain, yTrain);
+const preds = model.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Linear.ElasticNet(props?: {
-  alpha?: number;
-  l1Ratio?: number;
-  fitIntercept?: boolean;
-  maxIter?: number;
-  tol?: number;
-})
-```
+### `new Linear.ElasticNet(props?)`
 
-Options:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1` | Overall regularization multiplier controlling total penalty strength. |
+| `l1Ratio` | `number` | `0.5` | Mixing weight in `[0, 1]`. `0` equals pure L2 (Ridge), `1` equals pure L1 (Lasso). |
+| `fitIntercept` | `boolean` | `true` | Estimate an unpenalized intercept term. |
+| `maxIter` | `number` | `1000` | Maximum coordinate-descent iterations. |
+| `tol` | `number` | `1e-6` | Convergence tolerance on coefficient updates. |
 
-- `alpha?: number`, default `1`.
-- `l1Ratio?: number`, default `0.5`. Must be between `0` and `1`.
-- `fitIntercept?: boolean`, default `true`.
-- `maxIter?: number`, default `1000`.
-- `tol?: number`, default `1e-6`.
+### Methods & tuning workflow
 
-Methods:
-
-- `fit(X: number[][], Y: number[]): void`
-- `predict(X: number[][]): number[]`
-
-When `l1Ratio` is `0`, the implementation delegates to Ridge regression. When `l1Ratio` is `1`, it delegates to Lasso regression.
+- `fit(X: number[][], Y: number[]): void` — fits the combined L1/L2 regression model.
+- `predict(X: number[][]): number[]` — generates numeric predictions for `X`.
+- **Recommended grid**: Standardize columns with [`StandardScaler`](/docs/apis/utils/preprocessing) inside a [`Pipeline`](/docs/apis/pipeline), then search `l1Ratio` in `[0.1, 0.5, 0.9]` and `alpha` across `[0.001, 0.01, 0.1, 1]`.
+- **Related pages**: [Ridge Regression](/docs/apis/linear/ridgeRegression), [Lasso Regression](/docs/apis/linear/lassoRegression), [Robust Regressors](/docs/apis/linear/robustRegressors).

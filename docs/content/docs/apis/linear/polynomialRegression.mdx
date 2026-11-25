@@ -1,25 +1,28 @@
 ---
 title: Polynomial Regression in JavaScript with @kanaries/ml
-description: Fit nonlinear curves with PolynomialRegression in JavaScript and TypeScript using @kanaries/ml. Includes interactive playground, degree tuning, and API docs.
+description: Fit smooth nonlinear curves in JavaScript and TypeScript with Linear.PolynomialRegression from @kanaries/ml. Includes live demo, degree guide, and API docs.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# Polynomial Regression in JavaScript
 
 ## Algorithm overview
 
-Polynomial regression expands each numeric feature into powers of that feature, then fits a linear model on the expanded matrix. It is useful when a linear baseline is too simple but the target still follows a smooth curve.
+**Polynomial Regression** extends linear regression to smooth non-linear curves by transforming each numeric input feature `x` into powers `[x, x², ..., xᵈ]` up to `degree` and fitting an ordinary least-squares model over the expanded basis. Although the resulting prediction curve is non-linear in `x`, the estimation problem remains strictly linear in the polynomial coefficients—meaning it solves rapidly in closed form with zero gradient-descent tuning.
 
-Use it for small numeric regression problems where the degree of curvature is known or easy to tune.
+Polynomial regression works best when:
+
+- A scatter plot shows clear curvature (parabolic growth, diminishing returns, saturation) that a straight line underfits.
+- You have a low-dimensional numeric problem where degree `2`–`4` captures the domain trend cleanly.
+- You want lightweight, interpretable trendlines embedded directly inside browser charts or CSV calculators.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Linear.PolynomialRegression` as a JavaScript estimator with `fit` and `predict`. It runs in browser or Node.js and keeps polynomial feature expansion inside the model.
+`@kanaries/ml` provides `Linear.PolynomialRegression` as a self-contained estimator in pure TypeScript for browser and Node.js apps. Rather than manually constructing a separate polynomial basis transformer before fitting, `PolynomialRegression` encapsulates power expansion, fitting, and prediction inside one serializable estimator (`toJSON()` / [`loadModel()`](/docs/apis/serialization)).
 
 ## Interactive polynomial regression playground
 
-Adjust the polynomial degree, data shape, and noise below. The curve is fitted live with `Linear.PolynomialRegression`; click the chart to test how an added observation changes the fit.
+Adjust the polynomial degree, underlying data shape, and noise level below. The curve refits live with `Linear.PolynomialRegression`; click anywhere on the chart to see how an added point—or an overly high degree—bends the fit.
 
 <RegressionPlayground algorithm="polynomial" />
 
@@ -37,19 +40,37 @@ const pred = model.predict([[4]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="Polynomial Regression"
+  pythonCode={String.raw`from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
+model.fit(X_train, y_train)
+preds = model.predict(X_test)`}
+  tsCode={String.raw`import { Linear } from '@kanaries/ml';
+
+const model = new Linear.PolynomialRegression({ degree: 2 });
+model.fit(XTrain, yTrain);
+const preds = model.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Linear.PolynomialRegression(props?: { degree?: number })
-```
+### `new Linear.PolynomialRegression(props?)`
 
-Options:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `degree` | `number` | `2` | Integer `≥ 1` specifying the highest power per feature (`1` reduces to standard linear regression). |
 
-- `degree?: number`, default `2`. Must be an integer greater than or equal to 1.
+### Methods
 
-Methods:
+- `fit(X: number[][], Y: number[]): void` — expands each column to powers `1..degree` and fits ordinary least squares with an intercept.
+- `predict(X: number[][]): number[]` — applies the same power expansion and returns predicted values.
 
-- `fit(X: number[][], Y: number[]): void`
-- `predict(X: number[][]): number[]`
+### Avoiding polynomial overfitting
 
-The implementation expands every input feature to powers from `1` through `degree`, fits ordinary least squares, and stores an intercept plus coefficients internally.
+- **Keep degree low (`2` or `3`) unless cross-validation proves higher degree helps**: High degrees oscillate wildly between points (Runge's phenomenon) and diverge rapidly outside the training range. Read our practical guide on [how to choose polynomial degree](/docs/guides/choose-polynomial-degree) or test interactively in the [Polynomial Regression Calculator](/tools/polynomial-regression-calculator).
+- **Scale inputs before high-degree fits**: Large `x` values (like years `2020..2026`) raised to the 4th power cause numerical ill-conditioning; center or standardize `X` with [`StandardScaler`](/docs/apis/utils/preprocessing) first.
+- **Related pages**: [Choosing Polynomial Degree Guide](/docs/guides/choose-polynomial-degree), [Polynomial Regression Calculator](/tools/polynomial-regression-calculator), [Ridge Regression](/docs/apis/linear/ridgeRegression).

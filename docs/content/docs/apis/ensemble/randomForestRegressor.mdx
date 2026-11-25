@@ -1,23 +1,30 @@
 ---
 title: RandomForestRegressor in JavaScript with @kanaries/ml
-description: Predict continuous targets with tree ensembles using the RandomForestRegressor JavaScript and TypeScript implementation in @kanaries/ml.
+description: Predict continuous targets with Random Forest regression in JavaScript and TypeScript using @kanaries/ml. Includes live demo, sklearn comparison, and tuning.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { RegressionPlayground } from '@/components/regressionPlayground';
-
-# RandomForestRegressor in JavaScript
 
 ## Algorithm overview
 
-RandomForestRegressor averages predictions from many decision trees. It is useful for nonlinear numeric prediction when a single regression tree is too noisy.
+**RandomForestRegressor** averages the numeric predictions of an ensemble of randomized [regression trees](/docs/apis/tree/decisionTreeRegressor). While a single regression tree produces blocky step-function predictions that easily overfit noise, averaging dozens of bootstrap-resampled, feature-subsampled trees smooths variance sharply while capturing non-linear curves, thresholds, and interaction effects automatically.
+
+RandomForestRegressor is well suited for:
+
+- Tabular regression where relationships are non-linear or piecewise (pricing, demand forecasting, latency estimation).
+- Mixed numeric features without requiring polynomial expansion or feature standardization.
+- Robust baseline modeling before investing in gradient boosting hyperparameter sweeps.
+
+Keep one key limitation in mind: because every tree outputs averages of observed training targets in its leaves, Random Forests **cannot extrapolate** linear trends beyond the numeric range of `y` seen during `fit()`. For trend extrapolation, combine linear features with [Ridge](/docs/apis/linear/ridgeRegression) or [Polynomial Regression](/docs/apis/linear/polynomialRegression).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Ensemble.RandomForestRegressor` for JavaScript and TypeScript projects. It supports bootstrap sampling, feature subsampling, and seeded randomness.
+`@kanaries/ml` exposes `Ensemble.RandomForestRegressor` in pure TypeScript for browsers and Node.js. It supports bootstrap resampling, `maxFeatures` subsampling, deterministic `randomState` seeding, [`Pipeline`](/docs/apis/pipeline) composition, and JSON persistence via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Interactive random forest regression playground
 
-Change the number of trees, dataset, and noise below. The prediction line is produced by a live `Ensemble.RandomForestRegressor`; click the chart to add another training point.
+Change the number of trees, dataset, and noise below. The prediction curve is produced live by `Ensemble.RandomForestRegressor` in your browser; click the chart to add another training observation and watch the ensemble adapt.
 
 <RegressionPlayground algorithm="randomForest" />
 
@@ -33,26 +40,55 @@ const reg = new Ensemble.RandomForestRegressor({
 });
 
 reg.fit([[0], [1], [2], [3]], [0, 1, 4, 9]);
-const pred = reg.predict([[4]]);
+const pred = reg.predict([[2.5]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="RandomForestRegressor"
+  pythonCode={String.raw`from sklearn.ensemble import RandomForestRegressor
+
+reg = RandomForestRegressor(
+    n_estimators=100,
+    max_depth=6,
+    max_features=1.0,
+    random_state=7,
+)
+reg.fit(X_train, y_train)
+preds = reg.predict(X_test)`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const reg = new Ensemble.RandomForestRegressor({
+  nEstimators: 100,
+  maxDepth: 6,
+  maxFeatures: 1.0,
+  randomState: 7,
+});
+reg.fit(XTrain, yTrain);
+const preds = reg.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Ensemble.RandomForestRegressor(props?: {
-  nEstimators?: number;
-  bootstrap?: boolean;
-  maxDepth?: number;
-  minSamplesSplit?: number;
-  maxFeatures?: number | 'sqrt' | 'log2';
-  randomState?: number;
-})
-```
+### `new Ensemble.RandomForestRegressor(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nEstimators` | `number` | `100` | Number of regression trees averaged in the ensemble. |
+| `bootstrap` | `boolean` | `true` | Sample training rows with replacement for each tree. |
+| `maxDepth` | `number` | `undefined` | Maximum depth per tree; capping to `4`–`10` curbs overfitting and keeps browser inference fast. |
+| `minSamplesSplit` | `number` | `2` | Minimum samples required in a node before attempting another split. |
+| `maxFeatures` | `number \| 'sqrt' \| 'log2'` | `1.0` | Features considered per split (`1.0` considers all features; `'sqrt'` reduces tree correlation on wide datasets). |
+| `randomState` | `number` | `undefined` | Seed for reproducible forest construction. |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods
 
-Defaults are `nEstimators: 100`, `bootstrap: true`, and `maxFeatures: 1.0`.
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(trainX: number[][], trainY: number[]) => void` | Fits all regression trees on `(trainX, trainY)`. |
+| `predict` | `(testX: number[][]) => number[]` | Returns the mean prediction across all trees for each sample. |
+| `score` / `toJSON` / `clone` | Inherited from `RegressorBase` | Computes R² score and supports JSON model serialization. |
+
+### Related pages
+
+- [RandomForestClassifier](/docs/apis/ensemble/randomForestClassifier), [ExtraTreesRegressor](/docs/apis/ensemble/extraTreesRegressor), [XGBoostRegressor](/docs/apis/ensemble/xgboostRegressor), [Evaluation Metrics](/docs/apis/metrics).

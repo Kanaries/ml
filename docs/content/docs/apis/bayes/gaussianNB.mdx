@@ -1,17 +1,23 @@
 ---
 title: GaussianNB in JavaScript with @kanaries/ml
-description: Classify continuous numeric features with the GaussianNB JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+description: Train Gaussian Naive Bayes classifiers for continuous numeric features in JavaScript and TypeScript with Bayes.GaussianNB from @kanaries/ml.
 ---
 
-# GaussianNB in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-GaussianNB is a naive Bayes classifier for continuous numeric features. It models each feature per class with a Gaussian distribution and predicts the class with the highest posterior score.
+**Gaussian Naive Bayes (`GaussianNB`)** is a fast generative probabilistic classifier for continuous numeric features. Under the conditional independence ("naive") assumption, each feature within each class is modeled by a one-dimensional Gaussian distribution estimated purely from its class mean and variance. At inference time, Bayes' rule combines the class prior with the sum of per-feature log-likelihoods to pick the most probable class.
+
+GaussianNB is an excellent choice when:
+
+- You want an ultra-fast baseline that fits in a single `O(n * d)` pass with almost zero hyperparameter tuning.
+- Training data is small or streaming, where iterative models like SVMs or deep ensembles risk overfitting.
+- You need real-time browser classification with tiny serialized JSON artifacts (only per-class means, variances, and priors are stored).
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Bayes.GaussianNB` for lightweight probabilistic classification in browser or Node.js applications.
+`@kanaries/ml` exposes `Bayes.GaussianNB` in pure TypeScript for browser and Node.js runtimes. It supports custom class `priors` and scikit-learn's `varSmoothing` stabilizer (which adds a tiny fraction of the largest feature variance to every variance estimate so zero-variance features never cause division by zero). It composes cleanly inside [`Pipeline`](/docs/apis/pipeline), [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration), and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -24,18 +30,35 @@ const pred = clf.predict([[1.1, 2.1], [4.1, 4.1]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="GaussianNB"
+  pythonCode={String.raw`from sklearn.naive_bayes import GaussianNB
+
+clf = GaussianNB(var_smoothing=1e-9)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Bayes } from '@kanaries/ml';
+
+const clf = new Bayes.GaussianNB({ varSmoothing: 1e-9 });
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Bayes.GaussianNB(props?: {
-  priors?: number[] | null;
-  varSmoothing?: number;
-})
-```
+### `new Bayes.GaussianNB(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `priors` | `number[] \| null` | `null` | Optional prior probabilities matching the number of fitted classes (in sorted label order). When `null`, priors are estimated from class frequencies. |
+| `varSmoothing` | `number` | `1e-9` | Portion of the largest feature variance added to all variances for numerical stability. |
 
-- `fit(X: number[][], y: number[]): void`
-- `predict(X: number[][]): number[]`
+### Methods
 
-`priors`, when provided, must match the number of fitted classes.
+- `fit(X: number[][], y: number[]): void` — computes per-class means, variances, and priors in a single pass.
+- `predict(X: number[][]): number[]` — predicts the class maximizing log-posterior probability.
+
+### Practical guidance
+
+- **Correlated features**: Because `GaussianNB` assumes diagonal class covariances, strongly correlated features can make its probabilities overconfident. Consider [`DiscriminantAnalysis.LDA`](/docs/apis/discriminant-analysis/lda), [`DiscriminantAnalysis.QDA`](/docs/apis/discriminant-analysis/qda), or [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration).
+- **Count or binary features**: Use [`Bayes.MultinomialNB`](/docs/apis/bayes/multinomialNB), [`Bayes.ComplementNB`](/docs/apis/bayes/complementNB), or [`Bayes.BernoulliNB`](/docs/apis/bayes/bernoulliNB) for discrete count or indicator inputs.

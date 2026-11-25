@@ -1,17 +1,19 @@
 ---
 title: BaggingClassifier in JavaScript with @kanaries/ml
-description: Train bootstrap classifier ensembles with the BaggingClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+description: Reduce classification variance with bootstrap aggregating in JavaScript and TypeScript using BaggingClassifier from @kanaries/ml with default or custom models.
 ---
 
-# BaggingClassifier in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-BaggingClassifier trains multiple classifiers on resampled datasets and predicts by vote. It is useful for reducing variance in unstable base estimators such as decision trees.
+**BaggingClassifier** (Bootstrap Aggregating) trains an ensemble of `nEstimators` classifiers—each fitted on a different random subset of the training rows—and combines their outputs by majority vote. Bagging is specifically designed to reduce **variance** in high-variance, low-bias base learners such as unpruned decision trees, k-nearest neighbors, or small neural models without increasing bias.
+
+Unlike [RandomForestClassifier](/docs/apis/ensemble/randomForestClassifier), which specifically pairs decision trees with per-split feature subsampling, `BaggingClassifier` is a general meta-ensemble: you can bag the default `DecisionTreeClassifier` or wrap any custom classifier via `estimatorFactory`.
 
 ## JavaScript implementation
 
-`@kanaries/ml` implements `Ensemble.BaggingClassifier` with a default decision-tree base estimator. You can also pass an `estimatorFactory` for custom estimators that implement `fit` and `predict`.
+`@kanaries/ml` provides `Ensemble.BaggingClassifier` in pure TypeScript for browser and Node.js runtimes. By default it uses `DecisionTreeClassifier` members with `bootstrap: true` (sampling with replacement) and deterministic `randomState` seeding. Passing `bootstrap: false` switches from bagging to **pasting** (sampling subsets without replacement).
 
 ## Quick start example
 
@@ -29,25 +31,45 @@ const pred = clf.predict([[1, 1], [4, 4]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="BaggingClassifier"
+  pythonCode={String.raw`from sklearn.ensemble import BaggingClassifier
+
+clf = BaggingClassifier(
+    n_estimators=20,
+    max_samples=0.8,
+    bootstrap=True,
+    random_state=12,
+)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const clf = new Ensemble.BaggingClassifier({
+  nEstimators: 20,
+  maxSamples: 3,
+  bootstrap: true,
+  randomState: 12,
+});
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Ensemble.BaggingClassifier(props?: {
-  nEstimators?: number;
-  maxSamples?: number;
-  bootstrap?: boolean;
-  randomState?: number;
-  estimatorFactory?: (seed?: number) => {
-    fit(X: number[][], y: number[]): void;
-    predict(X: number[][]): number[];
-  };
-  // plus DecisionTreeClassifier options when using the default estimator
-})
-```
+### `new Ensemble.BaggingClassifier(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nEstimators` | `number` | `10` | Number of base classifiers in the ensemble. |
+| `maxSamples` | `number` | `X.length` | Samples drawn per estimator (integer count or fraction in `(0, 1]`). |
+| `bootstrap` | `boolean` | `true` | Sample with replacement (`true` = bagging) or without replacement (`false` = pasting). |
+| `randomState` | `number` | `undefined` | Seed for reproducible subsampling and member seeds. |
+| `estimatorFactory` | `(seed?: number) => { fit, predict }` | `DecisionTreeClassifier` | Optional factory returning a fresh base classifier per ensemble member. |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods & usage guidance
 
-Defaults are `nEstimators: 10` and `bootstrap: true`.
+- `fit(trainX: number[][], trainY: number[]): void` — draws `nEstimators` sample subsets and fits each member.
+- `predict(testX: number[][]): number[]` — predicts by majority vote across all fitted members.
+- **When to prefer Random Forest**: If your base estimator is a decision tree and your dataset has many correlated features, [`Ensemble.RandomForestClassifier`](/docs/apis/ensemble/randomForestClassifier) usually outperforms plain bagging by also subsampling features at every split.
+- **Related pages**: [BaggingRegressor](/docs/apis/ensemble/baggingRegressor), [RandomForestClassifier](/docs/apis/ensemble/randomForestClassifier), [AdaBoostClassifier](/docs/apis/ensemble/adaboostClassifier).

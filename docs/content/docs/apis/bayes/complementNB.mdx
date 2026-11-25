@@ -1,17 +1,22 @@
 ---
 title: ComplementNB in JavaScript with @kanaries/ml
-description: Classify imbalanced non-negative count features with the ComplementNB JavaScript and TypeScript implementation in @kanaries/ml.
+description: Classify imbalanced text and count datasets in JavaScript and TypeScript with Bayes.ComplementNB from @kanaries/ml for browser and Node.js NLP.
 ---
 
-# ComplementNB in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-ComplementNB is a naive Bayes variant designed for non-negative count features and often useful on imbalanced text-like classification problems. It estimates feature weights from the complement of each class.
+**Complement Naive Bayes (`ComplementNB`)** is an adaptation of [`MultinomialNB`](/docs/apis/bayes/multinomialNB) introduced by Rennie et al. specifically to fix the bias that standard Multinomial Naive Bayes suffers on **imbalanced text datasets**. Instead of estimating feature weights from documents *inside* class `c`, `ComplementNB` computes statistics from the **complement of class `c`** (all documents belonging to *other* classes) and optionally L1-normalizes weights (`norm: true`) so longer classes cannot dominate predictions.
+
+Use `ComplementNB` when:
+
+- Class frequencies in your text or count dataset are heavily skewed (for example 90% normal tickets vs 10% urgent escalations).
+- You want a drop-in upgrade over `MultinomialNB` on bag-of-words or TF-IDF features with the exact same `O(nnz)` speed.
 
 ## JavaScript implementation
 
-`@kanaries/ml` exposes `Bayes.ComplementNB` so JavaScript and TypeScript applications can run this lightweight classifier in browser or Node.js environments.
+`@kanaries/ml` provides `Bayes.ComplementNB` in pure TypeScript for browsers and Node.js. Like `MultinomialNB`, it supports both dense `number[][]` and sparse [`CSRMatrix`](/docs/apis/data) matrices, integrates directly with [`TfidfVectorizer`](/docs/apis/feature_extraction/tfidfVectorizer) inside a [`Pipeline`](/docs/apis/pipeline), and serializes via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
 
 ## Quick start example
 
@@ -27,21 +32,35 @@ const pred = clf.predict([[2, 0, 1], [0, 2, 1]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="ComplementNB"
+  pythonCode={String.raw`from sklearn.naive_bayes import ComplementNB
+
+clf = ComplementNB(alpha=1.0, norm=True)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Bayes } from '@kanaries/ml';
+
+const clf = new Bayes.ComplementNB({ alpha: 1.0, norm: true });
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Bayes.ComplementNB(props?: {
-  alpha?: number;
-  forceAlpha?: boolean;
-  fitPrior?: boolean;
-  classPrior?: number[] | null;
-  norm?: boolean;
-})
-```
+### `new Bayes.ComplementNB(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `alpha` | `number` | `1.0` | Additive smoothing parameter for complement token counts. |
+| `forceAlpha` | `boolean` | `true` | Keeps tiny `alpha` values unmodified when `true`; clamps near-zero values to `1e-10` when `false`. |
+| `fitPrior` | `boolean` | `true` | Learn class priors from training frequencies (only applied in binary classification, matching scikit-learn). |
+| `classPrior` | `number[] \| null` | `null` | Explicit class priors overriding empirical frequencies. |
+| `norm` | `boolean` | `false` | When `true`, performs a second L1 normalization of complement feature weights as recommended in the original ComplementNB paper. |
 
-- `fit(X: number[][], y: number[]): void`
-- `predict(X: number[][]): number[]`
+### Methods & tuning tips
 
-Feature values must be non-negative.
+- `fit(X: number[][] | CSRMatrix, y: number[]): void` — requires non-negative feature values.
+- `predict(X: number[][] | CSRMatrix): number[]` — assigns each sample to the class with minimum complement score.
+- Try sweeping `alpha` in `[0.1, 0.5, 1.0]` with `norm: true` vs `false` using [`utils.ModelSelection`](/docs/apis/utils/modelSelection) and compare macro-F1 via [`Metrics.f1Score`](/docs/apis/metrics).
+- **Related pages**: [MultinomialNB](/docs/apis/bayes/multinomialNB), [GaussianNB](/docs/apis/bayes/gaussianNB), [TfidfVectorizer](/docs/apis/feature_extraction/tfidfVectorizer).

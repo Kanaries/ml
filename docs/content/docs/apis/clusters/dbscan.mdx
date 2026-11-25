@@ -1,23 +1,30 @@
 ---
 title: DBScan in JavaScript with @kanaries/ml
-description: Discover density-based clusters and noise with the DBScan JavaScript and TypeScript implementation in @kanaries/ml for browser and Node.js applications.
+description: Discover arbitrary-shape density clusters and outliers in JavaScript and TypeScript with Clusters.DBSCAN (DBScan) from @kanaries/ml for browser and Node.js.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { ClusteringPlayground } from '@/components/clusteringPlayground';
-
-# DBScan in JavaScript
 
 ## Algorithm overview
 
-DBSCAN groups points that are densely connected and marks sparse points as noise. It is useful when cluster count is unknown and clusters may have irregular shapes.
+**DBSCAN (Density-Based Spatial Clustering of Applications with Noise)** groups observations that lie in densely packed neighborhoods and labels isolated points in sparse regions as **noise (`-1`)**. Unlike [K-Means](/docs/apis/clusters/kmeans), DBSCAN does not require choosing the number of clusters `k` in advance and can recover crescents, rings, elongated bands, and clusters of arbitrary non-convex shape.
+
+Every point is classified into one of three roles using two hyperparameters—neighborhood radius `eps` and density threshold `minSamples`:
+
+- **Core points**: have at least `minSamples` neighbors (including themselves) within distance `eps`.
+- **Border points**: fall within `eps` of a core point but do not meet `minSamples` on their own.
+- **Noise points**: are neither core nor reachable from any core point, and receive label `-1`.
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Clusters.DBScan` for JavaScript and TypeScript workflows. It accepts an epsilon radius, a minimum sample count, and a distance metric name.
+`@kanaries/ml` exports both `Clusters.DBSCAN` (canonical scikit-learn spelling) and `Clusters.DBScan` (legacy alias pointing to the exact same constructor). Both accept a props-object constructor (`{ eps, minSamples, distanceType }`) as well as the legacy positional signature, run in pure TypeScript across browsers and Node.js, and serialize cleanly via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+Because DBSCAN evaluates pairwise neighborhood distances (`O(n²)` worst-case), it fits effortlessly on typical browser datasets of a few hundred to several thousand rows; for larger point clouds, run inside a Web Worker or consider [`Clusters.HDBSCAN`](/docs/apis/clusters/hdbscan) when cluster densities vary widely.
 
 ## Interactive DBSCAN playground
 
-Tune the neighborhood radius and minimum sample count below. The cluster map is fitted live with `Clusters.DBScan`; click the chart to test whether a new point connects dense regions or remains noise.
+Tune the neighborhood radius (`eps`) and minimum sample count (`minSamples`) below. The cluster map is fitted live with `Clusters.DBSCAN`; click the chart to test whether a new point connects dense regions or remains noise.
 
 <ClusteringPlayground algorithm="dbscan" />
 
@@ -26,25 +33,55 @@ Tune the neighborhood radius and minimum sample count below. The cluster map is 
 ```ts
 import { Clusters } from '@kanaries/ml';
 
-const X = [[0, 0], [0.1, 0], [5, 5], [5.1, 5], [20, 20]];
+const X = [[0, 0], [0.1, 0], [0, 0.15], [5, 5], [5.1, 5], [5, 5.1], [20, 20]];
 
-const dbscan = new Clusters.DBScan(0.3, 2, 'euclidean');
+const dbscan = new Clusters.DBSCAN({
+  eps: 0.3,
+  minSamples: 2,
+  distanceType: 'euclidean',
+});
 const labels = dbscan.fitPredict(X);
-console.log(labels);
+console.log(labels); // [0, 0, 0, 1, 1, 1, -1]
 ```
+
+<AlgorithmComparison
+  title="DBSCAN"
+  pythonCode={String.raw`from sklearn.cluster import DBSCAN
+
+X = [[0, 0], [0.1, 0], [5, 5], [5.1, 5], [20, 20]]
+dbscan = DBSCAN(eps=0.3, min_samples=2, metric="euclidean")
+labels = dbscan.fit_predict(X)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const X = [[0, 0], [0.1, 0], [5, 5], [5.1, 5], [20, 20]];
+const dbscan = new Clusters.DBSCAN({
+  eps: 0.3,
+  minSamples: 2,
+  distanceType: 'euclidean',
+});
+const labels = dbscan.fitPredict(X);`}
+/>
 
 ## Detailed API reference
 
-```ts
-new Clusters.DBScan(
-  eps?: number,
-  minSamples?: number,
-  distanceType?: Distance.IDistanceType,
-)
-```
+### `new Clusters.DBSCAN(props?)` / `new Clusters.DBScan(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `eps` | `number` | `0.5` | Maximum distance between two points to be considered neighbors. |
+| `minSamples` | `number` | `5` | Minimum number of points within `eps` required to form a dense core region. |
+| `distanceType` | `Distance.IDistanceType` | `'euclidean'` | Distance metric (`'euclidean'`, `'manhattan'`, `'cosine'`, etc.). |
 
-- `fitPredict(samplesX: number[][]): number[]`
+### Methods
 
-Labels are numeric cluster ids starting at `0`. Noise points are labeled `-1`.
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fitPredict` | `(samplesX: number[][]) => number[]` | Clusters `samplesX` and returns numeric cluster IDs starting at `0`, with `-1` marking noise points. |
+| `getParams` / `setParams` / `toJSON` | Inherited from `ClusterBase` | Parameter inspection, cloning, and JSON serialization. |
+
+### Tuning `eps` and `minSamples`
+
+- **Scale features first**: Standardize numeric columns with [`StandardScaler`](/docs/apis/utils/preprocessing) so a single `eps` radius applies evenly across all dimensions.
+- **Selecting `minSamples`**: A standard heuristic is `minSamples >= nFeatures + 1` (or `2 * nFeatures` for noisy data); increase it to merge tiny spurious clusters into noise.
+- **Selecting `eps`**: If almost every point gets `-1`, `eps` is too small; if everything collapses into cluster `0`, `eps` is too large. Plot sorted `k`-th nearest neighbor distances (using [`Neighbors.NearestNeighbors`](/docs/apis/neighbors/nearestNeighbors)) and pick `eps` near the sharpest knee.
+- **Varying densities**: If your data mixes tight dense clusters with sparser broad clusters, switch to [`Clusters.OPTICS`](/docs/apis/clusters/optics) or [`Clusters.HDBSCAN`](/docs/apis/clusters/hdbscan).

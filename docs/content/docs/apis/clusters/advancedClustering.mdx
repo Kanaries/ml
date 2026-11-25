@@ -1,23 +1,28 @@
 ---
 title: Birch, Affinity & Bisecting K-Means in JavaScript
-description: Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans.
+description: Cluster streamed, exemplar-based, or hierarchical data in JavaScript and TypeScript with Birch, AffinityPropagation, and BisectingKMeans from @kanaries/ml.
 ---
 
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 import { ClusteringPlayground } from '@/components/clusteringPlayground';
-
-# Advanced clustering in JavaScript
 
 ## Algorithm overview
 
-`Birch` incrementally compresses observations into clustering-feature subclusters, `AffinityPropagation` discovers exemplars by message passing, and `BisectingKMeans` recursively splits high-inertia groups.
+Standard [K-Means](/docs/apis/clusters/kmeans) works well on moderate static datasets, but specialized clustering workloads often need incremental compression, automatic exemplar discovery, or deterministic top-down splitting. `@kanaries/ml` bundles three complementary clustering estimators for those scenarios:
+
+- **`Birch` (Balanced Iterative Reducing and Clustering using Hierarchies)**: compresses incoming rows into compact Clustering Feature (CF) subclusters within radius `threshold`, making it suitable for incremental (`partialFit`) or large streaming tabular datasets before an optional global merge into `nClusters`.
+- **`AffinityPropagation`**: discovers both the number of clusters and real data-point **exemplars** by exchanging responsibility and availability messages across a pairwise similarity matrix—no need to guess `k` beforehand.
+- **`BisectingKMeans`**: builds clusters divisively from the top down by repeatedly picking the highest-inertia cluster (or largest cluster) and splitting it with 2-means until `nClusters` groups exist, avoiding poor random initializations that can trap standard K-Means.
 
 ## JavaScript implementation
 
-These estimators run locally in browser or Node.js and follow the library's `fitPredict` convention. Affinity propagation stores several O(n²) matrices; as a practical browser ceiling, keep it below roughly 2,000 samples unless you have benchmarked the target device's memory budget.
+All three estimators live under `import { Clusters } from '@kanaries/ml'` and follow the library's `fitPredict` and `BaseEstimator` serialization contracts in both browser and Node.js runtimes.
+
+**Browser memory note**: `AffinityPropagation` allocates several `O(n²)` dense matrices for similarity, responsibility, and availability messages. Keep browser datasets below roughly 1,500–2,000 samples unless you have profiled memory usage on target devices, or use `Birch` / `BisectingKMeans` / [`EMeans`](/docs/apis/clusters/eMeans) for larger tables.
 
 ## Interactive advanced clustering playground
 
-Switch among Birch, Affinity Propagation, and Bisecting K-Means, then change each estimator's most important controls. Every view is fitted live with the corresponding `@kanaries/ml` class, including its reported centers, exemplars, or inertia.
+Switch among Birch, Affinity Propagation, and Bisecting K-Means, then adjust each estimator's primary controls. Every view is fitted live with the corresponding `@kanaries/ml` class, reporting its centers, exemplars, or inertia.
 
 <ClusteringPlayground algorithm="advanced" />
 
@@ -26,13 +31,62 @@ Switch among Birch, Affinity Propagation, and Bisecting K-Means, then change eac
 ```ts
 import { Clusters } from '@kanaries/ml';
 
-const X = [[-2, -2], [-1.8, -2.1], [2, 2], [2.1, 1.9]];
-const labels = new Clusters.Birch({ threshold: 0.5, nClusters: 3 }).fitPredict(X);
-console.log(labels);
+const X = [[-2, -2], [-1.8, -2.1], [-2.2, -1.9], [2, 2], [2.1, 1.9], [1.9, 2.2]];
+
+const birch = new Clusters.Birch({ threshold: 0.5, nClusters: 2 });
+const bisect = new Clusters.BisectingKMeans({ nClusters: 2, randomState: 42 });
+const ap = new Clusters.AffinityPropagation({ damping: 0.7, randomState: 42 });
+
+console.log({
+  birch: birch.fitPredict(X),
+  bisect: bisect.fitPredict(X),
+  affinity: ap.fitPredict(X),
+});
 ```
 
-Birch also supports `partialFit`; AffinityPropagation exposes exemplar indices and `nIter`; BisectingKMeans exposes final centers and inertia.
+<AlgorithmComparison
+  title="Birch, AffinityPropagation & BisectingKMeans"
+  pythonCode={String.raw`from sklearn.cluster import Birch, AffinityPropagation, BisectingKMeans
+
+birch_labels = Birch(threshold=0.5, n_clusters=2).fit_predict(X)
+ap_labels = AffinityPropagation(damping=0.7, random_state=42).fit_predict(X)
+bisect_labels = BisectingKMeans(n_clusters=2, random_state=42).fit_predict(X)`}
+  tsCode={String.raw`import { Clusters } from '@kanaries/ml';
+
+const birchLabels = new Clusters.Birch({ threshold: 0.5, nClusters: 2 }).fitPredict(X);
+const apLabels = new Clusters.AffinityPropagation({ damping: 0.7, randomState: 42 }).fitPredict(X);
+const bisectLabels = new Clusters.BisectingKMeans({ nClusters: 2, randomState: 42 }).fitPredict(X);`}
+/>
 
 ## Detailed API reference
 
-`Birch` accepts `threshold`, `branchingFactor`, and `nClusters`. `AffinityPropagation` accepts `damping`, `preference`, `maxIter`, `convergenceIter`, and `randomState`. `BisectingKMeans` accepts `nClusters`, `bisectingStrategy`, the inner K-Means iteration settings, and `randomState`.
+### `Clusters.Birch(props?)`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `threshold` | `0.5` | Maximum radius of a subcluster before a new sample spawns a separate CF leaf. |
+| `branchingFactor` | `50` | Maximum number of CF subclusters per node. |
+| `nClusters` | `3` | Final cluster count after global subcluster clustering (`null` keeps raw subclusters). |
+
+Supports `fit(X)`, `partialFit(X)`, `predict(X)`, and `fitPredict(X)`.
+
+### `Clusters.AffinityPropagation(props?)`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `damping` | `0.5` | Damping factor in `[0.5, 1)` to prevent numerical oscillations during message passing. |
+| `preference` | median similarity | Self-similarity preference; higher values produce more clusters, lower values produce fewer. |
+| `maxIter` / `convergenceIter` | `200` / `15` | Iteration cap and consecutive unchanged iterations required to converge. |
+| `randomState` | `undefined` | Seed for tie-breaking noise. |
+
+Exposes exemplar indices, cluster centers, and `nIter` after fitting.
+
+### `Clusters.BisectingKMeans(props?)`
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `nClusters` | `8` | Target number of leaf clusters. |
+| `bisectingStrategy` | `'biggest_inertia'` | Criterion for picking the next cluster to bisect. |
+| `maxIter` / `nInit` / `randomState` | K-Means split controls | Controls inner 2-means splits and determinism. |
+
+Exposes fitted centers and total inertia. See also [K-Means](/docs/apis/clusters/kmeans), [E-Means](/docs/apis/clusters/eMeans), and [HDBSCAN](/docs/apis/clusters/hdbscan).

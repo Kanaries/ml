@@ -1,17 +1,27 @@
 ---
 title: RandomForestClassifier in JavaScript with @kanaries/ml
-description: Train bootstrap decision-tree ensembles with the RandomForestClassifier JavaScript and TypeScript implementation in @kanaries/ml.
+description: Train Random Forest classifiers in JavaScript and TypeScript with @kanaries/ml. Includes bootstrap sampling, maxFeatures, sklearn comparison, and tuning tips.
 ---
 
-# RandomForestClassifier in JavaScript
+import { AlgorithmComparison } from '@/components/algorithmComparison';
 
 ## Algorithm overview
 
-RandomForestClassifier combines many decision trees and predicts by majority vote. It is useful for nonlinear tabular classification when a single tree is too sensitive or underpowered.
+**RandomForestClassifier** is a bagging ensemble of independent [decision trees](/docs/apis/tree/decisionTreeClassifier) that predicts class labels by aggregating votes across the forest. Each tree is trained on a bootstrap resample of the rows (`bootstrap: true`) and considers only a random subset of candidate features (`maxFeatures`, defaulting to `'sqrt'`) at every split.
+
+That double randomization decorrelates individual trees so their variance averages out while preserving the ability to model non-linear interactions, mixed feature scales, and multiclass decision boundaries—making Random Forest one of the most reliable out-of-the-box tabular classifiers with minimal preprocessing.
+
+Use RandomForestClassifier when:
+
+- Linear boundaries underfit non-linear feature interactions.
+- A single decision tree overfits noise or fluctuates across train/test splits.
+- Features sit on wildly different numeric scales (trees are invariant to monotonic feature scaling).
 
 ## JavaScript implementation
 
-`@kanaries/ml` provides `Ensemble.RandomForestClassifier` for browser and Node.js applications. The implementation builds `DecisionTreeClassifier` estimators with bootstrap sampling and feature subsampling.
+`@kanaries/ml` provides `Ensemble.RandomForestClassifier` in pure TypeScript for browsers and Node.js. It builds `DecisionTreeClassifier` estimators with deterministic `randomState` seeding, integrates cleanly inside [`Pipeline`](/docs/apis/pipeline) and [`Calibration.CalibratedClassifierCV`](/docs/apis/calibration), and persists trained forests as JSON via `toJSON()` / [`loadModel()`](/docs/apis/serialization).
+
+For interactive browser apps, keep `nEstimators` between `20` and `100` and cap `max_depth` (for example `6`–`12`) to keep training sub-second and serialized JSON payloads compact. You can also explore how tree depth and ensemble size shape decision boundaries in the [Random Forest Playground](/playground/random-forest).
 
 ## Quick start example
 
@@ -29,21 +39,53 @@ const pred = clf.predict([[1, 1], [4, 4]]);
 console.log(pred);
 ```
 
+<AlgorithmComparison
+  title="RandomForestClassifier"
+  pythonCode={String.raw`from sklearn.ensemble import RandomForestClassifier
+
+clf = RandomForestClassifier(
+    n_estimators=100,
+    max_features="sqrt",
+    max_depth=8,
+    random_state=42,
+)
+clf.fit(X_train, y_train)
+preds = clf.predict(X_test)`}
+  tsCode={String.raw`import { Ensemble } from '@kanaries/ml';
+
+const clf = new Ensemble.RandomForestClassifier({
+  nEstimators: 100,
+  maxFeatures: 'sqrt',
+  max_depth: 8,
+  randomState: 42,
+});
+clf.fit(XTrain, yTrain);
+const preds = clf.predict(XTest);`}
+/>
+
 ## Detailed API reference
 
-```ts
-new Ensemble.RandomForestClassifier(props?: {
-  nEstimators?: number;
-  bootstrap?: boolean;
-  maxFeatures?: number | 'sqrt' | 'log2';
-  randomState?: number;
-  // plus DecisionTreeClassifier options
-})
-```
+### `new Ensemble.RandomForestClassifier(props?)`
 
-Methods:
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nEstimators` | `number` | `100` | Number of trees in the forest. Larger values reduce variance at linear training/inference cost. |
+| `bootstrap` | `boolean` | `true` | Whether each tree trains on a bootstrap sample drawn with replacement. |
+| `maxFeatures` | `number \| 'sqrt' \| 'log2'` | `'sqrt'` | Number of features evaluated at each split (`'sqrt'` = `sqrt(nFeatures)`, `'log2'` = `log2(nFeatures)`, fraction in `(0, 1]`, or explicit integer). |
+| `randomState` | `number` | `undefined` | Seed for reproducible bootstrap draws and feature subsampling. |
+| Tree options | `DecisionTreeClassifier` props | — | Forwarded to every member tree (`criterion`, `max_depth`, `min_samples_split`, `min_samples_leaf`). |
 
-- `fit(trainX: number[][], trainY: number[]): void`
-- `predict(testX: number[][]): number[]`
+### Methods
 
-The classifier defaults to `nEstimators: 100`, `bootstrap: true`, and `maxFeatures: 'sqrt'`.
+| Method | Signature | Description |
+| --- | --- | --- |
+| `fit` | `(trainX: number[][], trainY: number[]) => void` | Fits `nEstimators` randomized decision trees on `(trainX, trainY)`. |
+| `predict` | `(testX: number[][]) => number[]` | Returns majority-vote class predictions for each row in `testX`. |
+| `getParams` / `setParams` / `clone` / `toJSON` | Inherited from `ClassifierBase` | Full estimator contract & JSON serialization. |
+
+### Tuning & comparison tips
+
+- **Overfitting or huge JSON models**: Restrict `max_depth` (`5`–`12`) or raise `min_samples_leaf` before increasing `nEstimators`.
+- **Faster randomized alternative**: Compare against [`Ensemble.ExtraTreesClassifier`](/docs/apis/ensemble/extraTreesClassifier), which samples split thresholds randomly and often trains faster in JavaScript.
+- **Higher accuracy on tabular benchmarks**: Try [`Ensemble.GradientBoostingClassifier`](/docs/apis/ensemble/gradientBoostingClassifier) or [`Ensemble.XGBoostClassifier`](/docs/apis/ensemble/xgboostClassifier).
+- **Related pages**: [Random Forest Playground](/playground/random-forest), [RandomForestRegressor](/docs/apis/ensemble/randomForestRegressor), [Confusion Matrix Calculator](/tools/confusion-matrix-calculator).
