@@ -5,9 +5,9 @@ import styles from '@/components/tools/toolPage.module.css';
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 export const metadata: Metadata = {
-  title: { absolute: 'Free Machine Learning Calculators & Visualizations — @kanaries/ml' },
+  title: { absolute: 'Free Machine Learning Calculators & Tools — @kanaries/ml' },
   description:
-    'Use free, private machine learning calculators in your browser. Calculate confusion-matrix metrics, fit logistic regression, visualize models, and copy JavaScript or Python code.',
+    'Use free, private machine learning calculators in your browser. Analyze CSV outliers, fit regression, score confusion matrices, and export JS or Python code.',
   alternates: { canonical: `${siteUrl}/tools` },
   openGraph: {
     title: 'Free Machine Learning Calculators & Visualizations',

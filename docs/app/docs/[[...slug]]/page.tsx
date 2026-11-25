@@ -10,7 +10,7 @@ import { createRelativeLink } from 'fumadocs-ui/mdx';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
-import { getDisplayTitle, getDisplayTitleNode } from '@/lib/title';
+import { getDisplayTitle, getDisplayTitleNode, getMetadataTitle } from '@/lib/title';
 import { getMarkdownPath } from '@/lib/agent-docs';
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
@@ -109,10 +109,7 @@ export async function generateMetadata(props: {
   const title = page.data.title;
   const description = page.data.description;
   const isAlgorithmPage = slug[0] === 'apis' && slug.length >= 3;
-  const metadataTitle =
-    isAlgorithmPage && !/javascript|typescript/i.test(title)
-      ? `${title} in JavaScript and TypeScript`
-      : title;
+  const metadataTitle = getMetadataTitle(title, isAlgorithmPage);
 
   return {
     title: metadataTitle,

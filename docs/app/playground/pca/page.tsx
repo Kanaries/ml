@@ -6,8 +6,8 @@ import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout'
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 export const metadata: Metadata = {
-  title: { absolute: 'PCA Visualization — Interactive Principal Component Analysis in JavaScript' },
-  description: 'Explore principal component analysis with an interactive PCA visualization. Paste data, inspect explained variance and loadings, and run PCA in JavaScript with @kanaries/ml.',
+  title: { absolute: 'PCA Visualization — Interactive PCA in JavaScript' },
+  description: 'Explore principal component analysis interactively. Paste CSV data, inspect explained variance and loadings, and run PCA in JavaScript with @kanaries/ml.',
   keywords: ['PCA visualization', 'principal component analysis visualization', 'PCA JavaScript', 'interactive PCA', 'dimensionality reduction'],
   alternates: { canonical: `${siteUrl}/playground/pca` },
   openGraph: {

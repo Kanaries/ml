@@ -7,7 +7,7 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').
 const pathname = '/tools/logistic-regression-calculator';
 const title = 'Logistic Regression Calculator — Odds Ratios & Decision Boundary, Free';
 const description =
-  'Fit logistic regression in your browser from pasted CSV data. Get coefficients, odds ratios, probabilities, classification metrics, a sigmoid curve, and a 2D decision boundary.';
+  'Fit logistic regression in your browser from CSV data. Inspect coefficients, odds ratios, probabilities, metrics, sigmoid curve, and 2D decision boundary.';
 
 export const metadata: Metadata = {
   title: { absolute: title },

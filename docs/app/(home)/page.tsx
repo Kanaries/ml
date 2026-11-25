@@ -7,7 +7,9 @@ import { CopyButton } from '@/components/copyButton';
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 export const metadata: Metadata = {
-  title: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
+  title: {
+    absolute: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
+  },
   description:
     'Train and deploy ML models in JavaScript with a scikit-learn-style API. Works in browser and Node.js. Fast examples, tiny bundles, docs for every algorithm.',
   alternates: {

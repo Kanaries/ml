@@ -1,6 +1,6 @@
 ---
 title: Feature Selection in JavaScript with @kanaries/ml
-description: Select informative columns in browser or Node.js machine-learning workflows with model-based, recursive, and univariate JavaScript feature selection in @kanaries/ml.
+description: Select informative features in JavaScript and TypeScript with model-based, recursive (RFE/RFECV), and univariate selectors in @kanaries/ml.
 ---
 
 # Feature selection in JavaScript

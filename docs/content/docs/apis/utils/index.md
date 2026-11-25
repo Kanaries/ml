@@ -1,6 +1,6 @@
 ---
 title: Machine Learning Utilities in JavaScript with @kanaries/ml
-description: Explore machine learning workflow utilities in JavaScript and TypeScript with @kanaries/ml, including preprocessing, sampling, model selection, statistics, and async execution helpers.
+description: Use @kanaries/ml JavaScript ML utilities for preprocessing, train/test splitting, cross-validation, statistics, sampling, and Web Worker async execution.
 ---
 
 # Machine Learning Utilities in JavaScript

@@ -50,10 +50,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
     default: '@kanaries/ml Documentation',
-    template: '%s | @kanaries/ml Docs',
+    template: '%s | @kanaries/ml',
   },
   description:
-    'Learn machine learning in JavaScript and TypeScript with @kanaries/ml. API guides, practical algorithm tutorials, and deployment patterns for browser and Node.js.',
+    'Train and run scikit-learn-style ML models in JavaScript and TypeScript with @kanaries/ml. API docs, tutorials, and interactive tools for browser and Node.js.',
   applicationName: '@kanaries/ml Docs',
   keywords: [
     'JavaScript machine learning',

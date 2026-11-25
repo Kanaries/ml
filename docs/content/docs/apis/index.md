@@ -1,6 +1,6 @@
 ---
 title: JavaScript Machine Learning APIs with @kanaries/ml
-description: Explore machine learning APIs in JavaScript and TypeScript with @kanaries/ml, including clustering, classification, anomaly detection, dimensionality reduction, and workflow utilities.
+description: "Browse @kanaries/ml JavaScript and TypeScript ML APIs: clustering, linear models, trees, ensembles, SVM, decomposition, metrics, and preprocessing utilities."
 ---
 
 # JavaScript Machine Learning APIs

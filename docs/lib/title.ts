@@ -9,6 +9,22 @@ export function getDisplayTitle(title: string | undefined): string {
     .trim();
 }
 
+export function getMetadataTitle(title: string | undefined, isAlgorithmPage = false): string {
+  if (!title) return '';
+
+  const cleaned = title
+    .replace(/\s+(?:with|in)\s+@kanaries\/ml(?:\s+Docs)?\s*$/i, '')
+    .replace(/\s*[—–|-]\s*@kanaries\/ml(?:\s+Docs)?\s*$/i, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  if (isAlgorithmPage && !/javascript|typescript/i.test(cleaned)) {
+    return `${cleaned} in JavaScript`;
+  }
+
+  return cleaned;
+}
+
 export function getTextFromNode(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);

@@ -5,8 +5,8 @@ import styles from '@/components/tools/toolPage.module.css';
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 export const metadata: Metadata = {
-  title: { absolute: 'Interactive Machine Learning Playgrounds in JavaScript — @kanaries/ml' },
-  description: 'Explore PCA, KNN, gradient descent, and K-Means with interactive browser visualizations powered by @kanaries/ml. No install or backend required.',
+  title: { absolute: 'Interactive ML Playgrounds in JavaScript — @kanaries/ml' },
+  description: 'Explore PCA, KNN, gradient descent, K-Means, decision trees, and Random Forests with interactive browser visualizations powered by @kanaries/ml.',
   alternates: { canonical: `${siteUrl}/playground` },
   openGraph: {
     title: 'Interactive Machine Learning Playgrounds',
