@@ -13,7 +13,13 @@ Like K-Means, E-Means takes a fixed number of clusters and minimizes squared Euc
 
 ## Quick start in JavaScript or TypeScript
 
-The repository build exposes `Clusters.EMeans` for browsers and Node.js. To use this feature before the next npm release, build the repository with `yarn install --frozen-lockfile && yarn build`, then run `yarn pack` and install the resulting tarball in your application. The example uses two-dimensional coordinates so you can inspect the assignments directly.
+Install `@kanaries/ml` with npm. Version 1.2.0 introduces `Clusters.EMeans` for browsers and Node.js.
+
+```sh
+npm install @kanaries/ml
+```
+
+The example uses two-dimensional coordinates so you can inspect the assignments directly.
 
 ```ts
 import { Clusters } from '@kanaries/ml';
