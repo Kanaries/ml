@@ -30,3 +30,39 @@ test('FeatureHasher matches sklearn dict hashing', () => {
     const fixture = waveC.feature_hasher, model = new FeatureHasher({ nFeatures: 16, inputType: 'dict', alternateSign: true });
     expect(model.fitTransform(fixture.rows).toDense()).toEqual(fixture.matrix);
 });
+
+test.each(waveC.feature_hasher_cases)(
+    'FeatureHasher matches sklearn for $inputType inputs with alternateSign=$alternateSign',
+    ({ inputType, alternateSign, rows, matrix }) => {
+        const model = new FeatureHasher({ nFeatures: 4, inputType, alternateSign });
+        const result = model.fitTransform(rows) as CSRMatrix;
+        expect(result).toBeInstanceOf(CSRMatrix);
+        expect(result.shape).toEqual([rows.length, 4]);
+        expect(result.toDense()).toEqual(matrix);
+        expect(result.data).not.toContain(0);
+    },
+);
+
+test('dict string values hash as categorical features', () => {
+    const options = { nFeatures: 16 };
+    const actual = new FeatureHasher(options).transform([{ city: 'London', temp: 12 }]);
+    const encoded = new FeatureHasher({ ...options, inputType: 'pair' }).transform([[['city=London', 1], ['temp', 12]]]);
+    expect(actual.toDense()).toEqual(encoded.toDense());
+});
+
+test('FeatureHasher rejects malformed samples and invalid dimensions', () => {
+    const dict = new FeatureHasher();
+    for (const sample of [null, [], { key: Infinity }, { key: false }]) {
+        expect(() => dict.transform([sample])).toThrow();
+    }
+    const tokens = new FeatureHasher({ inputType: 'string' });
+    expect(() => tokens.transform(['abc'])).toThrow(/arrays/);
+    expect(() => tokens.transform([['abc', 2]])).toThrow(/strings/);
+    const pairs = new FeatureHasher({ inputType: 'pair' });
+    for (const pair of ['x', ['x'], [2, 1], ['x', '1'], ['x', NaN]]) {
+        expect(() => pairs.transform([[pair]])).toThrow(/string, number/);
+    }
+    for (const nFeatures of [0, 1.5]) {
+        expect(() => new FeatureHasher({ nFeatures })).toThrow(/parameters/);
+    }
+});

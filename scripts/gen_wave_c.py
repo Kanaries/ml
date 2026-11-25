@@ -66,6 +66,17 @@ dict_vectorizer = DictVectorizer(sparse=False).fit(dict_rows)
 hasher_rows = [{'city=London': 1, 'temp': 12}, {'city=Dubai': 1, 'temp': 33}]
 feature_hasher = FeatureHasher(n_features=16, input_type='dict', alternate_sign=True)
 
+hasher_inputs = {
+    'string': [['red', 'red', 'café', 'blue'], [], ['tree', 'blue']],
+    'pair': [[('red', 2), ('red', -2), ('café', 1.5)], [('blue', -2), ('tree', 3)], []],
+}
+hasher_cases = []
+for input_type, rows in hasher_inputs.items():
+    for signed in (True, False):
+        model = FeatureHasher(n_features=4, input_type=input_type, alternate_sign=signed)
+        hasher_cases.append({'inputType': input_type, 'alternateSign': signed, 'rows': rows,
+                             'matrix': model.transform(rows).toarray().tolist()})
+
 cluster_x = np.array([[-5, -5], [-5.2, -4.8], [-4.8, -5.1], [0, 0], [.2, -.1], [-.2, .1], [5, 5], [5.1, 4.8], [4.8, 5.2]], dtype=float)
 birch = Birch(threshold=.5, n_clusters=None).fit(cluster_x)
 affinity = AffinityPropagation(damping=.7, preference=-20, random_state=0, max_iter=500, convergence_iter=20).fit(cluster_x)
@@ -194,6 +205,7 @@ fixture = {
         'matrix': dict_vectorizer.transform(dict_rows).tolist(),
     },
     'feature_hasher': {'rows': hasher_rows, 'matrix': feature_hasher.transform(hasher_rows).toarray().tolist()},
+    'feature_hasher_cases': hasher_cases,
     'clustering': {
         'X': cluster_x.tolist(),
         'birch': {
