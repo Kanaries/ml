@@ -38,12 +38,16 @@ const config = {
           },
         ],
       },
-      ...['/llms.txt', '/llm.txt'].map((source) => ({
+      ...['/llms.txt', '/llm.txt', '/llms-full.txt'].map((source) => ({
         source,
         headers: [
           {
             key: 'Content-Type',
             value: 'text/plain; charset=utf-8',
+          },
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, follow',
           },
         ],
       })),
@@ -51,6 +55,11 @@ const config = {
   },
   async redirects() {
     return [
+      {
+        source: '/llm.txt',
+        destination: '/llms.txt',
+        permanent: true,
+      },
       {
         source: '/docs/apis/linear/lasso',
         destination: '/docs/apis/linear/lassoRegression',

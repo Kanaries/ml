@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import styles from './toolPage.module.css';
+import { SITE_URL, buildBreadcrumbLd, safeJsonLd } from '@/lib/seo';
 
 export type ToolFaq = {
   question: string;
@@ -28,11 +29,7 @@ type ToolPageLayoutProps = {
   compact?: boolean;
 };
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
-
-function safeJsonLd(value: unknown) {
-  return JSON.stringify(value).replace(/</g, '\\u003c');
-}
+const siteUrl = SITE_URL;
 
 export function ToolPageLayout({
   name,
@@ -87,6 +84,11 @@ export function ToolPageLayout({
           },
         })),
       },
+      buildBreadcrumbLd([
+        { name: '@kanaries/ml', path: '/' },
+        { name: sectionName, path: sectionPath },
+        { name, path: pathname },
+      ]),
     ],
   };
 

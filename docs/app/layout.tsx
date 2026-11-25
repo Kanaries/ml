@@ -3,6 +3,7 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import { Inter, Fraunces, Newsreader, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { DEFAULT_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
 // UI / chrome sans
 const inter = Inter({
@@ -44,10 +45,8 @@ const fontVars = [
   jetbrainsMono.variable,
 ].join(' ');
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: '@kanaries/ml Documentation',
     template: '%s | @kanaries/ml',
@@ -69,13 +68,14 @@ export const metadata: Metadata = {
     title: '@kanaries/ml Documentation',
     description:
       'Machine learning documentation for JavaScript and TypeScript: algorithms, examples, and sklearn-style APIs.',
-    url: `${siteUrl}/docs`,
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: '@kanaries/ml Documentation',
     description:
       'JavaScript and TypeScript machine learning docs with practical algorithm guides for browser and Node.js.',
+    images: [DEFAULT_OG_IMAGE.url],
   },
 };
 

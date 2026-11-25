@@ -3,14 +3,28 @@ import Link from 'next/link';
 import { RandomForestPlayground } from '@/components/playground/RandomForestPlayground';
 import { CodeTabs } from '@/components/tools/CodeTabs';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 export const metadata: Metadata = {
   title: { absolute: 'Random Forest Visualization — Interactive JavaScript Playground' },
   description: 'Compare a Random Forest with one decision tree. Change tree count, depth, noise, and data while watching the decision boundary and holdout score update.',
   keywords: ['random forest visualization', 'random forest JavaScript', 'random forest playground', 'bagging visualization', 'decision forest'],
   alternates: { canonical: `${siteUrl}/playground/random-forest` },
-  openGraph: { title: 'Interactive Random Forest Visualization', description: 'See how bootstrap aggregation stabilizes decision trees on noisy nonlinear data.', url: `${siteUrl}/playground/random-forest` },
+  openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Interactive Random Forest Visualization',
+    description: 'See how bootstrap aggregation stabilizes decision trees on noisy nonlinear data.',
+    url: `${siteUrl}/playground/random-forest`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive Random Forest Visualization',
+    description: 'See how bootstrap aggregation stabilizes decision trees on noisy nonlinear data.',
+    images: [PLAYGROUND_OG_IMAGE.url],
+  },
 };
 
 const js = `import { Ensemble } from '@kanaries/ml';

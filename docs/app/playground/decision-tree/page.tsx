@@ -3,15 +3,29 @@ import Link from 'next/link';
 import { DecisionTreePlayground } from '@/components/decisionTreePlayground';
 import { CodeTabs } from '@/components/tools/CodeTabs';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'Decision Tree Visualization — Interactive Classifier & Tree Diagram' },
   description: 'Build and visualize a decision tree in JavaScript. Change depth, criterion, noise, and samples while inspecting the fitted boundary and tree diagram.',
   keywords: ['decision tree visualization', 'visualize decision tree', 'decision tree JavaScript', 'sklearn tree visualization', 'interactive decision tree'],
   alternates: { canonical: `${siteUrl}/playground/decision-tree` },
-  openGraph: { title: 'Interactive Decision Tree Visualization in JavaScript', description: 'Change the data and hyperparameters, then inspect the live decision surface and fitted tree.', url: `${siteUrl}/playground/decision-tree` },
+  openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Interactive Decision Tree Visualization in JavaScript',
+    description: 'Change the data and hyperparameters, then inspect the live decision surface and fitted tree.',
+    url: `${siteUrl}/playground/decision-tree`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive Decision Tree Visualization in JavaScript',
+    description: 'Change the data and hyperparameters, then inspect the live decision surface and fitted tree.',
+    images: [PLAYGROUND_OG_IMAGE.url],
+  },
 };
 
 const javascriptCode = `import { Tree } from '@kanaries/ml';

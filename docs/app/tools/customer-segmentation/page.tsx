@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
 import { WorkflowCalculator } from '@/components/tools/WorkflowCalculator';
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+import { SITE_URL, TOOLS_OG_IMAGE } from '@/lib/seo';
+const siteUrl = SITE_URL;
 const title = 'Customer Segmentation Tool';
 const description =
     'Create customer groups from CSV features or transaction-based RFM data. Standardize features, inspect K-Means group profiles, and export customer labels.';
@@ -10,7 +11,20 @@ export const metadata: Metadata = {
     title: { absolute: `${title} — Free CSV Tool` },
     description,
     alternates: { canonical: `${siteUrl}/tools/customer-segmentation` },
-    openGraph: { title, description, url: `${siteUrl}/tools/customer-segmentation` },
+    openGraph: {
+        type: 'website',
+        siteName: '@kanaries/ml',
+        title: `${title} — Free CSV Tool`,
+        description,
+        url: `${siteUrl}/tools/customer-segmentation`,
+        images: [TOOLS_OG_IMAGE],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `${title} — Free CSV Tool`,
+        description,
+        images: [TOOLS_OG_IMAGE.url],
+    },
 };
 const faq: ToolFaq[] = [
     {

@@ -1,17 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from '@/components/tools/toolPage.module.css';
+import { PLAYGROUND_OG_IMAGE, SITE_URL, buildCollectionLd, safeJsonLd } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'Interactive ML Playgrounds in JavaScript — @kanaries/ml' },
   description: 'Explore PCA, KNN, gradient descent, K-Means, decision trees, and Random Forests with interactive browser visualizations powered by @kanaries/ml.',
   alternates: { canonical: `${siteUrl}/playground` },
   openGraph: {
-    title: 'Interactive Machine Learning Playgrounds',
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Interactive ML Playgrounds in JavaScript — @kanaries/ml',
     description: 'Learn machine learning by changing data and watching algorithms respond in your browser.',
     url: `${siteUrl}/playground`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive ML Playgrounds in JavaScript — @kanaries/ml',
+    description: 'Learn machine learning by changing data and watching algorithms respond in your browser.',
+    images: [PLAYGROUND_OG_IMAGE.url],
   },
 };
 
@@ -25,8 +35,25 @@ const playgrounds = [
 ];
 
 export default function PlaygroundIndexPage() {
+  const collectionLd = buildCollectionLd({
+    name: 'Interactive Machine Learning Playgrounds',
+    description:
+      'Explore PCA, KNN, gradient descent, K-Means, decision trees, and Random Forests with interactive browser visualizations powered by @kanaries/ml.',
+    pathname: '/playground',
+    items: playgrounds.map((item) => ({
+      name: item.title,
+      description: item.description,
+      path: item.href,
+    })),
+    breadcrumbs: [
+      { name: '@kanaries/ml', path: '/' },
+      { name: 'Playground', path: '/playground' },
+    ],
+  });
+
   return (
     <main className={styles.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(collectionLd) }} />
       <div className={styles.shell}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
           <Link href="/">@kanaries/ml</Link><span aria-hidden="true">/</span><span aria-current="page">Playground</span>

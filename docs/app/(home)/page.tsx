@@ -1,10 +1,10 @@
 import './home.css';
 import Link from 'next/link';
-import Script from 'next/script';
 import type { Metadata } from 'next';
 import { CopyButton } from '@/components/copyButton';
+import { DEFAULT_OG_IMAGE, SITE_URL, safeJsonLd } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: {
@@ -16,9 +16,20 @@ export const metadata: Metadata = {
     canonical: `${siteUrl}/`,
   },
   openGraph: {
-    title: 'Machine Learning in JavaScript — @kanaries/ml',
-    description: 'Train and deploy ML models in JavaScript (browser & Node).',
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
+    description:
+      'Train and deploy ML models in JavaScript with a scikit-learn-style API for browser and Node.js.',
     url: `${siteUrl}/`,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Machine Learning in JavaScript (Browser & Node) — @kanaries/ml',
+    description:
+      'Train and deploy ML models in JavaScript with a scikit-learn-style API for browser and Node.js.',
+    images: [DEFAULT_OG_IMAGE.url],
   },
 };
 
@@ -185,48 +196,64 @@ const COMMUNITY_LINKS = [
   { label: 'Subscribe for updates', href: 'https://kanaries.net/#newsletter' },
 ];
 
-const JSON_LD = {
+const HOME_LD = {
   '@context': 'https://schema.org',
-  '@type': ['SoftwareSourceCode', 'WebSite'],
-  name: '@kanaries/ml',
-  description:
-    'A scikit-learn-style JavaScript machine learning library for browser and Node.js. Familiar API, tiny bundles, runnable examples.',
-  url: `${siteUrl}/`,
-  programmingLanguage: 'JavaScript',
-  codeRepository: 'https://github.com/Kanaries/ml',
-  license: 'https://opensource.org/licenses/MIT',
-  isAccessibleForFree: true,
-  publisher: {
-    '@type': 'Organization',
-    name: 'Kanaries',
-    url: 'https://kanaries.net/',
-  },
-  inLanguage: 'en',
-  keywords: [
-    'machine learning in JavaScript',
-    'JavaScript machine learning library',
-    'scikit-learn for JavaScript',
-    'browser machine learning',
-    'Node.js machine learning',
-  ],
-  sameAs: [
-    'https://www.npmjs.com/package/@kanaries/ml',
-    'https://twitter.com/KanariesData',
-    'https://github.com/Kanaries/ml',
-  ],
-};
-
-const FAQ_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ_ITEMS.slice(0, 5).map((item) => ({
-    '@type': 'Question',
-    name: item.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: item.answer,
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      name: '@kanaries/ml',
+      url: `${siteUrl}/`,
+      inLanguage: 'en',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Kanaries',
+        url: 'https://kanaries.net/',
+      },
     },
-  })),
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': `${siteUrl}/#software`,
+      name: '@kanaries/ml',
+      description:
+        'A scikit-learn-style JavaScript machine learning library for browser and Node.js. Familiar API, tiny bundles, runnable examples.',
+      url: `${siteUrl}/`,
+      programmingLanguage: ['JavaScript', 'TypeScript'],
+      codeRepository: 'https://github.com/Kanaries/ml',
+      license: 'https://opensource.org/licenses/MIT',
+      isAccessibleForFree: true,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Kanaries',
+        url: 'https://kanaries.net/',
+      },
+      inLanguage: 'en',
+      keywords: [
+        'machine learning in JavaScript',
+        'JavaScript machine learning library',
+        'scikit-learn for JavaScript',
+        'browser machine learning',
+        'Node.js machine learning',
+      ],
+      sameAs: [
+        'https://www.npmjs.com/package/@kanaries/ml',
+        'https://twitter.com/KanariesData',
+        'https://github.com/Kanaries/ml',
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${siteUrl}/#faq`,
+      mainEntity: FAQ_ITEMS.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    },
+  ],
 };
 
 // Deterministic two-class scatter for the hero figure (seeded — stable SSR markup).
@@ -252,17 +279,9 @@ const SCATTER = makeScatter();
 export default function HomePage() {
   return (
     <>
-      <Script
-        id="json-ld-software"
+      <script
         type="application/ld+json"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
-      />
-      <Script
-        id="json-ld-faq"
-        type="application/ld+json"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(HOME_LD) }}
       />
 
       <main className="acad flex flex-1 flex-col pb-16">

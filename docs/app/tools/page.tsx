@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from '@/components/tools/toolPage.module.css';
+import { SITE_URL, TOOLS_OG_IMAGE, buildCollectionLd, safeJsonLd } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'Free Machine Learning Calculators & Tools — @kanaries/ml' },
@@ -10,9 +11,18 @@ export const metadata: Metadata = {
     'Use free, private machine learning calculators in your browser. Analyze CSV outliers, fit regression, score confusion matrices, and export JS or Python code.',
   alternates: { canonical: `${siteUrl}/tools` },
   openGraph: {
-    title: 'Free Machine Learning Calculators & Visualizations',
-    description: 'Interactive, browser-native ML tools powered by @kanaries/ml.',
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Free Machine Learning Calculators & Tools — @kanaries/ml',
+    description: 'Interactive, browser-native ML calculators powered by @kanaries/ml.',
     url: `${siteUrl}/tools`,
+    images: [TOOLS_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Free Machine Learning Calculators & Tools — @kanaries/ml',
+    description: 'Interactive, browser-native ML calculators powered by @kanaries/ml.',
+    images: [TOOLS_OG_IMAGE.url],
   },
 };
 
@@ -34,8 +44,25 @@ const tools = [
 ];
 
 export default function ToolsIndexPage() {
+  const collectionLd = buildCollectionLd({
+    name: 'Free Machine Learning Calculators & Tools',
+    description:
+      'Use free, private machine learning calculators in your browser. Analyze CSV outliers, fit regression, score confusion matrices, and export JS or Python code.',
+    pathname: '/tools',
+    items: tools.map((tool) => ({
+      name: tool.title,
+      description: tool.description,
+      path: tool.href,
+    })),
+    breadcrumbs: [
+      { name: '@kanaries/ml', path: '/' },
+      { name: 'Tools', path: '/tools' },
+    ],
+  });
+
   return (
     <main className={styles.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(collectionLd) }} />
       <div className={styles.shell}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
           <Link href="/">@kanaries/ml</Link><span aria-hidden="true">/</span><span aria-current="page">Tools</span>

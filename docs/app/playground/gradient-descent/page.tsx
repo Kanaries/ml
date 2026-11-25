@@ -2,15 +2,29 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { GradientDescentPlayground } from '@/components/playground/GradientDescentPlayground';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'Gradient Descent Visualization — Compare SGD, Momentum & Adam' },
   description: 'Compare SGD, Momentum, and Adam in an interactive gradient descent visualization. Change the loss surface, learning rate, and starting point in your browser.',
   keywords: ['gradient descent visualization', 'SGD visualization', 'Adam optimizer visualization', 'Momentum gradient descent', 'machine learning optimizer'],
   alternates: { canonical: `${siteUrl}/playground/gradient-descent` },
-  openGraph: { title: 'Gradient Descent Visualization: SGD vs Momentum vs Adam', description: 'Animate three optimizers from the same point across convex and non-convex loss surfaces.', url: `${siteUrl}/playground/gradient-descent` },
+  openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Gradient Descent Visualization: SGD vs Momentum vs Adam',
+    description: 'Animate three optimizers from the same point across convex and non-convex loss surfaces.',
+    url: `${siteUrl}/playground/gradient-descent`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Gradient Descent Visualization: SGD vs Momentum vs Adam',
+    description: 'Animate three optimizers from the same point across convex and non-convex loss surfaces.',
+    images: [PLAYGROUND_OG_IMAGE.url],
+  },
 };
 
 const faq: ToolFaq[] = [

@@ -23,11 +23,18 @@ export const metadata: Metadata = {
   alternates: { canonical: `${siteUrl}${pathname}` },
   openGraph: {
     type: 'website',
+    siteName: '@kanaries/ml',
     title,
     description,
     url: `${siteUrl}${pathname}`,
+    images: [{ url: `${siteUrl}${pathname}/opengraph-image`, width: 1200, height: 630, alt: title }],
   },
-  twitter: { card: 'summary_large_image', title, description },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+    images: [`${siteUrl}${pathname}/opengraph-image`],
+  },
 };
 
 const faq: ToolFaq[] = [

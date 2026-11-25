@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
 import { WorkflowCalculator } from '@/components/tools/WorkflowCalculator';
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+import { SITE_URL, TOOLS_OG_IMAGE } from '@/lib/seo';
+const siteUrl = SITE_URL;
 const title = 'Polynomial Regression Calculator';
 const description =
     'Fit a polynomial curve to CSV data, compare holdout error, inspect residuals, and export predictions with reproducible JavaScript and Python code.';
@@ -10,7 +11,20 @@ export const metadata: Metadata = {
     title: { absolute: `${title} — Free CSV Tool` },
     description,
     alternates: { canonical: `${siteUrl}/tools/polynomial-regression-calculator` },
-    openGraph: { title, description, url: `${siteUrl}/tools/polynomial-regression-calculator` },
+    openGraph: {
+        type: 'website',
+        siteName: '@kanaries/ml',
+        title: `${title} — Free CSV Tool`,
+        description,
+        url: `${siteUrl}/tools/polynomial-regression-calculator`,
+        images: [TOOLS_OG_IMAGE],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: `${title} — Free CSV Tool`,
+        description,
+        images: [TOOLS_OG_IMAGE.url],
+    },
 };
 const faq: ToolFaq[] = [
     {

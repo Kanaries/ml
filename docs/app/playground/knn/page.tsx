@@ -2,15 +2,29 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { KnnPlayground } from '@/components/playground/KnnPlayground';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'KNN Visualization — Interactive k-Nearest Neighbors in JavaScript' },
   description: 'Explore k-nearest neighbors with an interactive KNN visualization. Draw training points, move a query, compare k and distance metrics, and inspect every vote.',
   keywords: ['KNN visualization', 'k nearest neighbors visualization', 'KNN JavaScript', 'KNN decision boundary', 'interactive machine learning'],
   alternates: { canonical: `${siteUrl}/playground/knn` },
-  openGraph: { title: 'Interactive KNN Visualization in JavaScript', description: 'Draw labeled points and see the @kanaries/ml KNN decision boundary update instantly.', url: `${siteUrl}/playground/knn` },
+  openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Interactive KNN Visualization in JavaScript',
+    description: 'Draw labeled points and see the @kanaries/ml KNN decision boundary update instantly.',
+    url: `${siteUrl}/playground/knn`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive KNN Visualization in JavaScript',
+    description: 'Draw labeled points and see the @kanaries/ml KNN decision boundary update instantly.',
+    images: [PLAYGROUND_OG_IMAGE.url],
+  },
 };
 
 const faq: ToolFaq[] = [

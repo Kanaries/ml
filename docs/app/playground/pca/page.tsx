@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PcaPlayground } from '@/components/playground/PcaPlayground';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'PCA Visualization — Interactive PCA in JavaScript' },
@@ -11,9 +12,18 @@ export const metadata: Metadata = {
   keywords: ['PCA visualization', 'principal component analysis visualization', 'PCA JavaScript', 'interactive PCA', 'dimensionality reduction'],
   alternates: { canonical: `${siteUrl}/playground/pca` },
   openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
     title: 'Interactive PCA Visualization in JavaScript',
     description: 'Project multidimensional data, drag a valid loading basis, and reconstruct observations in your browser.',
     url: `${siteUrl}/playground/pca`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive PCA Visualization in JavaScript',
+    description: 'Project multidimensional data, drag a valid loading basis, and reconstruct observations in your browser.',
+    images: [PLAYGROUND_OG_IMAGE.url],
   },
 };
 

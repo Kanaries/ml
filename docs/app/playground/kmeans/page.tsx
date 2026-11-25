@@ -2,15 +2,29 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { KMeansPlayground } from '@/components/playground/KMeansPlayground';
 import { ToolPageLayout, type ToolFaq } from '@/components/tools/ToolPageLayout';
+import { PLAYGROUND_OG_IMAGE, SITE_URL } from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   title: { absolute: 'K-Means Clustering Visualization — Interactive JavaScript Playground' },
   description: 'Step through K-Means clustering in an interactive visualization. Change k, add points, watch centroids move, and verify the result with @kanaries/ml.',
   keywords: ['K Means visualization', 'K-Means clustering visualization', 'KMeans JavaScript', 'interactive clustering', 'Lloyd algorithm'],
   alternates: { canonical: `${siteUrl}/playground/kmeans` },
-  openGraph: { title: 'Interactive K-Means Clustering Visualization', description: 'Watch assignments, centroids, and inertia change one Lloyd iteration at a time.', url: `${siteUrl}/playground/kmeans` },
+  openGraph: {
+    type: 'website',
+    siteName: '@kanaries/ml',
+    title: 'Interactive K-Means Clustering Visualization',
+    description: 'Watch assignments, centroids, and inertia change one Lloyd iteration at a time.',
+    url: `${siteUrl}/playground/kmeans`,
+    images: [PLAYGROUND_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interactive K-Means Clustering Visualization',
+    description: 'Watch assignments, centroids, and inertia change one Lloyd iteration at a time.',
+    images: [PLAYGROUND_OG_IMAGE.url],
+  },
 };
 
 const faq: ToolFaq[] = [

@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { source } from '@/lib/source';
 import {
   DocsPage,
@@ -12,8 +13,44 @@ import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { getDisplayTitle, getDisplayTitleNode, getMetadataTitle } from '@/lib/title';
 import { getMarkdownPath } from '@/lib/agent-docs';
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_URL,
+  buildBreadcrumbLd,
+  getFileLastModified,
+  safeJsonLd,
+  type BreadcrumbItem,
+} from '@/lib/seo';
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
+const siteUrl = SITE_URL;
+
+function buildDocsBreadcrumbs(slug: string[], pageTitle: string): BreadcrumbItem[] {
+  const items: BreadcrumbItem[] = [
+    { name: '@kanaries/ml', path: '/' },
+    { name: 'Docs', path: '/docs' },
+  ];
+
+  if (slug.length === 0) return items;
+
+  for (let i = 0; i < slug.length - 1; i++) {
+    const prefix = slug.slice(0, i + 1);
+    const parentPage = source.getPage(prefix);
+    const segmentLabel = parentPage
+      ? getDisplayTitle(parentPage.data.title)
+      : slug[i].replace(/[-_]/g, ' ');
+    items.push({
+      name: segmentLabel,
+      path: `/docs/${prefix.join('/')}`,
+    });
+  }
+
+  items.push({
+    name: pageTitle,
+    path: `/docs/${slug.join('/')}`,
+  });
+
+  return items;
+}
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -38,27 +75,41 @@ export default async function Page(props: {
       };
     })
     .filter((item) => item.title !== displayTitle);
-  const articleLd = {
+  const sourceFilePath = path.join(process.cwd(), 'content/docs', page.file.path);
+  const lastModified = getFileLastModified(sourceFilePath).toISOString();
+  const isAlgorithmPage = slug[0] === 'apis' && slug.length >= 3;
+  const headline = getMetadataTitle(page.data.title, isAlgorithmPage);
+  const structuredData = {
     '@context': 'https://schema.org',
-    '@type': 'TechArticle',
-    headline: page.data.title,
-    description: page.data.description,
-    url: canonicalUrl,
-    inLanguage: 'en',
-    author: {
-      '@type': 'Organization',
-      name: 'Kanaries',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Kanaries',
-      url: 'https://kanaries.net/',
-    },
+    '@graph': [
+      {
+        '@type': 'TechArticle',
+        '@id': `${canonicalUrl}#article`,
+        headline,
+        description: page.data.description,
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+        image: DEFAULT_OG_IMAGE.url,
+        dateModified: lastModified,
+        inLanguage: 'en',
+        author: {
+          '@type': 'Organization',
+          name: 'Kanaries',
+          url: 'https://kanaries.net/',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Kanaries',
+          url: 'https://kanaries.net/',
+        },
+      },
+      buildBreadcrumbLd(buildDocsBreadcrumbs(slug, displayTitle || headline)),
+    ],
   };
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(structuredData) }} />
       <DocsPage toc={displayToc} full={page.data.full}>
         <DocsTitle>{displayTitle}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
@@ -126,11 +177,13 @@ export async function generateMetadata(props: {
       description,
       url: canonicalUrl,
       siteName: '@kanaries/ml',
+      images: [DEFAULT_OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',
       title: metadataTitle,
       description,
+      images: [DEFAULT_OG_IMAGE.url],
     },
   };
 }
