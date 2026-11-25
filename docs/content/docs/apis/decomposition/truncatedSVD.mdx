@@ -39,7 +39,7 @@ embedding = svd.fit_transform(X)`}
 
 const X = [[1, 0, 1], [0, 1, 1], [1, 1, 0], [0, 0, 1]];
 
-const svd = new Decomposition.TruncatedSVD(2);
+const svd = new Decomposition.TruncatedSVD({ nComponents: 2 });
 const embedding = svd.fitTransform(X);`}
 />
 
@@ -50,19 +50,23 @@ import { Decomposition } from '@kanaries/ml';
 
 const X = [[1, 0, 1], [0, 1, 1], [1, 1, 0], [0, 0, 1]];
 
-const svd = new Decomposition.TruncatedSVD(2);
+const svd = new Decomposition.TruncatedSVD({ nComponents: 2 });
 const embedding = svd.fitTransform(X);
-console.log(embedding);
+console.log({ embedding, ratio: svd.getExplainedVarianceRatio() });
 ```
 
 ## Detailed API reference
 
 ### Algorithm
-The algorithm performs power iteration on the uncentered covariance matrix and keeps the top components corresponding to the largest singular values.
+Decomposes the uncentered cross-product matrix and retains the top components corresponding to the largest singular values.
 
 ```ts
-constructor(nComponents: number = 2)
+new Decomposition.TruncatedSVD(props?: {
+  nComponents?: number; // default: 2
+})
 ```
+
+*(Legacy positional calls `new Decomposition.TruncatedSVD(2)` remain supported for backward compatibility, but prefer `{ nComponents: 2 }`.)*
 
 ### Parameters
 - `nComponents` (number, default `2`): number of singular vectors to retain.

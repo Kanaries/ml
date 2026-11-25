@@ -44,7 +44,7 @@ labels = model.fit_predict(X)`}
 
 const X = [[0, 0], [0.1, 0.2], [3, 3], [3.2, 3.1]];
 
-const model = new Clusters.MeanShift(1.0);
+const model = new Clusters.MeanShift({ bandwidth: 1.0 });
 const labels = model.fitPredict(X);`}
 />
 
@@ -55,27 +55,29 @@ import { Clusters } from '@kanaries/ml';
 
 const X = [[0, 0], [0.1, 0.2], [3, 3], [3.2, 3.1]];
 
-const model = new Clusters.MeanShift(1.0);
+const model = new Clusters.MeanShift({ bandwidth: 1.0, max_iter: 300 });
 const labels = model.fitPredict(X);
-console.log(labels);
+console.log({ labels, centroids: model.getCentroids() });
 ```
 
 ## Detailed API reference
 
 ```ts
-constructor(
-    bandwidth: number = 1,
-    max_iter: number = 300,
-    distanceType: Distance.IDistanceType = 'euclidean'
-)
+new Clusters.MeanShift(props?: {
+  bandwidth?: number;                  // default: 1
+  max_iter?: number;                   // default: 300
+  distanceType?: Distance.IDistanceType; // default: 'euclidean'
+})
 ```
+
+*(Legacy positional calls `new Clusters.MeanShift(bandwidth, max_iter, distanceType)` remain supported for backward compatibility, but prefer the options object.)*
 
 Methods:
 - `fitPredict(samplesX: number[][]): number[]`
 - `getCentroids(): number[][]`
 
 ```ts
-const ms = new Clusters.MeanShift(2);
+const ms = new Clusters.MeanShift({ bandwidth: 2 });
 const labels = ms.fitPredict(X);
 const centers = ms.getCentroids();
 ```

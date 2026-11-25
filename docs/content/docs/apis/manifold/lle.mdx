@@ -41,7 +41,7 @@ embedding = lle.fit_transform(X)`}
 
 const X = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]];
 
-const lle = new Manifold.LocallyLinearEmbedding(3, 2);
+const lle = new Manifold.LocallyLinearEmbedding({ nNeighbors: 3, nComponents: 2, randomState: 42 });
 const embedding = lle.fitTransform(X);`}
 />
 
@@ -52,20 +52,30 @@ import { Manifold } from '@kanaries/ml';
 
 const X = [[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]];
 
-const lle = new Manifold.LocallyLinearEmbedding(3, 2);
+const lle = new Manifold.LocallyLinearEmbedding({
+  nNeighbors: 3,
+  nComponents: 2,
+  reg: 0.001,
+  randomState: 42,
+});
 const embedding = lle.fitTransform(X);
 console.log(embedding);
 ```
 
+*(Also exported under the short alias `Manifold.LLE`.)*
+
 ## Detailed API reference
 
 ```ts
-constructor(
-    nNeighbors: number = 5,
-    nComponents: number = 2,
-    reg: number = 0.001
-)
+new Manifold.LocallyLinearEmbedding(props?: {
+  nNeighbors?: number;  // default: 5
+  nComponents?: number; // default: 2
+  reg?: number;         // default: 0.001
+  randomState?: number; // optional deterministic seed
+})
 ```
+
+*(Legacy positional calls remain supported for backward compatibility, but prefer the options object.)*
 
 ### Parameters
 - `nNeighbors` (number, default `5`): how many neighbors to use for the local

@@ -38,9 +38,14 @@ pred = clf.predict(X)`}
 
 const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
 
-const clf = new Ensemble.IsolationForest(256, 50, 0.25);
+const clf = new Ensemble.IsolationForest({
+  subsampling_size: 256,
+  tree_num: 50,
+  contamination: 0.25,
+  random_state: 0,
+});
 clf.fit(X);
-const pred = clf.predict(X);`}
+const pred = clf.predict(X); // 1 = anomaly, 0 = normal`}
 />
 
 ### Quick JavaScript example
@@ -50,17 +55,31 @@ import { Ensemble } from '@kanaries/ml';
 
 const X = [[0, 0], [0.1, 0.2], [0.2, 0.1], [8, 8]];
 
-const clf = new Ensemble.IsolationForest(256, 50, 0.25);
+const clf = new Ensemble.IsolationForest({
+  subsampling_size: 256,
+  tree_num: 50,
+  contamination: 0.25,
+  random_state: 42,
+});
 clf.fit(X);
 const pred = clf.predict(X);
-console.log(pred);
+console.log({ pred, score: clf.anomalyScore([8, 8]) });
 ```
+
+> **Label convention vs scikit-learn**: `@kanaries/ml` `IsolationForest.predict()` returns `1` for anomalies and `0` for normal observations (whereas scikit-learn returns `-1` for anomalies and `1` for normal). For an interactive walkthrough and contamination slider, see our [Isolation Forest Guide & Demo](/docs/guides/isolation-forest).
 
 ## Detailed API reference
 
 ```ts
-constructor(subsampling_size: number = 256, tree_num: number = 100, contamination: 'auto' | number = 'auto')
+new Ensemble.IsolationForest(props?: {
+  subsampling_size?: number;         // default: 256
+  tree_num?: number;                 // default: 100
+  contamination?: 'auto' | number;   // default: 'auto'
+  random_state?: number;             // optional deterministic seed
+})
 ```
+
+*(Legacy positional calls `new Ensemble.IsolationForest(256, 50, 0.25)` remain supported for backward compatibility, but prefer the options object.)*
 
 ### Parameters
 | name | type | default | description |
@@ -68,13 +87,16 @@ constructor(subsampling_size: number = 256, tree_num: number = 100, contaminatio
 | subsampling_size | number | 256 | Number of samples used to build each tree |
 | tree_num | number | 100 | Number of isolation trees in the forest |
 | contamination | 'auto' \| number | 'auto' | Expected proportion of outliers |
+| random_state | number | undefined | Seed for deterministic subsampling and splits |
 
 ### Algorithm
-IsolationForest randomly splits features to isolate samples. Points that can be isolated with fewer splits are considered anomalies.
+IsolationForest randomly splits features to isolate samples. Points that can be isolated with fewer splits receive shorter average path lengths and higher anomaly scores.
 
 ### Methods
 + `fit(samplesX: number[][]): void`
-+ `predict(samplesX: number[][]): (0|1)[]`
++ `predict(samplesX: number[][]): (0 | 1)[]` (`1` = anomaly, `0` = normal)
++ `anomalyScore(row: number[]): number` (continuous anomaly score in `[0, 1]`)
++ `toJSON()` / [`loadModel()`](/docs/apis/serialization) (full JSON model serialization)
 
 ### Implementation workflow
 

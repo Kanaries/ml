@@ -40,7 +40,10 @@ pred = clf.predict([[0.9, 0.8], [0.2, 0.1]])`}
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new Neighbors.KNearestNeighbors(3, 'distance');
+const clf = new Neighbors.KNeighborsClassifier({
+  kNeighbors: 3,
+  weightType: 'distance',
+});
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);`}
 />
@@ -53,24 +56,30 @@ import { Neighbors } from '@kanaries/ml';
 const X = [[0, 0], [1, 1], [1, 0], [0, 1]];
 const y = [0, 1, 1, 0];
 
-const clf = new Neighbors.KNearestNeighbors(3, 'distance');
+const clf = new Neighbors.KNeighborsClassifier({
+  kNeighbors: 3,
+  weightType: 'distance',
+  distanceType: 'euclidean',
+});
 clf.fit(X, y);
 const pred = clf.predict([[0.9, 0.8], [0.2, 0.1]]);
 console.log(pred);
 ```
 
-`KNearstNeighbors` remains exported as a deprecated compatibility alias for existing code. New code should use `KNearestNeighbors`.
+`Neighbors.KNeighborsClassifier` and `Neighbors.KNearestNeighbors` reference the exact same class; `KNearstNeighbors` remains as a deprecated compatibility alias. Explore decision boundaries interactively in the [KNN Playground](/playground/knn).
 
 ## Detailed API reference
 
 ```ts
-constructor(
-    kNeighbors: number = 5,
-    weightType: IWeightType = 'uniform',
-    distanceType: Distance.IDistanceType = 'euclidean',
-    pNorm: number = 2
-)
+new Neighbors.KNeighborsClassifier(props?: {
+  kNeighbors?: number;                   // default: 5
+  weightType?: 'uniform' | 'distance';   // default: 'uniform'
+  distanceType?: Distance.IDistanceType; // default: 'euclidean'
+  pNorm?: number;                        // default: 2 (Minkowski)
+})
 ```
+
+*(Legacy positional calls `new Neighbors.KNearestNeighbors(3, 'distance')` remain supported for backward compatibility, but prefer the options object.)*
 
 ### Parameters
 

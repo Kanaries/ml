@@ -39,7 +39,7 @@ embedding = pca.fit_transform(X)`}
 
 const X = [[1, 2, 3], [2, 3, 4], [3, 5, 7], [4, 6, 8]];
 
-const pca = new Decomposition.PCA(2);
+const pca = new Decomposition.PCA({ nComponents: 2 });
 const embedding = pca.fitTransform(X);`}
 />
 
@@ -50,20 +50,25 @@ import { Decomposition } from '@kanaries/ml';
 
 const X = [[1, 2, 3], [2, 3, 4], [3, 5, 7], [4, 6, 8]];
 
-const pca = new Decomposition.PCA(2);
+const pca = new Decomposition.PCA({ nComponents: 2 });
 const embedding = pca.fitTransform(X);
-console.log(embedding);
+console.log({ embedding, explainedVariance: pca.getExplainedVariance() });
 ```
+
+Want to visualize principal axes and variance explained interactively? Try the [PCA Interactive Playground](/playground/pca).
 
 ## Detailed API reference
 
 ### Algorithm
-The covariance matrix of the centered samples is decomposed by power iteration.
-The resulting eigenvectors form the principal components sorted by explained variance.
+The covariance matrix of the centered samples is decomposed via symmetric eigendecomposition. The resulting eigenvectors form the principal components sorted by explained variance.
 
 ```ts
-constructor(nComponents: number | null = null)
+new Decomposition.PCA(props?: {
+  nComponents?: number | null; // default: null (keep all features)
+})
 ```
+
+*(Legacy positional calls `new Decomposition.PCA(2)` remain supported for backward compatibility, but prefer `{ nComponents: 2 }`.)*
 
 ### Parameters
 - `nComponents` (number | null, default `null`): number of principal components to retain. If `null`, all components are used.
