@@ -21,6 +21,8 @@ function articleWords(source) {
 const pages = [
   { file: 'app/tools/confusion-matrix-calculator/page.tsx', slug: '/tools/confusion-matrix-calculator', words: 1000 },
   { file: 'app/tools/logistic-regression-calculator/page.tsx', slug: '/tools/logistic-regression-calculator', words: 1000 },
+  { file: 'app/tools/roc-auc-calculator/page.tsx', slug: '/tools/roc-auc-calculator', words: 1000 },
+  { file: 'app/tools/linear-regression-calculator/page.tsx', slug: '/tools/linear-regression-calculator', words: 1000 },
   { file: 'app/playground/pca/page.tsx', slug: '/playground/pca', words: 800 },
   { file: 'app/playground/knn/page.tsx', slug: '/playground/knn', words: 800 },
   { file: 'app/playground/gradient-descent/page.tsx', slug: '/playground/gradient-descent', words: 800 },
@@ -76,6 +78,9 @@ test('structured data, discovery, backlinks, and static OG coverage stay wired',
     fs.access(path.join(DOCS_ROOT, 'app/playground/opengraph-image.tsx')),
     fs.access(path.join(DOCS_ROOT, 'app/tools/confusion-matrix-calculator/opengraph-image.tsx')),
     fs.access(path.join(DOCS_ROOT, 'app/tools/logistic-regression-calculator/opengraph-image.tsx')),
+    fs.access(path.join(DOCS_ROOT, 'app/tools/roc-auc-calculator/opengraph-image.tsx')),
+    fs.access(path.join(DOCS_ROOT, 'app/tools/linear-regression-calculator/opengraph-image.tsx')),
+    fs.access(path.join(DOCS_ROOT, 'components/tools/ToolShareBar.tsx')),
   ]);
 });
 

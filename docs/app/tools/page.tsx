@@ -37,6 +37,16 @@ const tools = [
     description: 'Calculate accuracy, precision, recall, specificity, macro/micro/weighted F1, MCC, and Cohen’s kappa for binary or multiclass predictions.',
   },
   {
+    href: '/tools/roc-auc-calculator',
+    title: 'ROC-AUC & PR Curve Calculator',
+    description: 'Plot ROC and Precision-Recall curves from y_true and y_score CSV data, tune thresholds, find Youden’s J & Best F1, and export PNG/CSV/code.',
+  },
+  {
+    href: '/tools/linear-regression-calculator',
+    title: 'Linear & Ridge Regression Calculator',
+    description: 'Fit OLS or L2 Ridge regression on single or multi-feature CSV data, inspect R², RMSE, standardized coefficients, and residual plots.',
+  },
+  {
     href: '/tools/logistic-regression-calculator',
     title: 'Logistic Regression Calculator',
     description: 'Fit pasted CSV data, inspect coefficients and odds ratios, visualize a sigmoid or decision boundary, and predict new samples.',

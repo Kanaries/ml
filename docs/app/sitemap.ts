@@ -54,6 +54,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${siteUrl}/tools/roc-auc-calculator`,
+      lastModified: appPageLastModified('tools/roc-auc-calculator/page.tsx'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${siteUrl}/tools/linear-regression-calculator`,
+      lastModified: appPageLastModified('tools/linear-regression-calculator/page.tsx'),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${siteUrl}/tools/logistic-regression-calculator`,
       lastModified: appPageLastModified('tools/logistic-regression-calculator/page.tsx'),
       changeFrequency: 'monthly',

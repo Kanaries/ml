@@ -58,3 +58,8 @@
       'Segoe UI', sans-serif;
   }
 }
+
+html[data-tool-embed='true'] header#nd-nav,
+html[data-tool-embed='true'] #nd-subnav {
+  display: none !important;
+}

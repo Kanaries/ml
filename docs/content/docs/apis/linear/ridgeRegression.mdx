@@ -72,4 +72,4 @@ const preds = model.predict(XTest);`}
 
 - **Scale features before regularizing**: Because L2 penalizes squared coefficient magnitude equally across features, wrap `StandardScaler` and `Ridge` inside a [`Pipeline`](/docs/apis/pipeline) so large-scale columns are not unfairly favored.
 - **Ridge vs Lasso vs ElasticNet**: Prefer Ridge when all features matter slightly; switch to [`Linear.LassoRegression`](/docs/apis/linear/lassoRegression) for sparse feature selection or [`Linear.ElasticNet`](/docs/apis/linear/elasticNet) when correlated groups need sparsity.
-- **Related pages**: [Linear Regression](/docs/apis/linear/linearRegression), [Lasso Regression](/docs/apis/linear/lassoRegression), [ElasticNet](/docs/apis/linear/elasticNet), [Bayesian Ridge](/docs/apis/linear/bayesianRegressors).
+- **Related pages**: [Linear & Ridge Regression CSV Calculator](/tools/linear-regression-calculator), [Linear Regression](/docs/apis/linear/linearRegression), [Lasso Regression](/docs/apis/linear/lassoRegression), [ElasticNet](/docs/apis/linear/elasticNet), [Bayesian Ridge](/docs/apis/linear/bayesianRegressors).

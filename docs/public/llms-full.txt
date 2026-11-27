@@ -7143,6 +7143,7 @@ predicted and actual values.
 - Use linear regression as a baseline before moving to more complex non-linear models.
 - Inspect residuals to decide whether feature engineering or a different model family is needed.
 - This estimator is a strong fit for small to medium tabular problems where interpretability matters.
+- Want to fit pasted CSV columns and inspect R², RMSE, and residual plots directly in your browser? Try the [Linear & Ridge Regression CSV Calculator](/tools/linear-regression-calculator).
 
 ---
 
@@ -7535,7 +7536,7 @@ const preds = model.predict(XTest);
 
 - **Scale features before regularizing**: Because L2 penalizes squared coefficient magnitude equally across features, wrap `StandardScaler` and `Ridge` inside a [`Pipeline`](/docs/apis/pipeline/index.html.md) so large-scale columns are not unfairly favored.
 - **Ridge vs Lasso vs ElasticNet**: Prefer Ridge when all features matter slightly; switch to [`Linear.LassoRegression`](/docs/apis/linear/lassoRegression.md) for sparse feature selection or [`Linear.ElasticNet`](/docs/apis/linear/elasticNet.md) when correlated groups need sparsity.
-- **Related pages**: [Linear Regression](/docs/apis/linear/linearRegression.md), [Lasso Regression](/docs/apis/linear/lassoRegression.md), [ElasticNet](/docs/apis/linear/elasticNet.md), [Bayesian Ridge](/docs/apis/linear/bayesianRegressors.md).
+- **Related pages**: [Linear & Ridge Regression CSV Calculator](/tools/linear-regression-calculator), [Linear Regression](/docs/apis/linear/linearRegression.md), [Lasso Regression](/docs/apis/linear/lassoRegression.md), [ElasticNet](/docs/apis/linear/elasticNet.md), [Bayesian Ridge](/docs/apis/linear/bayesianRegressors.md).
 
 ---
 
@@ -8291,7 +8292,7 @@ precisionRecallCurve(expected: number[], scores: number[], positiveLabel = 1): {
 }
 ```
 
-Curve functions expect true binary labels in `expected` and model scores in `scores`. The configured `positiveLabel` must be present.
+Curve functions expect true binary labels in `expected` and model scores in `scores`. The configured `positiveLabel` must be present. Try them interactively on pasted CSV scores with the [ROC-AUC & PR Curve Calculator](/tools/roc-auc-calculator) or the [Confusion Matrix & F1 Calculator](/tools/confusion-matrix-calculator).
 
 ### Clustering agreement
 
@@ -13621,7 +13622,7 @@ markdown_url: "https://ml.kanaries.net/docs/index.html.md"
 
 3. **Integrate with your stack** – Pair @kanaries/ml with modern frameworks, dashboards, and serverless runtimes to deliver on-device intelligence without round-trips to Python services.
 
-Prefer to begin with a live example? Open the [interactive machine learning tools](/tools), explore the [algorithm playgrounds](/playground), calculate [confusion-matrix metrics](/tools/confusion-matrix-calculator), or fit a [logistic regression model](/tools/logistic-regression-calculator) directly in your browser. The playground collection includes interactive [PCA](/playground/pca), [KNN](/playground/knn), [gradient descent](/playground/gradient-descent), and [K-Means](/playground/kmeans) visualizations.
+Prefer to begin with a live example? Open the [interactive machine learning tools](/tools), explore the [algorithm playgrounds](/playground), plot [ROC-AUC & Precision-Recall curves](/tools/roc-auc-calculator), fit [linear or Ridge regression on CSV data](/tools/linear-regression-calculator), calculate [confusion-matrix metrics](/tools/confusion-matrix-calculator), or fit a [logistic regression model](/tools/logistic-regression-calculator) directly in your browser. The playground collection includes interactive [PCA](/playground/pca), [KNN](/playground/knn), [gradient descent](/playground/gradient-descent), and [K-Means](/playground/kmeans) visualizations.
 
 Analyze your own CSV: [find outliers](/tools/outlier-calculator), [fit a polynomial curve](/tools/polynomial-regression-calculator), or [group customers from features and RFM](/tools/customer-segmentation). Each tool runs in your browser and exports results and reproducible code.
 

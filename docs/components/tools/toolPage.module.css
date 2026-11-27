@@ -368,11 +368,6 @@
   color: var(--color-fd-foreground);
 }
 
-:global(html[data-tool-embed='true']) :global(header#nd-nav),
-:global(html[data-tool-embed='true']) :global(#nd-subnav) {
-  display: none !important;
-}
-
 :global(html[data-tool-embed='true']) .page {
   min-height: auto;
   background: var(--color-fd-background);

@@ -151,9 +151,11 @@ const INTERACTIVE_RESOURCES = [
     description: 'Paste CSV data and compute results locally with zero server uploads and exportable JS/Python code.',
     href: '/tools',
     links: [
-      { label: 'Outlier Calculator', href: '/tools/outlier-calculator' },
+      { label: 'ROC-AUC & PR Curve', href: '/tools/roc-auc-calculator' },
+      { label: 'Linear & Ridge Regression', href: '/tools/linear-regression-calculator' },
       { label: 'Confusion Matrix & F1', href: '/tools/confusion-matrix-calculator' },
       { label: 'Logistic Regression', href: '/tools/logistic-regression-calculator' },
+      { label: 'Outlier Calculator', href: '/tools/outlier-calculator' },
       { label: 'Polynomial Regression', href: '/tools/polynomial-regression-calculator' },
       { label: 'Customer Segmentation', href: '/tools/customer-segmentation' },
     ],

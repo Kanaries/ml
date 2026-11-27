@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import styles from './toolPage.module.css';
-import { SITE_URL } from '@/lib/seo';
 import { buildEmbedSnippet } from './clientUtils';
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ml.kanaries.net').replace(/\/$/, '');
 
 type ToolShareBarProps = {
   name: string;

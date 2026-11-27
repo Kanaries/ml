@@ -17,6 +17,14 @@ const landingPages = [
     title: 'Confusion Matrix Calculator — F1, Precision, Recall (2-class & Multiclass)',
   },
   {
+    path: '/tools/roc-auc-calculator',
+    title: 'ROC-AUC & PR Curve Calculator — Threshold, Youden’s J & AP, Free',
+  },
+  {
+    path: '/tools/linear-regression-calculator',
+    title: 'Linear & Ridge Regression Calculator — CSV, R² & Residuals',
+  },
+  {
     path: '/tools/logistic-regression-calculator',
     title: 'Logistic Regression Calculator — Odds Ratios & Decision Boundary, Free',
   },

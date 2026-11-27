@@ -330,8 +330,8 @@ print({"roc_auc": roc_auc, "ap": ap, "f1": f1_score(y_true, y_pred)})`
                   { label: 'Precision (PPV)', value: analysis.atThreshold!.precision, digits: 4 },
                   { label: 'FPR (1 − Spec)', value: analysis.atThreshold!.fpr, digits: 4 },
                   {
-                    label: analysis.brier !== null ? 'Brier Score' : 'Positive Rate',
-                    value: analysis.brier !== null ? analysis.brier : analysis.prevalence!,
+                    label: analysis.brier != null ? 'Brier Score' : 'Positive Rate',
+                    value: analysis.brier != null ? analysis.brier : analysis.prevalence!,
                     digits: 4,
                   },
                 ]}
