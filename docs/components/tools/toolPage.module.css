@@ -298,3 +298,102 @@
 .compact .description { margin-top: .75rem; font-size: 1.08rem; }
 .compact .trustRow { margin-top: .75rem; }
 @media (max-width: 600px) { .compact .breadcrumb { flex-wrap: wrap; } }
+
+.toolHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.poweredBy {
+  color: var(--color-fd-muted-foreground);
+}
+
+.headerActionBtn {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.45rem;
+  background: var(--color-fd-card);
+  color: var(--color-fd-foreground);
+  padding: 0.28rem 0.6rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.headerActionBtn:hover {
+  border-color: var(--tool-accent);
+  color: var(--tool-accent);
+}
+
+.embedAttribution {
+  color: var(--tool-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.embedAttribution:hover {
+  text-decoration: underline;
+}
+
+.embedDrawer {
+  border-bottom: 1px solid var(--color-fd-border);
+  background: color-mix(in srgb, var(--color-fd-muted) 60%, var(--color-fd-background));
+  padding: 0.75rem 1rem;
+  font-size: 0.76rem;
+}
+
+.embedDrawerHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--color-fd-muted-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.embedCode {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.5rem;
+  background: var(--color-fd-card);
+  overflow-x: auto;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--color-fd-foreground);
+}
+
+:global(html[data-tool-embed='true']) :global(header#nd-nav),
+:global(html[data-tool-embed='true']) :global(#nd-subnav) {
+  display: none !important;
+}
+
+:global(html[data-tool-embed='true']) .page {
+  min-height: auto;
+  background: var(--color-fd-background);
+}
+
+:global(html[data-tool-embed='true']) .shell {
+  width: 100%;
+  padding: 0;
+}
+
+:global(html[data-tool-embed='true']) .breadcrumb,
+:global(html[data-tool-embed='true']) .hero,
+:global(html[data-tool-embed='true']) .article,
+:global(html[data-tool-embed='true']) .faq,
+:global(html[data-tool-embed='true']) .related,
+:global(html[data-tool-embed='true']) .footer {
+  display: none !important;
+}
+
+:global(html[data-tool-embed='true']) .toolFrame {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}

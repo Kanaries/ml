@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import styles from './toolPage.module.css';
 import { SITE_URL, buildBreadcrumbLd, safeJsonLd } from '@/lib/seo';
+import { ToolShareBar } from './ToolShareBar';
 
 export type ToolFaq = {
   question: string;
@@ -116,10 +117,7 @@ export function ToolPageLayout({
         </header>
 
         <section className={styles.toolFrame} aria-label={`${name} interactive tool`}>
-          <div className={styles.toolHeader}>
-            <span className={styles.live}>{activityLabel}</span>
-            <span>Powered by @kanaries/ml</span>
-          </div>
+          <ToolShareBar name={name} pathname={pathname} activityLabel={activityLabel} />
           {tool}
         </section>
 
